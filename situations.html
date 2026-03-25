@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Practice English</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      border-radius: 15px;
+      padding: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 1px solid transparent;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border: 1px solid #38bdf8;
+      background: #0ea5e9;
+    }
+
+    .card h2 {
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .emoji {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌍 Choose a Situation to Practice</h1>
+
+  <div class="container">
+
+    <div class="card" onclick="selectSituation('travel')">
+      <div class="emoji">✈️</div>
+      <h2>Travel & Transport</h2>
+      <p>Airport, taxi, hotel, directions</p>
+    </div>
+
+    <div class="card" onclick="selectSituation('shopping')">
+      <div class="emoji">🛒</div>
+      <h2>Shopping</h2>
+      <p>Buying clothes, asking prices, returns</p>
+    </div>
+
+    <div class="card" onclick="selectSituation('restaurant')">
+      <div class="emoji">🍽️</div>
+      <h2>Restaurants</h2>
+      <p>Ordering food, menus, paying bills</p>
+    </div>
+
+    <div class="card" onclick="selectSituation('work')">
+      <div class="emoji">💼</div>
+      <h2>Work & Business</h2>
+      <p>Meetings, interviews, presentations</p>
+    </div>
+
+    <div class="card" onclick="selectSituation('social')">
+      <div class="emoji">👥</div>
+      <h2>Social Life</h2>
+      <p>Small talk, friends, introductions</p>
+    </div>
+
+    <div class="card" onclick="selectSituation('emergency')">
+      <div class="emoji">🚨</div>
+      <h2>Emergency</h2>
+      <p>Doctor, police, urgent situations</p>
+    </div>
+
+  </div>
+
+  <script>
+    function selectSituation(type) {
+        if (type === "travel") {
+            window.location.href = "situations/airport.html?situation=travel";
+        }
+        if (type === "restaurant") {
+            window.location.href = "situations/restaurant.html?situation=restaurant";
+        }
+}
+  </script>
+
+</body>
+</html>

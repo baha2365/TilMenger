@@ -76,7 +76,7 @@ scene.add(directionalLight);
 // 5. Loading the GLB File
 const loader = new GLTFLoader();
 loader.load(
-    'game_girl.glb', // <--- REPLACE THIS WITH YOUR FILE PATH
+    '../game_girl.glb', // <--- REPLACE THIS WITH YOUR FILE PATH
     (gltf) => {
         const model = gltf.scene;
         scene.add(model);
