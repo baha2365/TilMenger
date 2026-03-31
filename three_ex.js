@@ -79,7 +79,7 @@ scene.add(directionalLight);
 // 4. Loading the GLB File
 const loader = new GLTFLoader();
 loader.load(
-    'ame_girl.glb',
+    'game_girl.glb',
     (gltf) => {
         const model = gltf.scene;
         scene.add(model);
