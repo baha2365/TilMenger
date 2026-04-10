@@ -8,455 +8,135 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --cream:    #F5F0E8;
-      --ink:      #1A1612;
-      --rust:     #C4572A;
-      --sage:     #4A6741;
-      --gold:     #D4A853;
-      --muted:    #7A6E65;
-      --border:   #DDD5C8;
-      --card-bg:  #FDFAF5;
-      --input-bg: #F9F5EE;
+      --cream:    #F5F0E8; --ink: #1A1612; --rust: #C4572A;
+      --sage:     #4A6741; --gold: #D4A853; --muted: #7A6E65;
+      --border:   #DDD5C8; --card-bg: #FDFAF5; --input-bg: #F9F5EE;
     }
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background-color: var(--cream); color: var(--ink); }
 
-    html, body {
-      height: 100%;
-      font-family: 'DM Sans', sans-serif;
-      background-color: var(--cream);
-      color: var(--ink);
-    }
-
-    /* ── Navbar ── */
     .navbar {
-      background: var(--ink);
-      padding: 1rem 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      background: var(--ink); padding: 1rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
     }
-    .nav-brand {
-      font-family: 'Playfair Display', serif;
-      color: var(--cream);
-      font-size: 1.3rem;
-      letter-spacing: -0.02em;
-      text-decoration: none;
-    }
+    .nav-brand { font-family: 'Playfair Display', serif; color: var(--cream); font-size: 1.3rem; letter-spacing: -0.02em; text-decoration: none; }
     .nav-brand span { color: var(--gold); }
     .nav-right { display: flex; align-items: center; gap: 1rem; }
-    .nav-avatar {
-      width: 38px; height: 38px;
-      background: var(--rust);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: 600; font-size: 0.95rem;
-    }
-    .btn-back {
-      background: none;
-      border: 1px solid rgba(255,255,255,0.2);
-      color: #9A9089;
-      padding: 0.4rem 1rem;
-      border-radius: 7px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
+    .nav-avatar { width: 38px; height: 38px; background: var(--rust); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.95rem; }
+    .btn-back { background: none; border: 1px solid rgba(255,255,255,0.2); color: #9A9089; padding: 0.4rem 1rem; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
     .btn-back:hover { border-color: rgba(255,255,255,0.5); color: var(--cream); }
 
-    /* ── Main layout ── */
-    .main {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 2.5rem 1.5rem 4rem;
-    }
+    .main { max-width: 680px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
 
-    /* ── Page header ── */
-    .page-header {
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-    .page-header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.6rem, 3vw, 2rem);
-      color: var(--ink);
-      margin-bottom: 0.4rem;
-    }
+    .page-header { margin-bottom: 2rem; text-align: center; }
+    .page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 3vw, 2rem); color: var(--ink); margin-bottom: 0.4rem; }
     .page-header h1 em { color: var(--rust); font-style: italic; }
     .page-header p { font-size: 0.88rem; color: var(--muted); }
 
-    /* ── Progress bar ── */
-    .progress-wrap {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.2rem 1.5rem;
-      margin-bottom: 1.8rem;
-      display: flex;
-      align-items: center;
-      gap: 1.2rem;
-    }
+    .progress-wrap { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 1.8rem; display: flex; align-items: center; gap: 1.2rem; }
     .progress-info { flex: 1; }
-    .progress-label {
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-    .progress-bar-bg {
-      height: 6px;
-      background: var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--rust);
-      border-radius: 3px;
-      transition: width 0.5s ease;
-      width: 0%;
-    }
-    .progress-count {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      color: var(--ink);
-      white-space: nowrap;
-    }
+    .progress-label { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .progress-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--rust); border-radius: 3px; transition: width 0.5s ease; width: 0%; }
+    .progress-count { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--ink); white-space: nowrap; }
     .progress-count span { font-size: 0.78rem; font-family: 'DM Sans', sans-serif; color: var(--muted); display: block; text-align: center; }
 
-    /* ── Part selector ── */
-    .part-selector {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-    .part-nav-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      width: 40px; height: 40px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      font-size: 1.1rem;
-      color: var(--ink);
-      transition: all 0.2s;
-    }
+    .part-selector { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .part-nav-btn { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; color: var(--ink); transition: all 0.2s; }
     .part-nav-btn:hover:not(:disabled) { background: var(--ink); color: var(--cream); border-color: var(--ink); }
     .part-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .part-info {
-      text-align: center;
-    }
-    .part-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1rem;
-      color: var(--ink);
-    }
+    .part-info { text-align: center; }
+    .part-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--ink); }
     .part-subtitle { font-size: 0.75rem; color: var(--muted); margin-top: 0.1rem; }
 
-    /* ── Word index dots ── */
-    .word-dots {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      margin-bottom: 1.2rem;
-    }
-    .word-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      cursor: pointer;
-      transition: background 0.2s, transform 0.2s;
-    }
+    .word-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 1.2rem; }
+    .word-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background 0.2s, transform 0.2s; }
     .word-dot.active { background: var(--rust); transform: scale(1.3); }
     .word-dot.learned { background: var(--sage); }
 
-    /* ── Cards scene ── */
-    .scene {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 1.8rem;
-    }
+    .scene { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 1.8rem; }
 
-    .card {
-      width: 100%;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-      position: relative;
-      height: 90px;
-    }
-    .card:hover { border-color: rgba(0,0,0,0.3); }
+    .card { width: 90%; border-radius: 16px; border: 1px solid var(--border); background: var(--card-bg); cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; position: relative; height: 180px; }
+    .card:hover { border-color: rgba(0,0,0,0.3); height: 250px; }
     .card:active { transform: scale(0.99); }
-    .card.expanded { height: 220px; }
+    .card.expanded { height: 250px; }
 
-    .card-accent {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      border-radius: 16px 16px 0 0;
-    }
+    .card-accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 16px 16px 0 0; }
     .card-top .card-accent    { background: #7F77DD; }
     .card-bottom .card-accent { background: #1D9E75; }
 
-    .card-lang-tag {
-      position: absolute;
-      top: 14px; left: 18px;
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 20px;
-    }
-    .card-top .card-lang-tag {
-      background: rgba(127,119,221,0.12);
-      color: #7F77DD;
-    }
-    .card-bottom .card-lang-tag {
-      background: rgba(29,158,117,0.12);
-      color: #1D9E75;
-    }
+    .card-lang-tag { position: absolute; top: 14px; left: 18px; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
+    .card-top .card-lang-tag    { background: rgba(127,119,221,0.12); color: #7F77DD; }
+    .card-bottom .card-lang-tag { background: rgba(29,158,117,0.12);  color: #1D9E75; }
 
-    .card-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      padding: 1.2rem 2rem;
-      gap: 0.5rem;
-    }
+    .card-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 1.2rem 2rem; gap: 0.5rem; }
+    .card-word { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--ink); text-align: center; line-height: 1.1; }
 
-    .card-word {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      color: var(--ink);
-      text-align: center;
-      line-height: 1.1;
-    }
-    .card-phonetic {
-      font-size: 0.85rem;
-      color: var(--muted);
-      text-align: center;
-    }
-    .card-part-of-speech {
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-      opacity: 0.7;
-    }
-
-    /* When card is collapsed, show only a hint */
-    .card-hint {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 0.85rem;
-      color: var(--muted);
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    .card.expanded .card-hint { opacity: 0; }
-    .card:not(.expanded) .card-inner { opacity: 0; }
-    .card:not(.expanded) .card-hint { opacity: 1; }
-
-    .expand-hint {
-      position: absolute;
-      bottom: 10px; right: 14px;
-      font-size: 10px;
-      color: var(--muted);
-      opacity: 0.6;
-      transition: opacity 0.3s;
-      pointer-events: none;
-    }
+    .expand-hint { position: absolute; bottom: 10px; right: 14px; font-size: 10px; color: var(--muted); opacity: 0.6; transition: opacity 0.3s; pointer-events: none; }
     .card.expanded .expand-hint { opacity: 0; }
 
-    /* ── Action buttons ── */
-    .actions {
-      display: flex;
-      gap: 0.8rem;
-      justify-content: center;
-    }
-    .btn-action {
-      flex: 1;
-      max-width: 200px;
-      padding: 0.75rem 1.2rem;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-    }
+    .actions { display: flex; gap: 0.8rem; justify-content: center; }
+    .btn-action { flex: 1; max-width: 200px; padding: 0.75rem 1.2rem; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
     .btn-action:active { transform: scale(0.98); }
-    .btn-skip {
-      background: var(--card-bg);
-      color: var(--muted);
-    }
-    .btn-skip:hover { background: var(--input-bg); border-color: rgba(0,0,0,0.2); color: var(--ink); }
-    .btn-learned {
-      background: var(--sage);
-      color: white;
-      border-color: var(--sage);
-    }
+    .btn-learned { background: var(--sage); color: white; border-color: var(--sage); }
     .btn-learned:hover { background: #3a5633; border-color: #3a5633; }
     .btn-learned:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── Complete banner ── */
-    .complete-banner {
-      display: none;
-      background: var(--ink);
-      border-radius: 16px;
-      padding: 2.5rem;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      margin-top: 1rem;
-    }
+    .complete-banner { display: none; background: var(--ink); border-radius: 16px; padding: 2.5rem; text-align: center; position: relative; overflow: hidden; margin-top: 1rem; }
     .complete-banner.show { display: block; }
-    .complete-banner::before {
-      content: '';
-      position: absolute;
-      top: -60px; right: -60px;
-      width: 200px; height: 200px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(212,168,83,0.25) 0%, transparent 70%);
-    }
-    .complete-banner h2 {
-      font-family: 'Playfair Display', serif;
-      color: var(--cream);
-      font-size: 1.4rem;
-      margin-bottom: 0.5rem;
-      position: relative; z-index: 1;
-    }
-    .complete-banner p { color: #9A9089; font-size: 0.88rem; position: relative; z-index: 1; }
-    .btn-next-part {
-      margin-top: 1.2rem;
-      padding: 0.75rem 2rem;
-      background: var(--gold);
-      color: var(--ink);
-      border: none;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative; z-index: 1;
-    }
-    .btn-next-part:hover { background: #c49840; }
+    .complete-banner::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(212,168,83,0.25) 0%, transparent 70%); }
+    .complete-banner h2 { font-family: 'Playfair Display', serif; color: var(--cream); font-size: 1.4rem; margin-bottom: 0.5rem; position: relative; z-index: 1; }
+    .complete-banner p { color: #9A9089; font-size: 0.88rem; position: relative; z-index: 1; margin-bottom: 1.2rem; }
 
-    /* ── Loading / Error ── */
-    .status-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 40vh;
-      gap: 1rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-    .spinner {
-      width: 28px; height: 28px;
-      border: 2.5px solid var(--border);
-      border-top-color: var(--rust);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
+    .banner-actions { display: flex; gap: 0.8rem; justify-content: center; position: relative; z-index: 1; flex-wrap: wrap; }
+
+    .btn-next-part { padding: 0.75rem 1.6rem; background: rgba(255,255,255,0.1); color: var(--cream); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .btn-next-part:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.4); }
+
+    /* Practice with Emma button — gold, pulsing */
+    .btn-convo { padding: 0.75rem 1.6rem; background: var(--gold); color: var(--ink); border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(212,168,83,0.35); animation: pulseGold 2s ease-in-out infinite; }
+    .btn-convo:hover { background: #c49840; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(212,168,83,0.5); animation: none; }
+    @keyframes pulseGold { 0%,100% { box-shadow: 0 4px 14px rgba(212,168,83,0.35); } 50% { box-shadow: 0 4px 22px rgba(212,168,83,0.7); } }
+
+    .status-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 40vh; gap: 1rem; color: var(--muted); font-size: 0.9rem; }
+    .spinner { width: 28px; height: 28px; border: 2.5px solid var(--border); border-top-color: var(--rust); border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .btn-retry {
-      padding: 0.5rem 1.4rem;
-      background: var(--ink); color: var(--cream);
-      border: none; border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
-      cursor: pointer;
-    }
+    .btn-retry { padding: 0.5rem 1.4rem; background: var(--ink); color: var(--cream); border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; }
 
-    /* ── Divider ── */
-    .divider-line {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .divider-line::before, .divider-line::after {
-      content: '';
-      flex: 1;
-      height: 0.5px;
-      background: var(--border);
-    }
-    .divider-text { font-size: 11px; color: var(--muted); }
-
-    @media (max-width: 500px) {
-      .navbar { padding: 1rem; }
-      .card-word { font-size: 1.5rem; }
-    }
+    @media (max-width: 500px) { .navbar { padding: 1rem; } .card-word { font-size: 1.5rem; } .banner-actions { flex-direction: column; align-items: center; } }
   </style>
 </head>
 <body>
 
 <nav class="navbar">
-  <a href="dashboard.html" class="nav-brand">Lingua<span>AI</span></a>
+  <a href="../dashboard.html" class="nav-brand">Lingua<span>AI</span></a>
   <div class="nav-right">
     <div class="nav-avatar" id="navAvatar">…</div>
-    <a href="dashboard.html" class="btn-back">← Dashboard</a>
+    <a href="../dashboard.html" class="btn-back">← Dashboard</a>
   </div>
 </nav>
 
-<!-- Loading state -->
 <div class="status-screen" id="statusScreen">
   <div class="spinner"></div>
   <span>Loading your vocabulary…</span>
 </div>
 
-<!-- Main content -->
 <main class="main" id="mainContent" style="display:none;">
-
   <div class="page-header">
     <h1>Vocabulary <em>Builder</em></h1>
     <p id="levelLabel">Loading your level…</p>
   </div>
 
-  <!-- Progress -->
   <div class="progress-wrap">
     <div class="progress-info">
       <div class="progress-label">Your overall progress</div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressFill"></div>
-      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
     </div>
-    <div class="progress-count" id="progressCount">
-      0
-      <span>parts done</span>
-    </div>
+    <div class="progress-count" id="progressCount">0<span>parts done</span></div>
   </div>
 
-  <!-- Part navigation -->
   <div class="part-selector">
     <button class="part-nav-btn" id="prevPartBtn" onclick="changePart(-1)" disabled>←</button>
     <div class="part-info">
@@ -466,76 +146,55 @@
     <button class="part-nav-btn" id="nextPartBtn" onclick="changePart(1)">→</button>
   </div>
 
-  <!-- Word dots -->
   <div class="word-dots" id="wordDots"></div>
 
-  <!-- Cards -->
   <div class="scene">
     <div class="card card-top" id="cardTop" onclick="toggleCard('top')">
       <div class="card-accent"></div>
       <div class="card-lang-tag">English</div>
-      <div class="card-hint">tap to reveal</div>
-      <div class="card-inner">
-        <div class="card-word" id="englishWord">—</div>
-      </div>
+      <div class="card-inner"><div class="card-word" id="englishWord">—</div></div>
       <div class="expand-hint">tap to expand</div>
     </div>
-
-    <div class="divider-line">
-      <span class="divider-text">translation</span>
-    </div>
-
     <div class="card card-bottom" id="cardBottom" onclick="toggleCard('bottom')">
       <div class="card-accent"></div>
       <div class="card-lang-tag">Kazakh</div>
-      <div class="card-hint">tap to reveal</div>
-      <div class="card-inner">
-        <div class="card-word" id="kazakhWord">—</div>
-      </div>
+      <div class="card-inner"><div class="card-word" id="kazakhWord">—</div></div>
       <div class="expand-hint">tap to expand</div>
     </div>
   </div>
 
-  <!-- Action buttons -->
   <div class="actions">
-    <button class="btn-action btn-skip" onclick="nextWord()">
-      ↷ Skip
-    </button>
-    <button class="btn-action btn-learned" id="learnedBtn" onclick="markLearned()" disabled>
-      ✓ I know this
-    </button>
+    <button class="btn-action btn-learned" id="learnedBtn" onclick="markLearned()" disabled>✓ Next</button>
   </div>
 
-  <!-- Part complete banner -->
   <div class="complete-banner" id="completeBanner">
     <h2>🎉 Part complete!</h2>
-    <p>You've learned all 3 words in this part. Keep going!</p>
-    <button class="btn-next-part" onclick="changePart(1)">Next Part →</button>
+    <p>You've learned all 3 words! Now practice them with your AI teacher Emma.</p>
+    <div class="banner-actions">
+      <button class="btn-next-part" onclick="changePart(1)">Next Part →</button>
+      <a href="conversation_after_lesson.html" class="btn-convo">💬 Practice with Emma</a>
+    </div>
   </div>
-
 </main>
 
 <script>
-  const API     = 'http://localhost:3030/api/auth';
-  const VOCAB   = 'http://localhost:3030/api/vocab';
-  const token   = localStorage.getItem('token');
+  const API   = 'http://localhost:3030/api/auth';
+  const VOCAB = 'http://localhost:3030/api/vocab';
+  const token = localStorage.getItem('token');
 
   if (!token) { window.location.href = 'index.html'; }
 
-  // ── State ─────────────────────────────────────────────────────────────────
-  let user          = null;
-  let parts         = [];       // all parts for this level
-  let currentPartIdx = 0;       // index into parts[]
-  let words         = [];       // words for current part
+  let user           = null;
+  let parts          = [];
+  let currentPartIdx = 0;
+  let words          = [];
   let currentWordIdx = 0;
-  let learnedInPart = new Set();
+  let learnedInPart  = new Set();
   let completedParts = new Set();
-  let activeCard    = null;
+  let activeCard     = null;
 
-  // ── Boot ─────────────────────────────────────────────────────────────────
   async function init() {
     try {
-      // 1. Get user (level)
       const res  = await fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (!res.ok || !data.success) { window.location.href = 'index.html'; return; }
@@ -545,22 +204,17 @@
       document.getElementById('levelLabel').textContent =
         `Level: ${user.level} · Work through each part to build your vocabulary`;
 
-      // 2. Fetch parts for this user's level
       const pRes  = await fetch(`${VOCAB}/parts`, { headers: { Authorization: `Bearer ${token}` } });
       const pData = await pRes.json();
       if (!pData.success) throw new Error('Could not load parts');
       parts = pData.parts;
 
-      // 3. Fetch progress
       const prRes  = await fetch(`${VOCAB}/progress`, { headers: { Authorization: `Bearer ${token}` } });
       const prData = await prRes.json();
-      if (prData.success) {
-        prData.completed.forEach(id => completedParts.add(id));
-      }
+      if (prData.success) prData.completed.forEach(id => completedParts.add(id));
 
       updateProgress();
 
-      // Start from first incomplete part
       const firstIncomplete = parts.findIndex(p => !completedParts.has(p.id));
       currentPartIdx = firstIncomplete >= 0 ? firstIncomplete : 0;
 
@@ -578,7 +232,6 @@
     }
   }
 
-  // ── Load part ─────────────────────────────────────────────────────────────
   async function loadPart() {
     learnedInPart.clear();
     currentWordIdx = 0;
@@ -592,7 +245,6 @@
     document.getElementById('nextPartBtn').disabled     = currentPartIdx === parts.length - 1;
     document.getElementById('completeBanner').classList.remove('show');
 
-    // Fetch words for this part
     const res  = await fetch(`${VOCAB}/words/${part.id}`, { headers: { Authorization: `Bearer ${token}` } });
     const data = await res.json();
     if (!data.success) return;
@@ -602,37 +254,28 @@
     showWord(0);
   }
 
-  // ── Show word ─────────────────────────────────────────────────────────────
   function showWord(idx) {
     currentWordIdx = idx;
     activeCard     = null;
     resetCards();
-
     if (!words[idx]) return;
     const w = words[idx];
-
     document.getElementById('englishWord').textContent = w.english;
     document.getElementById('kazakhWord').textContent  = w.kazakh;
     document.getElementById('learnedBtn').disabled     = learnedInPart.has(w.id);
-
     renderDots();
   }
 
-  // ── Card toggle ───────────────────────────────────────────────────────────
   function toggleCard(which) {
     const top    = document.getElementById('cardTop');
     const bottom = document.getElementById('cardBottom');
-
     if (activeCard === which) {
       top.classList.remove('expanded');
       bottom.classList.remove('expanded');
       activeCard = null;
-
-      // Both collapsed: disable learned button until user reads
       document.getElementById('learnedBtn').disabled = true;
       return;
     }
-
     activeCard = which;
     if (which === 'top') {
       top.classList.add('expanded');
@@ -640,7 +283,6 @@
     } else {
       bottom.classList.add('expanded');
       top.classList.remove('expanded');
-      // Enable "I know this" once the translation is revealed
       if (words[currentWordIdx] && !learnedInPart.has(words[currentWordIdx].id)) {
         document.getElementById('learnedBtn').disabled = false;
       }
@@ -652,18 +294,6 @@
     document.getElementById('cardBottom').classList.remove('expanded');
   }
 
-  // ── Next word / skip ──────────────────────────────────────────────────────
-  function nextWord() {
-    const next = currentWordIdx + 1;
-    if (next < words.length) {
-      showWord(next);
-    } else {
-      // loop back
-      showWord(0);
-    }
-  }
-
-  // ── Mark learned ──────────────────────────────────────────────────────────
   async function markLearned() {
     const w = words[currentWordIdx];
     if (!w) return;
@@ -674,31 +304,37 @@
     if (learnedInPart.size === words.length) {
       await markPartComplete();
     } else {
-      // Move to next unlearned
       const nextUnlearned = words.findIndex((wd, i) => i > currentWordIdx && !learnedInPart.has(wd.id));
       if (nextUnlearned >= 0) showWord(nextUnlearned);
       else showWord(words.findIndex(wd => !learnedInPart.has(wd.id)));
     }
   }
 
-  // ── Mark part complete ────────────────────────────────────────────────────
   async function markPartComplete() {
     const part = parts[currentPartIdx];
     try {
       await fetch(`${VOCAB}/progress/complete`, {
-        method:  'POST',
+        method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ part_id: part.id }),
+        body:   JSON.stringify({ part_id: part.id }),
       });
     } catch (e) { /* best effort */ }
 
     completedParts.add(part.id);
     updateProgress();
+
+    // Save vocab session to localStorage — conversation.html will read this
+    localStorage.setItem('vocabSession', JSON.stringify({
+      level:      user.level,
+      partNumber: part.part_number,
+      words:      words.map(w => ({ english: w.english, kazakh: w.kazakh })),
+    }));
+
     document.getElementById('completeBanner').classList.add('show');
     document.getElementById('nextPartBtn').disabled = currentPartIdx === parts.length - 1;
+    document.getElementById('completeBanner').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  // ── Part navigation ───────────────────────────────────────────────────────
   async function changePart(dir) {
     const next = currentPartIdx + dir;
     if (next < 0 || next >= parts.length) return;
@@ -706,7 +342,6 @@
     await loadPart();
   }
 
-  // ── Dots ──────────────────────────────────────────────────────────────────
   function renderDots() {
     const container = document.getElementById('wordDots');
     container.innerHTML = '';
@@ -714,17 +349,16 @@
       const dot = document.createElement('div');
       dot.className = 'word-dot';
       if (learnedInPart.has(w.id)) dot.classList.add('learned');
-      else if (i === currentWordIdx)  dot.classList.add('active');
+      else if (i === currentWordIdx) dot.classList.add('active');
       dot.onclick = () => showWord(i);
       container.appendChild(dot);
     });
   }
 
-  // ── Progress ──────────────────────────────────────────────────────────────
   function updateProgress() {
-    const total  = parts.length;
-    const done   = completedParts.size;
-    const pct    = total > 0 ? Math.round((done / total) * 100) : 0;
+    const total = parts.length;
+    const done  = completedParts.size;
+    const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('progressCount').innerHTML  = `${done}<span>/ ${total} parts</span>`;
   }
