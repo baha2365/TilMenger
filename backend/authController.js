@@ -5,9 +5,9 @@ const { pool } = require('./Db');
 const SALT_ROUNDS = 12;
 
 // ─── Helper: sign a JWT ───────────────────────────────────────────────────────
-function signToken(userId) {
+function signToken(userId, roleId) {
   return jwt.sign(
-    { sub: userId },
+    { sub: userId, roleId },          // roleId embedded in every token
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
@@ -20,6 +20,7 @@ function safeUser(row) {
     name:      row.name,
     email:     row.email,
     level:     row.level,
+    roleId:    row.role_id,           // exposed so the frontend knows the role
     createdAt: row.created_at,
   };
 }
@@ -44,7 +45,7 @@ async function register(req, res) {
     // 2. Hash password
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // 3. Insert user
+    // 3. Insert user — role_id defaults to 1 (student) via the DB column default
     const { rows } = await pool.query(
       `INSERT INTO users (name, email, password, level)
        VALUES ($1, $2, $3, $4)
@@ -53,7 +54,7 @@ async function register(req, res) {
     );
 
     const user  = rows[0];
-    const token = signToken(user.id);
+    const token = signToken(user.id, user.role_id);   // pass role_id
 
     return res.status(201).json({
       success: true,
@@ -79,7 +80,6 @@ async function login(req, res) {
     );
 
     if (rows.length === 0) {
-      // Generic message — don't reveal whether email exists
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password.',
@@ -97,8 +97,8 @@ async function login(req, res) {
       });
     }
 
-    // 3. Issue token
-    const token = signToken(user.id);
+    // 3. Issue token — include role_id in the payload
+    const token = signToken(user.id, user.role_id);   // pass role_id
 
     return res.status(200).json({
       success: true,
@@ -116,7 +116,7 @@ async function login(req, res) {
 async function getMe(req, res) {
   try {
     const { rows } = await pool.query(
-      'SELECT id, name, email, level, created_at FROM users WHERE id = $1',
+      'SELECT id, name, email, level, role_id, created_at FROM users WHERE id = $1',
       [req.userId]
     );
     if (rows.length === 0) {
