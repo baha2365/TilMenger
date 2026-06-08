@@ -1046,12 +1046,12 @@
           <span class="ac-arrow">Create →</span>
         </div>
 
-        <div class="action-card" data-accent="teal" onclick="openModal('quiz')">
-          <div class="ac-icon-wrap" data-bg="teal">🧩</div>
-          <div class="ac-title">New Quiz</div>
-          <div class="ac-desc">Build auto-graded multiple-choice or written answer quizzes.</div>
-          <span class="ac-arrow">Create →</span>
-        </div>
+        <a href="create_quiz.html" class="action-card" data-accent="teal">
+            <div class="ac-icon-wrap" data-bg="teal">🧩</div>
+            <div class="ac-title">New Quiz</div>
+            <div class="ac-desc">Build multiple question quizzes.</div>
+            <span class="ac-arrow">Create →</span>
+        </a>
 
         <div class="action-card" data-accent="rose" onclick="openModal('worksheet')">
           <div class="ac-icon-wrap" data-bg="rose">📄</div>
@@ -1364,66 +1364,9 @@
 </div>
 
 <!-- Create Quiz -->
-<div class="modal-overlay" id="modal-quiz">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title-group">
-        <div class="modal-eyebrow">Content · Quiz</div>
-        <div class="modal-title">New Quiz</div>
-      </div>
-      <button class="modal-close" onclick="closeModal('quiz')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Quiz Title</label>
-        <input class="form-input" type="text" placeholder="e.g. Vocabulary Unit 4 Quiz">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Assign to</label>
-          <select class="form-select">
-            <option>All Classes</option>
-            <option>Class A</option>
-            <option>Class B</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Time Limit</label>
-          <select class="form-select">
-            <option>No limit</option>
-            <option>15 minutes</option>
-            <option>30 minutes</option>
-            <option>45 minutes</option>
-            <option>60 minutes</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Question Type</label>
-          <select class="form-select">
-            <option>Multiple Choice</option>
-            <option>True / False</option>
-            <option>Short Answer</option>
-            <option>Mixed</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Number of Questions</label>
-          <input class="form-input" type="number" placeholder="10" min="1" max="100">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Available From</label>
-        <input class="form-input" type="datetime-local">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('quiz')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveAndClose('quiz')">🧩 Create Quiz</button>
-    </div>
-  </div>
-</div>
+ 
+<!--  -->
+
 
 <!-- Create Worksheet -->
 <div class="modal-overlay" id="modal-worksheet">
