@@ -527,7 +527,6 @@
     <!-- cells injected by JS -->
     <div class="center" id="boardCenter">
       <div class="center-title">ENGLISHPOLY!</div>
-      <p class="center-sub">Only for students who want<br>to speak a lot of English!</p>
     </div>
   </div>
 
@@ -1148,13 +1147,9 @@ function openSpeakingCard(cell) {
       <div class="modal-badge" style="background:${theme.accent};color:white;">${theme.label} — Speaking</div>
     </div>
     <div style="background:${theme.bg};border-radius:16px;padding:24px 20px;text-align:center;margin-bottom:18px;border:2px solid ${theme.accent}22;">
-      <div style="font-size:2.2rem;margin-bottom:10px;">🗣️</div>
       <h2 style="font-family:'Fredoka One',cursive;font-size:1.45rem;color:#1a1a2e;margin-bottom:0;">${cell.label}</h2>
     </div>
-    <p style="font-size:0.85rem;color:#666;text-align:center;margin-bottom:18px;">
-      <strong style="color:${theme.accent}">${p.name}</strong>, answer the question out loud in English!<br>
-      The group decides if it's a good answer. ✅
-    </p>
+    
     <div class="modal-actions" style="justify-content:center;gap:12px;">
       <button class="btn-check" onclick="speakingDone(true)"  style="background:${theme.accent};box-shadow:0 3px 0 ${theme.accent}88;">✅ Good answer! (+1 pt)</button>
       <button class="btn-skip"  onclick="speakingDone(false)">😅 Skip turn</button>
