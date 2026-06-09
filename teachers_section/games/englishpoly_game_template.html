@@ -911,14 +911,6 @@ function buildBoard() {
     el.style.gridRow    = row;
     el.dataset.idx = idx;
 
-    // Rotated text for left/right columns
-    const isLeft  = col === 1 && row > 1 && row < 8;
-    const isRight = col === 11 && row > 1 && row < 8;
-
-    if(isLeft)  el.style.writingMode = 'vertical-lr';
-    if(isRight) el.style.writingMode = 'vertical-rl';
-    if(isRight) el.style.transform   = 'rotate(180deg)';
-
     el.innerHTML = getCellHTML(cell);
     el.addEventListener('click', () => handleCellClick(idx));
     board.appendChild(el);
