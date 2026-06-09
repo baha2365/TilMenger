@@ -576,15 +576,20 @@
     <!-- Legend -->
     <div class="panel">
       <h3>🗺️ Legend</h3>
-      <div class="legend">
+      <p style="color:rgba(255,255,255,0.5);font-size:0.65rem;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Speaking squares (+1 pt)</p>
+      <div class="legend" style="margin-bottom:10px;">
         <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Vocabulary</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Spelling</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Grammar</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Speaking</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Sentences</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--brown)"></div>Matching</div>
-        <div class="legend-item"><div class="legend-dot" style="background:(#e84393)"></div>❓ Challenge</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Action</div>
+      </div>
+      <p style="color:rgba(255,255,255,0.5);font-size:0.65rem;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Mini-game squares (+2 pts)</p>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#fff7e0;border:2px solid var(--red)"></div>&#10067; Wild Challenge</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fff0f0;border:2px solid var(--red)"></div>&#10071; Action Challenge</div>
       </div>
     </div>
 
@@ -1130,21 +1135,71 @@ function onLand(posIdx) {
     return;
   }
 
-  // Challenge cell
-  const challengeType = getChallengeType(cell);
-  if(challengeType) {
+  // Regular question square → speaking card only
+  if(cell.type === 'question') {
     awaitingChallenge = true;
-    setTimeout(() => openChallenge(challengeType, cell.color || 'vocabulary'), 400);
-  } else {
-    setTimeout(() => endTurn(), 400);
+    setTimeout(() => openSpeakingCard(cell), 400);
+    return;
   }
+
+  // ❓ wild or ❗ exclaim → interactive mini-challenge
+  if(cell.type === 'wild' || cell.type === 'exclaim') {
+    awaitingChallenge = true;
+    setTimeout(() => openChallenge('random', 'blue'), 400);
+    return;
+  }
+
+  setTimeout(() => endTurn(), 400);
 }
 
-function getChallengeType(cell) {
-  if(!cell.type) return null;
-  if(cell.type === 'wild' || cell.type === 'exclaim') return 'random';
-  if(cell.type === 'question') return cell.color || 'vocabulary';
-  return null;
+// ════════════════════════════════════════
+//  SPEAKING CARD (for regular question squares)
+// ════════════════════════════════════════
+const COLOR_BG = {
+  red:    {bg:'#fde8e8', accent:'#e03232', label:'Vocabulary'},
+  yellow: {bg:'#fdf8dd', accent:'#c89000', label:'Spelling'},
+  green:  {bg:'#e2f7e8', accent:'#2e9e4f', label:'Grammar'},
+  blue:   {bg:'#ddeeff', accent:'#2574c0', label:'Speaking'},
+  purple: {bg:'#f0e0ff', accent:'#8b35b0', label:'Sentences'},
+  brown:  {bg:'#f5e8d8', accent:'#8B5E3C', label:'Matching'},
+  orange: {bg:'#ffeedd', accent:'#e07820', label:'Action'},
+};
+
+function openSpeakingCard(cell) {
+  const modal   = document.getElementById('challengeModal');
+  const content = document.getElementById('challengeContent');
+  const theme   = COLOR_BG[cell.color] || COLOR_BG.blue;
+  const p       = players[currentPlayer];
+
+  content.innerHTML = `
+    <div style="text-align:center;margin-bottom:14px;">
+      <div class="modal-badge" style="background:${theme.accent};color:white;">${theme.label} — Speaking</div>
+    </div>
+    <div style="background:${theme.bg};border-radius:16px;padding:24px 20px;text-align:center;margin-bottom:18px;border:2px solid ${theme.accent}22;">
+      <div style="font-size:2.2rem;margin-bottom:10px;">🗣️</div>
+      <h2 style="font-family:'Fredoka One',cursive;font-size:1.45rem;color:#1a1a2e;margin-bottom:0;">${cell.label}</h2>
+    </div>
+    <p style="font-size:0.85rem;color:#666;text-align:center;margin-bottom:18px;">
+      <strong style="color:${theme.accent}">${p.name}</strong>, answer the question out loud in English!<br>
+      The group decides if it's a good answer. ✅
+    </p>
+    <div class="modal-actions" style="justify-content:center;gap:12px;">
+      <button class="btn-check" onclick="speakingDone(true)"  style="background:${theme.accent};box-shadow:0 3px 0 ${theme.accent}88;">✅ Good answer! (+1 pt)</button>
+      <button class="btn-skip"  onclick="speakingDone(false)">😅 Skip turn</button>
+    </div>`;
+
+  modal.classList.add('show');
+}
+
+function speakingDone(correct) {
+  if(correct) {
+    players[currentPlayer].score += 1;
+    renderPlayers();
+    showToast('🗣️ +1 point for ' + players[currentPlayer].name + '!');
+  }
+  document.getElementById('challengeModal').classList.remove('show');
+  awaitingChallenge = false;
+  endTurn();
 }
 
 // ════════════════════════════════════════
