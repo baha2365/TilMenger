@@ -932,35 +932,18 @@
   <!-- ══════════ SIDEBAR ══════════ -->
   <aside class="sidebar">
 
-    <!-- Course CTA / Course Card — toggled by JS -->
-    <div id="sidebarCourseCta" class="sidebar-course-cta" onclick="openModal('course')">
-      <div class="sidebar-cta-icon">✦</div>
-      <div class="sidebar-cta-title">Create a Course</div>
-      <div class="sidebar-cta-sub">Set up your first course and start teaching</div>
-    </div>
-
-    <div id="sidebarCourseCard" class="sidebar-course-card" style="display:none;">
-      <div class="scc-label">Active Course</div>
-      <div class="scc-name" id="sccName">—</div>
-      <div class="scc-stats">
-        <div class="scc-stat"><div class="sv" id="sccStudents">0</div><div class="sl">Students</div></div>
-        <div class="scc-stat"><div class="sv" id="sccLessons">0</div><div class="sl">Lessons</div></div>
-        <div class="scc-stat"><div class="sv" id="sccDone">0%</div><div class="sl">Done</div></div>
-      </div>
-    </div>
+    
 
     <!-- Main nav -->
     <div class="sidebar-section">
       <div class="sidebar-section-label">Overview</div>
-      <div class="nav-item active" data-accent="gold" onclick="setActive(this)">
-        <div class="nav-icon">📊</div>
-        <span class="nav-label">Dashboard</span>
-      </div>
-      <div class="nav-item" data-accent="rust" onclick="setActive(this)">
-        <div class="nav-icon">👥</div>
-        <span class="nav-label">Students</span>
+      
+      <a class="nav-item" data-accent="rust" href="./courses/courses_dashboard.html">
+        <div class="nav-icon">📚</div>
+        <span class="nav-label">Courses</span>
         <span class="nav-badge" id="studentBadge">0</span>
-      </div>
+      </a>
+
       <a class="nav-item" data-accent="sage" href="./classes/classes_dashboard.html">
         <div class="nav-icon">🏛️</div>
         <span class="nav-label">Classes</span>
@@ -969,7 +952,7 @@
 
     <div class="sidebar-section">
       <div class="sidebar-section-label">Content</div>
-      <div class="nav-item" data-accent="violet" onclick="openModal('assignment'); setActive(this)">
+      <div class="nav-item" data-accent="violet">
         <div class="nav-icon">📋</div>
         <span class="nav-label">Assignments</span>
       </div>
@@ -978,7 +961,7 @@
         <div class="nav-icon">🧩</div>
         <span class="nav-label">Quizzes</span>
       </a>
-      <div class="nav-item" data-accent="rose" onclick="openModal('worksheet'); setActive(this)">
+      <div class="nav-item" data-accent="rose">
         <div class="nav-icon">📄</div>
         <span class="nav-label">Worksheets</span>
       </div>
@@ -1211,184 +1194,6 @@
 <div id="panelBackdrop" style="position:fixed;inset:0;z-index:150;display:none;" onclick="closePanels()"></div>
 
 
-<!-- ══════════════════════════════
-     MODALS
-══════════════════════════════ -->
-
-<!-- Create Course -->
-<div class="modal-overlay" id="modal-course">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title-group">
-        <div class="modal-eyebrow">Instructor Portal</div>
-        <div class="modal-title">Create a Course</div>
-      </div>
-      <button class="modal-close" onclick="closeModal('course')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Course Name</label>
-        <input class="form-input" type="text" placeholder="e.g. English B1 — Spring 2025" id="courseNameInput">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Level</label>
-          <select class="form-select" id="courseLevelSelect">
-            <option value="">Select level…</option>
-            <option>A1 — Beginner</option>
-            <option>A2 — Elementary</option>
-            <option>B1 — Intermediate</option>
-            <option>B2 — Upper Intermediate</option>
-            <option>C1 — Advanced</option>
-            <option>C2 — Proficiency</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Max Students</label>
-          <input class="form-input" type="number" placeholder="e.g. 25" min="1" id="courseMaxStudents">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Description</label>
-        <textarea class="form-textarea" placeholder="Brief course overview…" id="courseDesc"></textarea>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Start Date</label>
-          <input class="form-input" type="date" id="courseStart">
-        </div>
-        <div class="form-group">
-          <label class="form-label">End Date</label>
-          <input class="form-input" type="date" id="courseEnd">
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('course')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveCourse()">✦ Create Course</button>
-    </div>
-  </div>
-</div>
-
-<!-- Create Assignment -->
-<div class="modal-overlay" id="modal-assignment">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title-group">
-        <div class="modal-eyebrow">Content · Assignment</div>
-        <div class="modal-title">New Assignment</div>
-      </div>
-      <button class="modal-close" onclick="closeModal('assignment')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Title</label>
-        <input class="form-input" type="text" placeholder="e.g. Unit 3 Homework — Tenses">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Assign to</label>
-          <select class="form-select">
-            <option>All Classes</option>
-            <option>Class A</option>
-            <option>Class B</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Due Date</label>
-          <input class="form-input" type="date">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Instructions</label>
-        <textarea class="form-textarea" placeholder="Describe what students need to do…"></textarea>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Points</label>
-          <input class="form-input" type="number" placeholder="100" min="0">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Type</label>
-          <select class="form-select">
-            <option>Homework</option>
-            <option>In-class task</option>
-            <option>Project</option>
-            <option>Essay</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('assignment')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveAndClose('assignment')">📋 Create Assignment</button>
-    </div>
-  </div>
-</div>
-
-<!-- Create Quiz -->
- 
-<!--  -->
-
-
-<!-- Create Worksheet -->
-<div class="modal-overlay" id="modal-worksheet">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title-group">
-        <div class="modal-eyebrow">Content · Worksheet</div>
-        <div class="modal-title">New Worksheet</div>
-      </div>
-      <button class="modal-close" onclick="closeModal('worksheet')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Worksheet Title</label>
-        <input class="form-input" type="text" placeholder="e.g. Present Perfect Practice">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Topic / Unit</label>
-          <input class="form-input" type="text" placeholder="e.g. Grammar — Tenses">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Level</label>
-          <select class="form-select">
-            <option>A1</option><option>A2</option><option>B1</option>
-            <option>B2</option><option>C1</option><option>C2</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Instructions / Notes</label>
-        <textarea class="form-textarea" placeholder="What should students practice with this worksheet?"></textarea>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Format</label>
-          <select class="form-select">
-            <option>Digital (online)</option>
-            <option>Printable PDF</option>
-            <option>Both</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Assign to</label>
-          <select class="form-select">
-            <option>All Classes</option>
-            <option>Class A</option>
-            <option>Class B</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('worksheet')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveAndClose('worksheet')">📄 Create Worksheet</button>
-    </div>
-  </div>
-</div>
-
 
 <!-- ══════════ SCRIPTS ══════════ -->
 <script>
@@ -1431,41 +1236,8 @@
 
     } catch (e) { /* fail silently for demo */ }
 
-    loadCourseState();
-    loadStats();
   }
 
-  /* ─── Course state ─── */
-  function loadCourseState() {
-    const course = JSON.parse(localStorage.getItem('teacher_course') || 'null');
-    const cta  = document.getElementById('sidebarCourseCta');
-    const card = document.getElementById('sidebarCourseCard');
-
-    if (course) {
-      cta.style.display  = 'none';
-      card.style.display = 'block';
-      document.getElementById('sccName').textContent     = course.name;
-      document.getElementById('sccStudents').textContent = course.students || 0;
-      document.getElementById('sccLessons').textContent  = course.lessons  || 0;
-      document.getElementById('sccDone').textContent     = (course.done || 0) + '%';
-      document.getElementById('heroSub').textContent =
-        `Managing "${course.name}" · ${course.students || 0} students enrolled.`;
-    } else {
-      cta.style.display  = '';
-      card.style.display = 'none';
-    }
-  }
-
-  function loadStats() {
-    const stats = JSON.parse(localStorage.getItem('teacher_stats') || 'null') || {
-      students: 0, assignments: 0, quizzes: 0, avgScore: null
-    };
-    document.getElementById('qsStudents').textContent    = stats.students;
-    document.getElementById('qsAssignments').textContent = stats.assignments;
-    document.getElementById('qsQuizzes').textContent     = stats.quizzes;
-    document.getElementById('qsAvgScore').textContent    = stats.avgScore ? stats.avgScore + '%' : '—';
-    document.getElementById('studentBadge').textContent  = stats.students;
-  }
 
   /* ─── Sidebar nav active state ─── */
   function setActive(el) {
@@ -1474,64 +1246,6 @@
     if (el.classList.contains('nav-item')) el.classList.add('active');
   }
 
-  /* ─── Modal helpers ─── */
-  function openModal(id) {
-    closePanels();
-    document.getElementById('modal-' + id).classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeModal(id) {
-    document.getElementById('modal-' + id).classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  // Close modal on overlay click
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', e => {
-      if (e.target === overlay) {
-        overlay.classList.remove('open');
-        document.body.style.overflow = '';
-      }
-    });
-  });
-
-  function saveAndClose(type) {
-    // Increment stat counter for demo
-    const stats = JSON.parse(localStorage.getItem('teacher_stats') || '{}');
-    if (type === 'assignment') stats.assignments = (stats.assignments || 0) + 1;
-    if (type === 'quiz')       stats.quizzes     = (stats.quizzes     || 0) + 1;
-    localStorage.setItem('teacher_stats', JSON.stringify(stats));
-    loadStats();
-    closeModal(type);
-    showToast(
-      type === 'assignment' ? '📋 Assignment created!' :
-      type === 'quiz'       ? '🧩 Quiz created!'       :
-                              '📄 Worksheet created!'
-    );
-  }
-
-  /* ─── Save course ─── */
-  function saveCourse() {
-    const name = document.getElementById('courseNameInput').value.trim();
-    if (!name) {
-      document.getElementById('courseNameInput').focus();
-      return;
-    }
-    const course = {
-      name,
-      level:    document.getElementById('courseLevelSelect').value,
-      max:      document.getElementById('courseMaxStudents').value,
-      desc:     document.getElementById('courseDesc').value,
-      start:    document.getElementById('courseStart').value,
-      end:      document.getElementById('courseEnd').value,
-      students: 0,
-      lessons:  0,
-      done:     0,
-    };
-    localStorage.setItem('teacher_course', JSON.stringify(course));
-    loadCourseState();
-    closeModal('course');
-    showToast('✦ Course created successfully!');
-  }
 
   /* ─── Notification panel ─── */
   function toggleNotif() {
