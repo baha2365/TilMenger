@@ -1,11 +1,612 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LinguaAI — My Courses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #F5F0E8;
+      --ink:     #1A1612;
+      --rust:    #C4572A;
+      --gold:    #D4A853;
+      --muted:   #7A6E65;
+      --border:  #DDD5C8;
+      --card:    #FDFAF5;
+      --red:     #d32f2f;
+      --green:   #2e7d32;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+    /* ── Navbar ── */
+    nav {
+      background: var(--ink); padding: 0.9rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .brand { color: #F5F0E8; font-size: 1.1rem; font-weight: 600; text-decoration: none; }
+    .brand span { color: var(--gold); }
+    nav a.back {
+      font-size: 0.82rem; color: #9A9089; text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.15); padding: 0.35rem 0.9rem;
+      border-radius: 6px; transition: color 0.2s, border-color 0.2s;
+    }
+    nav a.back:hover { color: #F5F0E8; border-color: rgba(255,255,255,0.4); }
+
+    /* ── Page ── */
+    .page { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    /* ── Page header ── */
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.8rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .page-header h1 { font-size: 1.5rem; font-weight: 600; }
+    .page-header p  { font-size: 0.83rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 0.55rem 1.2rem; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.84rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.18s;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-primary { background: var(--rust); color: #fff; }
+    .btn-primary:hover { background: #a84524; }
+    .btn-outline {
+      background: none; border: 1px solid var(--border); color: var(--ink);
+    }
+    .btn-outline:hover { border-color: var(--muted); background: rgba(0,0,0,0.03); }
+    .btn-sm { padding: 0.35rem 0.85rem; font-size: 0.78rem; }
+    .btn-danger { background: none; border: 1px solid #f5c6c6; color: var(--red); }
+    .btn-danger:hover { background: #fff0f0; }
+    .btn-green { background: none; border: 1px solid #c8e6c9; color: var(--green); }
+    .btn-green:hover { background: #f0fff0; }
+
+    /* ── Banner feedback ── */
+    #feedback {
+      padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.83rem;
+      margin-bottom: 1.2rem; display: none;
+    }
+    #feedback.ok  { background: #e8f5e9; color: var(--green); border: 1px solid #c8e6c9; }
+    #feedback.err { background: #ffebee; color: var(--red);   border: 1px solid #f5c6c6; }
+
+    /* ── Create-course form card ── */
+    .form-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.6rem; margin-bottom: 2rem;
+    }
+    .form-card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1.2rem; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.75rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+    input[type="text"], select, textarea {
+      padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 7px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.85rem; background: #fff;
+      color: var(--ink); outline: none; transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--rust); }
+    textarea { resize: vertical; min-height: 75px; }
+    .form-footer { margin-top: 1.2rem; display: flex; justify-content: flex-end; }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    .spinner.dark { border-color: rgba(0,0,0,0.15); border-top-color: var(--ink); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Courses list ── */
+    #courseList { display: flex; flex-direction: column; gap: 1rem; }
+
+    .course-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.3rem 1.5rem;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+    .course-card-header {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+    }
+    .course-card-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .course-card-meta  { font-size: 0.78rem; color: var(--muted); }
+    .level-badge {
+      display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 600; background: rgba(212,168,83,0.15);
+      color: var(--gold); border: 1px solid rgba(212,168,83,0.3); margin-left: 0.5rem;
+    }
+    .inactive-badge {
+      display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 600; background: rgba(0,0,0,0.06);
+      color: var(--muted); border: 1px solid var(--border); margin-left: 0.4rem;
+    }
+
+    /* Invite code row */
+    .invite-row {
+      display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+      margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);
+    }
+    .invite-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .invite-code {
+      font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 700;
+      letter-spacing: 0.12em; color: var(--ink); background: rgba(0,0,0,0.05);
+      padding: 0.3rem 0.85rem; border-radius: 6px; border: 1px solid var(--border);
+      user-select: all;
+    }
+    .copy-btn {
+      font-size: 0.76rem; padding: 0.3rem 0.8rem; border-radius: 6px;
+      background: none; border: 1px solid var(--border); cursor: pointer;
+      font-family: 'DM Sans', sans-serif; color: var(--muted); transition: all 0.15s;
+    }
+    .copy-btn:hover { border-color: var(--muted); color: var(--ink); }
+    .copy-btn.copied { color: var(--green); border-color: #c8e6c9; }
+
+    /* Course actions */
+    .course-actions {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;
+    }
+
+    /* Description */
+    .course-desc {
+      font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.55;
+    }
+
+    /* UUID display */
+    .course-id {
+      font-size: 0.68rem; color: var(--muted); opacity: 0.65; margin-top: 0.4rem;
+      font-family: 'Courier New', monospace; word-break: break-all;
+    }
+
+    /* ── Empty state ── */
+    #emptyState {
+      text-align: center; padding: 3rem 1rem; color: var(--muted); display: none;
+    }
+    #emptyState p { font-size: 0.88rem; margin-top: 0.5rem; }
+
+    /* ── Loading state ── */
+    #loadingState {
+      text-align: center; padding: 2rem; color: var(--muted); font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+    }
+
+    /* ── Confirm overlay ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .overlay.open { display: flex; }
+    .confirm-box {
+      background: var(--card); border-radius: 12px; padding: 1.8rem; max-width: 380px; width: 90%;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.25);
+    }
+    .confirm-box h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .confirm-box p  { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.2rem; line-height: 1.5; }
+    .confirm-btns   { display: flex; gap: 0.75rem; justify-content: flex-end; }
+
+    @media (max-width: 560px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
 </head>
 <body>
-    
+
+<nav>
+  <a class="brand" href="../dashboard.html">Lingua<span>AI</span></a>
+  <a class="back" href="teacher_dashboard.html">← Dashboard</a>
+</nav>
+
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>My Courses</h1>
+      <p>Create and manage your language courses.</p>
+    </div>
+  </div>
+
+  <!-- Feedback banner -->
+  <div id="feedback"></div>
+
+  <!-- ── Create Course Form ── -->
+  <div class="form-card">
+    <h2>Create a New Course</h2>
+    <form id="courseForm" autocomplete="off">
+      <div class="form-grid">
+
+        <div class="form-group full">
+          <label for="courseName">Course Name *</label>
+          <input type="text" id="courseName" name="name"
+                 placeholder="e.g. English B1 — Spring 2025" maxlength="200" required>
+        </div>
+
+        <div class="form-group">
+          <label for="courseLevel">Level *</label>
+          <select id="courseLevel" name="level" required>
+            <option value="" disabled selected>Select level…</option>
+            <option value="A1-A2">A1-A2 — Beginner / Elementary</option>
+            <option value="B1-B2">B1-B2 — Intermediate / Upper-Intermediate</option>
+            <option value="C1-C2">C1-C2 — Advanced / Proficiency</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label for="courseDesc">Description</label>
+          <textarea id="courseDesc" name="description"
+                    placeholder="Optional: what will students learn in this course?"></textarea>
+        </div>
+
+      </div>
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary" id="createBtn">
+          + Create Course
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ── Courses List ── -->
+  <h2 style="font-size:1rem; font-weight:600; margin-bottom:1rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; font-size:0.78rem;">Your Courses</h2>
+
+  <div id="loadingState">
+    <div class="spinner dark"></div> Loading courses…
+  </div>
+
+  <div id="emptyState">
+    <div style="font-size:2rem;">📭</div>
+    <p>You haven't created any courses yet.<br>Use the form above to get started.</p>
+  </div>
+
+  <div id="courseList"></div>
+
+</div><!-- /page -->
+
+<!-- ── Delete confirmation overlay ── -->
+<div class="overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3>Delete course?</h3>
+    <p id="confirmText">This will permanently delete the course and all related data. This cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ══════════════════════════════════════════════════════
+     CONFIG
+  ══════════════════════════════════════════════════════ */
+  const API_BASE = 'http://localhost:3030/api/courses';
+
+  function token() { return localStorage.getItem('token'); }
+
+  function authHeaders(extra = {}) {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token()}`,
+      ...extra,
+    };
+  }
+
+  /* ══════════════════════════════════════════════════════
+     FEEDBACK BANNER
+  ══════════════════════════════════════════════════════ */
+  let feedbackTimer;
+  function showFeedback(msg, type = 'ok') {
+    const el = document.getElementById('feedback');
+    el.textContent = msg;
+    el.className = type; // 'ok' | 'err'
+    el.style.display = 'block';
+    clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
+
+  /* ══════════════════════════════════════════════════════
+     LOAD COURSES
+  ══════════════════════════════════════════════════════ */
+  async function loadCourses() {
+    const loading = document.getElementById('loadingState');
+    const empty   = document.getElementById('emptyState');
+    const list    = document.getElementById('courseList');
+
+    loading.style.display = 'flex';
+    empty.style.display   = 'none';
+    list.innerHTML        = '';
+
+    try {
+      const res  = await fetch(API_BASE, { headers: authHeaders() });
+      const data = await res.json();
+
+      loading.style.display = 'none';
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Failed to load courses.', 'err');
+        return;
+      }
+
+      if (!data.courses.length) {
+        empty.style.display = 'block';
+        return;
+      }
+
+      data.courses.forEach(course => list.appendChild(buildCourseCard(course)));
+
+    } catch (e) {
+      loading.style.display = 'none';
+      showFeedback('Could not reach the server.', 'err');
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     BUILD COURSE CARD
+  ══════════════════════════════════════════════════════ */
+  function buildCourseCard(course) {
+    const card = document.createElement('div');
+    card.className  = 'course-card';
+    card.id         = `card-${course.id}`;
+
+    const created   = new Date(course.created_at).toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+    const activeBadge = course.is_active
+      ? ''
+      : `<span class="inactive-badge">Inactive</span>`;
+
+    card.innerHTML = `
+      <div class="course-card-header">
+        <div>
+          <div class="course-card-title">
+            ${escHtml(course.name)}
+            <span class="level-badge">${escHtml(course.level)}</span>
+            ${activeBadge}
+          </div>
+          <div class="course-card-meta">Created ${created}</div>
+          ${course.description
+            ? `<div class="course-desc">${escHtml(course.description)}</div>`
+            : ''}
+          <div class="course-id">ID: ${course.id}</div>
+        </div>
+      </div>
+
+      <!-- Invite code row -->
+      <div class="invite-row">
+        <span class="invite-label">Invite Code</span>
+        <span class="invite-code" id="code-${course.id}">${course.invitation_code}</span>
+        <button class="copy-btn" id="copy-${course.id}"
+                onclick="copyCode('${course.id}')">Copy</button>
+        <button class="btn btn-outline btn-sm" onclick="regenCode('${course.id}', this)">
+          ↻ New Code
+        </button>
+      </div>
+
+      <!-- Actions -->
+      <div class="course-actions">
+        <button class="btn btn-outline btn-sm"
+                onclick="toggleActive('${course.id}', ${course.is_active}, this)">
+          ${course.is_active ? '⏸ Deactivate' : '▶ Activate'}
+        </button>
+        <button class="btn btn-danger btn-sm"
+                onclick="askDelete('${course.id}', '${escAttr(course.name)}')">
+          🗑 Delete
+        </button>
+      </div>
+    `;
+    return card;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     CREATE COURSE
+  ══════════════════════════════════════════════════════ */
+  document.getElementById('courseForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('createBtn');
+
+    const name        = document.getElementById('courseName').value.trim();
+    const level       = document.getElementById('courseLevel').value;
+    const description = document.getElementById('courseDesc').value.trim();
+
+    if (!name || !level) {
+      showFeedback('Please fill in all required fields.', 'err');
+      return;
+    }
+
+    // Loading state
+    btn.disabled   = true;
+    btn.innerHTML  = '<span class="spinner"></span> Creating…';
+
+    try {
+      const res  = await fetch(API_BASE, {
+        method:  'POST',
+        headers: authHeaders(),
+        body:    JSON.stringify({ name, level, description: description || undefined }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Failed to create course.', 'err');
+        return;
+      }
+
+      // Reset form
+      document.getElementById('courseForm').reset();
+      showFeedback(`✓ Course "${data.course.name}" created! Invite code: ${data.course.invitation_code}`, 'ok');
+
+      // Prepend new card to list
+      const list  = document.getElementById('courseList');
+      const empty = document.getElementById('emptyState');
+      empty.style.display = 'none';
+      list.prepend(buildCourseCard(data.course));
+
+    } catch (err) {
+      showFeedback('Could not reach the server.', 'err');
+    } finally {
+      btn.disabled  = false;
+      btn.innerHTML = '+ Create Course';
+    }
+  });
+
+  /* ══════════════════════════════════════════════════════
+     COPY INVITE CODE
+  ══════════════════════════════════════════════════════ */
+  function copyCode(courseId) {
+    const code = document.getElementById(`code-${courseId}`).textContent;
+    const btn  = document.getElementById(`copy-${courseId}`);
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════
+     REGENERATE INVITE CODE
+  ══════════════════════════════════════════════════════ */
+  async function regenCode(courseId, btn) {
+    const originalText = btn.textContent;
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner dark"></span>';
+
+    try {
+      const res  = await fetch(`${API_BASE}/${courseId}/regen`, {
+        method:  'POST',
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Could not regenerate code.', 'err');
+        return;
+      }
+
+      // Update the displayed code in-place
+      document.getElementById(`code-${courseId}`).textContent = data.course.invitation_code;
+      showFeedback(`✓ New invite code: ${data.course.invitation_code}`, 'ok');
+
+    } catch (err) {
+      showFeedback('Server error.', 'err');
+    } finally {
+      btn.disabled  = false;
+      btn.innerHTML = originalText;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     TOGGLE ACTIVE / INACTIVE
+  ══════════════════════════════════════════════════════ */
+  async function toggleActive(courseId, currentlyActive, btn) {
+    btn.disabled = true;
+    try {
+      const res  = await fetch(`${API_BASE}/${courseId}`, {
+        method:  'PATCH',
+        headers: authHeaders(),
+        body:    JSON.stringify({ is_active: !currentlyActive }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Failed to update course.', 'err');
+        btn.disabled = false;
+        return;
+      }
+
+      // Re-render this card to reflect new state
+      const card    = document.getElementById(`card-${courseId}`);
+      const newCard = buildCourseCard(data.course);
+      card.replaceWith(newCard);
+      showFeedback(`Course ${data.course.is_active ? 'activated' : 'deactivated'}.`, 'ok');
+
+    } catch (err) {
+      showFeedback('Server error.', 'err');
+      btn.disabled = false;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     DELETE COURSE
+  ══════════════════════════════════════════════════════ */
+  let pendingDeleteId = null;
+
+  function askDelete(courseId, courseName) {
+    pendingDeleteId = courseId;
+    document.getElementById('confirmText').textContent =
+      `Permanently delete "${courseName}"? This cannot be undone.`;
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+
+  function closeConfirm() {
+    pendingDeleteId = null;
+    document.getElementById('confirmOverlay').classList.remove('open');
+  }
+
+  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+    if (!pendingDeleteId) return;
+    const id  = pendingDeleteId;
+    closeConfirm();
+
+    try {
+      const res  = await fetch(`${API_BASE}/${id}`, {
+        method:  'DELETE',
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Could not delete course.', 'err');
+        return;
+      }
+
+      // Remove card from DOM
+      const card = document.getElementById(`card-${id}`);
+      if (card) card.remove();
+      showFeedback('Course deleted.', 'ok');
+
+      // Show empty state if no cards left
+      if (!document.getElementById('courseList').children.length) {
+        document.getElementById('emptyState').style.display = 'block';
+      }
+    } catch (err) {
+      showFeedback('Server error.', 'err');
+    }
+  });
+
+  // Close confirm on overlay click
+  document.getElementById('confirmOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('confirmOverlay')) closeConfirm();
+  });
+
+  /* ══════════════════════════════════════════════════════
+     ESCAPE HELPERS
+  ══════════════════════════════════════════════════════ */
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function escAttr(str) {
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  /* ══════════════════════════════════════════════════════
+     GUARD + INIT
+  ══════════════════════════════════════════════════════ */
+  (function guard() {
+    const t  = localStorage.getItem('token');
+    const r  = localStorage.getItem('role_id');
+    if (!t)         { window.location.href = '../index.html';     return; }
+    if (r !== '2')  { window.location.href = '../dashboard.html'; return; }
+    loadCourses();
+  })();
+</script>
 </body>
 </html>

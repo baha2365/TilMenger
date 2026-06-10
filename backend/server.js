@@ -6,6 +6,8 @@ const authRoutes    = require('./authRoutes');
 const vocabRoutes   = require('./vocabRoutes');   // ← NEW
 const path = require('path');
 const quizRoutes = require('./quizRoutes');
+const courseRoutes = require('./courseRoutes');   // ← ADD (1 of 2)
+
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +37,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth',  authRoutes);
 app.use('/api/vocab', vocabRoutes);
 app.use('/api/quizzes', quizRoutes);
+app.use('/api/courses', courseRoutes);             // ← ADD (2 of 2)
+
 
 
 app.use(
@@ -76,6 +80,14 @@ app.use((err, _req, res, _next) => {
       console.log('   GET  /api/quizzes         (protected)');
       console.log('   GET  /api/quizzes/:id     (protected)');
       console.log('   DELETE /api/quizzes/:id   (protected)');
+
+
+      console.log('   POST   /api/courses              – create course');
+      console.log('   GET    /api/courses              – list my courses');
+      console.log('   GET    /api/courses/:id          – get one course');
+      console.log('   PATCH  /api/courses/:id          – update course');
+      console.log('   DELETE /api/courses/:id          – delete course');
+      console.log('   POST   /api/courses/:id/regen    – new invite code');
     });
   } catch (err) {
     console.error('Failed to start server:', err);
