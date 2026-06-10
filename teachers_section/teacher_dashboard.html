@@ -995,138 +995,14 @@
         <p id="heroSub">Here's what's happening in your classroom today.</p>
       </div>
 
-      <!-- Quick stats -->
-      <div class="quick-stats">
-        <div class="qs-card" data-color="gold">
-          <span class="qs-icon">👥</span>
-          <div class="qs-value" id="qsStudents">0</div>
-          <div class="qs-label">Total Students</div>
-        </div>
-        <div class="qs-card" data-color="rust">
-          <span class="qs-icon">📋</span>
-          <div class="qs-value" id="qsAssignments">0</div>
-          <div class="qs-label">Assignments</div>
-        </div>
-        <div class="qs-card" data-color="sage">
-          <span class="qs-icon">🧩</span>
-          <div class="qs-value" id="qsQuizzes">0</div>
-          <div class="qs-label">Quizzes</div>
-        </div>
-        <div class="qs-card" data-color="violet">
-          <span class="qs-icon">📈</span>
-          <div class="qs-value" id="qsAvgScore">—</div>
-          <div class="qs-label">Avg. Score</div>
-        </div>
-      </div>
-
-      
-
       <!-- Bottom row -->
       <div class="bottom-row">
-
-        <!-- Recent activity -->
-        <div class="panel">
-          <div class="panel-title">Recent Activity</div>
-          <div class="activity-list" id="activityList">
-            <div class="activity-item">
-              <div class="activity-dot dot-gold"></div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Sarah K.</strong> submitted Quiz 3 — scored 92%</div>
-                <div class="activity-time">2 minutes ago</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot dot-violet"></div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Assignment 2</strong> deadline passed — 14/18 submitted</div>
-                <div class="activity-time">1 hour ago</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot dot-rust"></div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>3 new students</strong> enrolled in your course</div>
-                <div class="activity-time">Yesterday</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot dot-teal"></div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Worksheet 1</strong> was downloaded 22 times</div>
-                <div class="activity-time">2 days ago</div>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot dot-sage"></div>
-              <div class="activity-body">
-                <div class="activity-text"><strong>Class B</strong> completed Vocabulary Unit 4</div>
-                <div class="activity-time">3 days ago</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Upcoming schedule -->
-        <div class="panel">
-          <div class="panel-title">Today's Schedule</div>
-          <div class="schedule-list">
-            <div class="schedule-item">
-              <div class="schedule-time-block">
-                <div class="sched-time">9:00</div>
-                <div class="sched-ampm">AM</div>
-              </div>
-              <div class="sched-divider"></div>
-              <div class="sched-info">
-                <div class="sched-name">Class A — Grammar</div>
-                <div class="sched-meta">Room 201 · 18 students</div>
-              </div>
-              <span class="sched-badge badge-live">Live</span>
-            </div>
-            <div class="schedule-item">
-              <div class="schedule-time-block">
-                <div class="sched-time">11:30</div>
-                <div class="sched-ampm">AM</div>
-              </div>
-              <div class="sched-divider"></div>
-              <div class="sched-info">
-                <div class="sched-name">Class B — Vocabulary</div>
-                <div class="sched-meta">Room 105 · 22 students</div>
-              </div>
-              <span class="sched-badge badge-soon">Soon</span>
-            </div>
-            <div class="schedule-item">
-              <div class="schedule-time-block">
-                <div class="sched-time">2:00</div>
-                <div class="sched-ampm">PM</div>
-              </div>
-              <div class="sched-divider"></div>
-              <div class="sched-info">
-                <div class="sched-name">Office Hours</div>
-                <div class="sched-meta">Online · Open to all</div>
-              </div>
-              <span class="sched-badge badge-prep">Later</span>
-            </div>
-            <div class="schedule-item">
-              <div class="schedule-time-block">
-                <div class="sched-time">4:30</div>
-                <div class="sched-ampm">PM</div>
-              </div>
-              <div class="sched-divider"></div>
-              <div class="sched-info">
-                <div class="sched-name">Quiz Review — Unit 3</div>
-                <div class="sched-meta">Room 201 · 18 students</div>
-              </div>
-              <span class="sched-badge badge-prep">Later</span>
-            </div>
-          </div>
-        </div>
 
       </div>
     </div><!-- /content-inner -->
   </main><!-- /main-content -->
 
 </div><!-- /shell -->
-
 
 <!-- ══════════ NOTIFICATION PANEL ══════════ -->
 <div class="notif-panel" id="notifPanel">
@@ -1179,7 +1055,7 @@
     <span><span class="settings-row-icon">📊</span>Weekly Reports</span>
     <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
   </div>
-  <div class="settings-row" onclick="openModal('course')">
+  <div class="settings-row">
     <span><span class="settings-row-icon">✦</span>Course Settings</span>
     <span style="color:var(--cream-mute); font-size:0.8rem;">→</span>
   </div>
@@ -1190,7 +1066,7 @@
 </div>
 
 <!-- ══════════ OVERLAY BACKDROP ══════════ -->
-<div id="panelBackdrop" style="position:fixed;inset:0;z-index:150;display:none;" onclick="closePanels()"></div>
+<div id="panelBackdrop" style="position:fixed;inset:0;z-index:150;display:none;"></div>
 
 
 
