@@ -18,6 +18,7 @@ const express = require('express');
 const { pool } = require('./Db');
 const { authenticate } = require('./authMiddleware'); // ← FIX 1: was 'verifyToken'
 const { v4: uuidv4 } = require('uuid');
+const classRoutes = require('./classRoutes');
 
 const router = express.Router();
 
@@ -225,5 +226,7 @@ router.post('/:id/regen', authenticate, requireTeacher, async (req, res) => {
     }
   }
 });
+
+router.use('/:courseId/classes', classRoutes);
 
 module.exports = router;
