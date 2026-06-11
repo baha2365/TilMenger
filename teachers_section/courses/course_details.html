@@ -1420,8 +1420,8 @@
   (function init() {
     const t = localStorage.getItem('token');
     const r = localStorage.getItem('role_id');
-    if (!t)        { window.location.href = '../index.html';         return; }
-    if (r !== '2') { window.location.href = '../dashboard.html';     return; }
+    if (!t)        { window.location.href = '../../index.html';         return; }
+    if (r !== '2') { window.location.href = '../../dashboard.html';     return; }
     if (!courseId) { window.location.href = 'course_dashboard.html'; return; }
     loadCourse();
     loadClasses();
