@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LinguaAI — Course Details</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0C0A08;
+      --surface:      #181410;
+      --surface-2:    #211D17;
+      --surface-3:    #2A2520;
+      --border:       rgba(212, 168, 83, 0.1);
+      --border-2:     rgba(212, 168, 83, 0.18);
+      --rust:         #D4622E;
+      --rust-dark:    #B8501F;
+      --rust-glow:    rgba(212, 98, 46, 0.35);
+      --gold:         #E8B84A;
+      --gold-dim:     rgba(232, 184, 74, 0.15);
+      --text:         #F0EAE0;
+      --text-2:       #A89D92;
+      --text-3:       #6B6058;
+      --success:      #5DBF8A;
+      --success-bg:   rgba(93, 191, 138, 0.1);
+      --success-bd:   rgba(93, 191, 138, 0.22);
+      --error:        #E85252;
+      --error-bg:     rgba(232, 82, 82, 0.1);
+      --error-bd:     rgba(232, 82, 82, 0.25);
+      --radius:       14px;
+      --radius-sm:    9px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(212,168,83,0.045) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── NAV ─────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(12, 10, 8, 0.82);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--rust) 0%, var(--gold) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 12px var(--rust-glow);
+    }
+    .brand em { font-style: normal; color: var(--gold); }
+
+    .nav-back {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-3);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 0.38rem 0.95rem;
+      border-radius: 7px;
+      transition: color 0.18s, border-color 0.18s, background 0.18s;
+    }
+    .nav-back:hover {
+      color: var(--text);
+      border-color: var(--border-2);
+      background: var(--surface-2);
+    }
+
+    /* ─── PAGE ───────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 2.8rem 1.5rem 6rem;
+    }
+
+    /* ─── BREADCRUMB ─────────────────────────── */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.76rem;
+      color: var(--text-3);
+      margin-bottom: 1.8rem;
+    }
+    .breadcrumb a {
+      color: var(--text-3);
+      text-decoration: none;
+      transition: color 0.18s;
+    }
+    .breadcrumb a:hover { color: var(--text-2); }
+    .breadcrumb-sep     { opacity: 0.35; }
+    .breadcrumb-current {
+      color: var(--text-2);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 340px;
+    }
+
+    /* ─── COURSE HERO ────────────────────────── */
+    .course-hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(148deg, #1A1510 0%, var(--surface) 55%, #110E09 100%);
+      border: 1px solid var(--border-2);
+      border-radius: 18px;
+      padding: 2rem 2rem 1.7rem;
+      margin-bottom: 2.5rem;
+      display: none; /* shown after load */
+    }
+
+    /* Amber top-border glow */
+    .course-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--rust) 22%,
+        var(--gold) 52%,
+        rgba(232,184,74,0.35) 78%,
+        transparent 100%
+      );
+    }
+
+    /* Corner radial glow — the signature decorative element */
+    .course-hero::after {
+      content: '';
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 240px; height: 200px;
+      background: radial-gradient(ellipse at top right,
+        rgba(212,98,46,0.1) 0%,
+        rgba(232,184,74,0.06) 45%,
+        transparent 70%
+      );
+      pointer-events: none;
+    }
+
+    .hero-layout {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-main { flex: 1; min-width: 0; }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--rust);
+      margin-bottom: 0.5rem;
+      opacity: 0.85;
+    }
+    .hero-eyebrow-line {
+      display: block;
+      width: 16px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--rust);
+    }
+
+    .hero-title {
+      font-size: clamp(1.45rem, 3.5vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--text) 30%, var(--text-2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.6rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.18rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .badge-level    { background: var(--gold-dim);    color: var(--gold);    border: 1px solid rgba(232,184,74,0.22); }
+    .badge-active   { background: var(--success-bg);  color: var(--success); border: 1px solid var(--success-bd); }
+    .badge-inactive { background: var(--surface-3);   color: var(--text-3);  border: 1px solid var(--border); }
+    .badge-schedule { background: rgba(212,98,46,0.1); color: var(--rust);   border: 1px solid rgba(212,98,46,0.22); }
+
+    .hero-desc {
+      font-size: 0.83rem;
+      color: var(--text-2);
+      margin-top: 0.65rem;
+      line-height: 1.65;
+      max-width: 500px;
+    }
+
+    .hero-meta {
+      font-size: 0.72rem;
+      color: var(--text-3);
+      margin-top: 0.5rem;
+    }
+
+    /* Stats group (top-right of hero) */
+    .hero-stats {
+      display: flex;
+      gap: 0.6rem;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 66px;
+      padding: 0.7rem 0.9rem;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .hero-stat-val {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .hero-stat-lbl {
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-3);
+      margin-top: 0.28rem;
+    }
+
+    /* Invite code strip inside hero */
+    .hero-invite {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-top: 1.3rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+    .invite-lbl {
+      font-size: 0.64rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-3);
+    }
+    .invite-pill {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid var(--border-2);
+      border-radius: 7px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.28);
+    }
+    .invite-code {
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      padding: 0.38rem 0.9rem;
+      user-select: all;
+      background: none;
+      border: none;
+      outline: none;
+    }
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0 0.75rem;
+      border: none;
+      border-left: 1px solid var(--border);
+      background: var(--surface-2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover   { background: var(--surface-3); color: var(--text); }
+    .copy-btn.copied  { color: var(--success); }
+
+    /* ─── HERO SKELETON ──────────────────────── */
+    .hero-skeleton {
+      height: 190px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ─── SECTION BAR ────────────────────────── */
+    .section-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1rem;
+    }
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-3);
+    }
+
+    /* ─── ADD CLASS BUTTON ───────────────────── */
+    .btn-create {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      background: linear-gradient(135deg, var(--rust) 0%, var(--rust-dark) 100%);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 18px var(--rust-glow), inset 0 1px 0 rgba(255,255,255,0.12);
+      transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-create .ic {
+      width: 22px;
+      height: 22px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      transition: transform 0.22s cubic-bezier(0.22,1,0.36,1);
+    }
+    .btn-create:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--rust-glow), inset 0 1px 0 rgba(255,255,255,0.15); }
+    .btn-create:hover .ic { transform: rotate(90deg); }
+    .btn-create:active { transform: translateY(0); }
+    .btn-create::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: -75%;
+      width: 50%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.17), transparent);
+      transform: skewX(-15deg);
+      animation: shimmer 3.2s ease-in-out infinite;
+    }
+    @keyframes shimmer { 0% { left: -75%; } 45%, 100% { left: 130%; } }
+
+    /* ─── FEEDBACK ───────────────────────────── */
+    #feedback {
+      overflow: hidden;
+      max-height: 0;
+      margin-bottom: 0;
+      transition: max-height 0.35s ease, margin-bottom 0.35s ease;
+    }
+    #feedback.show { max-height: 80px; margin-bottom: 1.4rem; }
+    .fb-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 1.1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+    #feedback.ok  .fb-inner { background: var(--success-bg); border: 1px solid var(--success-bd); color: var(--success); }
+    #feedback.err .fb-inner { background: var(--error-bg);   border: 1px solid var(--error-bd);   color: var(--error); }
+
+    /* ─── STATES ─────────────────────────────── */
+    #loadingState {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 4.5rem 2rem;
+      color: var(--text-3);
+      font-size: 0.84rem;
+    }
+    #emptyState {
+      display: none;
+      text-align: center;
+      padding: 4.2rem 2rem;
+      border: 1px dashed var(--border-2);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .empty-emoji { font-size: 2.4rem; margin-bottom: 0.9rem; opacity: 0.7; }
+    .empty-h     { font-size: 1rem; font-weight: 600; color: var(--text-2); margin-bottom: 0.3rem; }
+    .empty-p     { font-size: 0.82rem; color: var(--text-3); margin-bottom: 1.5rem; }
+
+    /* ─── CLASS GRID ─────────────────────────── */
+    #classList {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 0.9rem;
+    }
+
+    /* ─── CLASS CARD ─────────────────────────── */
+    .class-card {
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.3rem 1.4rem 1.3rem 1.65rem;
+      transition:
+        border-color 0.25s,
+        box-shadow 0.25s,
+        transform 0.3s cubic-bezier(0.22,1,0.36,1);
+      animation: cardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .class-card:hover {
+      border-color: var(--border-2);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.24);
+      transform: translateY(-2px);
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* Gold left bar — differentiates class cards from course cards (rust) */
+    .class-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 14px; bottom: 14px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: linear-gradient(180deg, var(--gold), rgba(232,184,74,0.25));
+      opacity: 0.65;
+      transition: opacity 0.25s, top 0.25s, bottom 0.25s;
+    }
+    .class-card:hover::before { opacity: 1; top: 10px; bottom: 10px; }
+
+    /* Top shimmer on hover */
+    .class-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), rgba(232,184,74,0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .class-card:hover::after { opacity: 0.5; }
+
+    .class-index {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: var(--text-3);
+      opacity: 0.5;
+      margin-bottom: 0.18rem;
+      letter-spacing: 0.05em;
+    }
+
+    .class-name {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+    }
+
+    .class-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      margin-top: 0.38rem;
+    }
+
+    .class-desc {
+      font-size: 0.79rem;
+      color: var(--text-2);
+      margin-top: 0.42rem;
+      line-height: 1.6;
+    }
+
+    .class-meta {
+      font-size: 0.7rem;
+      color: var(--text-3);
+      margin-top: 0.42rem;
+    }
+
+    .class-uid {
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-size: 0.6rem;
+      color: var(--text-3);
+      opacity: 0.38;
+      margin-top: 0.3rem;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.9rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-ghost-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.36rem 0.8rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.73rem;
+      font-weight: 500;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-ghost-sm:hover { border-color: var(--border-2); color: var(--text); background: var(--surface-2); }
+    .btn-ghost-sm.danger { border-color: rgba(232,82,82,0.2); color: var(--error); }
+    .btn-ghost-sm.danger:hover { background: var(--error-bg); border-color: rgba(232,82,82,0.35); }
+
+    /* ─── SPINNER ────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.18);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.55s linear infinite;
+    }
+    .spinner.dark {
+      border-color: rgba(0,0,0,0.1);
+      border-top-color: var(--text-3);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════
+       MODAL
+    ═══════════════════════════════════════════ */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(6, 4, 3, 0.72);
+      backdrop-filter: blur(14px) saturate(0.8);
+      -webkit-backdrop-filter: blur(14px) saturate(0.8);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: linear-gradient(150deg, #1E1A13 0%, #16130E 55%, #120F0A 100%);
+      border: 1px solid rgba(212,168,83,0.14);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 24px 64px rgba(0,0,0,0.65),
+        0 48px 100px rgba(0,0,0,0.4);
+      transform: scale(0.88) translateY(32px);
+      opacity: 0;
+      transition:
+        transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity   0.3s ease;
+    }
+    .modal-backdrop.open .modal { transform: scale(1) translateY(0); opacity: 1; }
+
+    .modal-glow {
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 280px; height: 160px;
+      background: radial-gradient(ellipse at center, rgba(212,98,46,0.38) 0%, rgba(232,184,74,0.12) 50%, transparent 75%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .modal-top-border {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%, var(--rust) 25%, var(--gold) 55%,
+        rgba(232,184,74,0.4) 80%, transparent 100%
+      );
+      z-index: 1;
+    }
+
+    .modal-header {
+      position: relative;
+      z-index: 1;
+      padding: 2rem 2rem 1.2rem;
+    }
+    .modal-icon-wrap {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(212,98,46,0.22) 0%, rgba(232,184,74,0.1) 100%);
+      border: 1px solid rgba(212,168,83,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 16px rgba(212,98,46,0.15);
+    }
+    .modal-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text); }
+    .modal-sub   { font-size: 0.78rem; color: var(--text-3); margin-top: 0.28rem; line-height: 1.5; }
+
+    .modal-x {
+      position: absolute;
+      top: 1.4rem; right: 1.4rem;
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-3);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      z-index: 2;
+    }
+    .modal-x:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-2); transform: rotate(90deg); }
+
+    .modal-body { position: relative; z-index: 1; padding: 0 2rem; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr; gap: 0.95rem; }
+    .fg { display: flex; flex-direction: column; gap: 0.38rem; }
+
+    .f-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .f-label .req { color: var(--rust); }
+    .f-opt { opacity: 0.5; font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+    .f-input, .f-textarea {
+      padding: 0.68rem 1rem;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(212,168,83,0.1);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.86rem;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .f-input::placeholder, .f-textarea::placeholder { color: var(--text-3); }
+    .f-input:focus, .f-textarea:focus {
+      border-color: var(--rust);
+      background: rgba(212, 98, 46, 0.05);
+      box-shadow: 0 0 0 3px rgba(212, 98, 46, 0.12);
+    }
+    .f-textarea { resize: vertical; min-height: 82px; line-height: 1.6; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60%  { transform: translateX(-5px); }
+      40%,80%  { transform: translateX(5px); }
+    }
+    .f-input.err {
+      border-color: var(--error) !important;
+      box-shadow: 0 0 0 3px rgba(232,82,82,0.12) !important;
+      animation: shake 0.38s ease;
+    }
+
+    .modal-footer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.6rem;
+      padding: 1.2rem 2rem 1.7rem;
+      margin-top: 1.2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-cancel-modal {
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 500;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-cancel-modal:hover { border-color: var(--border-2); color: var(--text); background: var(--surface-2); }
+
+    .btn-submit-modal {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      background: linear-gradient(135deg, var(--rust), var(--rust-dark));
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 14px var(--rust-glow), inset 0 1px 0 rgba(255,255,255,0.1);
+      transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
+    }
+    .btn-submit-modal:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px var(--rust-glow), inset 0 1px 0 rgba(255,255,255,0.12); }
+    .btn-submit-modal:active { transform: translateY(0); }
+    .btn-submit-modal:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    /* ═══════════════════════════════════════════
+       DELETE CONFIRM OVERLAY
+    ═══════════════════════════════════════════ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 300;
+    }
+    .overlay.open { display: flex; animation: bdin 0.22s ease; }
+    @keyframes bdin { from { opacity: 0; } to { opacity: 1; } }
+
+    .confirm-box {
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .confirm-icon  { width: 44px; height: 44px; border-radius: 10px; background: var(--error-bg); border: 1px solid var(--error-bd); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; margin-bottom: 1rem; }
+    .confirm-title { font-size: 0.98rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .confirm-text  { font-size: 0.8rem; color: var(--text-3); line-height: 1.6; margin-bottom: 1.5rem; }
+    .confirm-btns  { display: flex; gap: 0.55rem; justify-content: flex-end; }
+
+    .btn-cf-cancel { padding: 0.52rem 1.1rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500; background: none; border: 1px solid var(--border); color: var(--text-3); cursor: pointer; transition: all 0.18s; }
+    .btn-cf-cancel:hover { border-color: var(--border-2); color: var(--text); }
+    .btn-cf-delete { padding: 0.52rem 1.1rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600; background: var(--error-bg); border: 1px solid var(--error-bd); color: var(--error); cursor: pointer; transition: all 0.18s; }
+    .btn-cf-delete:hover { background: rgba(232,82,82,0.2); }
+
+    /* ─── SCROLLBAR ───────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+
+    /* ─── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 640px) {
+      #classList { grid-template-columns: 1fr; }
+      .hero-layout { flex-direction: column; }
+      .hero-stats  { width: 100%; }
+      .hero-stat   { flex: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="brand" href="../../dashboard.html">
+    <div class="brand-mark">✦</div>
+    Lingua<em>AI</em>
+  </a>
+  <a class="nav-back" href="course_dashboard.html">← My Courses</a>
+</nav>
+
+<!-- ── PAGE ── -->
+<div class="page">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="course_dashboard.html">My Courses</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current" id="breadcrumbName">Loading…</span>
+  </div>
+
+  <!-- Course Hero Skeleton -->
+  <div class="hero-skeleton" id="heroSkeleton">
+    <div class="spinner dark"></div>
+  </div>
+
+  <!-- Course Hero (revealed after load) -->
+  <div class="course-hero" id="courseHero">
+    <div class="hero-layout">
+      <div class="hero-main">
+        <div class="hero-eyebrow"><span class="hero-eyebrow-line"></span> Course</div>
+        <div class="hero-title"   id="heroTitle">—</div>
+        <div class="hero-badges"  id="heroBadges"></div>
+        <div class="hero-desc"    id="heroDesc"  style="display:none;"></div>
+        <div class="hero-meta"    id="heroMeta"></div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="statClasses">—</div>
+          <div class="hero-stat-lbl">Classes</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="statActive">—</div>
+          <div class="hero-stat-lbl">Active</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-invite">
+      <span class="invite-lbl">Invite Code</span>
+      <div class="invite-pill">
+        <span class="invite-code" id="heroCode">——</span>
+        <button class="copy-btn" id="heroCopyBtn" onclick="copyHeroCode()">📋 Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback -->
+  <div id="feedback"><div class="fb-inner" id="fb-inner"></div></div>
+
+  <!-- Section bar -->
+  <div class="section-bar">
+    <span class="section-label">Classes</span>
+    <button class="btn-create" id="openModalBtn">
+      <span class="ic">+</span>
+      Add Class
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingState">
+    <div class="spinner dark"></div>
+    Loading classes…
+  </div>
+
+  <!-- Empty -->
+  <div id="emptyState">
+    <div class="empty-emoji">🏫</div>
+    <div class="empty-h">No classes yet</div>
+    <div class="empty-p">Add the first class to group your students.</div>
+    <button class="btn-create" onclick="openModal()" style="margin: 0 auto;">
+      <span class="ic">+</span> Add First Class
+    </button>
+  </div>
+
+  <!-- Class grid -->
+  <div id="classList"></div>
+
+</div><!-- /page -->
+
+
+<!-- ════════════════════════════════════════
+     CREATE CLASS MODAL
+════════════════════════════════════════ -->
+<div class="modal-backdrop" id="createModal" role="dialog" aria-modal="true" aria-label="Add a New Class">
+  <div class="modal" id="modalCard">
+    <div class="modal-glow"       aria-hidden="true"></div>
+    <div class="modal-top-border" aria-hidden="true"></div>
+
+    <button class="modal-x" id="modalXBtn" aria-label="Close">✕</button>
+
+    <div class="modal-header">
+      <div class="modal-icon-wrap" aria-hidden="true">🏫</div>
+      <div class="modal-title">Add a New Class</div>
+      <div class="modal-sub">Classes group students within a course — e.g. "Morning Group" or "Tuesday Session".</div>
+    </div>
+
+    <div class="modal-body">
+      <form id="classForm" autocomplete="off">
+        <div class="form-grid">
+
+          <div class="fg">
+            <label class="f-label" for="className">
+              Class Name <span class="req">*</span>
+            </label>
+            <input class="f-input" type="text" id="className" name="name"
+                   placeholder="e.g. Morning Group, Class A, Tuesday Section"
+                   maxlength="200" required>
+          </div>
+
+          <div class="fg">
+            <label class="f-label" for="classSchedule">
+              Schedule <span class="f-opt">— optional</span>
+            </label>
+            <input class="f-input" type="text" id="classSchedule" name="schedule"
+                   placeholder="e.g. Mon/Wed 09:00–10:30, Room 12"
+                   maxlength="100">
+          </div>
+
+          <div class="fg">
+            <label class="f-label" for="classDesc">
+              Description <span class="f-opt">— optional</span>
+            </label>
+            <textarea class="f-textarea" id="classDesc" name="description"
+                      placeholder="Any notes about focus areas, student level, or prerequisites…"></textarea>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel-modal" type="button" id="cancelModalBtn">Cancel</button>
+      <button class="btn-submit-modal" type="button" id="createBtn">Add Class</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── DELETE CONFIRM ── -->
+<div class="overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Delete this class?</div>
+    <p class="confirm-text" id="confirmText">This will permanently delete the class and all related data.</p>
+    <div class="confirm-btns">
+      <button class="btn-cf-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-cf-delete" id="confirmDeleteBtn">Delete class</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  /* ══════════════════════════════════════
+     CONFIG
+  ══════════════════════════════════════ */
+  const COURSES_BASE = 'http://localhost:3030/api/courses';
+  const token  = () => localStorage.getItem('token');
+  const authH  = (extra = {}) => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token()}`,
+    ...extra,
+  });
+
+  const params   = new URLSearchParams(window.location.search);
+  const courseId = params.get('id');
+  const CLASS_API = `${COURSES_BASE}/${courseId}/classes`;
+
+  /* ══════════════════════════════════════
+     FEEDBACK
+  ══════════════════════════════════════ */
+  let fbTimer;
+  function showFeedback(msg, type = 'ok') {
+    const wrap  = document.getElementById('feedback');
+    const inner = document.getElementById('fb-inner');
+    inner.textContent = (type === 'ok' ? '✓ ' : '✕ ') + msg;
+    wrap.className    = type + ' show';
+    clearTimeout(fbTimer);
+    fbTimer = setTimeout(() => { wrap.className = type; }, 5000);
+  }
+
+  /* ══════════════════════════════════════
+     MODAL OPEN / CLOSE
+  ══════════════════════════════════════ */
+  function openModal() {
+    document.getElementById('createModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('className').focus(), 420);
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('modalCard');
+    const bd    = document.getElementById('createModal');
+    modal.style.transition = 'transform 0.28s cubic-bezier(0.55, 0, 0.45, 1), opacity 0.22s ease';
+    modal.style.transform  = 'scale(0.9) translateY(20px)';
+    modal.style.opacity    = '0';
+    bd.style.transition    = 'opacity 0.28s ease';
+    bd.style.opacity       = '0';
+    setTimeout(() => {
+      bd.classList.remove('open');
+      bd.style.opacity = ''; bd.style.transition = '';
+      modal.style.transform = ''; modal.style.opacity = ''; modal.style.transition = '';
+      document.body.style.overflow = '';
+    }, 290);
+  }
+
+  document.getElementById('openModalBtn').addEventListener('click', openModal);
+  document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+  document.getElementById('modalXBtn').addEventListener('click', closeModal);
+  document.getElementById('createModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('createModal').classList.contains('open'))    closeModal();
+      if (document.getElementById('confirmOverlay').classList.contains('open')) closeConfirm();
+    }
+  });
+
+  /* ══════════════════════════════════════
+     LOAD COURSE (hero)
+  ══════════════════════════════════════ */
+  async function loadCourse() {
+    try {
+      const res  = await fetch(`${COURSES_BASE}/${courseId}`, { headers: authH() });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        // Course doesn't exist or no access — redirect back
+        window.location.href = 'course_dashboard.html';
+        return;
+      }
+      renderHero(data.course);
+    } catch {
+      document.getElementById('heroSkeleton').innerHTML =
+        '<span style="color:var(--error);font-size:.8rem;">Could not load course info.</span>';
+    }
+  }
+
+  function renderHero(course) {
+    document.getElementById('heroSkeleton').style.display = 'none';
+    document.getElementById('courseHero').style.display   = 'block';
+
+    document.title = `LinguaAI — ${course.name}`;
+    document.getElementById('heroTitle').textContent         = course.name;
+    document.getElementById('breadcrumbName').textContent    = course.name;
+
+    const activeBadge = course.is_active
+      ? `<span class="badge badge-active">● Active</span>`
+      : `<span class="badge badge-inactive">● Inactive</span>`;
+    document.getElementById('heroBadges').innerHTML =
+      `<span class="badge badge-level">${escHtml(course.level)}</span>${activeBadge}`;
+
+    if (course.description) {
+      const el = document.getElementById('heroDesc');
+      el.textContent  = course.description;
+      el.style.display = 'block';
+    }
+
+    const created = new Date(course.created_at).toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+    document.getElementById('heroMeta').textContent = `Created ${created}`;
+    document.getElementById('heroCode').textContent = course.invitation_code;
+  }
+
+  /* ══════════════════════════════════════
+     COPY INVITE CODE
+  ══════════════════════════════════════ */
+  function copyHeroCode() {
+    const code = document.getElementById('heroCode').textContent;
+    const btn  = document.getElementById('heroCopyBtn');
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2200);
+    });
+  }
+
+  /* ══════════════════════════════════════
+     UPDATE HERO STATS
+  ══════════════════════════════════════ */
+  function syncStats() {
+    const list    = document.getElementById('classList');
+    const total   = list.children.length;
+    const active  = Array.from(list.children)
+      .filter(c => c.querySelector('.badge-active')).length;
+    document.getElementById('statClasses').textContent = total;
+    document.getElementById('statActive').textContent  = active;
+  }
+
+  /* ══════════════════════════════════════
+     LOAD CLASSES
+  ══════════════════════════════════════ */
+  async function loadClasses() {
+    const loading = document.getElementById('loadingState');
+    const empty   = document.getElementById('emptyState');
+    const list    = document.getElementById('classList');
+
+    loading.style.display = 'flex';
+    empty.style.display   = 'none';
+    list.innerHTML        = '';
+
+    try {
+      const res  = await fetch(CLASS_API, { headers: authH() });
+      const data = await res.json();
+      loading.style.display = 'none';
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Failed to load classes.', 'err');
+        return;
+      }
+
+      if (!data.classes.length) {
+        empty.style.display = 'block';
+        syncStats();
+        return;
+      }
+
+      data.classes.forEach((cls, i) => {
+        const card = buildCard(cls, i + 1);
+        card.style.animationDelay = `${i * 0.06}s`;
+        list.appendChild(card);
+      });
+      syncStats();
+
+    } catch {
+      loading.style.display = 'none';
+      showFeedback('Could not reach the server.', 'err');
+    }
+  }
+
+  /* ══════════════════════════════════════
+     BUILD CLASS CARD
+  ══════════════════════════════════════ */
+  function buildCard(cls, index) {
+    const el = document.createElement('div');
+    el.className = 'class-card';
+    el.id        = `card-${cls.id}`;
+
+    const created = new Date(cls.created_at).toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+
+    const activeBadge = cls.is_active
+      ? `<span class="badge badge-active">● Active</span>`
+      : `<span class="badge badge-inactive">● Inactive</span>`;
+
+    const scheduleBadge = cls.schedule
+      ? `<span class="badge badge-schedule">🕐 ${escHtml(cls.schedule)}</span>`
+      : '';
+
+    el.innerHTML = `
+      <div class="class-index">Class #${index}</div>
+      <div class="class-name">${escHtml(cls.name)}</div>
+      <div class="class-badges">
+        ${activeBadge}
+        ${scheduleBadge}
+      </div>
+      ${cls.description ? `<div class="class-desc">${escHtml(cls.description)}</div>` : ''}
+      <div class="class-meta">Created ${created}</div>
+      <div class="class-uid">ID: ${cls.id}</div>
+      <div class="card-actions">
+        <button class="btn-ghost-sm" onclick="toggleActive('${cls.id}', ${cls.is_active}, this)">
+          ${cls.is_active ? '⏸ Deactivate' : '▶ Activate'}
+        </button>
+        <button class="btn-ghost-sm danger" onclick="askDelete('${cls.id}', '${escAttr(cls.name)}')">
+          🗑 Delete
+        </button>
+      </div>
+    `;
+    return el;
+  }
+
+  /* ══════════════════════════════════════
+     CREATE CLASS
+  ══════════════════════════════════════ */
+  document.getElementById('createBtn').addEventListener('click', async () => {
+    const btn      = document.getElementById('createBtn');
+    const name     = document.getElementById('className').value.trim();
+    const schedule = document.getElementById('classSchedule').value.trim();
+    const desc     = document.getElementById('classDesc').value.trim();
+
+    if (!name) {
+      const el = document.getElementById('className');
+      el.classList.add('err');
+      setTimeout(() => el.classList.remove('err'), 1800);
+      showFeedback('Class name is required.', 'err');
+      return;
+    }
+
+    btn.disabled  = true;
+    btn.innerHTML = `<span class="spinner"></span> Adding…`;
+
+    try {
+      const res  = await fetch(CLASS_API, {
+        method:  'POST',
+        headers: authH(),
+        body:    JSON.stringify({
+          name,
+          schedule:    schedule || undefined,
+          description: desc    || undefined,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Failed to create class.', 'err');
+        return;
+      }
+
+      closeModal();
+      document.getElementById('classForm').reset();
+      showFeedback(`Class "${data.class.name}" added.`, 'ok');
+
+      const list  = document.getElementById('classList');
+      const empty = document.getElementById('emptyState');
+      empty.style.display = 'none';
+
+      const card = buildCard(data.class, list.children.length + 1);
+      list.appendChild(card);
+      syncStats();
+
+    } catch {
+      showFeedback('Could not reach the server.', 'err');
+    } finally {
+      btn.disabled  = false;
+      btn.innerHTML = 'Add Class';
+    }
+  });
+
+  /* ══════════════════════════════════════
+     TOGGLE ACTIVE
+  ══════════════════════════════════════ */
+  async function toggleActive(id, active, btn) {
+    btn.disabled = true;
+    try {
+      const res  = await fetch(`${CLASS_API}/${id}`, {
+        method:  'PATCH',
+        headers: authH(),
+        body:    JSON.stringify({ is_active: !active }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Update failed.', 'err');
+        btn.disabled = false;
+        return;
+      }
+
+      const list     = document.getElementById('classList');
+      const oldCard  = document.getElementById(`card-${id}`);
+      const cardIndex = Array.from(list.children).indexOf(oldCard) + 1;
+      oldCard.replaceWith(buildCard(data.class, cardIndex));
+
+      showFeedback(`Class ${data.class.is_active ? 'activated' : 'deactivated'}.`, 'ok');
+      syncStats();
+    } catch {
+      showFeedback('Server error.', 'err');
+      btn.disabled = false;
+    }
+  }
+
+  /* ══════════════════════════════════════
+     DELETE
+  ══════════════════════════════════════ */
+  let pendingId = null;
+
+  function askDelete(id, name) {
+    pendingId = id;
+    document.getElementById('confirmText').textContent =
+      `Permanently delete "${name}"? This cannot be undone.`;
+    document.getElementById('confirmOverlay').classList.add('open');
+  }
+
+  function closeConfirm() {
+    pendingId = null;
+    document.getElementById('confirmOverlay').classList.remove('open');
+  }
+
+  document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+    if (!pendingId) return;
+    const id = pendingId;
+    closeConfirm();
+
+    try {
+      const res  = await fetch(`${CLASS_API}/${id}`, { method: 'DELETE', headers: authH() });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Delete failed.', 'err');
+        return;
+      }
+
+      const card = document.getElementById(`card-${id}`);
+      if (card) {
+        card.style.transition = 'opacity 0.22s, transform 0.22s';
+        card.style.opacity    = '0';
+        card.style.transform  = 'scale(0.96)';
+        setTimeout(() => {
+          card.remove();
+          // Re-number remaining cards
+          Array.from(document.getElementById('classList').children).forEach((c, i) => {
+            const idx = c.querySelector('.class-index');
+            if (idx) idx.textContent = `Class #${i + 1}`;
+          });
+          const list = document.getElementById('classList');
+          if (!list.children.length) {
+            document.getElementById('emptyState').style.display = 'block';
+          }
+          syncStats();
+        }, 240);
+      }
+      showFeedback('Class deleted.', 'ok');
+    } catch { showFeedback('Server error.', 'err'); }
+  });
+
+  document.getElementById('confirmOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('confirmOverlay')) closeConfirm();
+  });
+
+  /* ══════════════════════════════════════
+     ESCAPE HELPERS
+  ══════════════════════════════════════ */
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escAttr(s) {
+    return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  }
+
+  /* ══════════════════════════════════════
+     GUARD + INIT
+  ══════════════════════════════════════ */
+  (function init() {
+    const t = localStorage.getItem('token');
+    const r = localStorage.getItem('role_id');
+    if (!t)        { window.location.href = '../index.html';         return; }
+    if (r !== '2') { window.location.href = '../dashboard.html';     return; }
+    if (!courseId) { window.location.href = 'course_dashboard.html'; return; }
+    loadCourse();
+    loadClasses();
+  })();
+</script>
+</body>
+</html>
