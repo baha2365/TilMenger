@@ -32,7 +32,7 @@
     color: var(--text-main);
   }
 
-  /* ── HEADER ─────────────────────────────────────────────────────────────── */
+  /* ── HEADER ── */
   .header {
     background: var(--purple-bg);
     padding: 14px 24px;
@@ -72,14 +72,14 @@
   .create-btn:hover  { transform: scale(1.04); background: var(--yellow-dark); }
   .create-btn:active { transform: scale(0.96); }
 
-  /* ── PAGE ────────────────────────────────────────────────────────────────── */
+  /* ── PAGE ── */
   .page {
     max-width: 860px;
     margin: 0 auto;
     padding: 32px 20px 60px;
   }
 
-  /* ── TITLE ROW ───────────────────────────────────────────────────────────── */
+  /* ── TITLE ROW ── */
   .title-row {
     display: flex;
     align-items: center;
@@ -106,7 +106,7 @@
     transition: opacity 0.3s;
   }
 
-  /* ── LOADING ─────────────────────────────────────────────────────────────── */
+  /* ── LOADING ── */
   .loading-wrap {
     display: flex;
     flex-direction: column;
@@ -126,7 +126,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-label { font-size: 14px; font-weight: 700; color: var(--text-muted); }
 
-  /* ── EMPTY STATE ─────────────────────────────────────────────────────────── */
+  /* ── EMPTY STATE ── */
   .empty-state {
     display: flex;
     flex-direction: column;
@@ -155,14 +155,14 @@
   .empty-cta:hover  { transform: scale(1.04); background: var(--yellow-dark); }
   .empty-cta:active { transform: scale(0.96); }
 
-  /* ── QUIZ GRID ───────────────────────────────────────────────────────────── */
+  /* ── QUIZ GRID ── */
   .quiz-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
   }
 
-  /* ── QUIZ CARD ───────────────────────────────────────────────────────────── */
+  /* ── QUIZ CARD ── */
   .quiz-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -172,13 +172,14 @@
     flex-direction: column;
     gap: 12px;
     transition: background 0.18s, transform 0.14s, box-shadow 0.18s;
-    cursor: default;
+    cursor: pointer;     /* ← clickable */
   }
   .quiz-card:hover {
     background: var(--card-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.28);
   }
+  .quiz-card:active { transform: translateY(-1px); }
 
   .card-top {
     display: flex;
@@ -230,9 +231,10 @@
     justify-content: space-between;
     gap: 8px;
     margin-top: auto;
-    padding-top: 4px;
+    padding-top: 10px;
     border-top: 1px solid rgba(255,255,255,0.08);
   }
+
   .q-count-pill {
     background: rgba(255,215,64,0.15);
     border: 1px solid rgba(255,215,64,0.25);
@@ -243,6 +245,28 @@
     color: var(--yellow);
     white-space: nowrap;
   }
+
+  /* ── PLAY BUTTON (inside card footer) ── */
+  .play-btn {
+    background: var(--yellow);
+    color: var(--purple-deep);
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.12s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .play-btn:hover  { background: var(--yellow-dark); transform: scale(1.07); }
+  .play-btn:active { transform: scale(0.95); }
+
   .card-date {
     font-size: 11px;
     font-weight: 700;
@@ -250,7 +274,7 @@
     white-space: nowrap;
   }
 
-  /* ── CONFIRM OVERLAY ─────────────────────────────────────────────────────── */
+  /* ── CONFIRM OVERLAY ── */
   .overlay {
     position: fixed;
     inset: 0;
@@ -314,7 +338,7 @@
   .btn-delete-confirm:active { transform: scale(0.96); }
   .btn-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* ── TOAST ───────────────────────────────────────────────────────────────── */
+  /* ── TOAST ── */
   .toast {
     position: fixed;
     bottom: 28px;
@@ -334,11 +358,11 @@
     pointer-events: none;
     box-shadow: 0 8px 28px rgba(0,0,0,0.35);
   }
-  .toast.show  { transform: translateX(-50%) translateY(0); opacity: 1; }
-  .toast.ok    { border-color: var(--green); color: var(--green); }
-  .toast.err   { border-color: #ff6b8a; color: #ff6b8a; }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.ok   { border-color: var(--green); color: var(--green); }
+  .toast.err  { border-color: #ff6b8a; color: #ff6b8a; }
 
-  /* ── MOBILE ──────────────────────────────────────────────────────────────── */
+  /* ── MOBILE ── */
   @media (max-width: 480px) {
     .page { padding: 22px 14px 50px; }
     .header { padding: 12px 16px; }
@@ -363,8 +387,6 @@
     <h1 class="page-title">My Quizzes</h1>
     <div class="quiz-count-badge" id="countBadge" style="opacity:0">0 quizzes</div>
   </div>
-
-  <!-- Dynamic content injected here -->
   <div id="content"></div>
 </div>
 
@@ -387,15 +409,14 @@
 <script>
 const API_BASE = 'http://localhost:3030/api';
 
-let quizzes     = [];        // local cache of loaded quizzes
-let pendingId   = null;      // quiz id waiting for delete confirmation
-let toastTimer  = null;
+let quizzes   = [];
+let pendingId = null;
+let toastTimer = null;
 
-// ─── Auth helper ─────────────────────────────────────────────────────────────
+// ── Auth ──────────────────────────────────────────────────────────────────
 function getToken() {
   return localStorage.getItem('authToken') || localStorage.getItem('token');
 }
-
 function authHeaders() {
   const token = getToken();
   return {
@@ -404,25 +425,25 @@ function authHeaders() {
   };
 }
 
-// ─── Boot ─────────────────────────────────────────────────────────────────────
+// ── Navigation ────────────────────────────────────────────────────────────
+function playQuiz(id) {
+  location.href = `quiz_play.html?id=${id}`;
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', loadQuizzes);
 
-// ─── Fetch quizzes from the server ───────────────────────────────────────────
+// ── Fetch quizzes ─────────────────────────────────────────────────────────
 async function loadQuizzes() {
   showLoading();
-
   try {
     const res  = await fetch(`${API_BASE}/quizzes`, { headers: authHeaders() });
     const data = await res.json();
 
     if (!res.ok) {
-      if (res.status === 401) {
-        showError('Session expired. Please log in again.');
-      } else if (res.status === 403) {
-        showError('Access denied. Teacher account required.');
-      } else {
-        showError(data.message || 'Failed to load quizzes.');
-      }
+      if (res.status === 401) showError('Session expired. Please log in again.');
+      else if (res.status === 403) showError('Access denied. Teacher account required.');
+      else showError(data.message || 'Failed to load quizzes.');
       return;
     }
 
@@ -434,7 +455,7 @@ async function loadQuizzes() {
   }
 }
 
-// ─── Render quiz grid ─────────────────────────────────────────────────────────
+// ── Render grid ───────────────────────────────────────────────────────────
 function renderQuizzes() {
   const badge = document.getElementById('countBadge');
   badge.textContent = `${quizzes.length} quiz${quizzes.length !== 1 ? 'zes' : ''}`;
@@ -447,7 +468,7 @@ function renderQuizzes() {
       <div class="empty-state">
         <div class="empty-icon">📝</div>
         <div class="empty-title">No quizzes yet</div>
-        <div class="empty-sub">Create your first quiz and your students will be able to take it right away.</div>
+        <div class="empty-sub">Create your first quiz and your students will be able to play it right away.</div>
         <button class="empty-cta" onclick="location.href='create_quiz.html'">Create your first quiz</button>
       </div>`;
     return;
@@ -455,21 +476,26 @@ function renderQuizzes() {
 
   const grid = document.createElement('div');
   grid.className = 'quiz-grid';
-
-  quizzes.forEach(quiz => {
-    grid.appendChild(buildCard(quiz));
-  });
+  quizzes.forEach(quiz => grid.appendChild(buildCard(quiz)));
 
   content.innerHTML = '';
   content.appendChild(grid);
 }
 
-// ─── Build a single quiz card ─────────────────────────────────────────────────
+// ── Build card ────────────────────────────────────────────────────────────
 function buildCard(quiz) {
   const card = document.createElement('div');
   card.className = 'quiz-card';
   card.id = `card-${quiz.id}`;
 
+  // Clicking anywhere on the card (except action buttons) opens the quiz
+  card.addEventListener('click', (e) => {
+    if (!e.target.closest('.delete-btn') && !e.target.closest('.play-btn')) {
+      playQuiz(quiz.id);
+    }
+  });
+
+  // ── Top row: title + delete ──
   const top = document.createElement('div');
   top.className = 'card-top';
 
@@ -481,12 +507,16 @@ function buildCard(quiz) {
   delBtn.className = 'delete-btn';
   delBtn.title = 'Delete quiz';
   delBtn.textContent = '🗑';
-  delBtn.addEventListener('click', () => openConfirm(quiz.id, quiz.title));
+  delBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openConfirm(quiz.id, quiz.title);
+  });
 
   top.appendChild(title);
   top.appendChild(delBtn);
   card.appendChild(top);
 
+  // ── Optional description ──
   if (quiz.description) {
     const desc = document.createElement('div');
     desc.className = 'card-desc';
@@ -494,6 +524,7 @@ function buildCard(quiz) {
     card.appendChild(desc);
   }
 
+  // ── Footer: question count + play button + date ──
   const footer = document.createElement('div');
   footer.className = 'card-footer';
 
@@ -502,18 +533,28 @@ function buildCard(quiz) {
   const qc = quiz.question_count ?? 0;
   pill.textContent = `${qc} question${qc !== 1 ? 's' : ''}`;
 
+  const playBtn = document.createElement('button');
+  playBtn.className = 'play-btn';
+  playBtn.innerHTML = '▶ Play';
+  playBtn.title = 'Play this quiz';
+  playBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    playQuiz(quiz.id);
+  });
+
   const date = document.createElement('div');
   date.className = 'card-date';
   date.textContent = formatDate(quiz.created_at);
 
   footer.appendChild(pill);
+  footer.appendChild(playBtn);
   footer.appendChild(date);
   card.appendChild(footer);
 
   return card;
 }
 
-// ─── Delete flow ─────────────────────────────────────────────────────────────
+// ── Delete flow ───────────────────────────────────────────────────────────
 function openConfirm(id, title) {
   pendingId = id;
   document.getElementById('confirmSub').textContent =
@@ -525,6 +566,7 @@ function closeConfirm() {
   pendingId = null;
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('confirmDeleteBtn').disabled = false;
+  document.getElementById('confirmDeleteBtn').textContent = 'Delete';
 }
 
 async function confirmDelete() {
@@ -541,7 +583,6 @@ async function confirmDelete() {
     const data = await res.json();
 
     if (res.ok && data.success) {
-      // Remove from local cache and re-render without a new fetch
       quizzes = quizzes.filter(q => q.id !== pendingId);
       closeConfirm();
       renderQuizzes();
@@ -557,7 +598,7 @@ async function confirmDelete() {
   }
 }
 
-// ─── UI helpers ───────────────────────────────────────────────────────────────
+// ── UI helpers ────────────────────────────────────────────────────────────
 function showLoading() {
   document.getElementById('content').innerHTML = `
     <div class="loading-wrap">
@@ -578,8 +619,9 @@ function showError(msg) {
 
 function formatDate(iso) {
   if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  });
 }
 
 function showToast(msg, type = '') {
@@ -590,8 +632,8 @@ function showToast(msg, type = '') {
   toastTimer = setTimeout(() => { t.className = 'toast'; }, 3000);
 }
 
-// Close overlay when clicking the backdrop
-document.getElementById('overlay').addEventListener('click', function(e) {
+// Close overlay on backdrop click
+document.getElementById('overlay').addEventListener('click', function (e) {
   if (e.target === this) closeConfirm();
 });
 </script>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quizzz — Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: #5a35cc;
+  }
+
+  #quiz-root {
+    font-family: 'Nunito', sans-serif;
+    background: #7c4dff;
+    height: 100dvh;
+    height: 100vh;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: #6c3de0;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .logo { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: -0.5px; flex-shrink: 0; }
+  .logo span { color: #ffd740; }
+  .back-btn {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 18px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    line-height: 1;
+    font-family: sans-serif;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.22); }
+  .progress-bar-wrap { flex: 1; background: rgba(255,255,255,0.2); border-radius: 20px; height: 9px; overflow: hidden; }
+  .progress-bar { height: 100%; background: #ffd740; border-radius: 20px; transition: width 0.4s ease; }
+  .q-counter { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.85); white-space: nowrap; flex-shrink: 0; }
+  .score-badge {
+    background: #ffd740;
+    color: #3d1e8e;
+    font-weight: 900;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── LOADING SCREEN ── */
+  .load-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px;
+    text-align: center;
+  }
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(255,255,255,0.15);
+    border-top-color: #ffd740;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .load-text { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.7); }
+
+  /* ── ERROR SCREEN ── */
+  .error-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    text-align: center;
+  }
+  .error-icon { font-size: 52px; line-height: 1; }
+  .error-title { font-size: 20px; font-weight: 900; color: #fff; }
+  .error-sub {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.65);
+    max-width: 280px;
+    line-height: 1.5;
+  }
+  .error-back-btn {
+    background: #ffd740;
+    color: #3d1e8e;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 32px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.12s, background 0.15s;
+  }
+  .error-back-btn:hover  { transform: scale(1.04); background: #e6b800; }
+  .error-back-btn:active { transform: scale(0.96); }
+
+  /* ── INTRO SCREEN ── */
+  .intro-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 28px 24px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .intro-emoji { font-size: 56px; line-height: 1; }
+  .intro-title {
+    font-size: clamp(20px, 5.5vw, 28px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.3;
+    max-width: 420px;
+  }
+  .intro-desc {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    max-width: 340px;
+    line-height: 1.55;
+  }
+  .intro-meta {
+    background: rgba(255,255,255,0.13);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 16px;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffd740;
+  }
+  .start-btn {
+    background: #ffd740;
+    color: #3d1e8e;
+    border: none;
+    border-radius: 40px;
+    padding: 15px 56px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.12s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    margin-top: 4px;
+  }
+  .start-btn:hover  { transform: scale(1.05); background: #e6b800; }
+  .start-btn:active { transform: scale(0.96); }
+
+  /* ── QUESTION AREA ── */
+  .question-area {
+    flex-shrink: 0;
+    padding: 16px 20px 10px;
+    text-align: center;
+  }
+  .question-number {
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.65);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .question-text {
+    font-size: clamp(15px, 4vw, 26px);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.35;
+  }
+
+  /* ── ANSWERS GRID ── */
+  .answers-grid {
+    flex: 1;
+    display: grid;
+    gap: 10px;
+    padding: 8px 14px 10px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;  /* default: 4 answers */
+    min-height: 0;
+  }
+  .answers-grid.count-2 { grid-template-rows: 1fr; }
+  .answers-grid.count-3 { grid-template-rows: 1fr 1fr; }
+  .answers-grid.count-5 { grid-template-rows: 1fr 1fr 1fr; }
+
+  /* Odd-count last answer spans full width */
+  .answers-grid.count-3 .answer-btn:nth-child(3),
+  .answers-grid.count-5 .answer-btn:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+
+  /* ── ANSWER BUTTON ── */
+  .answer-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(13px, 3.5vw, 17px);
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.12s, opacity 0.2s;
+    width: 100%;
+    height: 100%;
+    min-height: 52px;
+    text-align: center;
+    color: #fff;
+    line-height: 1.25;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .answer-btn:hover:not(:disabled) { transform: scale(1.03); }
+  .answer-btn:active:not(:disabled) { transform: scale(0.97); }
+  .answer-btn:disabled { cursor: default; }
+
+  .color-0 { background: #e21b3c; }
+  .color-1 { background: #1368ce; }
+  .color-2 { background: #26890c; }
+  .color-3 { background: #e5a000; }
+  .color-4 { background: #7c4dff; }
+
+  .answer-btn.correct {
+    background: #2ecc71 !important;
+    animation: correctPop 0.5s ease forwards;
+  }
+  .answer-btn.wrong {
+    background: #e74c3c !important;
+    animation: headShake 0.6s ease forwards;
+  }
+  .answer-btn.gone { opacity: 0; pointer-events: none; }
+
+  @keyframes correctPop {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.08); }
+    60%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+  @keyframes headShake {
+    0%   { transform: translateX(0) rotate(0deg); }
+    10%  { transform: translateX(-7px) rotate(-3deg); }
+    25%  { transform: translateX(7px) rotate(3deg); }
+    40%  { transform: translateX(-6px) rotate(-2deg); }
+    55%  { transform: translateX(5px) rotate(1.5deg); }
+    70%  { transform: translateX(-3px) rotate(-0.8deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+  }
+
+  /* ── FEEDBACK BARS ── */
+  .feedback-bar {
+    text-align: center;
+    padding: 6px 16px 2px;
+    font-size: clamp(13px, 3.5vw, 16px);
+    font-weight: 800;
+    opacity: 0;
+    transition: opacity 0.2s;
+    min-height: 28px;
+    flex-shrink: 0;
+  }
+  .feedback-bar.show   { opacity: 1; }
+  .feedback-bar.correct-fb { color: #2ecc71; }
+  .feedback-bar.wrong-fb   { color: #ff6b6b; }
+
+  .auto-next-bar {
+    text-align: center;
+    padding: 4px 16px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    min-height: 26px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    flex-shrink: 0;
+  }
+  .auto-next-bar.show { opacity: 1; }
+
+  /* ── CANVAS (fireworks) ── */
+  #fw-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ── END SCREEN ── */
+  .end-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    text-align: center;
+    min-height: 0;
+    overflow: hidden;
+    gap: 0;
+  }
+  .trophy { font-size: clamp(48px, 14vw, 72px); margin-bottom: 10px; line-height: 1; }
+  .end-title { font-size: clamp(20px, 5.5vw, 30px); font-weight: 900; color: #fff; margin-bottom: 5px; }
+  .end-sub { font-size: clamp(13px, 3.5vw, 15px); color: rgba(255,255,255,0.75); font-weight: 700; margin-bottom: 20px; }
+  .score-display {
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 18px 40px;
+    margin-bottom: 22px;
+  }
+  .score-big { font-size: clamp(40px, 12vw, 58px); font-weight: 900; color: #ffd740; line-height: 1; }
+  .score-label { font-size: clamp(12px, 3vw, 14px); color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 4px; }
+  .end-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  .restart-btn, .back-dashboard-btn {
+    border: none;
+    border-radius: 40px;
+    padding: 13px 32px;
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(14px, 4vw, 17px);
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.12s, background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .restart-btn { background: #ffd740; color: #3d1e8e; }
+  .restart-btn:hover  { transform: scale(1.05); background: #e6b800; }
+  .restart-btn:active { transform: scale(0.96); }
+  .back-dashboard-btn { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+  .back-dashboard-btn:hover  { transform: scale(1.03); background: rgba(255,255,255,0.22); }
+  .back-dashboard-btn:active { transform: scale(0.97); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 520px) {
+    .answers-grid {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 6px 12px 8px;
+    }
+    /* Each count gets its own row count on single-column mobile */
+    .answers-grid.count-2 { grid-template-rows: repeat(2, 1fr); }
+    .answers-grid.count-3 { grid-template-rows: repeat(3, 1fr); }
+    .answers-grid.count-4 { grid-template-rows: repeat(4, 1fr); }
+    .answers-grid.count-5 { grid-template-rows: repeat(5, 1fr); }
+    /* Cancel any column-spanning rules */
+    .answers-grid .answer-btn { grid-column: 1 !important; }
+    .answer-btn { border-radius: 12px; min-height: 44px; }
+    .question-area { padding: 12px 16px 8px; }
+    .intro-screen { gap: 14px; padding: 20px 16px; }
+    .start-btn { padding: 13px 44px; font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<div id="quiz-root">
+  <canvas id="fw-canvas"></canvas>
+  <div id="quiz-main" style="display:flex;flex-direction:column;flex:1;min-height:0;"></div>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:3030/api';
+
+// ── Read quiz ID from URL ─────────────────────────────────────────────────
+const urlParams = new URLSearchParams(window.location.search);
+const quizId = urlParams.get('id');
+
+// ── State ─────────────────────────────────────────────────────────────────
+let quizData  = null;
+let questions = [];
+let current   = 0;
+let score     = 0;
+let answered  = false;
+
+// ── Auth helpers ──────────────────────────────────────────────────────────
+function getToken() {
+  return localStorage.getItem('authToken') || localStorage.getItem('token');
+}
+function authHeaders() {
+  const token = getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+// ── Fireworks ─────────────────────────────────────────────────────────────
+const canvas = document.getElementById('fw-canvas');
+const ctx    = canvas.getContext('2d');
+let particles = [];
+let fwRaf     = null;
+
+function resizeCanvas() {
+  const root = document.getElementById('quiz-root');
+  canvas.width  = root.offsetWidth;
+  canvas.height = root.offsetHeight;
+}
+
+function spawnBurst(cx, cy) {
+  const palette = ['#ffd740','#2ecc71','#fff','#a8ff78','#ffec6e','#b8f5a0','#ffe066','#80ffb4'];
+  for (let i = 0; i < 80; i++) {
+    const angle = (Math.PI * 2 / 80) * i + (Math.random() - 0.5) * 0.25;
+    const speed = 2.5 + Math.random() * 5.5;
+    particles.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+      life: 1, decay: 0.005 + Math.random() * 0.013,
+      radius: 3 + Math.random() * 3,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      trail: [], gravity: 0.08 + Math.random() * 0.06,
+    });
+  }
+  for (let i = 0; i < 30; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1 + Math.random() * 3;
+    particles.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1.5,
+      life: 1, decay: 0.02 + Math.random() * 0.014,
+      radius: 2 + Math.random() * 2, color: '#fff',
+      trail: [], gravity: 0.06,
+    });
+  }
+}
+
+function launchFireworks(btnEl) {
+  resizeCanvas();
+  const rootRect = document.getElementById('quiz-root').getBoundingClientRect();
+  const btnRect  = btnEl.getBoundingClientRect();
+  const cx = btnRect.left - rootRect.left + btnRect.width  / 2;
+  const cy = btnRect.top  - rootRect.top  + btnRect.height / 2;
+  spawnBurst(cx, cy);
+  spawnBurst(cx + (Math.random() - 0.5) * 60, cy - 20 + (Math.random() - 0.5) * 40);
+  if (!fwRaf) tick();
+}
+
+function tick() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.life > 0.015);
+  for (const p of particles) {
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > 5) p.trail.shift();
+    p.x += p.vx; p.y += p.vy;
+    p.vy += p.gravity; p.vx *= 0.97; p.life -= p.decay;
+    for (let t = 0; t < p.trail.length; t++) {
+      ctx.beginPath();
+      ctx.arc(p.trail[t].x, p.trail[t].y, p.radius * 0.45, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.life * (t / p.trail.length) * 0.45;
+      ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, Math.max(0.1, p.radius * p.life), 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.life;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  if (particles.length > 0) {
+    fwRaf = requestAnimationFrame(tick);
+  } else {
+    fwRaf = null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+function stopFireworks() {
+  particles = [];
+  if (fwRaf) { cancelAnimationFrame(fwRaf); fwRaf = null; }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  if (!quizId) {
+    showError('No quiz selected.', 'Go to the dashboard and click a quiz to play it.');
+    return;
+  }
+  loadQuiz();
+});
+
+// ── Fetch quiz from API ───────────────────────────────────────────────────
+async function loadQuiz() {
+  renderLoading();
+  try {
+    const res  = await fetch(`${API_BASE}/quizzes/${quizId}`, { headers: authHeaders() });
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (res.status === 401) showError('Not logged in.', 'Please log in to play quizzes.');
+      else if (res.status === 404) showError('Quiz not found.', 'This quiz may have been deleted.');
+      else showError('Failed to load quiz.', data.message || '');
+      return;
+    }
+
+    quizData = data.quiz;
+
+    if (!quizData.questions || quizData.questions.length === 0) {
+      showError('No questions yet.', 'This quiz has no questions. Ask your teacher to add some.');
+      return;
+    }
+
+    // Transform API shape → internal format
+    questions = quizData.questions.map(q => ({
+      text:    q.question_text,
+      options: q.answers.map(a => a.answer_text),
+      correct: q.answers.findIndex(a => a.is_correct),
+    }));
+
+    renderIntro();
+  } catch (err) {
+    console.error(err);
+    showError('Network error.', 'Could not reach the server. Is it running?');
+  }
+}
+
+// ── Screen builders ───────────────────────────────────────────────────────
+function renderLoading() {
+  document.getElementById('quiz-main').innerHTML = `
+    <div class="header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="logo">quiz<span>zz</span></div>
+      <div style="flex:1"></div>
+    </div>
+    <div class="load-screen">
+      <div class="spinner"></div>
+      <div class="load-text">Loading quiz…</div>
+    </div>
+  `;
+}
+
+function showError(title, sub) {
+  document.getElementById('quiz-main').innerHTML = `
+    <div class="header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="logo">quiz<span>zz</span></div>
+      <div style="flex:1"></div>
+    </div>
+    <div class="error-screen">
+      <div class="error-icon">⚠️</div>
+      <div class="error-title">${title}</div>
+      <div class="error-sub">${sub || ''}</div>
+      <button class="error-back-btn" onclick="goBack()">Back to Dashboard</button>
+    </div>
+  `;
+}
+
+function renderIntro() {
+  stopFireworks();
+  current = 0; score = 0; answered = false;
+  const qCount = questions.length;
+
+  document.getElementById('quiz-main').innerHTML = `
+    <div class="header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <div class="logo">quiz<span>zz</span></div>
+      <div style="flex:1"></div>
+    </div>
+    <div class="intro-screen">
+      <div class="intro-emoji">📝</div>
+      <div class="intro-title">${escHtml(quizData.title)}</div>
+      ${quizData.description
+        ? `<div class="intro-desc">${escHtml(quizData.description)}</div>`
+        : ''}
+      <div class="intro-meta">
+        📚 ${qCount} question${qCount !== 1 ? 's' : ''}
+      </div>
+      <button class="start-btn" onclick="startQuiz()">Start Quiz ▶</button>
+    </div>
+  `;
+}
+
+function startQuiz() { render(); }
+
+function render() {
+  stopFireworks();
+  if (current >= questions.length) { renderEnd(); return; }
+
+  const q   = questions[current];
+  const pct = (current / questions.length) * 100;
+  const cnt = q.options.length;
+
+  document.getElementById('quiz-main').innerHTML = `
+    <div class="header">
+      <button class="back-btn" onclick="confirmBack()">←</button>
+      <div class="logo">quiz<span>zz</span></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" style="width:${pct}%"></div>
+      </div>
+      <span class="q-counter">${current + 1} / ${questions.length}</span>
+      <span class="score-badge">⭐ ${score}</span>
+    </div>
+    <div class="question-area">
+      <div class="question-number">Question ${current + 1}</div>
+      <div class="question-text">${escHtml(q.text)}</div>
+    </div>
+    <div class="answers-grid count-${cnt}" id="answersGrid">
+      ${q.options.map((opt, i) => `
+        <button class="answer-btn color-${i}" id="ans-${i}" onclick="selectAnswer(${i})">
+          ${escHtml(opt)}
+        </button>
+      `).join('')}
+    </div>
+    <div class="feedback-bar" id="feedback"></div>
+    <div class="auto-next-bar" id="auto-next"></div>
+  `;
+
+  answered = false;
+  resizeCanvas();
+}
+
+// ── Answer logic ──────────────────────────────────────────────────────────
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[current];
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+
+  const selected   = document.getElementById('ans-' + idx);
+  const correctBtn = document.getElementById('ans-' + q.correct);
+  const fb         = document.getElementById('feedback');
+  const an         = document.getElementById('auto-next');
+
+  if (idx === q.correct) {
+    selected.classList.add('correct');
+    score += 100;
+    fb.textContent = '🎉 Correct! Nice work!';
+    fb.className   = 'feedback-bar show correct-fb';
+    document.querySelectorAll('.answer-btn').forEach((b, i) => {
+      if (i !== idx) b.classList.add('gone');
+    });
+    setTimeout(() => launchFireworks(selected), 100);
+  } else {
+    selected.classList.add('wrong');
+    correctBtn.classList.add('correct');
+    document.querySelectorAll('.answer-btn').forEach((b, i) => {
+      if (i !== idx && i !== q.correct) b.classList.add('gone');
+    });
+    fb.textContent = '❌ Oops! The correct answer is highlighted in green.';
+    fb.className   = 'feedback-bar show wrong-fb';
+  }
+
+  an.textContent = current < questions.length - 1 ? 'Moving to next question…' : 'Showing results…';
+  an.className   = 'auto-next-bar show';
+  setTimeout(() => { current++; render(); }, 2000);
+}
+
+// ── End screen ────────────────────────────────────────────────────────────
+function renderEnd() {
+  const total = questions.length * 100;
+  const pct   = Math.round((score / total) * 100);
+  const trophy = pct >= 80 ? '🏆' : pct >= 50 ? '🥈' : '🎮';
+  const msg    = pct >= 80 ? 'Outstanding!' : pct >= 50 ? 'Good job!' : 'Keep practicing!';
+
+  document.getElementById('quiz-main').innerHTML = `
+    <div class="header">
+      <div class="logo">quiz<span>zz</span></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" style="width:100%"></div>
+      </div>
+      <span class="q-counter">Done!</span>
+    </div>
+    <div class="end-screen">
+      <div class="trophy">${trophy}</div>
+      <div class="end-title">${msg}</div>
+      <div class="end-sub">
+        You completed all ${questions.length} question${questions.length !== 1 ? 's' : ''}
+      </div>
+      <div class="score-display">
+        <div class="score-big">${score}</div>
+        <div class="score-label">TOTAL SCORE · ${pct}% accuracy</div>
+      </div>
+      <div class="end-btns">
+        <button class="restart-btn" onclick="restartQuiz()">Play Again ↺</button>
+        <button class="back-dashboard-btn" onclick="goBack()">← Dashboard</button>
+      </div>
+    </div>
+  `;
+
+  resizeCanvas();
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      spawnBurst(
+        canvas.width  * (0.15 + Math.random() * 0.70),
+        canvas.height * (0.15 + Math.random() * 0.55)
+      );
+      if (!fwRaf) tick();
+    }, i * 350);
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function restartQuiz() {
+  current = 0; score = 0; answered = false;
+  stopFireworks();
+  render();
+}
+
+function goBack() {
+  stopFireworks();
+  location.href = 'quiz_dashboard.html';
+}
+
+function confirmBack() {
+  if (current > 0) {
+    if (confirm('Exit quiz? Your progress will be lost.')) goBack();
+  } else {
+    goBack();
+  }
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
