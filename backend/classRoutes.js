@@ -61,12 +61,13 @@ router.post('/', authenticate, requireTeacher, async (req, res) => {
     }
 
     const { rows } = await pool.query(
-      `INSERT INTO classes (id, course_id, name, description, schedule)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO classes (id, course_id, teacher_id, name, description, schedule)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
       [
         uuidv4(),
         courseId,
+        req.userId,            // teacher who created this class
         name.trim(),
         description ? description.trim() : null,
         schedule    ? schedule.trim()    : null,
@@ -193,6 +194,100 @@ router.delete('/:id', authenticate, requireTeacher, async (req, res) => {
   } catch (err) {
     console.error('Delete class error:', err);
     return res.status(500).json({ success: false, message: 'Could not delete class.' });
+  }
+});
+
+// ─── POST /api/courses/:courseId/classes/:id/enroll ──────────────────────────
+// Enroll a student (student_id from body) into this class.
+// Only the teacher who owns the course can do this.
+router.post('/:id/enroll', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id } = req.params;
+  const { student_id } = req.body;
+
+  if (!student_id || !Number.isInteger(Number(student_id))) {
+    return res.status(400).json({ success: false, message: 'student_id (integer) is required.' });
+  }
+
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    // Confirm target user exists and is a student (role_id = 1)
+    const { rows: userRows } = await pool.query(
+      `SELECT id FROM users WHERE id = $1 AND role_id = 1`,
+      [Number(student_id)]
+    );
+    if (!userRows.length) {
+      return res.status(404).json({ success: false, message: 'Student not found.' });
+    }
+
+    // Confirm class exists in this course
+    const { rows: classRows } = await pool.query(
+      `SELECT id FROM classes WHERE id = $1 AND course_id = $2`,
+      [id, courseId]
+    );
+    if (!classRows.length) {
+      return res.status(404).json({ success: false, message: 'Class not found.' });
+    }
+
+    await pool.query(
+      `INSERT INTO class_enrollments (class_id, student_id)
+       VALUES ($1, $2)
+       ON CONFLICT (class_id, student_id) DO NOTHING`,
+      [id, Number(student_id)]
+    );
+    return res.status(201).json({ success: true, message: 'Student enrolled.' });
+  } catch (err) {
+    console.error('Enroll student error:', err);
+    return res.status(500).json({ success: false, message: 'Could not enroll student.' });
+  }
+});
+
+// ─── DELETE /api/courses/:courseId/classes/:id/enroll/:studentId ──────────────
+// Remove a student from this class.
+router.delete('/:id/enroll/:studentId', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id, studentId } = req.params;
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    const { rowCount } = await pool.query(
+      `DELETE FROM class_enrollments WHERE class_id = $1 AND student_id = $2`,
+      [id, Number(studentId)]
+    );
+    if (!rowCount) {
+      return res.status(404).json({ success: false, message: 'Enrollment not found.' });
+    }
+    return res.json({ success: true, message: 'Student removed from class.' });
+  } catch (err) {
+    console.error('Remove student error:', err);
+    return res.status(500).json({ success: false, message: 'Could not remove student.' });
+  }
+});
+
+// ─── GET /api/courses/:courseId/classes/:id/students ─────────────────────────
+// List all students enrolled in a class.
+router.get('/:id/students', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id } = req.params;
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    const { rows } = await pool.query(
+      `SELECT u.id, u.name, u.email, u.level, ce.enrolled_at
+       FROM class_enrollments ce
+       JOIN users u ON u.id = ce.student_id
+       WHERE ce.class_id = $1
+       ORDER BY ce.enrolled_at ASC`,
+      [id]
+    );
+    return res.json({ success: true, students: rows });
+  } catch (err) {
+    console.error('List students error:', err);
+    return res.status(500).json({ success: false, message: 'Could not fetch students.' });
   }
 });
 
