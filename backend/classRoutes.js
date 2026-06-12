@@ -197,6 +197,50 @@ router.delete('/:id', authenticate, requireTeacher, async (req, res) => {
   }
 });
 
+// ─── GET /api/courses/:courseId/classes/:id/lookup-student ───────────────────
+// Find a student by email before enrolling. Returns student info + already_enrolled flag.
+router.get('/:id/lookup-student', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id } = req.params;
+  const { email } = req.query;
+
+  if (!email || !email.trim()) {
+    return res.status(400).json({ success: false, message: 'Email is required.' });
+  }
+
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    // Find user by email who is a student (role_id = 1)
+    const { rows: users } = await pool.query(
+      `SELECT id, name, email, level FROM users WHERE LOWER(email) = LOWER($1) AND role_id = 1`,
+      [email.trim()]
+    );
+
+    if (!users.length) {
+      return res.status(404).json({ success: false, message: 'No student account found with that email.' });
+    }
+
+    const student = users[0];
+
+    // Check if already enrolled in this class
+    const { rows: existing } = await pool.query(
+      `SELECT 1 FROM class_enrollments WHERE class_id = $1 AND student_id = $2`,
+      [id, student.id]
+    );
+
+    return res.json({
+      success:          true,
+      student,
+      already_enrolled: existing.length > 0,
+    });
+  } catch (err) {
+    console.error('Lookup student error:', err);
+    return res.status(500).json({ success: false, message: 'Could not look up student.' });
+  }
+});
+
 // ─── POST /api/courses/:courseId/classes/:id/enroll ──────────────────────────
 // Enroll a student (student_id from body) into this class.
 // Only the teacher who owns the course can do this.
