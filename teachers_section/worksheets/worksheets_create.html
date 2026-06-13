@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Worksheet Creator · LinguaAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  /* ─── Design tokens ─────────────────────────────────────── */
+  :root {
+    --purple:        #6D28D9;
+    --purple-mid:    #8B5CF6;
+    --purple-light:  #EDE9FE;
+    --purple-xlight: #F5F3FF;
+    --yellow:        #F59E0B;
+    --yellow-light:  #FEF3C7;
+    --green:         #10B981;
+    --red:           #EF4444;
+    --red-light:     #FEE2E2;
+    --bg:            #F5F3FF;
+    --surface:       #FFFFFF;
+    --border:        #DDD6FE;
+    --text:          #1E1B4B;
+    --text-muted:    #6B7280;
+    --text-soft:     #9CA3AF;
+    --shadow-sm:     0 1px 3px rgba(109,40,217,.10), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-md:     0 4px 16px rgba(109,40,217,.13);
+    --shadow-lg:     0 8px 32px rgba(109,40,217,.18);
+    --radius:        12px;
+    --radius-sm:     8px;
+    --radius-xs:     6px;
+  }
+
+  /* ─── Reset ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── Header ─────────────────────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 1.5px solid var(--border);
+    padding: 0 28px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 34px; height: 34px;
+    background: var(--purple);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .header-title {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 17px;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .header-title span { color: var(--purple); }
+  .header-breadcrumb {
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--purple-xlight);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ─── Buttons ─────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: var(--radius-xs);
+    border: none;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    transition: all .18s ease;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--purple);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(109,40,217,.28);
+  }
+  .btn-primary:hover { background: #5B21B6; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(109,40,217,.35); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--purple);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--purple-xlight); border-color: var(--purple-mid); }
+  .btn-yellow {
+    background: var(--yellow);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(245,158,11,.28);
+  }
+  .btn-yellow:hover { background: #D97706; transform: translateY(-1px); }
+  .btn-sm { padding: 5px 12px; font-size: 12.5px; }
+  .btn-icon { padding: 7px; }
+
+  /* ─── Layout ─────────────────────────────────────────────── */
+  .app-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ─── Sidebar ────────────────────────────────────────────── */
+  .sidebar {
+    width: 290px;
+    min-width: 290px;
+    background: var(--surface);
+    border-right: 1.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 20px 18px;
+    gap: 24px;
+  }
+  .sidebar-section {}
+  .sidebar-label {
+    font-family: 'Nunito', sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 22px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--purple-xlight);
+    position: relative;
+  }
+  .upload-zone:hover { border-color: var(--purple-mid); background: var(--purple-light); }
+  .upload-zone input { display: none; }
+  .upload-zone .upload-icon {
+    font-size: 28px; margin-bottom: 6px;
+    display: block;
+  }
+  .upload-zone p { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+  .upload-zone p span { color: var(--purple); text-decoration: underline; }
+
+  /* URL input */
+  .url-row {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+  .input-text {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: var(--radius-xs);
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    font-family: 'Nunito Sans', sans-serif;
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color .18s;
+    outline: none;
+  }
+  .input-text:focus { border-color: var(--purple-mid); }
+
+  /* Layout toggle */
+  .toggle-group {
+    display: flex;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xs);
+    overflow: hidden;
+  }
+  .toggle-opt {
+    flex: 1;
+    padding: 7px 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    transition: all .18s;
+    text-align: center;
+  }
+  .toggle-opt.active {
+    background: var(--purple);
+    color: #fff;
+  }
+  .toggle-opt:not(.active):hover { background: var(--purple-xlight); color: var(--purple); }
+
+  /* Word bank add */
+  .add-word-row { display: flex; gap: 6px; }
+  .word-bank-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+    min-height: 40px;
+  }
+
+  /* Word tag */
+  .word-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px 5px 12px;
+    background: var(--purple-light);
+    border: 1.5px solid var(--purple-mid);
+    border-radius: 20px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--purple);
+    cursor: grab;
+    user-select: none;
+    transition: all .18s;
+    position: relative;
+  }
+  .word-tag:hover { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .word-tag.dragging { opacity: .45; cursor: grabbing; }
+  .word-tag .tag-del {
+    background: none; border: none; cursor: pointer;
+    font-size: 13px; line-height: 1; padding: 0;
+    color: inherit; opacity: .6;
+    transition: opacity .15s;
+    margin-left: 1px;
+  }
+  .word-tag .tag-del:hover { opacity: 1; }
+  .word-tag.assigned {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+    opacity: .6;
+    cursor: default;
+  }
+  .word-tag.assigned:hover { background: var(--green); }
+
+  /* Drop zone list in sidebar */
+  .dz-list { display: flex; flex-direction: column; gap: 6px; }
+  .dz-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    background: var(--purple-xlight);
+    border-radius: var(--radius-xs);
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+  }
+  .dz-item .dz-num {
+    width: 22px; height: 22px; min-width: 22px;
+    background: var(--purple);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800;
+  }
+  .dz-item .dz-answer {
+    flex: 1; color: var(--text-muted); font-style: italic; font-size: 12px;
+  }
+  .dz-item .dz-answer.filled { color: var(--green); font-style: normal; font-weight: 700; }
+  .dz-item .dz-del {
+    background: none; border: none; cursor: pointer;
+    color: var(--red); font-size: 14px; padding: 0; opacity: .6;
+    transition: opacity .15s;
+  }
+  .dz-item .dz-del:hover { opacity: 1; }
+  .dz-empty {
+    font-size: 12.5px;
+    color: var(--text-soft);
+    text-align: center;
+    padding: 10px;
+  }
+
+  /* ─── Canvas area ─────────────────────────────────────────── */
+  .canvas-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .canvas-hint {
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--yellow-light);
+    border: 1.5px solid #FDE68A;
+    border-radius: var(--radius-xs);
+    padding: 9px 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    max-width: 780px;
+  }
+  .canvas-hint.hidden { display: none; }
+
+  /* Word bank strip (above/below image) */
+  .word-bank-strip {
+    width: 100%;
+    max-width: 780px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .word-bank-strip-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .9px;
+    color: var(--text-soft);
+    margin-bottom: 10px;
+    font-family: 'Nunito', sans-serif;
+  }
+  .word-bank-strip .word-bank-pool {
+    min-height: 36px;
+    margin-top: 0;
+  }
+
+  /* Image canvas wrapper */
+  .image-canvas-wrap {
+    width: 100%;
+    max-width: 780px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    position: relative;
+  }
+  .image-canvas-inner {
+    position: relative;
+    width: 100%;
+    line-height: 0;
+    cursor: crosshair;
+    user-select: none;
+  }
+  .image-canvas-inner img {
+    width: 100%;
+    height: auto;
+    display: block;
+    pointer-events: none;
+  }
+  .image-placeholder {
+    width: 100%;
+    height: 420px;
+    background: linear-gradient(135deg, #EDE9FE 0%, #F5F3FF 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--purple-mid);
+    cursor: crosshair;
+  }
+  .image-placeholder .ph-icon { font-size: 52px; margin-bottom: 10px; }
+  .image-placeholder p { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 15px; }
+  .image-placeholder small { font-size: 12.5px; color: var(--text-soft); margin-top: 4px; }
+
+  /* ─── Drop zones on canvas ─────────────────────────────────── */
+  .drop-zone {
+    position: absolute;
+    min-width: 90px;
+    min-height: 36px;
+    border: 2.5px dashed var(--purple-mid);
+    border-radius: var(--radius-xs);
+    background: rgba(237,233,254,.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: move;
+    transition: border-color .18s, background .18s, box-shadow .18s;
+    z-index: 10;
+    padding: 4px 8px;
+  }
+  .drop-zone:hover { border-color: var(--purple); background: rgba(237,233,254,.8); }
+  .drop-zone.drag-over {
+    border-color: var(--yellow);
+    background: rgba(254,243,199,.7);
+    box-shadow: 0 0 0 3px rgba(245,158,11,.25);
+    border-style: solid;
+  }
+  .drop-zone.filled {
+    border-style: solid;
+    border-color: var(--green);
+    background: rgba(16,185,129,.12);
+  }
+  .dz-number-badge {
+    position: absolute;
+    top: -11px; left: -11px;
+    width: 22px; height: 22px;
+    background: var(--purple);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    z-index: 11;
+  }
+  .dz-answer-text {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--green);
+    text-align: center;
+  }
+  .dz-placeholder-text {
+    font-size: 12px;
+    color: var(--purple-mid);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    pointer-events: none;
+    opacity: .8;
+  }
+  .dz-del-btn {
+    position: absolute;
+    top: -10px; right: -10px;
+    width: 20px; height: 20px;
+    background: var(--red);
+    color: #fff;
+    border: none; border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 12;
+    line-height: 1;
+    transition: background .15s, transform .15s;
+  }
+  .dz-del-btn:hover { background: #B91C1C; transform: scale(1.1); }
+
+  /* resize handle */
+  .dz-resize {
+    position: absolute;
+    bottom: -5px; right: -5px;
+    width: 14px; height: 14px;
+    background: var(--purple-mid);
+    border-radius: 3px;
+    cursor: se-resize;
+    z-index: 13;
+  }
+
+  /* ─── Toast ──────────────────────────────────────────────── */
+  #toast {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    background: var(--text);
+    color: #fff;
+    padding: 11px 20px;
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: all .3s ease;
+    pointer-events: none;
+    z-index: 9999;
+    max-width: 320px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.success { background: var(--green); }
+  #toast.error { background: var(--red); }
+
+  /* ─── JSON output modal ───────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(30,27,74,.5);
+    z-index: 500;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 28px;
+    width: 90%;
+    max-width: 560px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .modal-title {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--text);
+  }
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 20px; color: var(--text-muted);
+    transition: color .15s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .json-output {
+    background: #1E1B4B;
+    color: #A5B4FC;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .modal-footer { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+
+  /* ─── Scrollbar ──────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  /* ─── Misc helpers ───────────────────────────────────────── */
+  .divider { height: 1px; background: var(--border); margin: 2px 0; }
+  .flex-center { display: flex; align-items: center; }
+  hr { border: none; border-top: 1.5px solid var(--border); margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header>
+  <div class="header-left">
+    <div class="logo-mark">LA</div>
+    <div class="header-title">Lingua<span>AI</span></div>
+    <div class="header-breadcrumb">Worksheet Creator</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary btn-sm" id="btn-preview">
+      👁 Preview JSON
+    </button>
+    <button class="btn btn-yellow btn-sm" id="btn-save">
+      💾 Save Worksheet
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ APP BODY ═══════════════ -->
+<div class="app-body">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+
+    <!-- Image upload -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Worksheet Image</div>
+      <label class="upload-zone" id="upload-zone">
+        <input type="file" id="img-file-input" accept="image/*" />
+        <span class="upload-icon">🖼</span>
+        <p><span>Click to upload</span> an image</p>
+      </label>
+      <div class="url-row" style="margin-top:10px">
+        <input class="input-text" id="img-url-input" placeholder="Or paste image URL…" />
+        <button class="btn btn-secondary btn-sm" id="btn-use-url">Use</button>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- Word bank position -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Word Bank Position</div>
+      <div class="toggle-group">
+        <button class="toggle-opt" id="pos-above">⬆ Above</button>
+        <button class="toggle-opt active" id="pos-below">⬇ Below</button>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- Word bank editor -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Word Bank Items</div>
+      <div class="add-word-row">
+        <input class="input-text" id="word-input" placeholder="Type a word…" />
+        <button class="btn btn-primary btn-sm" id="btn-add-word">Add</button>
+      </div>
+      <div class="word-bank-pool" id="sidebar-word-pool">
+        <span class="dz-empty" id="word-empty-msg">No words yet. Add some!</span>
+      </div>
+    </div>
+
+    <hr />
+
+    <!-- Drop zones list -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Drop Zones</div>
+      <div class="dz-list" id="dz-sidebar-list">
+        <span class="dz-empty" id="dz-empty-msg">Click on the image to add drop zones.</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── CANVAS ── -->
+  <main class="canvas-area" id="canvas-area">
+
+    <div class="canvas-hint" id="canvas-hint">
+      💡 <strong>Click anywhere on the image</strong> below to place a drop zone. Then drag words from the word bank onto a zone to set the correct answer.
+    </div>
+
+    <!-- word bank strip (above) — hidden by default -->
+    <div class="word-bank-strip" id="bank-strip-above" style="display:none">
+      <div class="word-bank-strip-label">📚 Word Bank</div>
+      <div class="word-bank-pool" id="strip-pool-above"></div>
+    </div>
+
+    <!-- Image canvas -->
+    <div class="image-canvas-wrap" id="image-canvas-wrap">
+      <div class="image-canvas-inner" id="image-canvas-inner">
+        <div class="image-placeholder" id="image-placeholder">
+          <div class="ph-icon">🖼</div>
+          <p>No image loaded</p>
+          <small>Upload an image or paste a URL in the sidebar</small>
+        </div>
+        <!-- Actual image (hidden until loaded) -->
+        <img id="worksheet-img" src="" alt="Worksheet" style="display:none" />
+        <!-- Drop zones are injected here -->
+      </div>
+    </div>
+
+    <!-- word bank strip (below) — visible by default -->
+    <div class="word-bank-strip" id="bank-strip-below">
+      <div class="word-bank-strip-label">📚 Word Bank</div>
+      <div class="word-bank-pool" id="strip-pool-below"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════ JSON MODAL ═══════════════ -->
+<div class="modal-overlay" id="json-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📋 Worksheet JSON</div>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <pre class="json-output" id="json-output"></pre>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" id="btn-copy-json">📋 Copy JSON</button>
+      <button class="btn btn-primary btn-sm" id="btn-close-modal">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════════ */
+const state = {
+  imageData: null,          // base64 or URL
+  wordBankPosition: 'below',// 'above' | 'below'
+  words: [],                // [{id, text, assigned}]
+  dropZones: [],            // [{id, x, y, w, h, answer, el}]
+  nextDzId: 1,
+  nextWordId: 1,
+  draggedWordId: null,
+  movingDz: null,           // {id, startMouseX, startMouseY, startElX, startElY}
+  resizingDz: null,         // {id, startMouseX, startMouseY, startW, startH}
+};
+
+/* ══════════════════════════════════════════════════════════
+   DOM REFS
+══════════════════════════════════════════════════════════ */
+const $canvas       = document.getElementById('image-canvas-inner');
+const $img          = document.getElementById('worksheet-img');
+const $placeholder  = document.getElementById('image-placeholder');
+const $fileInput    = document.getElementById('img-file-input');
+const $urlInput     = document.getElementById('img-url-input');
+const $wordInput    = document.getElementById('word-input');
+const $sidebarPool  = document.getElementById('sidebar-word-pool');
+const $stripAbove   = document.getElementById('bank-strip-above');
+const $stripBelow   = document.getElementById('bank-strip-below');
+const $stripAbovePool = document.getElementById('strip-pool-above');
+const $stripBelowPool = document.getElementById('strip-pool-below');
+const $dzList       = document.getElementById('dz-sidebar-list');
+const $toast        = document.getElementById('#toast') || document.getElementById('toast');
+const $jsonModal    = document.getElementById('json-modal');
+const $jsonOutput   = document.getElementById('json-output');
+const $hint         = document.getElementById('canvas-hint');
+
+/* ══════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg, type = '') {
+  $toast.textContent = msg;
+  $toast.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $toast.className = ''; }, 2800);
+}
+
+/* ══════════════════════════════════════════════════════════
+   IMAGE LOADING
+══════════════════════════════════════════════════════════ */
+function loadImage(src) {
+  $img.src = src;
+  $img.style.display = 'block';
+  $placeholder.style.display = 'none';
+  state.imageData = src;
+  $hint.classList.remove('hidden');
+}
+
+$fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => loadImage(ev.target.result);
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('upload-zone').addEventListener('click', () => $fileInput.click());
+
+document.getElementById('btn-use-url').addEventListener('click', () => {
+  const url = $urlInput.value.trim();
+  if (!url) { showToast('Please enter a URL', 'error'); return; }
+  loadImage(url);
+  $urlInput.value = '';
+  showToast('Image loaded!', 'success');
+});
+
+$urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-use-url').click(); });
+
+/* ══════════════════════════════════════════════════════════
+   WORD BANK POSITION TOGGLE
+══════════════════════════════════════════════════════════ */
+document.getElementById('pos-above').addEventListener('click', () => setWordBankPos('above'));
+document.getElementById('pos-below').addEventListener('click', () => setWordBankPos('below'));
+
+function setWordBankPos(pos) {
+  state.wordBankPosition = pos;
+  document.getElementById('pos-above').classList.toggle('active', pos === 'above');
+  document.getElementById('pos-below').classList.toggle('active', pos === 'below');
+  $stripAbove.style.display = pos === 'above' ? '' : 'none';
+  $stripBelow.style.display = pos === 'below' ? '' : 'none';
+  renderWordBankStrip();
+}
+
+/* ══════════════════════════════════════════════════════════
+   WORD BANK MANAGEMENT
+══════════════════════════════════════════════════════════ */
+document.getElementById('btn-add-word').addEventListener('click', addWord);
+$wordInput.addEventListener('keydown', e => { if (e.key === 'Enter') addWord(); });
+
+function addWord() {
+  const text = $wordInput.value.trim();
+  if (!text) return;
+  if (state.words.some(w => w.text.toLowerCase() === text.toLowerCase())) {
+    showToast(`"${text}" already exists`, 'error'); return;
+  }
+  const word = { id: state.nextWordId++, text, assigned: false };
+  state.words.push(word);
+  $wordInput.value = '';
+  renderWordBankAll();
+}
+
+function deleteWord(id) {
+  // if assigned, clear drop zone answer
+  const word = state.words.find(w => w.id === id);
+  if (word && word.assigned) {
+    const dz = state.dropZones.find(z => z.answer === word.text);
+    if (dz) { dz.answer = null; updateDropZoneEl(dz); }
+  }
+  state.words = state.words.filter(w => w.id !== id);
+  renderWordBankAll();
+  renderSidebarDzList();
+}
+
+function renderWordBankAll() {
+  renderSidebarPool();
+  renderWordBankStrip();
+}
+
+function renderSidebarPool() {
+  $sidebarPool.innerHTML = '';
+  const empty = document.getElementById('word-empty-msg');
+  if (state.words.length === 0) {
+    $sidebarPool.appendChild(createEmptyMsg('No words yet. Add some!'));
+    return;
+  }
+  state.words.forEach(w => $sidebarPool.appendChild(createWordTag(w, 'sidebar')));
+}
+
+function renderWordBankStrip() {
+  const pool = state.wordBankPosition === 'above' ? $stripAbovePool : $stripBelowPool;
+  const otherPool = state.wordBankPosition === 'above' ? $stripBelowPool : $stripAbovePool;
+  pool.innerHTML = '';
+  otherPool.innerHTML = '';
+  if (state.words.length === 0) {
+    pool.appendChild(createEmptyMsg('Add words in the sidebar panel →'));
+    return;
+  }
+  state.words.forEach(w => pool.appendChild(createWordTag(w, 'strip')));
+}
+
+function createEmptyMsg(text) {
+  const span = document.createElement('span');
+  span.className = 'dz-empty';
+  span.textContent = text;
+  return span;
+}
+
+function createWordTag(word, context) {
+  const div = document.createElement('div');
+  div.className = 'word-tag' + (word.assigned ? ' assigned' : '');
+  div.dataset.id = word.id;
+  div.dataset.context = context;
+  div.draggable = !word.assigned;
+  div.textContent = word.text;
+
+  if (!word.assigned) {
+    // delete button
+    const del = document.createElement('button');
+    del.className = 'tag-del';
+    del.textContent = '×';
+    del.title = 'Remove word';
+    del.addEventListener('click', e => { e.stopPropagation(); deleteWord(word.id); });
+    div.appendChild(del);
+
+    // drag events
+    div.addEventListener('dragstart', e => {
+      state.draggedWordId = word.id;
+      div.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', word.text);
+    });
+    div.addEventListener('dragend', () => {
+      div.classList.remove('dragging');
+      state.draggedWordId = null;
+    });
+  }
+  return div;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DROP ZONE CREATION (click on canvas)
+══════════════════════════════════════════════════════════ */
+$canvas.addEventListener('click', e => {
+  // ignore if clicking an existing drop zone or its children
+  if (e.target.closest('.drop-zone')) return;
+  // ignore if no image / placeholder is visible
+  const rect = $canvas.getBoundingClientRect();
+  const canvasW = $canvas.offsetWidth;
+  const canvasH = $canvas.offsetHeight;
+  const x = ((e.clientX - rect.left) / canvasW) * 100;
+  const y = ((e.clientY - rect.top)  / canvasH) * 100;
+  createDropZone(x, y);
+});
+
+function createDropZone(xPct, yPct) {
+  const id = state.nextDzId++;
+  const dz = { id, x: xPct, y: yPct, w: 110, h: 38, answer: null, el: null };
+  state.dropZones.push(dz);
+  const el = buildDropZoneEl(dz);
+  dz.el = el;
+  $canvas.appendChild(el);
+  positionDropZoneEl(dz);
+  renderSidebarDzList();
+  showToast(`Drop zone #${id} added`, 'success');
+}
+
+function buildDropZoneEl(dz) {
+  const div = document.createElement('div');
+  div.className = 'drop-zone';
+  div.dataset.dzId = dz.id;
+  div.style.width  = dz.w + 'px';
+  div.style.height = dz.h + 'px';
+
+  // badge
+  const badge = document.createElement('div');
+  badge.className = 'dz-number-badge';
+  badge.textContent = dz.id;
+  div.appendChild(badge);
+
+  // placeholder text
+  const ph = document.createElement('span');
+  ph.className = 'dz-placeholder-text';
+  ph.textContent = 'Drop here';
+  div.appendChild(ph);
+
+  // answer text (hidden initially)
+  const ans = document.createElement('span');
+  ans.className = 'dz-answer-text';
+  ans.style.display = 'none';
+  div.appendChild(ans);
+
+  // delete button
+  const del = document.createElement('button');
+  del.className = 'dz-del-btn';
+  del.textContent = '×';
+  del.title = 'Delete drop zone';
+  del.addEventListener('click', e => { e.stopPropagation(); deleteDropZone(dz.id); });
+  div.appendChild(del);
+
+  // resize handle
+  const resizeHandle = document.createElement('div');
+  resizeHandle.className = 'dz-resize';
+  resizeHandle.addEventListener('mousedown', e => startResize(e, dz));
+  div.appendChild(resizeHandle);
+
+  // drag-over highlighting
+  div.addEventListener('dragover', e => {
+    e.preventDefault();
+    div.classList.add('drag-over');
+    e.dataTransfer.dropEffect = 'move';
+  });
+  div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+  div.addEventListener('drop', e => {
+    e.preventDefault();
+    div.classList.remove('drag-over');
+    handleDrop(dz.id);
+  });
+
+  // move (mousedown on the zone itself, but not handles/buttons)
+  div.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('dz-resize')) return;
+    if (e.target.classList.contains('dz-del-btn')) return;
+    startMove(e, dz);
+  });
+
+  return div;
+}
+
+function positionDropZoneEl(dz) {
+  const el = dz.el;
+  const canvasW = $canvas.offsetWidth;
+  const canvasH = $canvas.offsetHeight;
+  const px = (dz.x / 100) * canvasW;
+  const py = (dz.y / 100) * canvasH;
+  // center the zone on the click point
+  el.style.left = (px - dz.w / 2) + 'px';
+  el.style.top  = (py - dz.h / 2) + 'px';
+}
+
+function updateDropZoneEl(dz) {
+  const el = dz.el;
+  const ph  = el.querySelector('.dz-placeholder-text');
+  const ans = el.querySelector('.dz-answer-text');
+  if (dz.answer) {
+    ph.style.display  = 'none';
+    ans.style.display = '';
+    ans.textContent   = dz.answer;
+    el.classList.add('filled');
+  } else {
+    ph.style.display  = '';
+    ans.style.display = 'none';
+    el.classList.remove('filled');
+  }
+}
+
+function deleteDropZone(id) {
+  const dz = state.dropZones.find(z => z.id === id);
+  if (!dz) return;
+  // free the assigned word
+  if (dz.answer) {
+    const word = state.words.find(w => w.text === dz.answer);
+    if (word) { word.assigned = false; }
+    renderWordBankAll();
+  }
+  dz.el.remove();
+  state.dropZones = state.dropZones.filter(z => z.id !== id);
+  renderSidebarDzList();
+  showToast(`Drop zone #${id} deleted`);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DRAG & DROP — WORD INTO DROP ZONE
+══════════════════════════════════════════════════════════ */
+function handleDrop(dzId) {
+  if (state.draggedWordId === null) return;
+  const word = state.words.find(w => w.id === state.draggedWordId);
+  const dz   = state.dropZones.find(z => z.id === dzId);
+  if (!word || !dz) return;
+
+  // if drop zone already has an answer, free that word first
+  if (dz.answer) {
+    const prev = state.words.find(w => w.text === dz.answer);
+    if (prev) { prev.assigned = false; }
+  }
+
+  // assign
+  dz.answer    = word.text;
+  word.assigned = true;
+
+  updateDropZoneEl(dz);
+  renderWordBankAll();
+  renderSidebarDzList();
+  showToast(`✓ "${word.text}" assigned to zone #${dz.id}`, 'success');
+}
+
+/* ══════════════════════════════════════════════════════════
+   DROP ZONE MOVE (drag the box itself)
+══════════════════════════════════════════════════════════ */
+function startMove(e, dz) {
+  e.preventDefault();
+  e.stopPropagation();
+  const el = dz.el;
+  const startMouseX = e.clientX;
+  const startMouseY = e.clientY;
+  const startLeft   = parseFloat(el.style.left) || 0;
+  const startTop    = parseFloat(el.style.top)  || 0;
+
+  function onMove(ev) {
+    const dx = ev.clientX - startMouseX;
+    const dy = ev.clientY - startMouseY;
+    let newLeft = startLeft + dx;
+    let newTop  = startTop  + dy;
+    const canvasW = $canvas.offsetWidth;
+    const canvasH = $canvas.offsetHeight;
+    newLeft = Math.max(0, Math.min(newLeft, canvasW - dz.w));
+    newTop  = Math.max(0, Math.min(newTop,  canvasH - dz.h));
+    el.style.left = newLeft + 'px';
+    el.style.top  = newTop  + 'px';
+    // update pct
+    dz.x = ((newLeft + dz.w / 2) / canvasW) * 100;
+    dz.y = ((newTop  + dz.h / 2) / canvasH) * 100;
+  }
+
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DROP ZONE RESIZE
+══════════════════════════════════════════════════════════ */
+function startResize(e, dz) {
+  e.preventDefault();
+  e.stopPropagation();
+  const startMouseX = e.clientX;
+  const startMouseY = e.clientY;
+  const startW = dz.w;
+  const startH = dz.h;
+
+  function onMove(ev) {
+    const dx = ev.clientX - startMouseX;
+    const dy = ev.clientY - startMouseY;
+    dz.w = Math.max(70, startW + dx);
+    dz.h = Math.max(28, startH + dy);
+    dz.el.style.width  = dz.w + 'px';
+    dz.el.style.height = dz.h + 'px';
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR DZ LIST
+══════════════════════════════════════════════════════════ */
+function renderSidebarDzList() {
+  $dzList.innerHTML = '';
+  if (state.dropZones.length === 0) {
+    $dzList.appendChild(createEmptyMsg('Click on the image to add drop zones.'));
+    return;
+  }
+  state.dropZones.forEach(dz => {
+    const row = document.createElement('div');
+    row.className = 'dz-item';
+    row.innerHTML = `
+      <div class="dz-num">${dz.id}</div>
+      <div class="dz-answer ${dz.answer ? 'filled' : ''}">${dz.answer || 'No answer set'}</div>
+      <button class="dz-del" title="Delete zone">✕</button>
+    `;
+    row.querySelector('.dz-del').addEventListener('click', () => deleteDropZone(dz.id));
+    $dzList.appendChild(row);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   SAVE / PREVIEW JSON
+══════════════════════════════════════════════════════════ */
+function buildJSON() {
+  return {
+    image: state.imageData || null,
+    wordBankPosition: state.wordBankPosition,
+    dropZones: state.dropZones.map(dz => ({
+      id: dz.id,
+      x: parseFloat(dz.x.toFixed(2)),
+      y: parseFloat(dz.y.toFixed(2)),
+      w: dz.w,
+      h: dz.h,
+      answer: dz.answer,
+    })),
+    items: state.words.map(w => w.text),
+  };
+}
+
+document.getElementById('btn-save').addEventListener('click', () => {
+  const data = buildJSON();
+  console.log('[LinguaAI] Worksheet saved:', data);
+  showToast('✅ Worksheet saved! Check the console.', 'success');
+});
+
+document.getElementById('btn-preview').addEventListener('click', () => {
+  const data = buildJSON();
+  // mask long base64 images
+  const display = JSON.parse(JSON.stringify(data));
+  if (display.image && display.image.startsWith('data:')) {
+    display.image = '[base64 image data]';
+  }
+  $jsonOutput.textContent = JSON.stringify(display, null, 2);
+  $jsonModal.classList.add('open');
+});
+
+document.getElementById('modal-close').addEventListener('click', () => $jsonModal.classList.remove('open'));
+document.getElementById('btn-close-modal').addEventListener('click', () => $jsonModal.classList.remove('open'));
+$jsonModal.addEventListener('click', e => { if (e.target === $jsonModal) $jsonModal.classList.remove('open'); });
+
+document.getElementById('btn-copy-json').addEventListener('click', () => {
+  navigator.clipboard.writeText($jsonOutput.textContent).then(() => {
+    showToast('JSON copied!', 'success');
+  }).catch(() => showToast('Copy failed — select manually', 'error'));
+});
+
+/* ══════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════ */
+// start with hint hidden until image loaded
+$hint.classList.add('hidden');
+
+// add some default sample words to help teachers start quickly
+['lion', 'tiger', 'elephant', 'giraffe'].forEach(w => {
+  state.words.push({ id: state.nextWordId++, text: w, assigned: false });
+});
+renderWordBankAll();
+
+// prevent default drag behavior on canvas to allow our custom DnD
+$canvas.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('dragover', e => e.preventDefault());
+</script>
+</body>
+</html>

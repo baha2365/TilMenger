@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Worksheet Player · LinguaAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+/* ─── Tokens ─────────────────────────────────── */
+:root {
+  --purple:       #6D28D9;
+  --purple-mid:   #8B5CF6;
+  --purple-light: #EDE9FE;
+  --purple-xlight:#F5F3FF;
+  --yellow:       #F59E0B;
+  --yellow-light: #FEF9EE;
+  --green:        #10B981;
+  --green-light:  #D1FAE5;
+  --red:          #EF4444;
+  --red-light:    #FEE2E2;
+  --bg:           #F5F3FF;
+  --surface:      #FFFFFF;
+  --border:       #DDD6FE;
+  --text:         #1E1B4B;
+  --text-muted:   #6B7280;
+  --text-soft:    #9CA3AF;
+  --shadow-sm:    0 1px 3px rgba(109,40,217,.10);
+  --shadow-md:    0 4px 16px rgba(109,40,217,.13);
+  --shadow-lg:    0 8px 32px rgba(109,40,217,.20);
+  --radius:       14px;
+  --radius-sm:    10px;
+  --radius-xs:    7px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header ─────────────────────────────────── */
+header {
+  background: var(--surface);
+  border-bottom: 1.5px solid var(--border);
+  padding: 0 28px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.logo-wrap { display: flex; align-items: center; gap: 10px; }
+.logo-mark {
+  width: 34px; height: 34px;
+  background: var(--purple);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900; font-size: 15px; color: #fff;
+}
+.header-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800; font-size: 17px; color: var(--text);
+}
+.header-title span { color: var(--purple); }
+.badge-student {
+  font-size: 12px; font-weight: 700;
+  background: var(--yellow-light);
+  color: #92400E;
+  border: 1.5px solid #FDE68A;
+  padding: 3px 10px; border-radius: 20px;
+}
+
+/* progress bar */
+.progress-wrap {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px; color: var(--text-muted);
+}
+.progress-bar {
+  width: 140px; height: 8px;
+  background: var(--border); border-radius: 99px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--purple-mid), var(--green));
+  border-radius: 99px;
+  transition: width .5s ease;
+}
+
+/* ─── Buttons ─────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 18px; border-radius: var(--radius-xs);
+  border: none; cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 13.5px;
+  transition: all .18s; white-space: nowrap;
+}
+.btn-primary { background: var(--purple); color: #fff; box-shadow: 0 2px 8px rgba(109,40,217,.28); }
+.btn-primary:hover { background: #5B21B6; transform: translateY(-1px); }
+.btn-ghost { background: none; color: var(--purple); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: var(--purple-light); border-color: var(--purple-mid); }
+.btn-green { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.28); }
+.btn-green:hover { background: #059669; transform: translateY(-1px); }
+.btn-sm { padding: 5px 14px; font-size: 12.5px; }
+
+/* ─── Main layout ─────────────────────────────── */
+.main { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 32px 24px 60px; gap: 24px; }
+
+/* ─── Load screen ─────────────────────────────── */
+#load-screen {
+  width: 100%; max-width: 560px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  box-shadow: var(--shadow-md);
+  display: flex; flex-direction: column; gap: 20px;
+}
+.load-hero {
+  text-align: center;
+}
+.load-hero .hero-emoji { font-size: 52px; display: block; margin-bottom: 10px; }
+.load-hero h2 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900; font-size: 24px; color: var(--text);
+  margin-bottom: 6px;
+}
+.load-hero p { font-size: 14px; color: var(--text-muted); line-height: 1.55; }
+
+.divider-label {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; font-weight: 700; color: var(--text-soft);
+  text-transform: uppercase; letter-spacing: .8px;
+}
+.divider-label::before, .divider-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+.json-paste-area {
+  width: 100%; min-height: 140px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  font-family: 'Courier New', monospace;
+  font-size: 12.5px; color: var(--text);
+  background: #FAFAFA;
+  resize: vertical; outline: none;
+  transition: border-color .18s;
+  line-height: 1.6;
+}
+.json-paste-area:focus { border-color: var(--purple-mid); background: var(--surface); }
+.json-paste-area::placeholder { color: var(--text-soft); font-family: 'Nunito Sans', sans-serif; font-size: 13px; }
+
+.load-error {
+  background: var(--red-light); color: #B91C1C;
+  border: 1.5px solid #FECACA;
+  border-radius: var(--radius-xs);
+  padding: 9px 14px; font-size: 13px; font-weight: 600;
+  display: none;
+}
+.load-error.show { display: block; }
+
+/* demo button */
+.demo-row { display: flex; justify-content: center; }
+
+/* ─── Game screen ─────────────────────────────── */
+#game-screen { display: none; width: 100%; max-width: 800px; flex-direction: column; align-items: center; gap: 20px; }
+
+/* word bank strip */
+.word-bank-strip {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.strip-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-soft); margin-bottom: 12px;
+}
+.word-pool {
+  display: flex; flex-wrap: wrap; gap: 8px; min-height: 40px;
+}
+
+/* draggable word chip */
+.word-chip {
+  display: inline-flex; align-items: center;
+  padding: 7px 16px;
+  background: var(--purple-light);
+  border: 2px solid var(--purple-mid);
+  border-radius: 24px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800; font-size: 14px; color: var(--purple);
+  cursor: grab; user-select: none;
+  transition: all .2s;
+  box-shadow: 0 2px 6px rgba(109,40,217,.12);
+}
+.word-chip:hover { background: var(--purple); color: #fff; border-color: var(--purple); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(109,40,217,.25); }
+.word-chip.dragging { opacity: .35; cursor: grabbing; transform: scale(.95); }
+.word-chip.used { opacity: .4; cursor: default; background: #F3F4F6; border-color: #D1D5DB; color: var(--text-soft); }
+.word-chip.used:hover { transform: none; box-shadow: 0 2px 6px rgba(109,40,217,.12); background: #F3F4F6; color: var(--text-soft); }
+
+/* canvas wrapper */
+.canvas-wrap {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  position: relative;
+}
+.canvas-inner {
+  position: relative; width: 100%; line-height: 0;
+  user-select: none;
+}
+.canvas-inner img { width: 100%; height: auto; display: block; pointer-events: none; }
+
+/* drop zones */
+.drop-zone {
+  position: absolute;
+  border: 2.5px dashed var(--purple-mid);
+  border-radius: var(--radius-xs);
+  background: rgba(237,233,254,.5);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+  cursor: default;
+  overflow: hidden;
+}
+.drop-zone.drag-over {
+  border-color: var(--yellow);
+  border-style: solid;
+  background: rgba(254,243,199,.65);
+  box-shadow: 0 0 0 4px rgba(245,158,11,.2);
+  transform: scale(1.03);
+}
+.drop-zone.correct {
+  border-color: var(--green);
+  border-style: solid;
+  background: var(--green-light);
+  animation: pop .35s ease;
+}
+.drop-zone.wrong {
+  border-color: var(--red);
+  border-style: solid;
+  background: var(--red-light);
+  animation: shake .4s ease;
+}
+.drop-zone.filled-neutral {
+  border-color: var(--purple);
+  border-style: solid;
+  background: var(--purple-light);
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px); }
+  40%      { transform: translateX(5px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+.dz-badge {
+  position: absolute; top: -10px; left: -10px;
+  width: 20px; height: 20px;
+  background: var(--purple); color: #fff;
+  border-radius: 50%; font-size: 10px;
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.dz-content {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px;
+  text-align: center; padding: 2px 6px;
+  pointer-events: none;
+}
+.dz-content.state-empty { color: rgba(139,92,246,.5); font-size: 11px; font-weight: 600; }
+.dz-content.state-filled { color: var(--purple); }
+.dz-content.state-correct { color: var(--green); }
+.dz-content.state-wrong { color: var(--red); }
+
+/* clear chip inside zone */
+.dz-clear {
+  position: absolute; top: -9px; right: -9px;
+  width: 18px; height: 18px;
+  background: var(--purple-mid); color: #fff;
+  border: none; border-radius: 50%; cursor: pointer;
+  font-size: 11px; font-weight: 800;
+  display: none; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.dz-clear:hover { background: var(--red); }
+.drop-zone.filled-neutral .dz-clear,
+.drop-zone.wrong .dz-clear { display: flex; }
+
+/* ─── Check bar ───────────────────────────────── */
+.check-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  box-shadow: var(--shadow-sm);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.check-bar .left { display: flex; align-items: center; gap: 12px; }
+.score-pill {
+  font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 22px;
+  color: var(--purple);
+}
+.score-label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
+/* ─── Result overlay ──────────────────────────── */
+#result-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(30,27,74,.6);
+  z-index: 500;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(5px);
+}
+#result-overlay.open { display: flex; }
+.result-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 40px 44px;
+  text-align: center;
+  max-width: 420px; width: 90%;
+  animation: slideUp .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.result-emoji { font-size: 64px; display: block; margin-bottom: 10px; }
+.result-title {
+  font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 28px;
+  color: var(--text); margin-bottom: 6px;
+}
+.result-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; }
+.big-score {
+  font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 56px;
+  color: var(--purple); line-height: 1;
+}
+.big-score-label { font-size: 14px; color: var(--text-soft); font-weight: 600; margin-bottom: 28px; }
+.result-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ─── Confetti ────────────────────────────────── */
+.confetti-piece {
+  position: fixed;
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ─── Toast ───────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--text); color: #fff;
+  padding: 10px 18px; border-radius: var(--radius-sm);
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transform: translateY(10px);
+  transition: all .3s; pointer-events: none; z-index: 9998;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.success { background: var(--green); }
+#toast.error   { background: var(--red); }
+
+/* ─── Scrollbar ───────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header>
+  <div class="logo-wrap">
+    <div class="logo-mark">LA</div>
+    <div class="header-title">Lingua<span>AI</span></div>
+    <div class="badge-student">Student Mode</div>
+  </div>
+  <div class="progress-wrap" id="progress-wrap" style="display:none">
+    <span id="progress-text">0 / 0</span>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+</header>
+
+<!-- ════ MAIN ════ -->
+<main class="main" id="main">
+
+  <!-- LOAD SCREEN -->
+  <div id="load-screen">
+    <div class="load-hero">
+      <span class="hero-emoji">📋</span>
+      <h2>Ready to play?</h2>
+      <p>Ask your teacher for the worksheet code, or paste the JSON below to start the activity.</p>
+    </div>
+
+    <div class="divider-label">Paste worksheet JSON</div>
+    <textarea class="json-paste-area" id="json-input" placeholder='Paste your worksheet JSON here…&#10;&#10;{"image": "...", "dropZones": [...], "items": [...]}'></textarea>
+    <div class="load-error" id="load-error">⚠️ That doesn't look like a valid worksheet. Check the JSON and try again.</div>
+    <button class="btn btn-primary" id="btn-load" style="width:100%">▶ Start Worksheet</button>
+
+    <div class="divider-label">or try a demo</div>
+    <div class="demo-row">
+      <button class="btn btn-ghost btn-sm" id="btn-demo">🦁 Load Animal Demo</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen">
+    <!-- word bank above (conditional) -->
+    <div class="word-bank-strip" id="strip-above" style="display:none">
+      <div class="strip-label">📚 Word Bank — drag a word onto the image</div>
+      <div class="word-pool" id="pool-above"></div>
+    </div>
+
+    <!-- image canvas -->
+    <div class="canvas-wrap">
+      <div class="canvas-inner" id="canvas-inner">
+        <img id="ws-img" src="" alt="Worksheet" />
+        <!-- drop zones injected here -->
+      </div>
+    </div>
+
+    <!-- word bank below (conditional) -->
+    <div class="word-bank-strip" id="strip-below">
+      <div class="strip-label">📚 Word Bank — drag a word onto the image</div>
+      <div class="word-pool" id="pool-below"></div>
+    </div>
+
+    <!-- check bar -->
+    <div class="check-bar">
+      <div class="left">
+        <div>
+          <div class="score-pill" id="score-pill">0 / 0</div>
+          <div class="score-label">correct answers</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" id="btn-reset">↺ Reset</button>
+        <button class="btn btn-primary" id="btn-check">✓ Check Answers</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ════ RESULT OVERLAY ════ -->
+<div id="result-overlay">
+  <div class="result-card">
+    <span class="result-emoji" id="res-emoji">🎉</span>
+    <div class="result-title" id="res-title">Great work!</div>
+    <div class="result-sub" id="res-sub">Here's how you did:</div>
+    <div class="big-score" id="res-score">0</div>
+    <div class="big-score-label" id="res-label">out of 0 correct</div>
+    <div class="result-actions">
+      <button class="btn btn-ghost" id="res-retry">↺ Try Again</button>
+      <button class="btn btn-green" id="res-new">📋 Load New Worksheet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TOAST ════ -->
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   DEMO DATA — a sample worksheet to test with
+══════════════════════════════════════════ */
+const DEMO = {
+  image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Biharwe_1.jpg/640px-Biharwe_1.jpg",
+  wordBankPosition: "below",
+  dropZones: [
+    { id: 1, x: 18, y: 35, w: 100, h: 36, answer: "cow" },
+    { id: 2, x: 60, y: 25, w: 100, h: 36, answer: "tree" },
+    { id: 3, x: 80, y: 65, w: 100, h: 36, answer: "sky" },
+    { id: 4, x: 35, y: 72, w: 100, h: 36, answer: "grass" },
+  ],
+  items: ["cow", "tree", "sky", "grass", "river", "mountain"],
+};
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let ws = null;   // loaded worksheet JSON
+const filled = {};   // dzId -> { wordText, correct: null|bool }
+let dragWord = null; // text of word being dragged
+let checked = false;
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+const $toast = document.getElementById('toast');
+let toastT;
+function toast(msg, type = '') {
+  $toast.textContent = msg;
+  $toast.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { $toast.className = ''; }, 2600);
+}
+
+/* ══════════════════════════════════════════
+   LOAD SCREEN LOGIC
+══════════════════════════════════════════ */
+document.getElementById('btn-load').addEventListener('click', () => {
+  const raw = document.getElementById('json-input').value.trim();
+  if (!raw) { showError('Please paste a worksheet JSON first.'); return; }
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch { showError(); return; }
+  if (!parsed.dropZones || !parsed.items) { showError(); return; }
+  launchWorksheet(parsed);
+});
+
+document.getElementById('btn-demo').addEventListener('click', () => launchWorksheet(DEMO));
+
+function showError(msg) {
+  const el = document.getElementById('load-error');
+  if (msg) el.textContent = '⚠️ ' + msg;
+  else el.textContent = '⚠️ That doesn\'t look like a valid worksheet. Check the JSON and try again.';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+/* ══════════════════════════════════════════
+   LAUNCH WORKSHEET
+══════════════════════════════════════════ */
+function launchWorksheet(data) {
+  ws = data;
+  checked = false;
+  Object.keys(filled).forEach(k => delete filled[k]);
+  dragWord = null;
+
+  document.getElementById('load-screen').style.display = 'none';
+  const $game = document.getElementById('game-screen');
+  $game.style.display = 'flex';
+
+  // image
+  const $img = document.getElementById('ws-img');
+  $img.src = data.image || '';
+  $img.style.display = data.image ? 'block' : 'none';
+
+  // word bank position
+  const above = (data.wordBankPosition || 'below') === 'above';
+  document.getElementById('strip-above').style.display = above ? '' : 'none';
+  document.getElementById('strip-below').style.display = above ? 'none' : '';
+
+  renderWordBank();
+  renderDropZones();
+  updateScorePill();
+  updateProgress();
+
+  // show progress
+  document.getElementById('progress-wrap').style.display = 'flex';
+}
+
+/* ══════════════════════════════════════════
+   WORD BANK
+══════════════════════════════════════════ */
+function renderWordBank() {
+  const pos = (ws.wordBankPosition || 'below') === 'above' ? 'above' : 'below';
+  const $pool = document.getElementById('pool-' + pos);
+  $pool.innerHTML = '';
+
+  // shuffle items for fun
+  const items = [...ws.items].sort(() => Math.random() - .5);
+
+  items.forEach(text => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = text;
+    chip.dataset.word = text;
+    chip.draggable = true;
+
+    chip.addEventListener('dragstart', e => {
+      if (isWordUsed(text)) { e.preventDefault(); return; }
+      dragWord = text;
+      chip.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', text);
+    });
+    chip.addEventListener('dragend', () => {
+      chip.classList.remove('dragging');
+      dragWord = null;
+    });
+
+    // touch support
+    chip.addEventListener('touchstart', touchStart, { passive: true });
+
+    $pool.appendChild(chip);
+    refreshChipState(text);
+  });
+}
+
+function isWordUsed(text) {
+  return Object.values(filled).some(f => f.wordText === text);
+}
+
+function refreshChipState(text) {
+  const pos = (ws.wordBankPosition || 'below') === 'above' ? 'above' : 'below';
+  const $pool = document.getElementById('pool-' + pos);
+  const chip = [...$pool.querySelectorAll('.word-chip')].find(c => c.dataset.word === text);
+  if (!chip) return;
+  const used = isWordUsed(text);
+  chip.classList.toggle('used', used);
+  chip.draggable = !used;
+}
+
+/* ══════════════════════════════════════════
+   DROP ZONES
+══════════════════════════════════════════ */
+function renderDropZones() {
+  const $canvas = document.getElementById('canvas-inner');
+  // remove old zones
+  $canvas.querySelectorAll('.drop-zone').forEach(el => el.remove());
+
+  ws.dropZones.forEach(dz => {
+    const el = document.createElement('div');
+    el.className = 'drop-zone';
+    el.dataset.dzId = dz.id;
+
+    // position using pct
+    el.style.left   = `calc(${dz.x}% - ${dz.w / 2}px)`;
+    el.style.top    = `calc(${dz.y}% - ${dz.h / 2}px)`;
+    el.style.width  = dz.w + 'px';
+    el.style.height = dz.h + 'px';
+
+    // badge
+    const badge = document.createElement('div');
+    badge.className = 'dz-badge';
+    badge.textContent = dz.id;
+    el.appendChild(badge);
+
+    // content label
+    const content = document.createElement('div');
+    content.className = 'dz-content state-empty';
+    content.textContent = '···';
+    el.appendChild(content);
+
+    // clear button
+    const clr = document.createElement('button');
+    clr.className = 'dz-clear';
+    clr.textContent = '×';
+    clr.title = 'Remove';
+    clr.addEventListener('click', e => { e.stopPropagation(); clearZone(dz.id); });
+    el.appendChild(clr);
+
+    // drag events
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (dragWord) el.classList.add('drag-over');
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      dropIntoZone(dz.id);
+    });
+
+    // touch drop target (handled globally)
+    el.addEventListener('touchend', e => handleTouchDrop(e, dz.id));
+
+    $canvas.appendChild(el);
+  });
+}
+
+/* ══════════════════════════════════════════
+   DROP LOGIC
+══════════════════════════════════════════ */
+function dropIntoZone(dzId) {
+  if (!dragWord) return;
+  if (checked) { toast('Reset the worksheet to try again', 'error'); return; }
+  setZoneWord(dzId, dragWord);
+  dragWord = null;
+}
+
+function setZoneWord(dzId, word) {
+  // free previous word in this zone if any
+  if (filled[dzId]) {
+    refreshChipState(filled[dzId].wordText);
+  }
+  // also free this word from any other zone it was in
+  Object.entries(filled).forEach(([id, f]) => {
+    if (f.wordText === word && parseInt(id) !== dzId) {
+      delete filled[id];
+      updateZoneEl(parseInt(id));
+      refreshChipState(word);
+    }
+  });
+
+  filled[dzId] = { wordText: word, correct: null };
+  updateZoneEl(dzId);
+  refreshChipState(word);
+  updateScorePill();
+  updateProgress();
+}
+
+function clearZone(dzId) {
+  if (checked) return;
+  const prev = filled[dzId];
+  if (prev) { refreshChipState(prev.wordText); }
+  delete filled[dzId];
+  updateZoneEl(dzId);
+  updateScorePill();
+  updateProgress();
+}
+
+function updateZoneEl(dzId) {
+  const el = document.querySelector(`.drop-zone[data-dz-id="${dzId}"]`);
+  if (!el) return;
+  const content = el.querySelector('.dz-content');
+  const entry = filled[dzId];
+
+  el.classList.remove('filled-neutral', 'correct', 'wrong');
+
+  if (!entry) {
+    content.className = 'dz-content state-empty';
+    content.textContent = '···';
+  } else {
+    content.textContent = entry.wordText;
+    if (entry.correct === null) {
+      el.classList.add('filled-neutral');
+      content.className = 'dz-content state-filled';
+    } else if (entry.correct) {
+      el.classList.add('correct');
+      content.className = 'dz-content state-correct';
+    } else {
+      el.classList.add('wrong');
+      content.className = 'dz-content state-wrong';
+    }
+  }
+}
+
+/* ══════════════════════════════════════════
+   CHECK ANSWERS
+══════════════════════════════════════════ */
+document.getElementById('btn-check').addEventListener('click', checkAnswers);
+
+function checkAnswers() {
+  const total = ws.dropZones.length;
+  const answeredCount = Object.keys(filled).length;
+
+  if (answeredCount < total) {
+    toast(`Fill in all ${total} zones before checking!`, 'error');
+    return;
+  }
+
+  checked = true;
+  let correct = 0;
+
+  ws.dropZones.forEach(dz => {
+    const entry = filled[dz.id];
+    if (!entry) return;
+    const isCorrect = entry.wordText.trim().toLowerCase() === (dz.answer || '').trim().toLowerCase();
+    entry.correct = isCorrect;
+    if (isCorrect) correct++;
+    updateZoneEl(dz.id);
+  });
+
+  updateScorePill(correct, total);
+  showResult(correct, total);
+}
+
+/* ══════════════════════════════════════════
+   RESULT OVERLAY
+══════════════════════════════════════════ */
+function showResult(correct, total) {
+  const pct = total > 0 ? correct / total : 0;
+  const emoji = pct === 1 ? '🏆' : pct >= .7 ? '🎉' : pct >= .4 ? '😊' : '💪';
+  const title = pct === 1 ? 'Perfect score!' : pct >= .7 ? 'Great work!' : pct >= .4 ? 'Good effort!' : 'Keep practicing!';
+  const sub   = pct === 1 ? 'You got every single one right!' : `You answered ${correct} out of ${total} correctly.`;
+
+  document.getElementById('res-emoji').textContent = emoji;
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-sub').textContent   = sub;
+  document.getElementById('res-score').textContent = correct;
+  document.getElementById('res-label').textContent = `out of ${total} correct`;
+
+  document.getElementById('result-overlay').classList.add('open');
+
+  if (pct >= .7) spawnConfetti();
+}
+
+document.getElementById('res-retry').addEventListener('click', () => {
+  document.getElementById('result-overlay').classList.remove('open');
+  resetWorksheet();
+});
+
+document.getElementById('res-new').addEventListener('click', () => {
+  document.getElementById('result-overlay').classList.remove('open');
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('load-screen').style.display = '';
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('json-input').value = '';
+  ws = null;
+});
+
+/* ══════════════════════════════════════════
+   RESET
+══════════════════════════════════════════ */
+document.getElementById('btn-reset').addEventListener('click', resetWorksheet);
+
+function resetWorksheet() {
+  checked = false;
+  Object.keys(filled).forEach(k => delete filled[k]);
+  dragWord = null;
+  renderWordBank();
+  renderDropZones();
+  updateScorePill();
+  updateProgress();
+}
+
+/* ══════════════════════════════════════════
+   SCORE & PROGRESS
+══════════════════════════════════════════ */
+function updateScorePill(correct, total) {
+  if (!ws) return;
+  const t = total !== undefined ? total : ws.dropZones.length;
+  const c = correct !== undefined ? correct : Object.values(filled).filter(f => f.correct === true).length;
+  const filled_count = Object.keys(filled).length;
+  document.getElementById('score-pill').textContent = checked
+    ? `${c} / ${t}`
+    : `${filled_count} / ${t} filled`;
+}
+
+function updateProgress() {
+  if (!ws) return;
+  const total = ws.dropZones.length;
+  const filled_count = Object.keys(filled).length;
+  const pct = total > 0 ? (filled_count / total) * 100 : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${filled_count} / ${total}`;
+}
+
+/* ══════════════════════════════════════════
+   CONFETTI
+══════════════════════════════════════════ */
+const CONFETTI_COLORS = ['#6D28D9','#F59E0B','#10B981','#EF4444','#3B82F6','#EC4899'];
+function spawnConfetti() {
+  for (let i = 0; i < 80; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top  = '-10px';
+    piece.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    piece.style.width  = (Math.random() * 8 + 6) + 'px';
+    piece.style.height = (Math.random() * 8 + 6) + 'px';
+    piece.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+    piece.style.animationDuration = (Math.random() * 1.8 + 1.2) + 's';
+    piece.style.animationDelay    = (Math.random() * .6) + 's';
+    document.body.appendChild(piece);
+    piece.addEventListener('animationend', () => piece.remove());
+  }
+}
+
+/* ══════════════════════════════════════════
+   TOUCH DRAG SUPPORT (mobile)
+══════════════════════════════════════════ */
+let touchDragWord = null;
+let touchGhost   = null;
+
+function touchStart(e) {
+  const chip = e.currentTarget;
+  const word = chip.dataset.word;
+  if (isWordUsed(word)) return;
+  touchDragWord = word;
+
+  // create ghost
+  touchGhost = chip.cloneNode(true);
+  touchGhost.style.position = 'fixed';
+  touchGhost.style.pointerEvents = 'none';
+  touchGhost.style.zIndex = '9999';
+  touchGhost.style.opacity = '.8';
+  touchGhost.style.transform = 'scale(1.1)';
+  document.body.appendChild(touchGhost);
+
+  const t = e.touches[0];
+  touchGhost.style.left = (t.clientX - 40) + 'px';
+  touchGhost.style.top  = (t.clientY - 20) + 'px';
+}
+
+document.addEventListener('touchmove', e => {
+  if (!touchGhost) return;
+  const t = e.touches[0];
+  touchGhost.style.left = (t.clientX - 40) + 'px';
+  touchGhost.style.top  = (t.clientY - 20) + 'px';
+  e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('touchend', e => {
+  if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+  touchDragWord = null;
+});
+
+function handleTouchDrop(e, dzId) {
+  if (!touchDragWord) return;
+  e.preventDefault();
+  setZoneWord(dzId, touchDragWord);
+  if (touchGhost) { touchGhost.remove(); touchGhost = null; }
+  touchDragWord = null;
+}
+</script>
+</body>
+</html>
