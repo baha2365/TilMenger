@@ -416,6 +416,16 @@
     }
     .card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 1.2rem; color: var(--ink); }
 
+    /* ══════════════════════════════════════════
+       ── My Classes Card ──
+       Students only, shown if enrolled in 1+ classes.
+       Hidden by default; JS unhides it once data loads.
+    ══════════════════════════════════════════ */
+    #my-classes-card {
+      display: none; /* hidden until JS confirms the student has classes */
+      margin-bottom: 1.5rem;
+    }
+
     /* ── Lesson items ── */
     .lesson-list { display: flex; flex-direction: column; gap: 0.8rem; }
     .lesson-item {
@@ -428,6 +438,8 @@
     .lesson-item:hover { border-color: var(--rust); transform: translateX(4px); }
     .lesson-item.lesson-vocab { border-color: rgba(127,119,221,0.3); }
     .lesson-item.lesson-vocab:hover { border-color: #7F77DD; }
+    .lesson-item.lesson-class { border-color: rgba(74,103,65,0.3); }
+    .lesson-item.lesson-class:hover { border-color: var(--sage); }
     .lesson-emoji { font-size: 1.3rem; flex-shrink: 0; }
     .lesson-info  { flex: 1; min-width: 0; }
     .lesson-name  { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
@@ -550,6 +562,14 @@
     <div class="vocab-arrow">→</div>
   </a>
 
+  <!-- ── My Classes Card (students only, shown if enrolled in 1+ classes) ── -->
+  <div class="card" id="my-classes-card" style="margin-top: 1.5rem;">
+    <div class="card-title">🏫 My Classes</div>
+    <div class="lesson-list" id="myClassesList">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
   <!-- Sections -->
   <div class="sections-row" style="margin-top: 1.5rem;">
     <div class="card">
@@ -589,8 +609,9 @@
 </main>
 <script src="/config.js"></script>
 <script>
-  const API   = LINGUA.auth;
-  const VOCAB = LINGUA.vocab;
+  const API          = LINGUA.auth;
+  const VOCAB        = LINGUA.vocab;
+  const STUDENT_API  = 'http://localhost:3030/api/student';
 
   function logout() {
     localStorage.removeItem('token');
@@ -607,6 +628,12 @@
     `;
   }
 
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   function renderUser(user) {
     const firstName = user.name.split(' ')[0];
     document.getElementById('greetName').textContent  = firstName;
@@ -616,11 +643,16 @@
     document.title = `LinguaAI — ${firstName}'s Dashboard`;
 
     // ── Role-based visibility ──
-    // Show the teacher banner ONLY if role_id is '2' (teacher).
-    // For any other role (students, admins, unknown) it stays hidden.
     const roleId = localStorage.getItem('role_id');
+
+    // Show the teacher banner ONLY if role_id is '2' (teacher).
     if (roleId === '2') {
       document.getElementById('teacher-dashboard-link').style.display = 'block';
+    }
+
+    // Load "My Classes" only for students (role_id === '1').
+    if (roleId === '1') {
+      loadMyClasses();
     }
 
     document.getElementById('statusScreen').style.display = 'none';
@@ -634,6 +666,44 @@
       return;
     }
     window.location.href = 'teachers_section/teacher_dashboard.html';
+  }
+
+  /* ── My Classes (students only) ── */
+  async function loadMyClasses() {
+    const token = localStorage.getItem('token');
+    try {
+      const res  = await fetch(`${STUDENT_API}/classes`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (!data.success || !data.classes.length) return; // stays hidden — no classes yet
+
+      const list = document.getElementById('myClassesList');
+      list.innerHTML = '';
+
+      data.classes.forEach(cls => {
+        const a = document.createElement('a');
+        a.href = `student_class_details.html?id=${cls.id}`;
+        a.className = 'lesson-item lesson-class';
+        a.style.textDecoration = 'none';
+
+        const statusText = cls.is_active ? 'Active' : 'Inactive';
+        const scheduleText = cls.schedule ? ` · ${escHtml(cls.schedule)}` : '';
+
+        a.innerHTML = `
+          <span class="lesson-emoji">🏫</span>
+          <div class="lesson-info">
+            <div class="lesson-name">${escHtml(cls.name)}</div>
+            <div class="lesson-meta">${escHtml(cls.course_name)} · ${statusText}${scheduleText}</div>
+          </div>
+          <span class="lesson-arrow">→</span>
+        `;
+        list.appendChild(a);
+      });
+
+      document.getElementById('my-classes-card').style.display = 'block';
+    } catch (e) { /* My Classes is non-critical, fail silently */ }
   }
 
   async function loadVocabProgress() {

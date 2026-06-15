@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LinguaAI — My Class</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0C0A08;
+      --surface:      #181410;
+      --surface-2:    #211D17;
+      --surface-3:    #2A2520;
+      --border:       rgba(212, 168, 83, 0.1);
+      --border-2:     rgba(212, 168, 83, 0.18);
+      --rust:         #D4622E;
+      --rust-dark:    #B8501F;
+      --rust-glow:    rgba(212, 98, 46, 0.35);
+      --gold:         #E8B84A;
+      --gold-dim:     rgba(232, 184, 74, 0.15);
+      --text:         #F0EAE0;
+      --text-2:       #A89D92;
+      --text-3:       #6B6058;
+      --success:      #5DBF8A;
+      --success-bg:   rgba(93, 191, 138, 0.1);
+      --success-bd:   rgba(93, 191, 138, 0.22);
+      --error:        #E85252;
+      --error-bg:     rgba(232, 82, 82, 0.1);
+      --error-bd:     rgba(232, 82, 82, 0.25);
+      --radius:       14px;
+      --radius-sm:    9px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(212,168,83,0.045) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── NAV ─────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: rgba(12, 10, 8, 0.82);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    .brand-mark {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--rust) 0%, var(--gold) 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 12px var(--rust-glow);
+    }
+    .brand em { font-style: normal; color: var(--gold); }
+
+    .nav-back {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-3);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 0.38rem 0.95rem;
+      border-radius: 7px;
+      transition: color 0.18s, border-color 0.18s, background 0.18s;
+    }
+    .nav-back:hover { color: var(--text); border-color: var(--border-2); background: var(--surface-2); }
+
+    /* ─── PAGE ───────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.8rem 1.5rem 6rem;
+    }
+
+    /* ─── BREADCRUMB ─────────────────────────── */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.76rem;
+      color: var(--text-3);
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+    }
+    .breadcrumb a {
+      color: var(--text-3);
+      text-decoration: none;
+      transition: color 0.18s;
+      white-space: nowrap;
+    }
+    .breadcrumb a:hover { color: var(--text-2); }
+    .breadcrumb-sep     { opacity: 0.35; flex-shrink: 0; }
+    .breadcrumb-current {
+      color: var(--text-2);
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 280px;
+    }
+
+    /* ─── SKELETON ───────────────────────────── */
+    .hero-skeleton {
+      height: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ─── CLASS HERO ─────────────────────────── */
+    .class-hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(148deg, #15120C 0%, var(--surface) 50%, #0F0D09 100%);
+      border: 1px solid var(--border-2);
+      border-radius: 18px;
+      padding: 2rem 2rem 1.8rem;
+      margin-bottom: 2rem;
+      display: none;
+    }
+
+    .class-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(212,98,46,0.5) 15%,
+        var(--gold) 45%,
+        rgba(232,184,74,0.5) 70%,
+        transparent 100%
+      );
+    }
+
+    .class-hero::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 180px;
+      background: radial-gradient(ellipse at top right,
+        rgba(232,184,74,0.1) 0%, rgba(212,98,46,0.05) 50%, transparent 70%
+      );
+      pointer-events: none;
+    }
+
+    .hero-layout {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-main { flex: 1; min-width: 0; }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+      opacity: 0.9;
+    }
+    .hero-eyebrow-line {
+      display: block;
+      width: 16px; height: 2px;
+      border-radius: 2px;
+      background: var(--gold);
+    }
+
+    .hero-title {
+      font-size: clamp(1.45rem, 3.5vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--text) 30%, var(--text-2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.6rem;
+    }
+
+    .hero-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.18rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .badge-active   { background: var(--success-bg);  color: var(--success); border: 1px solid var(--success-bd); }
+    .badge-inactive { background: var(--surface-3);   color: var(--text-3);  border: 1px solid var(--border); }
+    .badge-schedule { background: rgba(212,98,46,0.1); color: var(--rust);   border: 1px solid rgba(212,98,46,0.22); }
+
+    .hero-desc {
+      font-size: 0.83rem;
+      color: var(--text-2);
+      margin-top: 0.6rem;
+      line-height: 1.65;
+      max-width: 480px;
+      display: none;
+    }
+
+    /* "Course: X · Teacher: Y" line */
+    .hero-context {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.65rem;
+      font-size: 0.73rem;
+      color: var(--text-3);
+    }
+    .hero-context strong { color: var(--gold); font-weight: 600; }
+    .hero-context .ctx-sep { opacity: 0.35; }
+
+    .hero-meta { font-size: 0.72rem; color: var(--text-3); margin-top: 0.4rem; }
+
+    /* Stats cluster */
+    .hero-stats {
+      display: flex;
+      gap: 0.6rem;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 76px;
+      padding: 0.75rem 1rem;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .hero-stat-val {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .hero-stat-lbl {
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-3);
+      margin-top: 0.28rem;
+    }
+
+    /* ─── FEEDBACK ───────────────────────────── */
+    #feedback {
+      overflow: hidden;
+      max-height: 0;
+      margin-bottom: 0;
+      transition: max-height 0.35s ease, margin-bottom 0.35s ease;
+    }
+    #feedback.show { max-height: 80px; margin-bottom: 1.2rem; }
+    .fb-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 1.1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+    #feedback.err .fb-inner { background: var(--error-bg); border: 1px solid var(--error-bd); color: var(--error); }
+
+    /* ─── SECTION BAR ────────────────────────── */
+    .section-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.9rem;
+    }
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-3);
+    }
+    .section-hint {
+      font-size: 0.7rem;
+      color: var(--text-3);
+    }
+
+    /* ─── STATES ─────────────────────────────── */
+    #loadingState {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 4rem 2rem;
+      color: var(--text-3);
+      font-size: 0.84rem;
+    }
+    #emptyState {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+      border: 1px dashed var(--border-2);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .empty-emoji { font-size: 2.2rem; margin-bottom: 0.9rem; opacity: 0.7; }
+    .empty-h     { font-size: 1rem; font-weight: 600; color: var(--text-2); margin-bottom: 0.3rem; }
+    .empty-p     { font-size: 0.82rem; color: var(--text-3); }
+
+    /* ═══════════════════════════════════════════
+       ROSTER PANEL — read-only classmates list
+    ═══════════════════════════════════════════ */
+    .roster-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .roster-header {
+      display: grid;
+      grid-template-columns: 36px 1fr 100px 130px 70px;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.6rem 1.3rem 0.6rem 1.5rem;
+      background: rgba(0,0,0,0.18);
+      border-bottom: 1px solid var(--border);
+    }
+    .roster-col-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-3);
+    }
+    .roster-col-label.align-right { text-align: right; }
+
+    /* Individual student row */
+    .student-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 100px 130px 70px;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1.3rem 0.85rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      transition: background 0.15s;
+      animation: rowIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .student-row:last-child { border-bottom: none; }
+    .student-row:hover      { background: rgba(212,168,83,0.028); }
+    .student-row.is-you     { background: rgba(232,184,74,0.035); }
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* Subtle left accent on hover / for "you" */
+    .student-row::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 10px; bottom: 10px;
+      width: 2px;
+      border-radius: 0 2px 2px 0;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .student-row:hover::before,
+    .student-row.is-you::before { opacity: 0.6; }
+
+    /* Avatar with deterministic color */
+    .student-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    /* 5 color variants — chosen by hash of student name */
+    .av-0 { background: rgba(212,98,46,0.16);  color: var(--rust);    border: 1px solid rgba(212,98,46,0.28); }
+    .av-1 { background: var(--gold-dim);        color: var(--gold);    border: 1px solid rgba(232,184,74,0.28); }
+    .av-2 { background: var(--success-bg);      color: var(--success); border: 1px solid var(--success-bd); }
+    .av-3 { background: rgba(90,130,200,0.12);  color: #8BAED6;        border: 1px solid rgba(90,130,200,0.22); }
+    .av-4 { background: rgba(180,90,200,0.1);   color: #C49ED8;        border: 1px solid rgba(180,90,200,0.2); }
+
+    .student-info { min-width: 0; }
+    .student-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.015em;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+    }
+    .student-name .name-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .you-pill {
+      flex-shrink: 0;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      background: var(--gold-dim);
+      border: 1px solid rgba(232,184,74,0.28);
+      padding: 0.16rem 0.55rem;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .student-level {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-3);
+    }
+
+    .student-date {
+      font-size: 0.68rem;
+      color: var(--text-3);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .student-flag { display: flex; justify-content: flex-end; }
+
+    /* ─── ROSTER FOOTER (count row) ──────────────────────── */
+    .roster-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1.3rem 0.6rem 1.5rem;
+      background: rgba(0,0,0,0.1);
+      border-top: 1px solid var(--border);
+      font-size: 0.68rem;
+      color: var(--text-3);
+    }
+
+    /* ─── SPINNER ────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.18);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.55s linear infinite;
+    }
+    .spinner.dark { border-color: rgba(0,0,0,0.1); border-top-color: var(--text-3); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── SCROLLBAR ───────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+
+    /* ─── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 640px) {
+      .roster-header { display: none; }
+      .student-row {
+        grid-template-columns: 34px 1fr auto;
+        grid-template-rows: auto auto;
+      }
+      .student-level,
+      .student-date  { display: none; }
+      .hero-stats    { width: 100%; }
+      .hero-layout   { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="brand" href="dashboard.html">
+    <div class="brand-mark">✦</div>
+    Lingua<em>AI</em>
+  </a>
+  <a class="nav-back" href="dashboard.html">← Dashboard</a>
+</nav>
+
+<!-- ── PAGE ── -->
+<div class="page">
+
+  <!-- Breadcrumb: Dashboard / Class -->
+  <div class="breadcrumb">
+    <a href="dashboard.html">Dashboard</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current" id="bcClass">Loading…</span>
+  </div>
+
+  <!-- Hero Skeleton -->
+  <div class="hero-skeleton" id="heroSkeleton">
+    <div class="spinner dark"></div>
+  </div>
+
+  <!-- Class Hero -->
+  <div class="class-hero" id="classHero">
+    <div class="hero-layout">
+      <div class="hero-main">
+        <div class="hero-eyebrow"><span class="hero-eyebrow-line"></span> My Class</div>
+        <div class="hero-title"  id="heroTitle">—</div>
+        <div class="hero-badges" id="heroBadges"></div>
+        <div class="hero-desc"   id="heroDesc"></div>
+        <div class="hero-context" id="heroContext"></div>
+        <div class="hero-meta" id="heroMeta"></div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="statTotal">—</div>
+          <div class="hero-stat-lbl">Classmates</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" id="statJoined">—</div>
+          <div class="hero-stat-lbl">You joined</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback -->
+  <div id="feedback"><div class="fb-inner" id="fb-inner"></div></div>
+
+  <!-- Section bar -->
+  <div class="section-bar">
+    <span class="section-label">Classmates</span>
+    <span class="section-hint">Everyone learning alongside you</span>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingState">
+    <div class="spinner dark"></div>
+    Loading classmates…
+  </div>
+
+  <!-- Empty -->
+  <div id="emptyState">
+    <div class="empty-emoji">👤</div>
+    <div class="empty-h">No classmates yet</div>
+    <div class="empty-p">You're the first one here — more students may join soon.</div>
+  </div>
+
+  <!-- Roster panel -->
+  <div id="rosterWrap" style="display:none;">
+    <div class="roster-panel">
+      <!-- Column labels -->
+      <div class="roster-header">
+        <div></div><!-- avatar spacer -->
+        <div class="roster-col-label">Student</div>
+        <div class="roster-col-label">Level</div>
+        <div class="roster-col-label">Enrolled</div>
+        <div class="roster-col-label align-right"></div>
+      </div>
+      <!-- Rows injected here -->
+      <div id="studentList"></div>
+      <!-- Footer -->
+      <div class="roster-footer">
+        <span id="rosterCount">0 students</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+
+<script>
+  /* ══════════════════════════════════════
+     CONFIG
+  ══════════════════════════════════════ */
+  const API      = 'http://localhost:3030/api/student';
+  const AUTH_API = 'http://localhost:3030/api/auth';
+  const token    = () => localStorage.getItem('token');
+  const authH    = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token()}`,
+  });
+
+  const params  = new URLSearchParams(window.location.search);
+  const classId = params.get('id');
+
+  const CLASS_URL      = `${API}/classes/${classId}`;
+  const CLASSMATES_URL = `${API}/classes/${classId}/classmates`;
+
+  let currentUserId = null;
+
+  /* ══════════════════════════════════════
+     FEEDBACK
+  ══════════════════════════════════════ */
+  function showFeedback(msg, type = 'err') {
+    const wrap  = document.getElementById('feedback');
+    const inner = document.getElementById('fb-inner');
+    inner.textContent = '✕ ' + msg;
+    wrap.className    = type + ' show';
+  }
+
+  /* ══════════════════════════════════════
+     AVATAR / FORMAT HELPERS
+  ══════════════════════════════════════ */
+  function avatarClass(name) {
+    let h = 0;
+    for (const c of (name || '')) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+    return `av-${h % 5}`;
+  }
+  function initials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    return parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : parts[0].slice(0, 2).toUpperCase();
+  }
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function fmtDate(d) {
+    return new Date(d).toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+  }
+
+  /* ══════════════════════════════════════
+     LOAD CURRENT USER (to flag "You" in roster)
+  ══════════════════════════════════════ */
+  async function loadMe() {
+    try {
+      const res  = await fetch(`${AUTH_API}/me`, { headers: authH() });
+      const data = await res.json();
+      if (data.success) currentUserId = data.user.id;
+    } catch { /* not critical — roster still renders without the "You" tag */ }
+  }
+
+  /* ══════════════════════════════════════
+     LOAD CLASS (hero)
+  ══════════════════════════════════════ */
+  async function loadClass() {
+    try {
+      const res  = await fetch(CLASS_URL, { headers: authH() });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      renderHero(data.class);
+    } catch {
+      document.getElementById('heroSkeleton').innerHTML =
+        '<span style="color:var(--error);font-size:.8rem;">Could not load class info.</span>';
+    }
+  }
+
+  function renderHero(cls) {
+    document.getElementById('heroSkeleton').style.display = 'none';
+    document.getElementById('classHero').style.display   = 'block';
+
+    document.title = `LinguaAI — ${cls.name}`;
+    document.getElementById('heroTitle').textContent   = cls.name;
+    document.getElementById('bcClass').textContent     = cls.name;
+
+    const activeBadge = cls.is_active
+      ? `<span class="badge badge-active">● Active</span>`
+      : `<span class="badge badge-inactive">● Inactive</span>`;
+    const scheduleBadge = cls.schedule
+      ? `<span class="badge badge-schedule">🕐 ${escHtml(cls.schedule)}</span>`
+      : '';
+    document.getElementById('heroBadges').innerHTML = activeBadge + scheduleBadge;
+
+    if (cls.description) {
+      const el = document.getElementById('heroDesc');
+      el.textContent  = cls.description;
+      el.style.display = 'block';
+    }
+
+    document.getElementById('heroContext').innerHTML =
+      `Course: <strong>${escHtml(cls.course_name)}</strong>` +
+      `<span class="ctx-sep">·</span>Teacher: <strong>${escHtml(cls.teacher_name)}</strong>`;
+
+    const created = fmtDate(cls.created_at);
+    document.getElementById('heroMeta').textContent = `Class created ${created}`;
+
+    document.getElementById('statTotal').textContent  = cls.student_count;
+    document.getElementById('statJoined').textContent = fmtDate(cls.enrolled_at);
+  }
+
+  /* ══════════════════════════════════════
+     LOAD CLASSMATES (roster)
+  ══════════════════════════════════════ */
+  async function loadClassmates() {
+    const loading    = document.getElementById('loadingState');
+    const empty      = document.getElementById('emptyState');
+    const rosterWrap = document.getElementById('rosterWrap');
+    const list       = document.getElementById('studentList');
+
+    try {
+      const res  = await fetch(CLASSMATES_URL, { headers: authH() });
+      const data = await res.json();
+      loading.style.display = 'none';
+
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Failed to load classmates.');
+        return;
+      }
+
+      if (!data.classmates.length) {
+        empty.style.display = 'block';
+        return;
+      }
+
+      rosterWrap.style.display = 'block';
+      data.classmates.forEach((s, i) => {
+        const row = buildRow(s);
+        row.style.animationDelay = `${i * 0.04}s`;
+        list.appendChild(row);
+      });
+
+      const total = data.classmates.length;
+      document.getElementById('rosterCount').textContent =
+        `${total} student${total !== 1 ? 's' : ''}`;
+
+    } catch {
+      loading.style.display = 'none';
+      showFeedback('Could not reach the server.');
+    }
+  }
+
+  /* ══════════════════════════════════════
+     BUILD STUDENT ROW
+  ══════════════════════════════════════ */
+  function buildRow(student) {
+    const el = document.createElement('div');
+    const isYou = currentUserId !== null && String(student.id) === String(currentUserId);
+    el.className = 'student-row' + (isYou ? ' is-you' : '');
+
+    const enrolledDate = fmtDate(student.enrolled_at);
+
+    el.innerHTML = `
+      <div class="student-avatar ${avatarClass(student.name)}">${initials(student.name)}</div>
+      <div class="student-info">
+        <div class="student-name">
+          <span class="name-text">${escHtml(student.name)}</span>
+          ${isYou ? '<span class="you-pill">You</span>' : ''}
+        </div>
+      </div>
+      <div class="student-level">${escHtml(student.level || '—')}</div>
+      <div class="student-date">${enrolledDate}</div>
+      <div class="student-flag"></div>
+    `;
+    return el;
+  }
+
+  /* ══════════════════════════════════════
+     GUARD + INIT
+  ══════════════════════════════════════ */
+  (function init() {
+    const t = localStorage.getItem('token');
+    const r = localStorage.getItem('role_id');
+    if (!t)        { window.location.href = 'index.html';     return; }
+    if (r !== '1') { window.location.href = 'dashboard.html'; return; }
+    if (!classId)  { window.location.href = 'dashboard.html'; return; }
+
+    loadMe().then(() => {
+      loadClass();
+      loadClassmates();
+    });
+  })();
+</script>
+</body>
+</html>

@@ -7,6 +7,8 @@ const vocabRoutes   = require('./vocabRoutes');
 const path = require('path');
 const quizRoutes = require('./quizRoutes');
 const courseRoutes = require('./courseRoutes');
+const studentRoutes = require('./studentRoutes');
+
 
 
 const app  = express();
@@ -38,6 +40,8 @@ app.use('/api/auth',  authRoutes);
 app.use('/api/vocab', vocabRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/student', studentRoutes);
+
 
 app.use(express.static(path.join(__dirname, "..")));
 
