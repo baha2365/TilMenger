@@ -16,6 +16,8 @@
     "express": "^5.2.1",
     "node-fetch": "^3.3.2",
     "resend": "^6.12.4",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "uuid": "^14.0.0"
   }
 }
