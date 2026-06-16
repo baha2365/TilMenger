@@ -58,7 +58,6 @@
     text-align: center;
   }
 
-  /* ─── LAYOUT ─── */
   .game-wrap {
     display: flex;
     gap: 16px;
@@ -83,7 +82,7 @@
     width: min(700px, 98vw);
     height: min(700px, 98vw);
     flex-shrink: 0;
-    position: relative;
+    position: relative; /* tokens are absolute children of the board */
   }
 
   .cell {
@@ -117,7 +116,6 @@
     flex-shrink: 0;
   }
 
-  /* color types */
   .cell.red    { background: #fde8e8; } .cell.red    .color-bar { background: var(--red); }
   .cell.yellow { background: #fdf8dd; } .cell.yellow .color-bar { background: var(--yellow); }
   .cell.green  { background: #e2f7e8; } .cell.green  .color-bar { background: var(--green); }
@@ -126,21 +124,15 @@
   .cell.brown  { background: #f5e8d8; } .cell.brown  .color-bar { background: var(--brown); }
   .cell.orange { background: #ffeedd; } .cell.orange .color-bar { background: var(--orange); }
 
-  /* special cells */
-  .cell.corner-start { background: #fff9e0; border: 3px solid var(--red); }
+  .cell.corner-start  { background: #fff9e0; border: 3px solid var(--red); }
   .cell.corner-finish { background: #fff9e0; border: 3px solid var(--green); }
-  .cell.corner-paf { background: linear-gradient(135deg, #5b21b6, #9333ea); color: white; border: 3px solid #ffd700; }
-  .cell.corner-bonus { background: linear-gradient(135deg, #065f46, #10b981); border: 3px solid var(--gold); }
-
+  .cell.corner-paf    { background: linear-gradient(135deg, #5b21b6, #9333ea); color: white; border: 3px solid #ffd700; }
+  .cell.corner-bonus  { background: linear-gradient(135deg, #065f46, #10b981); border: 3px solid var(--gold); }
   .cell.question-cell { background: #fff7e0; }
   .cell.exclaim-cell  { background: #fff0f0; }
 
-  .cell-icon {
-    font-size: clamp(10px, 2.2vw, 22px);
-    line-height: 1;
-  }
+  .cell-icon { font-size: clamp(10px, 2.2vw, 22px); line-height: 1; }
 
-  /* corner text sizes */
   .cell.corner-start .cell-text,
   .cell.corner-finish .cell-text,
   .cell.corner-paf .cell-text,
@@ -149,7 +141,7 @@
     font-weight: 800;
   }
 
-  /* center area */
+  /* ─── CENTER ─── */
   .center {
     grid-column: 2 / 11;
     grid-row: 2 / 8;
@@ -163,6 +155,7 @@
     padding: 12px;
     position: relative;
     overflow: hidden;
+    pointer-events: none; /* tokens fly over the center */
   }
 
   .center-title {
@@ -179,35 +172,46 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
 
-  .center-sub {
-    font-size: clamp(0.45rem, 1.1vw, 0.75rem);
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #1a3a5c;
-    text-align: center;
-    letter-spacing: 1px;
-  }
-
-  /* Player tokens on board */
+  /* ─── PLAYER TOKENS ─── */
+  /*
+    Tokens are now absolutely positioned inside .board
+    (position: absolute; top: 0; left: 0) and moved via
+    CSS transform translate(). The Web Animations API
+    handles the jump arc between cells.
+  */
   .token {
-    width: clamp(12px, 2.2vw, 22px);
-    height: clamp(12px, 2.2vw, 22px);
+    width: clamp(14px, 2.4vw, 24px);
+    height: clamp(14px, 2.4vw, 24px);
     border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    border: 2.5px solid rgba(255,255,255,0.9);
     position: absolute;
-    transition: all 0.4s ease;
-    z-index: 5;
+    top: 0;
+    left: 0;
+    z-index: 30;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(6px, 1.2vw, 10px);
+    font-size: clamp(7px, 1.3vw, 11px);
     font-weight: 800;
     color: white;
-    cursor: grab;
+    pointer-events: none;
+    will-change: transform;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.45);
   }
 
-  /* ─── SIDEBAR PANEL ─── */
+  /* Shadow disc that sits beneath each token */
+  .token-shadow {
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 29;
+    background: rgba(0,0,0,0.25);
+    pointer-events: none;
+    will-change: transform, width, height, opacity;
+  }
+
+  /* ─── SIDEBAR ─── */
   .sidebar {
     display: flex;
     flex-direction: column;
@@ -234,7 +238,6 @@
     text-transform: uppercase;
   }
 
-  /* Dice */
   .dice-wrap { text-align: center; }
   .dice {
     width: 72px; height: 72px;
@@ -259,19 +262,10 @@
     75% { transform: rotate(270deg) scale(0.9); }
     100%{ transform: rotate(360deg) scale(1); }
   }
-  .dot {
-    width: 100%; height: 100%;
-    background: #1a3a5c;
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
+  .dot { width:100%;height:100%;background:#1a3a5c;border-radius:50%;display:none;align-items:center;justify-content:center; }
   .dot.on { display: flex; }
 
-  .dice-result {
-    color: white; font-size: 0.85rem; font-weight: 700; margin-top: 4px;
-  }
+  .dice-result { color: white; font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
   .roll-btn {
     background: var(--red);
     color: white; border: none; border-radius: 8px;
@@ -283,10 +277,10 @@
     transition: transform 0.1s, box-shadow 0.1s;
     width: 100%;
   }
-  .roll-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #8b0000; }
-  .roll-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #8b0000; }
+  .roll-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 0 #8b0000; }
+  .roll-btn:active { transform: translateY(2px);  box-shadow: 0 2px 0 #8b0000; }
+  .roll-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-  /* Players */
   .players-list { display: flex; flex-direction: column; gap: 6px; }
   .player-row {
     display: flex; align-items: center; gap: 8px;
@@ -296,222 +290,115 @@
     transition: background 0.2s;
   }
   .player-row.active { background: rgba(255,215,0,0.15); border-color: var(--gold); }
-  .player-dot {
-    width: 24px; height: 24px; border-radius: 50%; border: 2px solid white;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem; font-weight: 800; color: white; flex-shrink: 0;
-  }
-  .player-info { flex: 1; min-width: 0; }
-  .player-name { color: white; font-size: 0.78rem; font-weight: 700; }
-  .player-pos  { color: rgba(255,255,255,0.55); font-size: 0.65rem; }
-  .player-score{ color: var(--gold); font-size: 0.8rem; font-weight: 800; }
+  .player-dot { width:24px;height:24px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:white;flex-shrink:0; }
+  .player-info { flex:1; min-width:0; }
+  .player-name { color:white; font-size:0.78rem; font-weight:700; }
+  .player-pos  { color:rgba(255,255,255,0.55); font-size:0.65rem; }
+  .player-score{ color:var(--gold); font-size:0.8rem; font-weight:800; }
 
-  /* Turn indicator */
-  .turn-box {
-    text-align: center;
-    padding: 8px;
-    background: rgba(255,215,0,0.12);
-    border-radius: 8px;
-    border: 1.5px solid rgba(255,215,0,0.3);
-  }
-  .turn-label { color: rgba(255,255,255,0.6); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
-  .turn-name  { color: var(--gold); font-family: 'Fredoka One', cursive; font-size: 1.1rem; letter-spacing: 1px; }
+  .turn-box { text-align:center;padding:8px;background:rgba(255,215,0,0.12);border-radius:8px;border:1.5px solid rgba(255,215,0,0.3); }
+  .turn-label { color:rgba(255,255,255,0.6);font-size:0.7rem;text-transform:uppercase;letter-spacing:1px; }
+  .turn-name  { color:var(--gold);font-family:'Fredoka One',cursive;font-size:1.1rem;letter-spacing:1px; }
 
-  /* Color legend */
-  .legend { display: flex; flex-wrap: wrap; gap: 5px; }
-  .legend-item {
-    display: flex; align-items: center; gap: 4px;
-    font-size: 0.62rem; color: rgba(255,255,255,0.75); font-weight: 600;
-  }
-  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .progress-wrap { background:rgba(255,255,255,0.1);border-radius:6px;height:8px;overflow:hidden; }
+  .progress-bar  { height:100%;background:var(--gold);border-radius:6px;transition:width 0.4s; }
 
-  /* ─── CHALLENGE MODAL ─── */
+  /* ─── MODAL ─── */
   .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7); z-index: 100;
-    align-items: center; justify-content: center;
-    padding: 16px;
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.7);z-index:100;
+    align-items:center;justify-content:center;padding:16px;
   }
   .modal-overlay.show { display: flex; }
   .modal {
-    background: white; border-radius: 20px;
-    padding: 28px; max-width: 520px; width: 100%;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
-    position: relative; max-height: 90vh; overflow-y: auto;
-    animation: modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    background:white;border-radius:20px;
+    padding:28px;max-width:520px;width:100%;
+    box-shadow:0 24px 60px rgba(0,0,0,0.5);
+    position:relative;max-height:90vh;overflow-y:auto;
+    animation:modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
   }
-  @keyframes modalPop {
-    from { transform: scale(0.7); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
-  }
-  .modal-badge {
-    display: inline-block; padding: 4px 14px;
-    border-radius: 20px; font-size: 0.72rem;
-    font-weight: 800; text-transform: uppercase;
-    letter-spacing: 1px; margin-bottom: 10px;
-  }
-  .modal h2 {
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.5rem; color: #1a1a2e; margin-bottom: 8px;
-  }
-  .modal .prompt {
-    font-size: 1rem; color: #333; font-weight: 600;
-    margin-bottom: 16px; line-height: 1.5;
-  }
+  @keyframes modalPop { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
 
-  /* word scramble */
-  .scramble-area {
-    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
-  }
+  .modal-badge { display:inline-block;padding:4px 14px;border-radius:20px;font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px; }
+  .modal h2 { font-family:'Fredoka One',cursive;font-size:1.5rem;color:#1a1a2e;margin-bottom:8px; }
+  .modal .prompt { font-size:1rem;color:#333;font-weight:600;margin-bottom:16px;line-height:1.5; }
+
+  .scramble-area { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px; }
   .letter-tile {
-    background: #1a3a5c; color: white;
-    width: 40px; height: 40px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Fredoka One', cursive; font-size: 1.2rem;
-    cursor: grab; user-select: none;
-    box-shadow: 0 3px 0 #0a1f3c;
-    transition: transform 0.15s;
-    position: relative;
+    background:#1a3a5c;color:white;width:40px;height:40px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fredoka One',cursive;font-size:1.2rem;
+    cursor:grab;user-select:none;box-shadow:0 3px 0 #0a1f3c;transition:transform 0.15s;
   }
-  .letter-tile:hover { transform: translateY(-3px); }
-  .letter-tile.placed { background: var(--green); box-shadow: 0 3px 0 #1a6b2f; }
-  .letter-tile.dragging { opacity: 0.5; transform: scale(1.1); cursor: grabbing; }
+  .letter-tile:hover { transform:translateY(-3px); }
+  .letter-tile.placed { background:var(--green);box-shadow:0 3px 0 #1a6b2f; }
+  .letter-tile.dragging { opacity:0.5;transform:scale(1.1);cursor:grabbing; }
 
-  .answer-slots {
-    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; min-height: 52px;
-  }
+  .answer-slots { display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;min-height:52px; }
   .answer-slot {
-    width: 40px; height: 40px; border-radius: 8px;
-    border: 2px dashed #aaa; display: flex;
-    align-items: center; justify-content: center;
-    background: #f5f5f5;
-    font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #1a3a5c;
-    transition: background 0.2s, border-color 0.2s;
+    width:40px;height:40px;border-radius:8px;border:2px dashed #aaa;
+    display:flex;align-items:center;justify-content:center;background:#f5f5f5;
+    font-family:'Fredoka One',cursive;font-size:1.2rem;color:#1a3a5c;transition:background 0.2s,border-color 0.2s;
   }
-  .answer-slot.filled { border-style: solid; border-color: var(--green); background: #e8f7ed; }
-  .answer-slot.dragover { background: #ddeeff; border-color: var(--blue); }
+  .answer-slot.filled   { border-style:solid;border-color:var(--green);background:#e8f7ed; }
+  .answer-slot.dragover { background:#ddeeff;border-color:var(--blue); }
 
-  /* sentence builder */
-  .sentence-words { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .word-chip {
-    background: var(--blue); color: white;
-    padding: 6px 12px; border-radius: 20px;
-    font-size: 0.85rem; font-weight: 700;
-    cursor: pointer; transition: transform 0.1s, background 0.2s;
-    user-select: none;
-  }
-  .word-chip:hover { transform: scale(1.05); }
-  .word-chip.used { background: #aaa; cursor: default; transform: none; }
-  .sentence-target {
-    min-height: 44px; border: 2px dashed #aaa;
-    border-radius: 10px; padding: 8px 12px;
-    display: flex; flex-wrap: wrap; gap: 6px;
-    margin-bottom: 12px; background: #fafafa;
-  }
-  .word-placed {
-    background: var(--green); color: white;
-    padding: 6px 12px; border-radius: 20px;
-    font-size: 0.85rem; font-weight: 700;
-    cursor: pointer;
-  }
-  .word-placed:hover { background: var(--red); }
+  .sentence-words { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px; }
+  .word-chip { background:var(--blue);color:white;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:700;cursor:pointer;transition:transform 0.1s,background 0.2s;user-select:none; }
+  .word-chip:hover { transform:scale(1.05); }
+  .word-chip.used { background:#aaa;cursor:default;transform:none; }
+  .sentence-target { min-height:44px;border:2px dashed #aaa;border-radius:10px;padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;background:#fafafa; }
+  .word-placed { background:var(--green);color:white;padding:6px 12px;border-radius:20px;font-size:0.85rem;font-weight:700;cursor:pointer; }
+  .word-placed:hover { background:var(--red); }
 
-  /* matching */
-  .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .match-col { display: flex; flex-direction: column; gap: 6px; }
-  .match-item {
-    padding: 8px 12px; border-radius: 8px;
-    font-size: 0.85rem; font-weight: 700; cursor: pointer;
-    text-align: center; transition: all 0.2s;
-    border: 2px solid transparent;
-  }
-  .match-item.left  { background: #ddeeff; color: #1a3a5c; }
-  .match-item.right { background: #f0e0ff; color: #5b21b6; }
-  .match-item.selected { border-color: var(--gold); transform: scale(1.03); }
-  .match-item.correct  { background: var(--green) !important; color: white !important; border-color: var(--green); }
-  .match-item.wrong    { background: var(--red) !important; color: white !important; border-color: var(--red); }
+  .match-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px; }
+  .match-col { display:flex;flex-direction:column;gap:6px; }
+  .match-item { padding:8px 12px;border-radius:8px;font-size:0.85rem;font-weight:700;cursor:pointer;text-align:center;transition:all 0.2s;border:2px solid transparent; }
+  .match-item.left  { background:#ddeeff;color:#1a3a5c; }
+  .match-item.right { background:#f0e0ff;color:#5b21b6; }
+  .match-item.selected { border-color:var(--gold);transform:scale(1.03); }
+  .match-item.correct  { background:var(--green)!important;color:white!important;border-color:var(--green); }
+  .match-item.wrong    { background:var(--red)!important;color:white!important;border-color:var(--red); }
 
-  /* fill in the blank */
-  .blank-input {
-    border: 2px solid #ddd; border-radius: 8px;
-    padding: 8px 14px; font-size: 1rem; font-weight: 700;
-    font-family: 'Nunito', sans-serif; width: 100%;
-    margin-bottom: 12px; outline: none;
-    transition: border-color 0.2s;
-  }
-  .blank-input:focus { border-color: var(--blue); }
-  .blank-input.correct { border-color: var(--green); background: #e8f7ed; }
-  .blank-input.wrong   { border-color: var(--red);   background: #fde8e8; }
+  .blank-input { border:2px solid #ddd;border-radius:8px;padding:8px 14px;font-size:1rem;font-weight:700;font-family:'Nunito',sans-serif;width:100%;margin-bottom:12px;outline:none;transition:border-color 0.2s; }
+  .blank-input:focus   { border-color:var(--blue); }
+  .blank-input.correct { border-color:var(--green);background:#e8f7ed; }
+  .blank-input.wrong   { border-color:var(--red);background:#fde8e8; }
 
-  /* multiple choice */
-  .choices { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .choice-btn {
-    background: #f0f4ff; border: 2px solid #ddd;
-    border-radius: 10px; padding: 10px 16px;
-    font-size: 0.9rem; font-weight: 700; color: #1a1a2e;
-    cursor: pointer; text-align: left; transition: all 0.2s;
-  }
-  .choice-btn:hover { background: #ddeeff; border-color: var(--blue); }
-  .choice-btn.correct { background: #e8f7ed; border-color: var(--green); color: var(--green); }
-  .choice-btn.wrong   { background: #fde8e8; border-color: var(--red);   color: var(--red); }
+  .choices { display:flex;flex-direction:column;gap:8px;margin-bottom:12px; }
+  .choice-btn { background:#f0f4ff;border:2px solid #ddd;border-radius:10px;padding:10px 16px;font-size:0.9rem;font-weight:700;color:#1a1a2e;cursor:pointer;text-align:left;transition:all 0.2s; }
+  .choice-btn:hover  { background:#ddeeff;border-color:var(--blue); }
+  .choice-btn.correct{ background:#e8f7ed;border-color:var(--green);color:var(--green); }
+  .choice-btn.wrong  { background:#fde8e8;border-color:var(--red);color:var(--red); }
 
-  /* feedback */
-  .feedback {
-    padding: 10px 16px; border-radius: 10px; font-size: 0.9rem;
-    font-weight: 700; margin-bottom: 12px; display: none;
-    align-items: center; gap: 8px;
-  }
-  .feedback.show { display: flex; }
-  .feedback.correct { background: #e8f7ed; color: var(--green); }
-  .feedback.wrong   { background: #fde8e8; color: var(--red);   }
+  .feedback { padding:10px 16px;border-radius:10px;font-size:0.9rem;font-weight:700;margin-bottom:12px;display:none;align-items:center;gap:8px; }
+  .feedback.show    { display:flex; }
+  .feedback.correct { background:#e8f7ed;color:var(--green); }
+  .feedback.wrong   { background:#fde8e8;color:var(--red); }
 
-  .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .btn-check {
-    background: var(--green); color: white;
-    border: none; border-radius: 10px; padding: 10px 24px;
-    font-family: 'Fredoka One', cursive; font-size: 1rem;
-    cursor: pointer; box-shadow: 0 3px 0 #1a6b2f;
-    transition: transform 0.1s, box-shadow 0.1s;
-  }
-  .btn-check:hover { transform: translateY(-2px); }
-  .btn-close {
-    background: #666; color: white;
-    border: none; border-radius: 10px; padding: 10px 20px;
-    font-family: 'Fredoka One', cursive; font-size: 1rem;
-    cursor: pointer; box-shadow: 0 3px 0 #333;
-  }
-  .btn-skip {
-    background: #aaa; color: white;
-    border: none; border-radius: 10px; padding: 10px 20px;
-    font-family: 'Fredoka One', cursive; font-size: 1rem;
-    cursor: pointer;
-  }
+  .modal-actions { display:flex;gap:8px;flex-wrap:wrap; }
+  .btn-check { background:var(--green);color:white;border:none;border-radius:10px;padding:10px 24px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;box-shadow:0 3px 0 #1a6b2f;transition:transform 0.1s; }
+  .btn-check:hover { transform:translateY(-2px); }
+  .btn-close { background:#666;color:white;border:none;border-radius:10px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;box-shadow:0 3px 0 #333; }
+  .btn-skip  { background:#aaa;color:white;border:none;border-radius:10px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer; }
 
-  /* special event modal */
-  .event-icon { font-size: 3rem; text-align: center; margin-bottom: 8px; }
-  .event-title { font-family: 'Fredoka One', cursive; font-size: 1.6rem; text-align: center; margin-bottom: 8px; }
-  .event-desc { font-size: 0.95rem; color: #555; text-align: center; line-height: 1.5; margin-bottom: 16px; }
+  .event-icon  { font-size:3rem;text-align:center;margin-bottom:8px; }
+  .event-title { font-family:'Fredoka One',cursive;font-size:1.6rem;text-align:center;margin-bottom:8px; }
+  .event-desc  { font-size:0.95rem;color:#555;text-align:center;line-height:1.5;margin-bottom:16px; }
 
-  /* toast */
   .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-    background: #1a3a5c; color: white; padding: 12px 24px;
-    border-radius: 30px; font-weight: 700; font-size: 0.9rem;
-    z-index: 200; transition: transform 0.4s ease;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    pointer-events: none;
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:#1a3a5c;color:white;padding:12px 24px;
+    border-radius:30px;font-weight:700;font-size:0.9rem;
+    z-index:200;transition:transform 0.4s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);pointer-events:none;
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.show { transform:translateX(-50%) translateY(0); }
 
-  /* progress bar */
-  .progress-wrap { background: rgba(255,255,255,0.1); border-radius: 6px; height: 8px; overflow: hidden; }
-  .progress-bar  { height: 100%; background: var(--gold); border-radius: 6px; transition: width 0.4s; }
-
-  /* mobile friendly */
-  @media(max-width: 800px) {
-    .game-wrap { flex-direction: column; align-items: center; }
-    .sidebar { width: 100%; max-width: 500px; flex-direction: row; flex-wrap: wrap; }
-    .sidebar .panel { flex: 1 1 180px; }
+  @media(max-width:800px) {
+    .game-wrap { flex-direction:column;align-items:center; }
+    .sidebar { width:100%;max-width:500px;flex-direction:row;flex-wrap:wrap; }
+    .sidebar .panel { flex:1 1 180px; }
   }
 </style>
 </head>
@@ -521,19 +408,13 @@
 <p class="subtitle">🎓 The English Learning Board Game</p>
 
 <div class="game-wrap">
-
-  <!-- ══════════ BOARD ══════════ -->
   <div class="board" id="board">
-    <!-- cells injected by JS -->
     <div class="center" id="boardCenter">
       <div class="center-title">ENGLISHPOLY!</div>
     </div>
   </div>
 
-  <!-- ══════════ SIDEBAR ══════════ -->
   <div class="sidebar">
-
-    <!-- Turn -->
     <div class="panel">
       <h3>🎯 Current Turn</h3>
       <div class="turn-box">
@@ -545,13 +426,10 @@
           <span style="color:rgba(255,255,255,0.6);font-size:0.68rem;">Round Progress</span>
           <span style="color:var(--gold);font-size:0.68rem;font-weight:800;" id="roundNum">Round 1</span>
         </div>
-        <div class="progress-wrap">
-          <div class="progress-bar" id="progressBar" style="width:0%"></div>
-        </div>
+        <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
       </div>
     </div>
 
-    <!-- Dice -->
     <div class="panel">
       <h3>🎲 Roll the Dice</h3>
       <div class="dice-wrap">
@@ -565,308 +443,134 @@
       <button class="roll-btn" onclick="rollDice()" id="rollBtn">🎲 ROLL DICE</button>
     </div>
 
-    <!-- Players -->
     <div class="panel">
       <h3>👥 Players</h3>
       <div class="players-list" id="playersList"></div>
       <button class="roll-btn" style="background:#2574c0;box-shadow:0 4px 0 #14437a;margin-top:10px;" onclick="addPlayer()">+ Add Player</button>
     </div>
-
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ══════════ CHALLENGE MODAL ══════════ -->
 <div class="modal-overlay" id="challengeModal">
-  <div class="modal" id="challengeContent">
-    <!-- filled dynamically -->
-  </div>
+  <div class="modal" id="challengeContent"></div>
 </div>
 
 <script>
 // ════════════════════════════════════════
 //  GAME DATA
 // ════════════════════════════════════════
-
 const CHALLENGES = {
-  // ── VOCABULARY (red) ──
   vocabulary: [
-    {
-      type: 'match',
-      title: 'Animal Match!',
-      prompt: 'Match each animal to its correct description:',
-      pairs: [
-        {left:'🐶 Dog',  right:'Man\'s best friend'},
-        {left:'🐱 Cat',  right:'Loves to purr'},
-        {left:'🐘 Elephant', right:'Never forgets'},
-        {left:'🦁 Lion', right:'King of the jungle'},
-      ]
-    },
-    {
-      type: 'choice',
-      title: 'What does it mean?',
-      prompt: 'What is the meaning of "ENORMOUS"?',
-      choices: ['Very small','Very fast','Very large','Very loud'],
-      answer: 2
-    },
-    {
-      type: 'choice',
-      title: 'Opposite Words',
-      prompt: 'What is the opposite of "ANCIENT"?',
-      choices: ['Old','Modern','Slow','Dark'],
-      answer: 1
-    },
-    {
-      type: 'match',
-      title: 'Food Vocabulary!',
-      prompt: 'Match the food to its category:',
-      pairs: [
-        {left:'🍎 Apple',   right:'Fruit'},
-        {left:'🥕 Carrot',  right:'Vegetable'},
-        {left:'🍞 Bread',   right:'Grain'},
-        {left:'🧀 Cheese',  right:'Dairy'},
-      ]
-    },
-    {
-      type: 'choice',
-      title: 'School Vocabulary',
-      prompt: 'Which word means "a person who teaches"?',
-      choices: ['Student','Doctor','Teacher','Pilot'],
-      answer: 2
-    },
+    { type:'match', title:'Animal Match!', prompt:'Match each animal to its correct description:',
+      pairs:[{left:'🐶 Dog',right:"Man's best friend"},{left:'🐱 Cat',right:'Loves to purr'},{left:'🐘 Elephant',right:'Never forgets'},{left:'🦁 Lion',right:'King of the jungle'}] },
+    { type:'choice', title:'What does it mean?', prompt:'What is the meaning of "ENORMOUS"?',
+      choices:['Very small','Very fast','Very large','Very loud'], answer:2 },
+    { type:'choice', title:'Opposite Words', prompt:'What is the opposite of "ANCIENT"?',
+      choices:['Old','Modern','Slow','Dark'], answer:1 },
+    { type:'match', title:'Food Vocabulary!', prompt:'Match the food to its category:',
+      pairs:[{left:'🍎 Apple',right:'Fruit'},{left:'🥕 Carrot',right:'Vegetable'},{left:'🍞 Bread',right:'Grain'},{left:'🧀 Cheese',right:'Dairy'}] },
+    { type:'choice', title:'School Vocabulary', prompt:'Which word means "a person who teaches"?',
+      choices:['Student','Doctor','Teacher','Pilot'], answer:2 },
   ],
-
-  // ── SPELLING (yellow) ──
   spelling: [
-    {
-      type: 'scramble',
-      title: 'Unscramble the Word!',
-      prompt: 'Unscramble the letters to make an animal:',
-      scrambled: ['T','A','R','R','O','P'],
-      answer: 'PARROT'
-    },
-    {
-      type: 'scramble',
-      title: 'Unscramble the Word!',
-      prompt: 'Unscramble the letters to make a fruit:',
-      scrambled: ['A','N','A','N','B','A'],
-      answer: 'BANANA'
-    },
-    {
-      type: 'scramble',
-      title: 'Unscramble the Word!',
-      prompt: 'Arrange these letters to make a body part:',
-      scrambled: ['H','D','U','S','O','L','E','R'],
-      answer: 'SHOULDER'
-    },
-    {
-      type: 'blank',
-      title: 'Fill in the Missing Letters!',
-      prompt: 'Complete the word: EL_ _PHANT',
-      answer: 'ELEPHANT',
-      hint: 'It\'s a huge grey animal!'
-    },
-    {
-      type: 'blank',
-      title: 'Spell it Right!',
-      prompt: 'How do you spell the colour? _ _ _ _ _ _ (starts with P, a mix of red & blue)',
-      answer: 'PURPLE',
-      hint: 'A colour mixed from red and blue'
-    },
+    { type:'scramble', title:'Unscramble the Word!', prompt:'Unscramble the letters to make an animal:',
+      scrambled:['T','A','R','R','O','P'], answer:'PARROT' },
+    { type:'scramble', title:'Unscramble the Word!', prompt:'Unscramble the letters to make a fruit:',
+      scrambled:['A','N','A','N','B','A'], answer:'BANANA' },
+    { type:'scramble', title:'Unscramble the Word!', prompt:'Arrange these letters to make a body part:',
+      scrambled:['H','D','U','S','O','L','E','R'], answer:'SHOULDER' },
+    { type:'blank', title:'Fill in the Missing Letters!', prompt:'Complete the word: EL_ _PHANT',
+      answer:'ELEPHANT', hint:"It's a huge grey animal!" },
+    { type:'blank', title:'Spell it Right!', prompt:'How do you spell the colour? _ _ _ _ _ _ (starts with P, a mix of red & blue)',
+      answer:'PURPLE', hint:'A colour mixed from red and blue' },
   ],
-
-  // ── GRAMMAR (green) ──
   grammar: [
-    {
-      type: 'choice',
-      title: 'Choose the Correct Verb!',
-      prompt: 'She ___ to school every day.',
-      choices: ['go','goes','going','goed'],
-      answer: 1
-    },
-    {
-      type: 'choice',
-      title: 'Past or Present?',
-      prompt: 'Yesterday I ___ a movie.',
-      choices: ['watch','watches','watched','watching'],
-      answer: 2
-    },
-    {
-      type: 'blank',
-      title: 'Fill in the Blank!',
-      prompt: 'Complete: "There ___ (be) two cats in the garden."',
-      answer: 'ARE',
-      hint: 'Two cats = plural!'
-    },
-    {
-      type: 'choice',
-      title: 'Correct Article',
-      prompt: 'I saw ___ elephant at the zoo.',
-      choices: ['a','an','the','—'],
-      answer: 1
-    },
-    {
-      type: 'choice',
-      title: 'Plurals!',
-      prompt: 'What is the plural of "child"?',
-      choices: ['childs','children','childrens','child'],
-      answer: 1
-    },
+    { type:'choice', title:'Choose the Correct Verb!', prompt:'She ___ to school every day.',
+      choices:['go','goes','going','goed'], answer:1 },
+    { type:'choice', title:'Past or Present?', prompt:'Yesterday I ___ a movie.',
+      choices:['watch','watches','watched','watching'], answer:2 },
+    { type:'blank', title:'Fill in the Blank!', prompt:'Complete: "There ___ (be) two cats in the garden."',
+      answer:'ARE', hint:'Two cats = plural!' },
+    { type:'choice', title:'Correct Article', prompt:'I saw ___ elephant at the zoo.',
+      choices:['a','an','the','—'], answer:1 },
+    { type:'choice', title:'Plurals!', prompt:'What is the plural of "child"?',
+      choices:['childs','children','childrens','child'], answer:1 },
   ],
-
-  // ── SPEAKING (blue) ──
   speaking: [
-    {
-      type: 'action',
-      title: 'Speaking Challenge!',
-      icon: '🗣️',
-      description: 'Describe your bedroom in 3 sentences. Use: "In my room there is/are..."',
-      points: 3
-    },
-    {
-      type: 'action',
-      title: 'Tell the Group!',
-      icon: '⭐',
-      description: 'Say 5 things you can see in this room right now!',
-      points: 2
-    },
-    {
-      type: 'action',
-      title: 'Make a Question!',
-      icon: '❓',
-      description: 'Ask the person on your left a question using "How often do you...?"',
-      points: 2
-    },
-    {
-      type: 'action',
-      title: 'Introduce Yourself!',
-      icon: '👋',
-      description: 'Say: your name, age, favourite colour, and one hobby — all in English!',
-      points: 3
-    },
+    { type:'action', title:'Speaking Challenge!', icon:'🗣️',
+      description:'Describe your bedroom in 3 sentences. Use: "In my room there is/are..."', points:3 },
+    { type:'action', title:'Tell the Group!', icon:'⭐',
+      description:'Say 5 things you can see in this room right now!', points:2 },
+    { type:'action', title:'Make a Question!', icon:'❓',
+      description:'Ask the person on your left a question using "How often do you...?"', points:2 },
+    { type:'action', title:'Introduce Yourself!', icon:'👋',
+      description:'Say: your name, age, favourite colour, and one hobby — all in English!', points:3 },
   ],
-
-  // ── SENTENCE BUILDING (purple) ──
   sentences: [
-    {
-      type: 'sentence',
-      title: 'Build the Sentence!',
-      prompt: 'Arrange the words to make a correct sentence:',
-      words: ['every','She','morning','breakfast','eats'],
-      answer: 'She eats breakfast every morning'
-    },
-    {
-      type: 'sentence',
-      title: 'Put it in Order!',
-      prompt: 'Build a correct sentence from these words:',
-      words: ['does','He','football','play','not'],
-      answer: 'He does not play football'
-    },
-    {
-      type: 'sentence',
-      title: 'Make a Sentence!',
-      prompt: 'Arrange these words correctly:',
-      words: ['birthday','When','your','is','?'],
-      answer: 'When is your birthday ?'
-    },
-    {
-      type: 'sentence',
-      title: 'Put it Together!',
-      prompt: 'Build the correct question:',
-      words: ['you','Can','English','speak','?'],
-      answer: 'Can you speak English ?'
-    },
+    { type:'sentence', title:'Build the Sentence!', prompt:'Arrange the words to make a correct sentence:',
+      words:['every','She','morning','breakfast','eats'], answer:'She eats breakfast every morning' },
+    { type:'sentence', title:'Put it in Order!', prompt:'Build a correct sentence from these words:',
+      words:['does','He','football','play','not'], answer:'He does not play football' },
+    { type:'sentence', title:'Make a Sentence!', prompt:'Arrange these words correctly:',
+      words:['birthday','When','your','is','?'], answer:'When is your birthday ?' },
+    { type:'sentence', title:'Put it Together!', prompt:'Build the correct question:',
+      words:['you','Can','English','speak','?'], answer:'Can you speak English ?' },
   ],
-
-  // ── MATCHING (brown) ──
   matching: [
-    {
-      type: 'match',
-      title: 'Match the Opposites!',
-      prompt: 'Match each word to its opposite:',
-      pairs: [
-        {left:'Hot',   right:'Cold'},
-        {left:'Big',   right:'Small'},
-        {left:'Happy', right:'Sad'},
-        {left:'Fast',  right:'Slow'},
-      ]
-    },
-    {
-      type: 'match',
-      title: 'Match: Number & Word!',
-      prompt: 'Match the number to the word:',
-      pairs: [
-        {left:'1',  right:'One'},
-        {left:'5',  right:'Five'},
-        {left:'10', right:'Ten'},
-        {left:'20', right:'Twenty'},
-      ]
-    },
-    {
-      type: 'match',
-      title: 'Jobs & Places!',
-      prompt: 'Match the job to its workplace:',
-      pairs: [
-        {left:'Doctor',  right:'Hospital'},
-        {left:'Teacher', right:'School'},
-        {left:'Chef',    right:'Restaurant'},
-        {left:'Pilot',   right:'Airport'},
-      ]
-    },
+    { type:'match', title:'Match the Opposites!', prompt:'Match each word to its opposite:',
+      pairs:[{left:'Hot',right:'Cold'},{left:'Big',right:'Small'},{left:'Happy',right:'Sad'},{left:'Fast',right:'Slow'}] },
+    { type:'match', title:'Match: Number & Word!', prompt:'Match the number to the word:',
+      pairs:[{left:'1',right:'One'},{left:'5',right:'Five'},{left:'10',right:'Ten'},{left:'20',right:'Twenty'}] },
+    { type:'match', title:'Jobs & Places!', prompt:'Match the job to its workplace:',
+      pairs:[{left:'Doctor',right:'Hospital'},{left:'Teacher',right:'School'},{left:'Chef',right:'Restaurant'},{left:'Pilot',right:'Airport'}] },
   ],
 };
 
 const BOARD_CELLS = [
-  // ── BOTTOM ROW (left to right) = squares 0–10 ──
-  {id:0,  pos:'corner-start', label:'START',        type:'start',    color:''},
-  {id:1,  pos:'bottom',       label:'What is your favourite fruit?',     type:'question', color:'red'},
-  {id:2,  pos:'bottom',       label:'When is your birthday?',            type:'question', color:'red'},
-  {id:3,  pos:'bottom',       label:'Do you have a pet?',                type:'question', color:'red'},
-  {id:4,  pos:'bottom',       label:'',              type:'wild',     color:''},
-  {id:5,  pos:'bottom',       label:'What is your favourite animal?',    type:'question', color:'brown'},
-  {id:6,  pos:'bottom',       label:'Where do you live?',                type:'question', color:'brown'},
-  {id:7,  pos:'bottom',       label:'Can you speak English?',            type:'question', color:'brown'},
-  {id:8,  pos:'bottom',       label:'',              type:'exclaim',  color:''},
-  {id:9,  pos:'bottom',       label:'Do you have a sister?',             type:'question', color:'blue'},
-  {id:10, pos:'corner-paf',   label:'PAF!\nGo back 4', type:'paf',   color:''},
-
-  // ── RIGHT COLUMN (bottom to top) = squares 11–16 ──
-  {id:11, pos:'right',        label:'Do you like basketball?',           type:'question', color:'blue'},
-  {id:12, pos:'right',        label:'',              type:'wild',     color:''},
-  {id:13, pos:'right',        label:'Can you drive a car?',              type:'question', color:'green'},
-  {id:14, pos:'right',        label:'Can you drive a car?',              type:'question', color:'green'},
-  {id:15, pos:'right',        label:'',              type:'wild',     color:''},
-  {id:16, pos:'right',        label:'What is your favourite day?',       type:'question', color:'green'},
-
-  // ── TOP ROW (right to left) = squares 17–27 ──
-  {id:17, pos:'corner-bonus', label:'BONUS!\n+2 pts',  type:'bonus',  color:''},
-  {id:18, pos:'top',          label:'What is your favourite drink?',     type:'question', color:'green'},
-  {id:19, pos:'top',          label:'',              type:'wild',     color:''},
-  {id:20, pos:'top',          label:'What is the weather like today?',   type:'question', color:'yellow'},
-  {id:21, pos:'top',          label:'Talk about your bedroom',           type:'question', color:'yellow'},
-  {id:22, pos:'top',          label:'What time do you go to bed?',       type:'question', color:'yellow'},
-  {id:23, pos:'top',          label:'',              type:'exclaim',  color:''},
-  {id:24, pos:'top',          label:'Do you like pizza?',                type:'question', color:'red'},
-  {id:25, pos:'top',          label:'Where is your school?',             type:'question', color:'red'},
-  {id:26, pos:'top',          label:'What is your favourite subject?',   type:'question', color:'red'},
-
-  // ── LEFT COLUMN (top to bottom) = squares 27–35 + FINISH ──
-  {id:27, pos:'corner-top',   label:'🚗',            type:'bonus',    color:''},
-  {id:28, pos:'left',         label:'Can you cook?', type:'question', color:'orange'},
-  {id:29, pos:'left',         label:'Name 4 months of the year!', type:'question', color:'orange'},
-  {id:30, pos:'left',         label:'Sing a song for 20 seconds!', type:'question', color:'orange'},
-  {id:31, pos:'left',         label:'',              type:'wild',     color:''},
-  {id:32, pos:'corner-finish',label:'FINISH 🎉',      type:'finish',   color:''},
+  {id:0,  type:'start',    color:''},
+  {id:1,  label:'What is your favourite fruit?',     type:'question', color:'red'},
+  {id:2,  label:'When is your birthday?',            type:'question', color:'red'},
+  {id:3,  label:'Do you have a pet?',                type:'question', color:'red'},
+  {id:4,  label:'',              type:'wild',     color:''},
+  {id:5,  label:'What is your favourite animal?',    type:'question', color:'brown'},
+  {id:6,  label:'Where do you live?',                type:'question', color:'brown'},
+  {id:7,  label:'Can you speak English?',            type:'question', color:'brown'},
+  {id:8,  label:'',              type:'exclaim',  color:''},
+  {id:9,  label:'Do you have a sister?',             type:'question', color:'blue'},
+  {id:10, label:'PAF!\nGo back 4', type:'paf',   color:''},
+  {id:11, label:'Do you like basketball?',           type:'question', color:'blue'},
+  {id:12, label:'',              type:'wild',     color:''},
+  {id:13, label:'Can you drive a car?',              type:'question', color:'green'},
+  {id:14, label:'Can you drive a car?',              type:'question', color:'green'},
+  {id:15, label:'',              type:'wild',     color:''},
+  {id:16, label:'What is your favourite day?',       type:'question', color:'green'},
+  {id:17, label:'BONUS!\n+2 pts',  type:'bonus',  color:''},
+  {id:18, label:'What is your favourite drink?',     type:'question', color:'green'},
+  {id:19, label:'',              type:'wild',     color:''},
+  {id:20, label:'What is the weather like today?',   type:'question', color:'yellow'},
+  {id:21, label:'Talk about your bedroom',           type:'question', color:'yellow'},
+  {id:22, label:'What time do you go to bed?',       type:'question', color:'yellow'},
+  {id:23, label:'',              type:'exclaim',  color:''},
+  {id:24, label:'Do you like pizza?',                type:'question', color:'red'},
+  {id:25, label:'Where is your school?',             type:'question', color:'red'},
+  {id:26, label:'What is your favourite subject?',   type:'question', color:'red'},
+  {id:27, label:'🚗',            type:'bonus',    color:''},
+  {id:28, label:'Can you cook?', type:'question', color:'orange'},
+  {id:29, label:'Name 4 months of the year!', type:'question', color:'orange'},
+  {id:30, label:'Sing a song for 20 seconds!', type:'question', color:'orange'},
+  {id:31, label:'',              type:'wild',     color:''},
+  {id:32, label:'FINISH 🎉',      type:'finish',   color:''},
 ];
 
-const TOTAL_SQUARES = 32; // 0 = start, 32 = finish (same cell on board loop)
+const PLAYER_COLORS = ['#e03232','#2574c0','#2e9e4f','#8b35b0','#e07820','#f5c518'];
+const PLAYER_EMOJIS = ['😀','😎','🦊','🐼','🦋','🚀'];
+const MAX_PLAYERS   = 6;
+const WINNING_SCORE = 10;
 
-const PLAYER_COLORS  = ['#e03232','#2574c0','#2e9e4f','#8b35b0','#e07820','#f5c518'];
-const PLAYER_EMOJIS  = ['😀','😎','🦊','🐼','🦋','🚀'];
-const MAX_PLAYERS    = 6;
-const WINNING_SCORE  = 10;
+// Per-player fixed offset (so tokens don't overlap perfectly when on same cell)
+const PLAYER_OFFSETS = [[3,3],[15,3],[3,15],[15,15],[9,9],[21,9]];
 
 // ════════════════════════════════════════
 //  GAME STATE
@@ -875,162 +579,226 @@ let players = [
   {name:'Player 1', pos:0, score:0, color:PLAYER_COLORS[0], emoji:PLAYER_EMOJIS[0]},
   {name:'Player 2', pos:0, score:0, color:PLAYER_COLORS[1], emoji:PLAYER_EMOJIS[1]},
 ];
-let currentPlayer = 0;
-let round = 1;
-let diceRolled = false;
-let lastDice = 1;
+let currentPlayer  = 0;
+let round          = 1;
+let diceRolled     = false;
+let lastDice       = 1;
 let awaitingChallenge = false;
-let challengeQueue = null;
+let challengeQueue    = null;
+let isMoving          = false; // lock while animation runs
 
 // ════════════════════════════════════════
 //  BOARD RENDERING
 // ════════════════════════════════════════
-
 function buildBoard() {
   const board = document.getElementById('board');
-  // Remove old cells
   [...board.querySelectorAll('.cell')].forEach(c => c.remove());
 
-  // Positions in grid (col, row) for each of the 32 squares
   const positions = [];
-  // Bottom row: cols 1-10, row 8  (squares 0-10)
   for(let c=1;c<=11;c++) positions.push([c, 8]);
-  // Right col: col 11, rows 7-2   (squares 11-16)
   for(let r=7;r>=2;r--) positions.push([11, r]);
-  // Top row: cols 10-1, row 1     (squares 17-27)
   for(let c=11;c>=1;c--) positions.push([c, 1]);
-  // Left col: col 1, rows 2-8     (squares 28-32 + finish = row 8 already done)
   for(let r=2;r<=7;r++) positions.push([1, r]);
 
   BOARD_CELLS.forEach((cell, idx) => {
-    const [col, row] = positions[idx];
+    const [col, row] = positions[idx] || [1,1];
     const el = document.createElement('div');
     el.className = 'cell ' + getCellClass(cell);
     el.style.gridColumn = col;
     el.style.gridRow    = row;
     el.dataset.idx = idx;
-
     el.innerHTML = getCellHTML(cell);
     el.addEventListener('click', () => handleCellClick(idx));
     board.appendChild(el);
   });
-
-  renderTokens();
 }
 
 function getCellClass(cell) {
-  if(cell.type === 'corner-start') return 'corner-start';
-  if(cell.type === 'corner-finish') return 'corner-finish';
-  if(cell.type === 'paf')   return 'corner-paf';
-  if(cell.type === 'bonus') return 'corner-bonus';
-  if(cell.type === 'finish') return 'corner-finish';
-  if(cell.type === 'wild')  return 'question-cell';
+  if(cell.type === 'start')   return 'corner-start';
+  if(cell.type === 'finish')  return 'corner-finish';
+  if(cell.type === 'paf')     return 'corner-paf';
+  if(cell.type === 'bonus')   return 'corner-bonus';
+  if(cell.type === 'wild')    return 'question-cell';
   if(cell.type === 'exclaim') return 'exclaim-cell';
   return cell.color || '';
 }
 
 function getCellHTML(cell) {
-  if(cell.type === 'start') {
+  if(cell.type === 'start')
     return `<div class="cell-icon">🏁</div><div class="cell-text" style="font-family:'Fredoka One';color:var(--red);font-size:clamp(8px,1.6vw,14px)">START</div>`;
-  }
-  if(cell.type === 'finish') {
+  if(cell.type === 'finish')
     return `<div class="cell-icon">🎉</div><div class="cell-text" style="font-family:'Fredoka One';color:var(--green);font-size:clamp(7px,1.4vw,13px)">FINISH!</div>`;
-  }
-  if(cell.type === 'paf') {
+  if(cell.type === 'paf')
     return `<div style="font-family:'Fredoka One';font-size:clamp(9px,1.8vw,18px);color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.8)">PAF!</div><div class="cell-text" style="color:rgba(255,255,255,0.8);font-size:clamp(6px,1vw,9px)">Go back 4</div>`;
-  }
   if(cell.type === 'bonus') {
     if(cell.label === '🚗') return `<div class="cell-icon">🚗</div>`;
     return `<div class="cell-icon">⭐</div><div class="cell-text" style="color:white;font-size:clamp(6px,1vw,10px)">BONUS!<br>+2 pts</div>`;
   }
-  if(cell.type === 'wild') {
+  if(cell.type === 'wild')
     return `<div class="cell-icon" style="font-size:clamp(12px,2.5vw,28px);color:var(--red)">❓</div>`;
-  }
-  if(cell.type === 'exclaim') {
+  if(cell.type === 'exclaim')
     return `<div class="cell-icon" style="font-size:clamp(12px,2.5vw,28px);color:var(--red)">❗</div>`;
-  }
-  // question cell
   const barColor = cell.color ? `var(--${cell.color})` : '#ccc';
   return `<div class="color-bar" style="background:${barColor}"></div><div class="cell-text">${cell.label}</div>`;
 }
 
 // ════════════════════════════════════════
-//  PLAYER TOKENS
+//  TOKEN ANIMATION SYSTEM
 // ════════════════════════════════════════
-function renderTokens() {
-  document.querySelectorAll('.token').forEach(t => t.remove());
-  const board = document.getElementById('board');
 
-  // positions array same as buildBoard
-  const positions = [];
-  for(let c=1;c<=11;c++) positions.push([c, 8]);
-  for(let r=7;r>=2;r--) positions.push([11, r]);
-  for(let c=11;c>=1;c--) positions.push([c, 1]);
-  for(let r=2;r<=7;r++) positions.push([1, r]);
+/** Get board-relative x,y for a player's token at a given cell index */
+function getCellPos(posIdx, playerIdx) {
+  const board    = document.getElementById('board');
+  const boardRect = board.getBoundingClientRect();
+  const safeIdx  = Math.min(Math.max(0, posIdx), BOARD_CELLS.length - 1);
+  const cell     = board.querySelector(`[data-idx="${safeIdx}"]`);
+  if (!cell) return { x: 8, y: 8 };
+  const r  = cell.getBoundingClientRect();
+  const [ox, oy] = PLAYER_OFFSETS[playerIdx % PLAYER_OFFSETS.length];
+  return {
+    x: r.left - boardRect.left + ox,
+    y: r.top  - boardRect.top  + oy
+  };
+}
 
-  // Group players at same position
-  const posGroups = {};
-  players.forEach((p,i) => {
-    if(!posGroups[p.pos]) posGroups[p.pos] = [];
-    posGroups[p.pos].push(i);
-  });
+/** Create or recreate all token + shadow elements as board children */
+function initTokens() {
+  document.querySelectorAll('.token, .token-shadow').forEach(t => t.remove());
+  const board    = document.getElementById('board');
+  const tokenSize = parseFloat(getComputedStyle(board).getPropertyValue('--_ts') || '20');
 
   players.forEach((p, i) => {
-    const safePos = Math.min(p.pos, positions.length - 1);
-    const cell = board.querySelector(`[data-idx="${safePos}"]`);
-    if(!cell) return;
+    // shadow disc
+    const shadow = document.createElement('div');
+    shadow.className = 'token-shadow';
+    shadow.id = `shadow${i}`;
+    shadow.style.cssText = `width:${14}px;height:${6}px;margin-left:2px;`;
+    board.appendChild(shadow);
+
+    // emoji token
     const token = document.createElement('div');
     token.className = 'token';
     token.id = `token${i}`;
     token.style.background = p.color;
     token.textContent = p.emoji;
+    board.appendChild(token);
 
-    // offset if multiple players on same cell
-    const group = posGroups[p.pos];
-    const groupIdx = group.indexOf(i);
-    const offsets = [[0,0],[10,0],[0,10],[10,10],[5,5],[15,5]];
-    const [ox, oy] = offsets[groupIdx] || [0, 0];
-
-    cell.style.position = 'relative';
-    token.style.top    = `${oy}px`;
-    token.style.left   = `${ox}px`;
-    cell.appendChild(token);
+    // place immediately at starting position
+    const pos = getCellPos(p.pos, i);
+    token.style.transform  = `translate(${pos.x}px, ${pos.y}px) scale(1)`;
+    shadow.style.transform = `translate(${pos.x + 3}px, ${pos.y + 17}px)`;
+    shadow.style.opacity   = '0.4';
   });
 }
+
+/** Snap all tokens to their current positions without animation (used after PAF/reset) */
+function renderTokens() {
+  const anyMissing = players.some((_, i) => !document.getElementById(`token${i}`));
+  if (anyMissing) { initTokens(); return; }
+
+  players.forEach((p, i) => {
+    const token  = document.getElementById(`token${i}`);
+    const shadow = document.getElementById(`shadow${i}`);
+    if (!token) return;
+    // cancel any running animations so the snap is immediate
+    token.getAnimations().forEach(a => a.cancel());
+    if (shadow) shadow.getAnimations().forEach(a => a.cancel());
+
+    const pos = getCellPos(p.pos, i);
+    token.style.transform  = `translate(${pos.x}px, ${pos.y}px) scale(1)`;
+    if (shadow) {
+      shadow.style.transform = `translate(${pos.x + 3}px, ${pos.y + 17}px)`;
+      shadow.style.opacity   = '0.4';
+    }
+  });
+}
+
+/** Animate one hop from fromPos → toPos with a jump arc */
+function animateTokenStep(playerIdx, fromPos, toPos) {
+  return new Promise(resolve => {
+    const token  = document.getElementById(`token${playerIdx}`);
+    const shadow = document.getElementById(`shadow${playerIdx}`);
+    if (!token) { resolve(); return; }
+
+    const from = getCellPos(fromPos, playerIdx);
+    const to   = getCellPos(toPos,   playerIdx);
+
+    const midX   = (from.x + to.x) / 2;
+    const midY   = Math.min(from.y, to.y) - 30;   // apex of the arc
+    const DUR    = 420;                             // ms per hop
+
+    // Token jump animation
+    const tokenAnim = token.animate([
+      {
+        transform: `translate(${from.x}px, ${from.y}px) scale(1)`,
+        easing: 'cubic-bezier(0.25, 0.0, 0.5, 1.0)'
+      },
+      {
+        transform: `translate(${midX}px, ${midY}px) scale(1.45)`,
+        offset: 0.40,
+        easing: 'cubic-bezier(0.5, 0.0, 0.75, 1.0)'
+      },
+      {
+        transform: `translate(${to.x}px, ${to.y + 6}px) scale(0.85)`,
+        offset: 0.82,
+        easing: 'cubic-bezier(0.25, 0.0, 0.5, 1.0)'
+      },
+      {
+        transform: `translate(${to.x}px, ${to.y}px) scale(1.0)`
+      }
+    ], { duration: DUR, fill: 'forwards' });
+
+    // Shadow animation: shrinks as token rises, grows as it lands
+    if (shadow) {
+      shadow.animate([
+        { transform: `translate(${from.x+3}px, ${from.y+17}px)`, width:'14px', height:'6px', opacity:'0.4' },
+        { transform: `translate(${midX+5}px,   ${(from.y+to.y)/2+20}px)`, width:'6px',  height:'3px', opacity:'0.15', offset: 0.40 },
+        { transform: `translate(${to.x+3}px,   ${to.y+20}px)`,   width:'18px', height:'8px', opacity:'0.5', offset: 0.86 },
+        { transform: `translate(${to.x+3}px,   ${to.y+17}px)`,   width:'14px', height:'6px', opacity:'0.4' }
+      ], { duration: DUR, fill: 'forwards' });
+    }
+
+    tokenAnim.onfinish = () => {
+      // Commit final position to inline style and cancel
+      token.style.transform = `translate(${to.x}px, ${to.y}px) scale(1)`;
+      if (shadow) {
+        shadow.style.transform = `translate(${to.x+3}px, ${to.y+17}px)`;
+        shadow.style.width   = '14px';
+        shadow.style.height  = '6px';
+        shadow.style.opacity = '0.4';
+      }
+      try { tokenAnim.cancel(); } catch(e) {}
+      resolve();
+    };
+  });
+}
+
+/** Simple async delay */
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ════════════════════════════════════════
 //  DICE
 // ════════════════════════════════════════
-const DICE_PATTERNS = {
-  1: [5],
-  2: [3,7],
-  3: [3,5,7],
-  4: [1,3,7,9],
-  5: [1,3,5,7,9],
-  6: [1,3,4,6,7,9],
-};
+const DICE_PATTERNS = {1:[5],2:[3,7],3:[3,5,7],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
 
 function showDice(n) {
-  for(let i=1;i<=9;i++) {
+  for(let i=1;i<=9;i++)
     document.getElementById('d'+i).className = 'dot' + (DICE_PATTERNS[n].includes(i) ? ' on' : '');
-  }
 }
 
 function rollDice() {
   if(awaitingChallenge) { showToast('⚠️ Finish the challenge first!'); return; }
-  if(diceRolled) { showToast('🎲 Already rolled! Complete your turn.'); return; }
+  if(diceRolled || isMoving) { showToast('🎲 Already rolled! Complete your turn.'); return; }
 
-  const btn = document.getElementById('rollBtn');
-  btn.disabled = true;
+  const btn    = document.getElementById('rollBtn');
   const diceEl = document.getElementById('diceEl');
+  btn.disabled = true;
   diceEl.classList.add('rolling');
 
   let count = 0;
   const anim = setInterval(() => {
-    const n = Math.ceil(Math.random() * 6);
-    showDice(n);
-    count++;
-    if(count > 8) {
+    showDice(Math.ceil(Math.random() * 6));
+    if(++count > 8) {
       clearInterval(anim);
       diceEl.classList.remove('rolling');
       const result = Math.ceil(Math.random() * 6);
@@ -1044,87 +812,84 @@ function rollDice() {
 }
 
 // ════════════════════════════════════════
-//  MOVEMENT
+//  MOVEMENT  (async — cell-by-cell jump)
 // ════════════════════════════════════════
-function movePlayer(steps) {
-  const p = players[currentPlayer];
-  const oldPos = p.pos;
-  let newPos = oldPos + steps;
+async function movePlayer(steps) {
+  isMoving = true;
+  const p       = players[currentPlayer];
+  const pIdx    = currentPlayer;
+  const oldPos  = p.pos;
+  const maxPos  = BOARD_CELLS.length - 1;
+  const target  = Math.min(oldPos + steps, maxPos);
+  const numHops = target - oldPos;
 
-  if(newPos >= BOARD_CELLS.length - 1) {
-    newPos = BOARD_CELLS.length - 1;
-    showToast('🎉 ' + p.name + ' reached FINISH!');
-    p.pos = newPos;
-    renderTokens();
+  for (let h = 0; h < numHops; h++) {
+    const fromPos = oldPos + h;
+    const toPos   = oldPos + h + 1;
+    p.pos = toPos;
+    await animateTokenStep(pIdx, fromPos, toPos);
     renderPlayers();
-    setTimeout(() => endTurn(true), 1200);
+    // small breathing pause between hops (feels more natural)
+    if (h < numHops - 1) await delay(55);
+  }
+
+  isMoving = false;
+
+  if (p.pos >= maxPos) {
+    p.score += 5;
+    renderPlayers();
+    showToast('🎉 ' + p.name + ' reached FINISH!');
+    setTimeout(() => openSpecialEvent('finish', p), 500);
     return;
   }
 
-  // Animate step by step
-  let step = 0;
-  const moveAnim = setInterval(() => {
-    step++;
-    p.pos = Math.min(oldPos + step, newPos);
-    renderTokens();
-    if(step >= steps) {
-      clearInterval(moveAnim);
-      onLand(p.pos);
-    }
-  }, 220);
+  onLand(p.pos);
 }
 
 function onLand(posIdx) {
   const cell = BOARD_CELLS[posIdx];
-  const p = players[currentPlayer];
+  const p    = players[currentPlayer];
 
-  if(cell.type === 'paf') {
+  if (cell.type === 'paf') {
     showToast('💥 PAF! ' + p.name + ' goes back 4!');
     setTimeout(() => {
       p.pos = Math.max(0, p.pos - 4);
       renderTokens();
       renderPlayers();
       openSpecialEvent('paf', p);
-    }, 500);
+    }, 400);
     return;
   }
-  if(cell.type === 'bonus') {
+  if (cell.type === 'bonus') {
     p.score += 2;
     showToast('⭐ BONUS! +2 points for ' + p.name + '!');
     renderPlayers();
-    setTimeout(() => openSpecialEvent('bonus', p), 400);
+    setTimeout(() => openSpecialEvent('bonus', p), 300);
     return;
   }
-  if(cell.type === 'finish') {
+  if (cell.type === 'finish') {
     p.score += 5;
     renderPlayers();
-    setTimeout(() => openSpecialEvent('finish', p), 400);
+    setTimeout(() => openSpecialEvent('finish', p), 300);
     return;
   }
-  if(cell.type === 'start') {
-    setTimeout(() => endTurn(), 400);
-    return;
-  }
+  if (cell.type === 'start') { setTimeout(() => endTurn(), 300); return; }
 
-  // Regular question square → speaking card only
-  if(cell.type === 'question') {
+  if (cell.type === 'question') {
     awaitingChallenge = true;
-    setTimeout(() => openSpeakingCard(cell), 400);
+    setTimeout(() => openSpeakingCard(cell), 300);
     return;
   }
-
-  // ❓ wild or ❗ exclaim → interactive mini-challenge
-  if(cell.type === 'wild' || cell.type === 'exclaim') {
+  if (cell.type === 'wild' || cell.type === 'exclaim') {
     awaitingChallenge = true;
-    setTimeout(() => openChallenge('random', 'blue'), 400);
+    setTimeout(() => openChallenge('random', 'blue'), 300);
     return;
   }
-
-  setTimeout(() => endTurn(), 400);
+  setTimeout(() => endTurn(), 300);
 }
 
 // ════════════════════════════════════════
-//  SPEAKING CARD (for regular question squares)
+//  SPEAKING CARD
 // ════════════════════════════════════════
 const COLOR_BG = {
   red:    {bg:'#fde8e8', accent:'#e03232', label:'Vocabulary'},
@@ -1140,7 +905,6 @@ function openSpeakingCard(cell) {
   const modal   = document.getElementById('challengeModal');
   const content = document.getElementById('challengeContent');
   const theme   = COLOR_BG[cell.color] || COLOR_BG.blue;
-  const p       = players[currentPlayer];
 
   content.innerHTML = `
     <div style="text-align:center;margin-bottom:14px;">
@@ -1149,12 +913,10 @@ function openSpeakingCard(cell) {
     <div style="background:${theme.bg};border-radius:16px;padding:24px 20px;text-align:center;margin-bottom:18px;border:2px solid ${theme.accent}22;">
       <h2 style="font-family:'Fredoka One',cursive;font-size:1.45rem;color:#1a1a2e;margin-bottom:0;">${cell.label}</h2>
     </div>
-    
     <div class="modal-actions" style="justify-content:center;gap:12px;">
       <button class="btn-check" onclick="speakingDone(true)"  style="background:${theme.accent};box-shadow:0 3px 0 ${theme.accent}88;">✅ Good answer! (+1 pt)</button>
       <button class="btn-skip"  onclick="speakingDone(false)">😅 Skip turn</button>
     </div>`;
-
   modal.classList.add('show');
 }
 
@@ -1179,11 +941,7 @@ function openChallenge(type, colorHint) {
     pool = CHALLENGES[keys[Math.floor(Math.random() * keys.length)]];
     colorHint = 'blue';
   } else {
-    const map = {
-      red: 'vocabulary', yellow: 'spelling', green: 'grammar',
-      blue: 'speaking',  purple: 'sentences', brown: 'matching',
-      orange: 'vocabulary'
-    };
+    const map = {red:'vocabulary',yellow:'spelling',green:'grammar',blue:'speaking',purple:'sentences',brown:'matching',orange:'vocabulary'};
     pool = CHALLENGES[map[colorHint] || 'vocabulary'];
   }
   const ch = pool[Math.floor(Math.random() * pool.length)];
@@ -1191,44 +949,28 @@ function openChallenge(type, colorHint) {
   renderChallenge(ch, colorHint);
 }
 
-const COLOR_NAMES = {
-  red:'#e03232', yellow:'#e6a800', green:'#2e9e4f',
-  blue:'#2574c0', purple:'#8b35b0', brown:'#8B5E3C', orange:'#e07820'
-};
-const TYPE_LABELS = {
-  vocabulary:'Vocabulary', spelling:'Spelling', grammar:'Grammar',
-  speaking:'Speaking', sentences:'Sentence Builder', matching:'Matching',
-  random:'Wild Challenge'
-};
+const COLOR_NAMES = {red:'#e03232',yellow:'#e6a800',green:'#2e9e4f',blue:'#2574c0',purple:'#8b35b0',brown:'#8B5E3C',orange:'#e07820'};
+const TYPE_LABELS = {vocabulary:'Vocabulary',spelling:'Spelling',grammar:'Grammar',speaking:'Speaking',sentences:'Sentence Builder',matching:'Matching',random:'Wild Challenge'};
 
 function renderChallenge(ch, colorHint) {
-  const modal = document.getElementById('challengeModal');
+  const modal   = document.getElementById('challengeModal');
   const content = document.getElementById('challengeContent');
-  const color = COLOR_NAMES[colorHint] || '#2574c0';
+  const color   = COLOR_NAMES[colorHint] || '#2574c0';
   const typeLabel = TYPE_LABELS[colorHint] || 'Challenge';
 
   let html = `<div class="modal-badge" style="background:${color};color:white;">${typeLabel}</div>`;
   html += `<h2>${ch.title}</h2>`;
 
-  if(ch.type === 'scramble') {
-    html += renderScramble(ch);
-  } else if(ch.type === 'sentence') {
-    html += renderSentence(ch);
-  } else if(ch.type === 'match') {
-    html += renderMatch(ch);
-  } else if(ch.type === 'blank') {
-    html += renderBlank(ch);
-  } else if(ch.type === 'choice') {
-    html += renderChoice(ch);
-  } else if(ch.type === 'action') {
-    html += renderAction(ch);
-  }
+  if(ch.type === 'scramble')  html += renderScramble(ch);
+  else if(ch.type === 'sentence') html += renderSentence(ch);
+  else if(ch.type === 'match')    html += renderMatch(ch);
+  else if(ch.type === 'blank')    html += renderBlank(ch);
+  else if(ch.type === 'choice')   html += renderChoice(ch);
+  else if(ch.type === 'action')   html += renderAction(ch);
 
   html += `<div class="feedback" id="challengeFeedback"></div>`;
   html += `<div class="modal-actions">`;
-  if(ch.type !== 'action') {
-    html += `<button class="btn-check" onclick="checkAnswer()">✅ Check</button>`;
-  }
+  if(ch.type !== 'action') html += `<button class="btn-check" onclick="checkAnswer()">✅ Check</button>`;
   html += `<button class="btn-skip" onclick="skipChallenge()">⏭ Skip (−1 pt)</button>`;
   html += `<button class="btn-close" onclick="closeChallenge()">✖ Close</button>`;
   html += `</div>`;
@@ -1236,108 +978,70 @@ function renderChallenge(ch, colorHint) {
   content.innerHTML = html;
   modal.classList.add('show');
 
-  if(ch.type === 'scramble') initScrambleDrag();
-  if(ch.type === 'sentence') initSentenceBuild();
+  if(ch.type === 'scramble')  initScrambleDrag();
+  if(ch.type === 'sentence')  initSentenceBuild();
 }
 
 function renderScramble(ch) {
   const shuffled = [...ch.scrambled].sort(() => Math.random() - 0.5);
-  let tiles = shuffled.map((l,i) =>
-    `<div class="letter-tile" draggable="true" data-letter="${l}" data-orig="${i}" id="tile${i}">${l}</div>`
-  ).join('');
-  let slots = ch.answer.split('').map((_,i) =>
-    `<div class="answer-slot" data-slot="${i}" id="slot${i}"></div>`
-  ).join('');
-  return `<p class="prompt">${ch.prompt}</p>
-    <div class="scramble-area" id="tilesArea">${tiles}</div>
-    <p style="font-size:0.8rem;color:#888;margin-bottom:6px;">↓ Drop letters here in order:</p>
-    <div class="answer-slots" id="slotsArea">${slots}</div>`;
+  const tiles = shuffled.map((l,i) => `<div class="letter-tile" draggable="true" data-letter="${l}" id="tile${i}">${l}</div>`).join('');
+  const slots = ch.answer.split('').map((_,i) => `<div class="answer-slot" data-slot="${i}" id="slot${i}"></div>`).join('');
+  return `<p class="prompt">${ch.prompt}</p><div class="scramble-area" id="tilesArea">${tiles}</div><p style="font-size:0.8rem;color:#888;margin-bottom:6px;">↓ Drop letters here in order:</p><div class="answer-slots" id="slotsArea">${slots}</div>`;
 }
 
 function renderSentence(ch) {
   const shuffled = [...ch.words].sort(() => Math.random() - 0.5);
-  let chips = shuffled.map((w,i) =>
-    `<div class="word-chip" data-word="${w}" data-idx="${i}" onclick="pickWord(this)">${w}</div>`
-  ).join('');
-  return `<p class="prompt">${ch.prompt}</p>
-    <div class="sentence-words" id="wordBank">${chips}</div>
-    <p style="font-size:0.8rem;color:#888;margin-bottom:6px;">↓ Your sentence:</p>
-    <div class="sentence-target" id="sentenceTarget"></div>`;
+  const chips = shuffled.map((w,i) => `<div class="word-chip" data-word="${w}" data-idx="${i}" onclick="pickWord(this)">${w}</div>`).join('');
+  return `<p class="prompt">${ch.prompt}</p><div class="sentence-words" id="wordBank">${chips}</div><p style="font-size:0.8rem;color:#888;margin-bottom:6px;">↓ Your sentence:</p><div class="sentence-target" id="sentenceTarget"></div>`;
 }
 
 function renderMatch(ch) {
   const shuffledRight = [...ch.pairs].map(p => p.right).sort(() => Math.random() - 0.5);
-  let leftCols = ch.pairs.map((p,i) =>
-    `<div class="match-item left" data-idx="${i}" onclick="selectMatch('left',this)">${p.left}</div>`
-  ).join('');
-  let rightCols = shuffledRight.map((r,i) =>
-    `<div class="match-item right" data-ridx="${i}" data-val="${r}" onclick="selectMatch('right',this)">${r}</div>`
-  ).join('');
-  return `<p class="prompt">${ch.prompt}</p>
-    <div class="match-grid">
-      <div class="match-col" id="leftCol">${leftCols}</div>
-      <div class="match-col" id="rightCol">${rightCols}</div>
-    </div>`;
+  const leftCols  = ch.pairs.map((p,i) => `<div class="match-item left"  data-idx="${i}"  onclick="selectMatch('left',this)">${p.left}</div>`).join('');
+  const rightCols = shuffledRight.map((r,i) => `<div class="match-item right" data-ridx="${i}" data-val="${r}" onclick="selectMatch('right',this)">${r}</div>`).join('');
+  return `<p class="prompt">${ch.prompt}</p><div class="match-grid"><div class="match-col" id="leftCol">${leftCols}</div><div class="match-col" id="rightCol">${rightCols}</div></div>`;
 }
 
 function renderBlank(ch) {
-  return `<p class="prompt">${ch.prompt}</p>
-    <p style="font-size:0.78rem;color:#888;margin-bottom:6px;">Hint: ${ch.hint}</p>
-    <input type="text" class="blank-input" id="blankInput" placeholder="Type your answer..." 
-      onkeydown="if(event.key==='Enter')checkAnswer()" autocomplete="off">`;
+  return `<p class="prompt">${ch.prompt}</p><p style="font-size:0.78rem;color:#888;margin-bottom:6px;">Hint: ${ch.hint}</p><input type="text" class="blank-input" id="blankInput" placeholder="Type your answer..." onkeydown="if(event.key==='Enter')checkAnswer()" autocomplete="off">`;
 }
 
 function renderChoice(ch) {
-  let choices = ch.choices.map((c,i) =>
-    `<button class="choice-btn" data-idx="${i}" onclick="selectChoice(this,${i})">${c}</button>`
-  ).join('');
+  const choices = ch.choices.map((c,i) => `<button class="choice-btn" data-idx="${i}" onclick="selectChoice(this,${i})">${c}</button>`).join('');
   return `<p class="prompt">${ch.prompt}</p><div class="choices" id="choicesArea">${choices}</div>`;
 }
 
 function renderAction(ch) {
-  return `<div class="event-icon">${ch.icon}</div>
-    <div class="event-title">${ch.title}</div>
-    <div class="event-desc">${ch.description}</div>
+  return `<div class="event-icon">${ch.icon}</div><div class="event-title">${ch.title}</div><div class="event-desc">${ch.description}</div>
     <div class="modal-actions">
       <button class="btn-check" onclick="completeAction(${ch.points})">✅ Done! (+${ch.points} pts)</button>
       <button class="btn-skip" onclick="skipChallenge()">⏭ Skip (−1 pt)</button>
     </div>`;
 }
 
-// ─── Drag & Drop for Scramble ───
+// ─── Drag & Drop (Scramble) ───
 let dragSrc = null;
 function initScrambleDrag() {
   document.querySelectorAll('.letter-tile').forEach(tile => {
-    tile.addEventListener('dragstart', e => {
-      dragSrc = tile;
-      tile.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
+    tile.addEventListener('dragstart', e => { dragSrc = tile; tile.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
     tile.addEventListener('dragend', () => tile.classList.remove('dragging'));
   });
   document.querySelectorAll('.answer-slot').forEach(slot => {
-    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('dragover'); });
+    slot.addEventListener('dragover',  e => { e.preventDefault(); slot.classList.add('dragover'); });
     slot.addEventListener('dragleave', () => slot.classList.remove('dragover'));
     slot.addEventListener('drop', e => {
-      e.preventDefault();
-      slot.classList.remove('dragover');
+      e.preventDefault(); slot.classList.remove('dragover');
       if(!dragSrc) return;
       if(slot.textContent.trim()) {
-        // swap back
-        const oldLetter = slot.textContent.trim();
-        slot.textContent = dragSrc.textContent;
-        slot.classList.add('filled');
-        dragSrc.textContent = oldLetter;
+        const old = slot.textContent.trim();
+        slot.textContent = dragSrc.textContent; slot.classList.add('filled');
+        dragSrc.textContent = old;
       } else {
-        slot.textContent = dragSrc.textContent;
-        slot.classList.add('filled');
+        slot.textContent = dragSrc.textContent; slot.classList.add('filled');
         dragSrc.textContent = '';
       }
       dragSrc = null;
     });
-  });
-  // click to clear slot
-  document.querySelectorAll('.answer-slot').forEach(slot => {
     slot.addEventListener('dblclick', () => { slot.textContent = ''; slot.classList.remove('filled'); });
   });
 }
@@ -1349,50 +1053,37 @@ function pickWord(el) {
   if(el.classList.contains('used')) return;
   builtSentence.push(el.dataset.word);
   el.classList.add('used');
-  const target = document.getElementById('sentenceTarget');
   const chip = document.createElement('div');
-  chip.className = 'word-placed';
-  chip.textContent = el.dataset.word;
+  chip.className = 'word-placed'; chip.textContent = el.dataset.word;
   chip.onclick = () => {
-    builtSentence = builtSentence.filter((w,i) => i !== builtSentence.lastIndexOf(el.dataset.word));
-    chip.remove();
-    el.classList.remove('used');
+    builtSentence = builtSentence.filter((w,i,a) => !(i === a.lastIndexOf(el.dataset.word)));
+    chip.remove(); el.classList.remove('used');
   };
-  target.appendChild(chip);
+  document.getElementById('sentenceTarget').appendChild(chip);
 }
 
 // ─── Matching ───
-let matchLeft = null, matchRight = null;
-let matchedPairs = 0;
+let matchLeft = null, matchRight = null, matchedPairs = 0;
 function selectMatch(side, el) {
   if(el.classList.contains('correct')) return;
   if(side === 'left') {
     document.querySelectorAll('.match-item.left.selected').forEach(e => e.classList.remove('selected'));
-    matchLeft = el;
-    el.classList.add('selected');
+    matchLeft = el; el.classList.add('selected');
   } else {
     document.querySelectorAll('.match-item.right.selected').forEach(e => e.classList.remove('selected'));
-    matchRight = el;
-    el.classList.add('selected');
+    matchRight = el; el.classList.add('selected');
   }
   if(matchLeft && matchRight) {
     const ch = challengeQueue;
-    const leftIdx = parseInt(matchLeft.dataset.idx);
-    const leftItem = ch.pairs[leftIdx];
-    const rightVal = matchRight.dataset.val;
-    if(leftItem.right === rightVal) {
+    const leftItem = ch.pairs[parseInt(matchLeft.dataset.idx)];
+    if(leftItem.right === matchRight.dataset.val) {
       matchLeft.classList.remove('selected'); matchLeft.classList.add('correct');
       matchRight.classList.remove('selected'); matchRight.classList.add('correct');
       matchedPairs++;
-      if(matchedPairs >= ch.pairs.length) {
-        setTimeout(() => { showFeedback(true, 'Perfect match! +2 points 🎉'); awardPoints(2); }, 200);
-      }
+      if(matchedPairs >= ch.pairs.length) setTimeout(() => { showFeedback(true,'Perfect match! +2 points 🎉'); awardPoints(2); }, 200);
     } else {
       matchLeft.classList.add('wrong'); matchRight.classList.add('wrong');
-      setTimeout(() => {
-        matchLeft.classList.remove('wrong','selected');
-        matchRight.classList.remove('wrong','selected');
-      }, 700);
+      setTimeout(() => { matchLeft.classList.remove('wrong','selected'); matchRight.classList.remove('wrong','selected'); }, 700);
     }
     matchLeft = null; matchRight = null;
   }
@@ -1402,69 +1093,48 @@ function selectMatch(side, el) {
 let choiceSelected = null;
 function selectChoice(el, idx) {
   document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  choiceSelected = idx;
+  el.classList.add('selected'); choiceSelected = idx;
 }
 
-// ─── CHECK ANSWER ───
+// ─── Check Answer ───
 function checkAnswer() {
   const ch = challengeQueue;
   if(!ch) return;
 
   if(ch.type === 'scramble') {
-    const slots = document.querySelectorAll('.answer-slot');
-    const built = [...slots].map(s => s.textContent.trim()).join('');
-    if(built.toUpperCase() === ch.answer.toUpperCase()) {
-      showFeedback(true, '✅ Correct! +2 points!'); awardPoints(2);
-    } else {
-      showFeedback(false, `❌ Not quite! The answer is: ${ch.answer}`);
-    }
+    const built = [...document.querySelectorAll('.answer-slot')].map(s => s.textContent.trim()).join('');
+    if(built.toUpperCase() === ch.answer.toUpperCase()) { showFeedback(true,'✅ Correct! +2 points!'); awardPoints(2); }
+    else showFeedback(false,`❌ Not quite! The answer is: ${ch.answer}`);
   }
   else if(ch.type === 'sentence') {
     const built = builtSentence.join(' ');
-    if(built.toLowerCase() === ch.answer.toLowerCase()) {
-      showFeedback(true, '✅ Perfect sentence! +2 points!'); awardPoints(2);
-    } else {
-      showFeedback(false, `❌ Try again! Correct: "${ch.answer}"`);
-    }
+    if(built.toLowerCase() === ch.answer.toLowerCase()) { showFeedback(true,'✅ Perfect sentence! +2 points!'); awardPoints(2); }
+    else showFeedback(false,`❌ Try again! Correct: "${ch.answer}"`);
   }
   else if(ch.type === 'blank') {
-    const val = document.getElementById('blankInput').value.trim();
+    const val   = document.getElementById('blankInput').value.trim();
     const input = document.getElementById('blankInput');
-    if(val.toUpperCase() === ch.answer.toUpperCase()) {
-      input.classList.add('correct');
-      showFeedback(true, '✅ Correct! +2 points!'); awardPoints(2);
-    } else {
-      input.classList.add('wrong');
-      showFeedback(false, `❌ Answer: ${ch.answer}`);
-    }
+    if(val.toUpperCase() === ch.answer.toUpperCase()) { input.classList.add('correct'); showFeedback(true,'✅ Correct! +2 points!'); awardPoints(2); }
+    else { input.classList.add('wrong'); showFeedback(false,`❌ Answer: ${ch.answer}`); }
   }
   else if(ch.type === 'choice') {
     if(choiceSelected === null) { showToast('Pick an answer first!'); return; }
     const btns = document.querySelectorAll('.choice-btn');
     btns[ch.answer].classList.add('correct');
-    if(choiceSelected === ch.answer) {
-      showFeedback(true, '✅ Correct! +2 points!'); awardPoints(2);
-    } else {
-      btns[choiceSelected].classList.add('wrong');
-      showFeedback(false, `❌ Wrong! Correct answer: ${ch.choices[ch.answer]}`);
-    }
+    if(choiceSelected === ch.answer) { showFeedback(true,'✅ Correct! +2 points!'); awardPoints(2); }
+    else { btns[choiceSelected].classList.add('wrong'); showFeedback(false,`❌ Wrong! Correct: ${ch.choices[ch.answer]}`); }
     btns.forEach(b => b.onclick = null);
   }
   else if(ch.type === 'match') {
-    if(matchedPairs < ch.pairs.length) showFeedback(false, '❌ Match all pairs first!');
+    if(matchedPairs < ch.pairs.length) showFeedback(false,'❌ Match all pairs first!');
   }
 }
 
-function completeAction(pts) {
-  showFeedback(true, `✅ Great job! +${pts} points!`);
-  awardPoints(pts);
-}
+function completeAction(pts) { showFeedback(true,`✅ Great job! +${pts} points!`); awardPoints(pts); }
 
 function awardPoints(n) {
   players[currentPlayer].score += n;
-  renderPlayers();
-  checkWin();
+  renderPlayers(); checkWin();
   setTimeout(() => closeChallenge(), 1800);
 }
 
@@ -1476,39 +1146,26 @@ function showFeedback(correct, msg) {
 
 function skipChallenge() {
   players[currentPlayer].score = Math.max(0, players[currentPlayer].score - 1);
-  renderPlayers();
-  closeChallenge();
+  renderPlayers(); closeChallenge();
 }
 
 function closeChallenge() {
   document.getElementById('challengeModal').classList.remove('show');
-  awaitingChallenge = false;
-  challengeQueue = null;
+  awaitingChallenge = false; challengeQueue = null;
   matchLeft = null; matchRight = null; matchedPairs = 0; choiceSelected = null;
   endTurn();
 }
 
-// ────────────────────────────────────────
-// SPECIAL EVENTS
-// ────────────────────────────────────────
+// ─── Special Events ───
 function openSpecialEvent(type, p) {
   const content = document.getElementById('challengeContent');
   let html = '';
   if(type === 'paf') {
-    html = `<div class="event-icon">💥</div>
-      <div class="event-title" style="color:#8b35b0">PAF! Go back 4!</div>
-      <div class="event-desc">${p.name} moves back 4 spaces. Better luck next turn!</div>
-      <div class="modal-actions"><button class="btn-close" onclick="closePafModal()">OK, let's go!</button></div>`;
+    html = `<div class="event-icon">💥</div><div class="event-title" style="color:#8b35b0">PAF! Go back 4!</div><div class="event-desc">${p.name} moves back 4 spaces. Better luck next turn!</div><div class="modal-actions"><button class="btn-close" onclick="closePafModal()">OK, let's go!</button></div>`;
   } else if(type === 'bonus') {
-    html = `<div class="event-icon">⭐</div>
-      <div class="event-title" style="color:var(--green)">Bonus Points!</div>
-      <div class="event-desc">${p.name} lands on a BONUS square and earns 2 extra points!</div>
-      <div class="modal-actions"><button class="btn-close" onclick="closePafModal()">🎉 Awesome!</button></div>`;
+    html = `<div class="event-icon">⭐</div><div class="event-title" style="color:var(--green)">Bonus Points!</div><div class="event-desc">${p.name} earns 2 extra points!</div><div class="modal-actions"><button class="btn-close" onclick="closePafModal()">🎉 Awesome!</button></div>`;
   } else if(type === 'finish') {
-    html = `<div class="event-icon">🏆</div>
-      <div class="event-title" style="color:var(--gold)">FINISHED!</div>
-      <div class="event-desc">${p.name} reached the end! +5 bonus points!</div>
-      <div class="modal-actions"><button class="btn-close" onclick="closePafModal()">🎉 Celebrate!</button></div>`;
+    html = `<div class="event-icon">🏆</div><div class="event-title" style="color:var(--gold)">FINISHED!</div><div class="event-desc">${p.name} reached the end! +5 bonus points!</div><div class="modal-actions"><button class="btn-close" onclick="closePafModal()">🎉 Celebrate!</button></div>`;
   }
   document.getElementById('challengeModal').classList.add('show');
   content.innerHTML = html;
@@ -1516,15 +1173,14 @@ function openSpecialEvent(type, p) {
 
 function closePafModal() {
   document.getElementById('challengeModal').classList.remove('show');
-  awaitingChallenge = false;
-  endTurn();
+  awaitingChallenge = false; endTurn();
 }
 
-// ────────────────────────────────────────
-// TURN MANAGEMENT
-// ────────────────────────────────────────
+// ════════════════════════════════════════
+//  TURN MANAGEMENT
+// ════════════════════════════════════════
 function endTurn(won=false) {
-  diceRolled = false;
+  diceRolled = false; isMoving = false;
   document.getElementById('rollBtn').disabled = false;
   document.getElementById('diceResult').textContent = 'Click to roll!';
 
@@ -1534,9 +1190,7 @@ function endTurn(won=false) {
   if(currentPlayer === 0) round++;
 
   document.getElementById('roundNum').textContent = 'Round ' + round;
-  document.getElementById('progressBar').style.width =
-    Math.min(100, (round / 10) * 100) + '%';
-
+  document.getElementById('progressBar').style.width = Math.min(100, (round / 10) * 100) + '%';
   renderPlayers();
   updateTurnDisplay();
 }
@@ -1560,9 +1214,9 @@ function checkWin() {
   });
 }
 
-// ────────────────────────────────────────
-// PLAYER MANAGEMENT
-// ────────────────────────────────────────
+// ════════════════════════════════════════
+//  PLAYER MANAGEMENT
+// ════════════════════════════════════════
 function renderPlayers() {
   const list = document.getElementById('playersList');
   list.innerHTML = players.map((p,i) => `
@@ -1573,8 +1227,7 @@ function renderPlayers() {
         <div class="player-pos">Square ${p.pos}</div>
       </div>
       <div class="player-score">${p.score}⭐</div>
-    </div>
-  `).join('');
+    </div>`).join('');
   updateTurnDisplay();
 }
 
@@ -1584,42 +1237,60 @@ function updateTurnDisplay() {
 
 function addPlayer() {
   if(players.length >= MAX_PLAYERS) { showToast('Maximum 6 players!'); return; }
-  const n = players.length;
+  const n    = players.length;
   const name = prompt(`Enter name for Player ${n+1}:`, `Player ${n+1}`);
   if(!name) return;
-  players.push({ name, pos:0, score:0, color:PLAYER_COLORS[n], emoji:PLAYER_EMOJIS[n] });
+  const p = { name, pos:0, score:0, color:PLAYER_COLORS[n], emoji:PLAYER_EMOJIS[n] };
+  players.push(p);
   renderPlayers();
-  renderTokens();
+
+  // add token + shadow for the new player
+  const board = document.getElementById('board');
+  const i     = players.length - 1;
+
+  const shadow = document.createElement('div');
+  shadow.className = 'token-shadow'; shadow.id = `shadow${i}`;
+  shadow.style.cssText = `width:14px;height:6px;margin-left:2px;`;
+  board.appendChild(shadow);
+
+  const token = document.createElement('div');
+  token.className = 'token'; token.id = `token${i}`;
+  token.style.background = p.color; token.textContent = p.emoji;
+  board.appendChild(token);
+
+  const pos = getCellPos(p.pos, i);
+  token.style.transform  = `translate(${pos.x}px, ${pos.y}px) scale(1)`;
+  shadow.style.transform = `translate(${pos.x+3}px, ${pos.y+17}px)`;
+  shadow.style.opacity   = '0.4';
 }
 
-function handleCellClick(idx) {
-  // clicking a cell just shows its info (no-op for now; movement is dice-driven)
-}
+function handleCellClick(idx) { /* informational only */ }
 
-// ────────────────────────────────────────
-// RESET
-// ────────────────────────────────────────
+// ════════════════════════════════════════
+//  RESET
+// ════════════════════════════════════════
 function resetGame() {
   document.getElementById('challengeModal').classList.remove('show');
   players.forEach(p => { p.pos = 0; p.score = 0; });
-  currentPlayer = 0; round = 1; diceRolled = false; awaitingChallenge = false;
+  currentPlayer = 0; round = 1; diceRolled = false;
+  awaitingChallenge = false; isMoving = false;
   document.getElementById('roundNum').textContent = 'Round 1';
   document.getElementById('progressBar').style.width = '0%';
   document.getElementById('diceResult').textContent = 'Click to roll!';
   document.getElementById('rollBtn').disabled = false;
   showDice(1);
   renderPlayers();
-  renderTokens();
+  // Re-init tokens so positions update correctly after layout
+  requestAnimationFrame(() => requestAnimationFrame(initTokens));
   showToast('🔄 New game started!');
 }
 
-// ────────────────────────────────────────
-// TOAST
-// ────────────────────────────────────────
+// ════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
@@ -1629,6 +1300,8 @@ function showToast(msg) {
 buildBoard();
 renderPlayers();
 showDice(1);
+// Double rAF ensures the grid has been laid out before we query getBoundingClientRect
+requestAnimationFrame(() => requestAnimationFrame(initTokens));
 </script>
 </body>
 </html>
