@@ -8,887 +8,308 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg:           #0C0A08;
-      --surface:      #181410;
-      --surface-2:    #211D17;
-      --surface-3:    #2A2520;
-      --border:       rgba(212, 168, 83, 0.1);
-      --border-2:     rgba(212, 168, 83, 0.18);
-      --rust:         #D4622E;
-      --rust-dark:    #B8501F;
-      --rust-glow:    rgba(212, 98, 46, 0.35);
-      --gold:         #E8B84A;
-      --gold-dim:     rgba(232, 184, 74, 0.15);
-      --text:         #F0EAE0;
-      --text-2:       #A89D92;
-      --text-3:       #6B6058;
-      --success:      #5DBF8A;
-      --success-bg:   rgba(93, 191, 138, 0.1);
-      --success-bd:   rgba(93, 191, 138, 0.22);
-      --error:        #E85252;
-      --error-bg:     rgba(232, 82, 82, 0.1);
-      --error-bd:     rgba(232, 82, 82, 0.25);
-      --radius:       14px;
-      --radius-sm:    9px;
+      --bg:#0C0A08; --surface:#181410; --surface-2:#211D17; --surface-3:#2A2520;
+      --border:rgba(212,168,83,0.1); --border-2:rgba(212,168,83,0.18);
+      --rust:#D4622E; --rust-dark:#B8501F; --rust-glow:rgba(212,98,46,0.35);
+      --gold:#E8B84A; --gold-dim:rgba(232,184,74,0.15);
+      --text:#F0EAE0; --text-2:#A89D92; --text-3:#6B6058;
+      --success:#5DBF8A; --success-bg:rgba(93,191,138,0.1); --success-bd:rgba(93,191,138,0.22);
+      --error:#E85252; --error-bg:rgba(232,82,82,0.1); --error-bd:rgba(232,82,82,0.25);
+      --radius:14px; --radius-sm:9px;
+      /* game accent */
+      --game:#8B35B0; --game-bg:rgba(139,53,176,0.12); --game-bd:rgba(139,53,176,0.25);
+      --game-glow:rgba(139,53,176,0.35);
     }
-
     html { scroll-behavior: smooth; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5; -webkit-font-smoothing:antialiased; }
+    body::before { content:''; position:fixed; inset:0; background-image:radial-gradient(circle,rgba(212,168,83,0.045) 1px,transparent 1px); background-size:44px 44px; pointer-events:none; z-index:0; }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
+    /* ─── NAV ─── */
+    nav { position:sticky; top:0; z-index:50; height:62px; display:flex; align-items:center; justify-content:space-between; padding:0 2rem; background:rgba(12,10,8,0.82); backdrop-filter:blur(22px); border-bottom:1px solid var(--border); }
+    .brand { text-decoration:none; display:flex; align-items:center; gap:.55rem; color:var(--text); font-size:1.05rem; font-weight:700; letter-spacing:-0.025em; }
+    .brand-mark { width:28px; height:28px; border-radius:7px; background:linear-gradient(135deg,var(--rust) 0%,var(--gold) 100%); display:flex; align-items:center; justify-content:center; font-size:.9rem; box-shadow:0 2px 12px var(--rust-glow); }
+    .brand em { font-style:normal; color:var(--gold); }
+    .nav-back { font-size:.78rem; font-weight:500; color:var(--text-3); text-decoration:none; border:1px solid var(--border); padding:.38rem .95rem; border-radius:7px; transition:all .18s; }
+    .nav-back:hover { color:var(--text); border-color:var(--border-2); background:var(--surface-2); }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: radial-gradient(circle, rgba(212,168,83,0.045) 1px, transparent 1px);
-      background-size: 44px 44px;
-      pointer-events: none;
-      z-index: 0;
-    }
+    /* ─── PAGE ─── */
+    .page { position:relative; z-index:1; max-width:860px; margin:0 auto; padding:2.8rem 1.5rem 6rem; }
 
-    /* ─── NAV ─────────────────────────────────── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      height: 62px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      background: rgba(12, 10, 8, 0.82);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-bottom: 1px solid var(--border);
-    }
+    /* ─── BREADCRUMB ─── */
+    .breadcrumb { display:flex; align-items:center; gap:.45rem; font-size:.76rem; color:var(--text-3); margin-bottom:1.8rem; flex-wrap:wrap; }
+    .breadcrumb a { color:var(--text-3); text-decoration:none; transition:color .18s; white-space:nowrap; }
+    .breadcrumb a:hover { color:var(--text-2); }
+    .breadcrumb-sep { opacity:.35; flex-shrink:0; }
+    .breadcrumb-current { color:var(--text-2); font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:280px; }
 
-    .brand {
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      color: var(--text);
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: -0.025em;
-    }
-    .brand-mark {
-      width: 28px; height: 28px;
-      border-radius: 7px;
-      background: linear-gradient(135deg, var(--rust) 0%, var(--gold) 100%);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.9rem;
-      box-shadow: 0 2px 12px var(--rust-glow);
-    }
-    .brand em { font-style: normal; color: var(--gold); }
+    /* ─── SKELETON ─── */
+    .hero-skeleton { height:200px; background:var(--surface); border:1px solid var(--border); border-radius:18px; margin-bottom:2rem; display:flex; align-items:center; justify-content:center; }
 
-    .nav-back {
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: var(--text-3);
-      text-decoration: none;
-      border: 1px solid var(--border);
-      padding: 0.38rem 0.95rem;
-      border-radius: 7px;
-      transition: color 0.18s, border-color 0.18s, background 0.18s;
-    }
-    .nav-back:hover { color: var(--text); border-color: var(--border-2); background: var(--surface-2); }
+    /* ─── CLASS HERO ─── */
+    .class-hero { position:relative; overflow:hidden; background:linear-gradient(148deg,#15120C 0%,var(--surface) 50%,#0F0D09 100%); border:1px solid var(--border-2); border-radius:18px; padding:2rem 2rem 1.8rem; margin-bottom:2rem; display:none; }
+    .class-hero::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent 0%,rgba(212,98,46,0.5) 15%,var(--gold) 45%,rgba(232,184,74,0.5) 70%,transparent 100%); }
+    .class-hero::after { content:''; position:absolute; top:-40px; right:-40px; width:200px; height:180px; background:radial-gradient(ellipse at top right,rgba(232,184,74,0.1) 0%,rgba(212,98,46,0.05) 50%,transparent 70%); pointer-events:none; }
+    .hero-layout { display:flex; align-items:flex-start; justify-content:space-between; gap:1.5rem; flex-wrap:wrap; }
+    .hero-main { flex:1; min-width:0; }
+    .hero-eyebrow { display:flex; align-items:center; gap:.45rem; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.16em; color:var(--gold); margin-bottom:.5rem; opacity:.9; }
+    .hero-eyebrow-line { display:block; width:16px; height:2px; border-radius:2px; background:var(--gold); }
+    .hero-title { font-size:clamp(1.45rem,3.5vw,2rem); font-weight:700; letter-spacing:-0.035em; line-height:1.1; background:linear-gradient(135deg,var(--text) 30%,var(--text-2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:.6rem; }
+    .hero-badges { display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+    .badge { display:inline-flex; align-items:center; gap:.25rem; padding:.18rem .6rem; border-radius:20px; font-size:.68rem; font-weight:700; letter-spacing:.02em; }
+    .badge-level { background:var(--gold-dim); color:var(--gold); border:1px solid rgba(232,184,74,0.22); }
+    .badge-active { background:var(--success-bg); color:var(--success); border:1px solid var(--success-bd); }
+    .badge-inactive { background:var(--surface-3); color:var(--text-3); border:1px solid var(--border); }
+    .badge-schedule { background:rgba(212,98,46,0.1); color:var(--rust); border:1px solid rgba(212,98,46,0.22); }
+    .hero-desc { font-size:.83rem; color:var(--text-2); margin-top:.6rem; line-height:1.65; max-width:480px; display:none; }
+    .hero-course-ref { display:flex; align-items:center; gap:.4rem; margin-top:.55rem; font-size:.73rem; color:var(--text-3); }
+    .hero-course-ref a { color:var(--gold); text-decoration:none; font-weight:500; transition:opacity .18s; }
+    .hero-course-ref a:hover { opacity:.75; }
+    .hero-meta { font-size:.72rem; color:var(--text-3); margin-top:.35rem; }
+    .hero-stats { display:flex; gap:.6rem; flex-shrink:0; align-self:flex-start; }
+    .hero-stat { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:70px; padding:.75rem 1rem; background:rgba(0,0,0,0.22); border:1px solid var(--border); border-radius:10px; text-align:center; }
+    .hero-stat-val { font-size:1.45rem; font-weight:700; color:var(--text); line-height:1; font-variant-numeric:tabular-nums; }
+    .hero-stat-lbl { font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text-3); margin-top:.28rem; }
 
-    /* ─── PAGE ───────────────────────────────── */
-    .page {
+    /* ─── FEEDBACK ─── */
+    #feedback { overflow:hidden; max-height:0; margin-bottom:0; transition:max-height .35s ease,margin-bottom .35s ease; }
+    #feedback.show { max-height:80px; margin-bottom:1.2rem; }
+    .fb-inner { display:flex; align-items:center; gap:.6rem; padding:.8rem 1.1rem; border-radius:var(--radius-sm); font-size:.82rem; font-weight:500; }
+    #feedback.ok  .fb-inner { background:var(--success-bg); border:1px solid var(--success-bd); color:var(--success); }
+    #feedback.err .fb-inner { background:var(--error-bg); border:1px solid var(--error-bd); color:var(--error); }
+
+    /* ─── SECTION BAR ─── */
+    .section-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:.9rem; }
+    .section-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.15em; color:var(--text-3); }
+
+    /* ─── GAME BANNER ─────────────────────────────────────────────── */
+    .game-banner {
       position: relative;
-      z-index: 1;
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 2.8rem 1.5rem 6rem;
-    }
-
-    /* ─── BREADCRUMB ─────────────────────────── */
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      font-size: 0.76rem;
-      color: var(--text-3);
-      margin-bottom: 1.8rem;
-      flex-wrap: wrap;
-    }
-    .breadcrumb a {
-      color: var(--text-3);
-      text-decoration: none;
-      transition: color 0.18s;
-      white-space: nowrap;
-    }
-    .breadcrumb a:hover { color: var(--text-2); }
-    .breadcrumb-sep     { opacity: 0.35; flex-shrink: 0; }
-    .breadcrumb-current {
-      color: var(--text-2);
-      font-weight: 500;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 280px;
-    }
-
-    /* ─── SKELETON ───────────────────────────── */
-    .hero-skeleton {
-      height: 200px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
+      background: linear-gradient(130deg, rgba(139,53,176,0.14) 0%, rgba(90,33,120,0.08) 100%);
+      border: 1px solid var(--game-bd);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.6rem;
       margin-bottom: 2rem;
       display: flex;
       align-items: center;
-      justify-content: center;
-    }
-
-    /* ─── CLASS HERO ─────────────────────────── */
-    .class-hero {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(148deg, #15120C 0%, var(--surface) 50%, #0F0D09 100%);
-      border: 1px solid var(--border-2);
-      border-radius: 18px;
-      padding: 2rem 2rem 1.8rem;
-      margin-bottom: 2rem;
-      display: none;
-    }
-
-    /* Gold-leaning top border — distinguishes class level from course (rust) */
-    .class-hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(212,98,46,0.5) 15%,
-        var(--gold) 45%,
-        rgba(232,184,74,0.5) 70%,
-        transparent 100%
-      );
-    }
-
-    /* Radial glow corner */
-    .class-hero::after {
-      content: '';
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 200px; height: 180px;
-      background: radial-gradient(ellipse at top right,
-        rgba(232,184,74,0.1) 0%, rgba(212,98,46,0.05) 50%, transparent 70%
-      );
-      pointer-events: none;
-    }
-
-    .hero-layout {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1.5rem;
+      gap: 1.4rem;
       flex-wrap: wrap;
     }
-
-    .hero-main { flex: 1; min-width: 0; }
-
-    .hero-eyebrow {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--gold);
-      margin-bottom: 0.5rem;
-      opacity: 0.9;
-    }
-    .hero-eyebrow-line {
-      display: block;
-      width: 16px; height: 2px;
-      border-radius: 2px;
-      background: var(--gold);
-    }
-
-    .hero-title {
-      font-size: clamp(1.45rem, 3.5vw, 2rem);
-      font-weight: 700;
-      letter-spacing: -0.035em;
-      line-height: 1.1;
-      background: linear-gradient(135deg, var(--text) 30%, var(--text-2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.6rem;
-    }
-
-    .hero-badges {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.18rem 0.6rem;
-      border-radius: 20px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-    .badge-level    { background: var(--gold-dim);    color: var(--gold);    border: 1px solid rgba(232,184,74,0.22); }
-    .badge-active   { background: var(--success-bg);  color: var(--success); border: 1px solid var(--success-bd); }
-    .badge-inactive { background: var(--surface-3);   color: var(--text-3);  border: 1px solid var(--border); }
-    .badge-schedule { background: rgba(212,98,46,0.1); color: var(--rust);   border: 1px solid rgba(212,98,46,0.22); }
-
-    .hero-desc {
-      font-size: 0.83rem;
-      color: var(--text-2);
-      margin-top: 0.6rem;
-      line-height: 1.65;
-      max-width: 480px;
-      display: none;
-    }
-
-    .hero-course-ref {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-top: 0.55rem;
-      font-size: 0.73rem;
-      color: var(--text-3);
-    }
-    .hero-course-ref a {
-      color: var(--gold);
-      text-decoration: none;
-      font-weight: 500;
-      transition: opacity 0.18s;
-    }
-    .hero-course-ref a:hover { opacity: 0.75; }
-
-    .hero-meta { font-size: 0.72rem; color: var(--text-3); margin-top: 0.35rem; }
-
-    /* Stats cluster */
-    .hero-stats {
-      display: flex;
-      gap: 0.6rem;
-      flex-shrink: 0;
-      align-self: flex-start;
-    }
-    .hero-stat {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-width: 70px;
-      padding: 0.75rem 1rem;
-      background: rgba(0,0,0,0.22);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      text-align: center;
-    }
-    .hero-stat-val {
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-    .hero-stat-lbl {
-      font-size: 0.58rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-3);
-      margin-top: 0.28rem;
-    }
-
-    /* ─── FEEDBACK ───────────────────────────── */
-    #feedback {
-      overflow: hidden;
-      max-height: 0;
-      margin-bottom: 0;
-      transition: max-height 0.35s ease, margin-bottom 0.35s ease;
-    }
-    #feedback.show { max-height: 80px; margin-bottom: 1.2rem; }
-    .fb-inner {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.8rem 1.1rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.82rem;
-      font-weight: 500;
-    }
-    #feedback.ok  .fb-inner { background: var(--success-bg); border: 1px solid var(--success-bd); color: var(--success); }
-    #feedback.err .fb-inner { background: var(--error-bg);   border: 1px solid var(--error-bd);   color: var(--error); }
-
-    /* ─── SECTION BAR ────────────────────────── */
-    .section-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.9rem;
-    }
-    .section-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--text-3);
-    }
-
-    /* ─── ENROLL BUTTON ──────────────────────── */
-    .btn-create {
-      position: relative;
-      overflow: hidden;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.35rem;
-      border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.83rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, var(--rust) 0%, var(--rust-dark) 100%);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 18px var(--rust-glow), inset 0 1px 0 rgba(255,255,255,0.12);
-      transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s ease;
-      white-space: nowrap;
-    }
-    .btn-create .ic {
-      width: 20px; height: 20px;
-      background: rgba(255,255,255,0.18);
-      border-radius: 5px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      transition: transform 0.22s cubic-bezier(0.22,1,0.36,1);
-    }
-    .btn-create:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--rust-glow), inset 0 1px 0 rgba(255,255,255,0.15); }
-    .btn-create:hover .ic { transform: rotate(90deg); }
-    .btn-create:active { transform: translateY(0); }
-    .btn-create::after {
+    .game-banner::before {
       content: '';
-      position: absolute;
-      top: 0; bottom: 0; left: -75%;
-      width: 50%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.17), transparent);
-      transform: skewX(-15deg);
-      animation: shimmer 3.2s ease-in-out infinite;
-    }
-    @keyframes shimmer { 0% { left: -75%; } 45%, 100% { left: 130%; } }
-
-    /* ─── STATES ─────────────────────────────── */
-    #loadingState {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      padding: 4rem 2rem;
-      color: var(--text-3);
-      font-size: 0.84rem;
-    }
-    #emptyState {
-      display: none;
-      text-align: center;
-      padding: 4rem 2rem;
-      border: 1px dashed var(--border-2);
-      border-radius: var(--radius);
-      background: var(--surface);
-    }
-    .empty-emoji { font-size: 2.2rem; margin-bottom: 0.9rem; opacity: 0.7; }
-    .empty-h     { font-size: 1rem; font-weight: 600; color: var(--text-2); margin-bottom: 0.3rem; }
-    .empty-p     { font-size: 0.82rem; color: var(--text-3); margin-bottom: 1.5rem; }
-
-    /* ═══════════════════════════════════════════
-       ROSTER PANEL — the signature element of this page
-       A contained register-like panel, not floating cards.
-       Signals "this is an official class list."
-    ═══════════════════════════════════════════ */
-    .roster-panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
-    .roster-header {
-      display: grid;
-      grid-template-columns: 36px 1fr 100px 130px 80px;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.6rem 1.3rem 0.6rem 1.5rem;
-      background: rgba(0,0,0,0.18);
-      border-bottom: 1px solid var(--border);
-    }
-    .roster-col-label {
-      font-size: 0.6rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--text-3);
-    }
-    .roster-col-label.align-right { text-align: right; }
-
-    /* Individual student row */
-    .student-row {
-      display: grid;
-      grid-template-columns: 36px 1fr 100px 130px 80px;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.85rem 1.3rem 0.85rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      transition: background 0.15s;
-      animation: rowIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-    .student-row:last-child { border-bottom: none; }
-    .student-row:hover      { background: rgba(212,168,83,0.028); }
-    @keyframes rowIn {
-      from { opacity: 0; transform: translateX(-8px); }
-      to   { opacity: 1; transform: none; }
-    }
-
-    /* Subtle left accent on hover */
-    .student-row::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 10px; bottom: 10px;
-      width: 2px;
-      border-radius: 0 2px 2px 0;
-      background: var(--gold);
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-    .student-row:hover::before { opacity: 0.6; }
-
-    /* Avatar with deterministic color */
-    .student-avatar {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
-    /* 5 color variants — chosen by hash of student name */
-    .av-0 { background: rgba(212,98,46,0.16);  color: var(--rust);    border: 1px solid rgba(212,98,46,0.28); }
-    .av-1 { background: var(--gold-dim);        color: var(--gold);    border: 1px solid rgba(232,184,74,0.28); }
-    .av-2 { background: var(--success-bg);      color: var(--success); border: 1px solid var(--success-bd); }
-    .av-3 { background: rgba(90,130,200,0.12);  color: #8BAED6;        border: 1px solid rgba(90,130,200,0.22); }
-    .av-4 { background: rgba(180,90,200,0.1);   color: #C49ED8;        border: 1px solid rgba(180,90,200,0.2); }
-
-    .student-info { min-width: 0; }
-    .student-name {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -0.015em;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .student-email {
-      font-size: 0.7rem;
-      color: var(--text-3);
-      margin-top: 0.08rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .student-level {
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: var(--text-3);
-    }
-
-    .student-date {
-      font-size: 0.68rem;
-      color: var(--text-3);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .student-action { display: flex; justify-content: flex-end; }
-
-    .btn-ghost-sm {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.3rem 0.7rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 500;
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-3);
-      cursor: pointer;
-      transition: all 0.18s;
-      white-space: nowrap;
-    }
-    .btn-ghost-sm:hover        { border-color: var(--border-2); color: var(--text); background: var(--surface-2); }
-    .btn-ghost-sm.danger       { border-color: rgba(232,82,82,0.2); color: var(--error); }
-    .btn-ghost-sm.danger:hover { background: var(--error-bg); border-color: rgba(232,82,82,0.35); }
-
-    /* ─── ROSTER FOOTER (count row) ──────────────────────── */
-    .roster-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.6rem 1.3rem 0.6rem 1.5rem;
-      background: rgba(0,0,0,0.1);
-      border-top: 1px solid var(--border);
-      font-size: 0.68rem;
-      color: var(--text-3);
-    }
-
-    /* ─── SPINNER ────────────────────────────── */
-    .spinner {
-      display: inline-block;
-      width: 13px; height: 13px;
-      border: 2px solid rgba(255,255,255,0.18);
-      border-top-color: currentColor;
-      border-radius: 50%;
-      animation: spin 0.55s linear infinite;
-    }
-    .spinner.dark { border-color: rgba(0,0,0,0.1); border-top-color: var(--text-3); }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ═══════════════════════════════════════════
-       ENROLL MODAL — two-step: search → preview
-    ═══════════════════════════════════════════ */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      background: rgba(6, 4, 3, 0.72);
-      backdrop-filter: blur(14px) saturate(0.8);
-      -webkit-backdrop-filter: blur(14px) saturate(0.8);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.28s ease;
-    }
-    .modal-backdrop.open { opacity: 1; pointer-events: all; }
-
-    .modal {
-      position: relative;
-      width: 100%;
-      max-width: 480px;
-      border-radius: 20px;
-      overflow: hidden;
-      background: linear-gradient(150deg, #1E1A13 0%, #16130E 55%, #120F0A 100%);
-      border: 1px solid rgba(212,168,83,0.14);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.04),
-        0 24px 64px rgba(0,0,0,0.65),
-        0 48px 100px rgba(0,0,0,0.4);
-      transform: scale(0.88) translateY(32px);
-      opacity: 0;
-      transition:
-        transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-        opacity   0.3s ease;
-    }
-    .modal-backdrop.open .modal { transform: scale(1) translateY(0); opacity: 1; }
-
-    .modal-glow {
-      position: absolute;
-      top: -80px; left: 50%;
-      transform: translateX(-50%);
-      width: 280px; height: 160px;
-      background: radial-gradient(ellipse at center, rgba(212,98,46,0.38) 0%, rgba(232,184,74,0.12) 50%, transparent 75%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .modal-top-border {
       position: absolute;
       top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent 0%, var(--rust) 25%, var(--gold) 55%, rgba(232,184,74,0.4) 80%, transparent 100%);
-      z-index: 1;
+      background: linear-gradient(90deg, transparent, var(--game), transparent);
     }
-
-    .modal-header {
-      position: relative;
-      z-index: 1;
-      padding: 1.8rem 2rem 1.1rem;
+    .game-banner-icon {
+      font-size: 2.5rem;
+      flex-shrink: 0;
+      line-height: 1;
     }
-    .modal-icon-wrap {
-      width: 46px; height: 46px;
-      border-radius: 11px;
-      background: linear-gradient(135deg, rgba(212,98,46,0.22) 0%, rgba(232,184,74,0.1) 100%);
-      border: 1px solid rgba(212,168,83,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 4px 16px rgba(212,98,46,0.15);
-    }
-    .modal-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text); }
-    .modal-sub   { font-size: 0.77rem; color: var(--text-3); margin-top: 0.25rem; line-height: 1.5; }
-    .modal-x {
-      position: absolute;
-      top: 1.3rem; right: 1.3rem;
-      width: 30px; height: 30px;
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text-3);
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.18s;
-      z-index: 2;
-    }
-    .modal-x:hover { background: var(--surface-3); color: var(--text); border-color: var(--border-2); transform: rotate(90deg); }
-
-    .modal-body { position: relative; z-index: 1; padding: 0 2rem; }
-
-    /* Step containers */
-    .enroll-step { display: none; }
-    .enroll-step.active { display: block; }
-
-    .fg { display: flex; flex-direction: column; gap: 0.38rem; }
-    .f-label {
-      font-size: 0.68rem;
+    .game-banner-body { flex: 1; min-width: 0; }
+    .game-banner-title {
+      font-size: .95rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.11em;
-      color: var(--text-3);
-    }
-    .f-input {
-      padding: 0.68rem 1rem;
-      background: rgba(0,0,0,0.28);
-      border: 1px solid rgba(212,168,83,0.1);
-      border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.86rem;
       color: var(--text);
-      outline: none;
-      width: 100%;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      letter-spacing: -.015em;
+      margin-bottom: .2rem;
     }
-    .f-input::placeholder { color: var(--text-3); }
-    .f-input:focus {
-      border-color: var(--rust);
-      background: rgba(212, 98, 46, 0.05);
-      box-shadow: 0 0 0 3px rgba(212, 98, 46, 0.12);
-    }
-    .f-input.err {
-      border-color: var(--error) !important;
-      box-shadow: 0 0 0 3px rgba(232,82,82,0.12) !important;
-    }
-
-    /* Inline error inside modal */
-    .modal-inline-err {
-      display: none;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 0.85rem;
-      background: var(--error-bg);
-      border: 1px solid var(--error-bd);
-      border-radius: 8px;
-      font-size: 0.78rem;
-      color: var(--error);
-      margin-top: 0.75rem;
-    }
-    .modal-inline-err.show { display: flex; }
-
-    /* Student preview card (step 2) */
-    .student-preview-card {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem 1.1rem;
-      background: rgba(0,0,0,0.2);
-      border: 1px solid var(--border-2);
-      border-radius: 10px;
-    }
-    .preview-info { flex: 1; min-width: 0; }
-    .preview-name {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -0.015em;
-    }
-    .preview-email { font-size: 0.73rem; color: var(--text-3); margin-top: 0.1rem; }
-
-    .already-warning {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 0.85rem;
-      background: rgba(232,184,74,0.08);
-      border: 1px solid rgba(232,184,74,0.2);
-      border-radius: 8px;
-      font-size: 0.77rem;
-      color: var(--gold);
-      margin-top: 0.8rem;
-    }
-
-    /* Modal footer */
-    .modal-footer {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.6rem;
-      padding: 1.1rem 2rem 1.6rem;
-      margin-top: 1.2rem;
-      border-top: 1px solid var(--border);
-    }
-    .footer-left { flex: 1; }
-    .footer-right { display: flex; gap: 0.55rem; }
-
-    .btn-cancel-modal {
-      padding: 0.58rem 1.1rem;
-      border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.81rem;
-      font-weight: 500;
-      background: none;
-      border: 1px solid var(--border);
+    .game-banner-sub {
+      font-size: .76rem;
       color: var(--text-3);
-      cursor: pointer;
-      transition: all 0.18s;
+      line-height: 1.55;
     }
-    .btn-cancel-modal:hover { border-color: var(--border-2); color: var(--text); background: var(--surface-2); }
+    .game-banner-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
 
-    .btn-text-sm {
-      padding: 0.58rem 0.8rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 500;
-      background: none;
-      border: none;
-      color: var(--text-3);
-      cursor: pointer;
-      transition: color 0.18s;
+    /* Active game banner (shown when a game is running) */
+    .game-banner.active-game {
+      background: linear-gradient(130deg, rgba(93,191,138,0.1) 0%, rgba(46,158,79,0.05) 100%);
+      border-color: rgba(93,191,138,0.3);
     }
-    .btn-text-sm:hover { color: var(--text-2); }
-
-    .btn-submit-modal {
-      position: relative;
-      overflow: hidden;
+    .game-banner.active-game::before {
+      background: linear-gradient(90deg, transparent, var(--success), transparent);
+    }
+    .live-pulse {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.58rem 1.3rem;
-      border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.83rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, var(--rust), var(--rust-dark));
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 2px 14px var(--rust-glow), inset 0 1px 0 rgba(255,255,255,0.1);
-      transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
+      gap: .35rem;
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--success);
+      text-transform: uppercase;
+      letter-spacing: .1em;
     }
-    .btn-submit-modal:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px var(--rust-glow); }
-    .btn-submit-modal:active { transform: translateY(0); }
-    .btn-submit-modal:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* ═══════════════════════════════════════════
-       REMOVE CONFIRM OVERLAY
-    ═══════════════════════════════════════════ */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.72);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      z-index: 300;
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 0 rgba(93,191,138,0.6);
+      animation: livePulse 1.4s ease-in-out infinite;
     }
-    .overlay.open { display: flex; animation: bdin 0.22s ease; }
-    @keyframes bdin { from { opacity:0; } to { opacity:1; } }
-
-    .confirm-box {
-      background: var(--surface);
-      border: 1px solid var(--border-2);
-      border-radius: 16px;
-      padding: 1.8rem;
-      max-width: 340px;
-      width: 100%;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-      animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    @keyframes popIn { from { transform: scale(0.88); opacity:0; } to { transform: scale(1); opacity:1; } }
-    .confirm-icon  { width: 42px; height: 42px; border-radius: 10px; background: var(--error-bg); border: 1px solid var(--error-bd); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 0.9rem; }
-    .confirm-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
-    .confirm-text  { font-size: 0.78rem; color: var(--text-3); line-height: 1.6; margin-bottom: 1.4rem; }
-    .confirm-btns  { display: flex; gap: 0.5rem; justify-content: flex-end; }
-    .btn-cf-cancel { padding: 0.5rem 1rem; border-radius: 7px; font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:500; background:none; border:1px solid var(--border); color:var(--text-3); cursor:pointer; transition:all 0.18s; }
-    .btn-cf-cancel:hover { border-color: var(--border-2); color: var(--text); }
-    .btn-cf-delete { padding: 0.5rem 1rem; border-radius: 7px; font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:600; background:var(--error-bg); border:1px solid var(--error-bd); color:var(--error); cursor:pointer; transition:all 0.18s; }
-    .btn-cf-delete:hover { background: rgba(232,82,82,0.2); }
-
-    /* ─── SCROLLBAR ───────────────────────────── */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
-
-    /* ─── RESPONSIVE ─────────────────────────── */
-    @media (max-width: 640px) {
-      .roster-header { display: none; }
-      .student-row {
-        grid-template-columns: 34px 1fr auto;
-        grid-template-rows: auto auto;
-      }
-      .student-level,
-      .student-date  { display: none; }
-      .hero-stats    { width: 100%; }
-      .hero-layout   { flex-direction: column; }
+    @keyframes livePulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(93,191,138,0.6); }
+      50%      { box-shadow: 0 0 0 6px rgba(93,191,138,0); }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+    /* ─── BUTTONS ─── */
+    .btn-create {
+      position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:.5rem;
+      padding:.65rem 1.35rem; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif;
+      font-size:.83rem; font-weight:600;
+      background:linear-gradient(135deg,var(--rust) 0%,var(--rust-dark) 100%); color:#fff;
+      border:none; cursor:pointer;
+      box-shadow:0 4px 18px var(--rust-glow),inset 0 1px 0 rgba(255,255,255,0.12);
+      transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s ease; white-space:nowrap;
     }
+    .btn-create .ic { width:20px; height:20px; background:rgba(255,255,255,0.18); border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:transform .22s cubic-bezier(.22,1,.36,1); }
+    .btn-create:hover { transform:translateY(-2px); box-shadow:0 8px 28px var(--rust-glow),inset 0 1px 0 rgba(255,255,255,0.15); }
+    .btn-create:hover .ic { transform:rotate(90deg); }
+    .btn-create:active { transform:translateY(0); }
+    .btn-create::after { content:''; position:absolute; top:0; bottom:0; left:-75%; width:50%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.17),transparent); transform:skewX(-15deg); animation:shimmer 3.2s ease-in-out infinite; }
+    @keyframes shimmer { 0%{left:-75%;} 45%,100%{left:130%;} }
+
+    .btn-game {
+      position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:.5rem;
+      padding:.65rem 1.35rem; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif;
+      font-size:.83rem; font-weight:600;
+      background:linear-gradient(135deg,var(--game),#6b1f8a); color:#fff;
+      border:none; cursor:pointer;
+      box-shadow:0 4px 18px var(--game-glow),inset 0 1px 0 rgba(255,255,255,0.12);
+      transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s ease; white-space:nowrap;
+    }
+    .btn-game:hover { transform:translateY(-2px); box-shadow:0 8px 28px var(--game-glow); }
+    .btn-game:active { transform:translateY(0); }
+    .btn-game:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+
+    .btn-end-game {
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.55rem 1rem; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif;
+      font-size:.78rem; font-weight:500;
+      background:var(--error-bg); border:1px solid var(--error-bd); color:var(--error);
+      cursor:pointer; transition:all .18s;
+    }
+    .btn-end-game:hover { background:rgba(232,82,82,0.2); }
+
+    .btn-join-game {
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.55rem 1.2rem; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif;
+      font-size:.8rem; font-weight:600;
+      background:var(--success-bg); border:1px solid var(--success-bd); color:var(--success);
+      cursor:pointer; transition:all .18s; text-decoration:none;
+    }
+    .btn-join-game:hover { background:rgba(93,191,138,0.2); }
+
+    /* ─── STATES ─── */
+    #loadingState { display:flex; align-items:center; justify-content:center; gap:.75rem; padding:4rem 2rem; color:var(--text-3); font-size:.84rem; }
+    #emptyState { display:none; text-align:center; padding:4rem 2rem; border:1px dashed var(--border-2); border-radius:var(--radius); background:var(--surface); }
+    .empty-emoji { font-size:2.2rem; margin-bottom:.9rem; opacity:.7; }
+    .empty-h { font-size:1rem; font-weight:600; color:var(--text-2); margin-bottom:.3rem; }
+    .empty-p { font-size:.82rem; color:var(--text-3); margin-bottom:1.5rem; }
+
+    /* ─── ROSTER PANEL ─── */
+    .roster-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    .roster-header { display:grid; grid-template-columns:36px 1fr 100px 130px 80px; align-items:center; gap:1rem; padding:.6rem 1.3rem .6rem 1.5rem; background:rgba(0,0,0,0.18); border-bottom:1px solid var(--border); }
+    .roster-col-label { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--text-3); }
+    .roster-col-label.align-right { text-align:right; }
+    .student-row { display:grid; grid-template-columns:36px 1fr 100px 130px 80px; align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem; border-bottom:1px solid var(--border); position:relative; transition:background .15s; animation:rowIn .35s cubic-bezier(.22,1,.36,1) both; }
+    .student-row:last-child { border-bottom:none; }
+    .student-row:hover { background:rgba(212,168,83,0.028); }
+    @keyframes rowIn { from{opacity:0;transform:translateX(-8px);} to{opacity:1;transform:none;} }
+    .student-row::before { content:''; position:absolute; left:0; top:10px; bottom:10px; width:2px; border-radius:0 2px 2px 0; background:var(--gold); opacity:0; transition:opacity .15s; }
+    .student-row:hover::before { opacity:.6; }
+    .student-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; letter-spacing:.02em; text-transform:uppercase; flex-shrink:0; }
+    .av-0{background:rgba(212,98,46,0.16);color:var(--rust);border:1px solid rgba(212,98,46,0.28);}
+    .av-1{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(232,184,74,0.28);}
+    .av-2{background:var(--success-bg);color:var(--success);border:1px solid var(--success-bd);}
+    .av-3{background:rgba(90,130,200,0.12);color:#8BAED6;border:1px solid rgba(90,130,200,0.22);}
+    .av-4{background:rgba(180,90,200,0.1);color:#C49ED8;border:1px solid rgba(180,90,200,0.2);}
+    .student-info { min-width:0; }
+    .student-name { font-size:.88rem; font-weight:600; color:var(--text); letter-spacing:-.015em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .student-email { font-size:.7rem; color:var(--text-3); margin-top:.08rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .student-level { font-size:.68rem; font-weight:600; color:var(--text-3); }
+    .student-date { font-size:.68rem; color:var(--text-3); font-variant-numeric:tabular-nums; }
+    .student-action { display:flex; justify-content:flex-end; }
+    .btn-ghost-sm { display:inline-flex; align-items:center; gap:.3rem; padding:.3rem .7rem; font-family:'DM Sans',sans-serif; font-size:.7rem; font-weight:500; background:none; border:1px solid var(--border); border-radius:6px; color:var(--text-3); cursor:pointer; transition:all .18s; white-space:nowrap; }
+    .btn-ghost-sm:hover { border-color:var(--border-2); color:var(--text); background:var(--surface-2); }
+    .btn-ghost-sm.danger { border-color:rgba(232,82,82,0.2); color:var(--error); }
+    .btn-ghost-sm.danger:hover { background:var(--error-bg); border-color:rgba(232,82,82,0.35); }
+    .roster-footer { display:flex; align-items:center; justify-content:space-between; padding:.6rem 1.3rem .6rem 1.5rem; background:rgba(0,0,0,0.1); border-top:1px solid var(--border); font-size:.68rem; color:var(--text-3); }
+
+    /* ─── SPINNER ─── */
+    .spinner { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,0.18); border-top-color:currentColor; border-radius:50%; animation:spin .55s linear infinite; }
+    .spinner.dark { border-color:rgba(0,0,0,0.1); border-top-color:var(--text-3); }
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ─── MODAL ─── */
+    .modal-backdrop { position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center; padding:1rem; background:rgba(6,4,3,0.72); backdrop-filter:blur(14px) saturate(0.8); opacity:0; pointer-events:none; transition:opacity .28s ease; }
+    .modal-backdrop.open { opacity:1; pointer-events:all; }
+    .modal { position:relative; width:100%; max-width:480px; border-radius:20px; overflow:hidden; background:linear-gradient(150deg,#1E1A13 0%,#16130E 55%,#120F0A 100%); border:1px solid rgba(212,168,83,0.14); box-shadow:0 0 0 1px rgba(255,255,255,0.04),0 24px 64px rgba(0,0,0,0.65); transform:scale(.88) translateY(32px); opacity:0; transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .3s ease; }
+    .modal-backdrop.open .modal { transform:scale(1) translateY(0); opacity:1; }
+    .modal-glow { position:absolute; top:-80px; left:50%; transform:translateX(-50%); width:280px; height:160px; background:radial-gradient(ellipse at center,rgba(212,98,46,0.38) 0%,rgba(232,184,74,0.12) 50%,transparent 75%); pointer-events:none; z-index:0; }
+    .modal-top-border { position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent 0%,var(--rust) 25%,var(--gold) 55%,rgba(232,184,74,0.4) 80%,transparent 100%); z-index:1; }
+    .modal-header { position:relative; z-index:1; padding:1.8rem 2rem 1.1rem; }
+    .modal-icon-wrap { width:46px; height:46px; border-radius:11px; background:linear-gradient(135deg,rgba(212,98,46,0.22) 0%,rgba(232,184,74,0.1) 100%); border:1px solid rgba(212,168,83,0.2); display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin-bottom:1rem; }
+    .modal-title { font-size:1.1rem; font-weight:700; letter-spacing:-0.03em; color:var(--text); }
+    .modal-sub { font-size:.77rem; color:var(--text-3); margin-top:.25rem; line-height:1.5; }
+    .modal-x { position:absolute; top:1.3rem; right:1.3rem; width:30px; height:30px; border-radius:7px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border:1px solid var(--border); color:var(--text-3); font-size:.9rem; cursor:pointer; transition:all .18s; z-index:2; }
+    .modal-x:hover { background:var(--surface-3); color:var(--text); border-color:var(--border-2); transform:rotate(90deg); }
+    .modal-body { position:relative; z-index:1; padding:0 2rem; }
+    .enroll-step { display:none; }
+    .enroll-step.active { display:block; }
+    .fg { display:flex; flex-direction:column; gap:.38rem; }
+    .f-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.11em; color:var(--text-3); }
+    .f-input { padding:.68rem 1rem; background:rgba(0,0,0,0.28); border:1px solid rgba(212,168,83,0.1); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:.86rem; color:var(--text); outline:none; width:100%; transition:border-color .2s,box-shadow .2s,background .2s; }
+    .f-input::placeholder { color:var(--text-3); }
+    .f-input:focus { border-color:var(--rust); background:rgba(212,98,46,0.05); box-shadow:0 0 0 3px rgba(212,98,46,0.12); }
+    .f-input.err { border-color:var(--error)!important; box-shadow:0 0 0 3px rgba(232,82,82,0.12)!important; }
+    .modal-inline-err { display:none; align-items:center; gap:.5rem; padding:.6rem .85rem; background:var(--error-bg); border:1px solid var(--error-bd); border-radius:8px; font-size:.78rem; color:var(--error); margin-top:.75rem; }
+    .modal-inline-err.show { display:flex; }
+    .student-preview-card { display:flex; align-items:center; gap:1rem; padding:1rem 1.1rem; background:rgba(0,0,0,0.2); border:1px solid var(--border-2); border-radius:10px; }
+    .preview-info { flex:1; min-width:0; }
+    .preview-name { font-size:.92rem; font-weight:600; color:var(--text); letter-spacing:-.015em; }
+    .preview-email { font-size:.73rem; color:var(--text-3); margin-top:.1rem; }
+    .already-warning { display:flex; align-items:center; gap:.5rem; padding:.6rem .85rem; background:rgba(232,184,74,0.08); border:1px solid rgba(232,184,74,0.2); border-radius:8px; font-size:.77rem; color:var(--gold); margin-top:.8rem; }
+    .modal-footer { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:.6rem; padding:1.1rem 2rem 1.6rem; margin-top:1.2rem; border-top:1px solid var(--border); }
+    .footer-left { flex:1; }
+    .footer-right { display:flex; gap:.55rem; }
+    .btn-cancel-modal { padding:.58rem 1.1rem; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:.81rem; font-weight:500; background:none; border:1px solid var(--border); color:var(--text-3); cursor:pointer; transition:all .18s; }
+    .btn-cancel-modal:hover { border-color:var(--border-2); color:var(--text); background:var(--surface-2); }
+    .btn-text-sm { padding:.58rem .8rem; font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:500; background:none; border:none; color:var(--text-3); cursor:pointer; transition:color .18s; }
+    .btn-text-sm:hover { color:var(--text-2); }
+    .btn-submit-modal { position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:.45rem; padding:.58rem 1.3rem; border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:.83rem; font-weight:600; background:linear-gradient(135deg,var(--rust),var(--rust-dark)); color:#fff; border:none; cursor:pointer; box-shadow:0 2px 14px var(--rust-glow),inset 0 1px 0 rgba(255,255,255,0.1); transition:transform .2s cubic-bezier(.22,1,.36,1),box-shadow .2s; }
+    .btn-submit-modal:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 22px var(--rust-glow); }
+    .btn-submit-modal:disabled { opacity:.5; cursor:not-allowed; }
+
+    /* ─── CONFIRM OVERLAY ─── */
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.72); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; padding:1rem; z-index:300; }
+    .overlay.open { display:flex; animation:bdin .22s ease; }
+    @keyframes bdin{from{opacity:0;}to{opacity:1;}}
+    .confirm-box { background:var(--surface); border:1px solid var(--border-2); border-radius:16px; padding:1.8rem; max-width:340px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.5); animation:popIn .28s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes popIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .confirm-icon { width:42px; height:42px; border-radius:10px; background:var(--error-bg); border:1px solid var(--error-bd); display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:.9rem; }
+    .confirm-title { font-size:.95rem; font-weight:700; margin-bottom:.3rem; }
+    .confirm-text { font-size:.78rem; color:var(--text-3); line-height:1.6; margin-bottom:1.4rem; }
+    .confirm-btns { display:flex; gap:.5rem; justify-content:flex-end; }
+    .btn-cf-cancel { padding:.5rem 1rem; border-radius:7px; font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:500; background:none; border:1px solid var(--border); color:var(--text-3); cursor:pointer; transition:all .18s; }
+    .btn-cf-cancel:hover { border-color:var(--border-2); color:var(--text); }
+    .btn-cf-delete { padding:.5rem 1rem; border-radius:7px; font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:600; background:var(--error-bg); border:1px solid var(--error-bd); color:var(--error); cursor:pointer; transition:all .18s; }
+    .btn-cf-delete:hover { background:rgba(232,82,82,0.2); }
+
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:3px;}
+    @media(max-width:640px){ .roster-header{display:none;} .student-row{grid-template-columns:34px 1fr auto;} .student-level,.student-date{display:none;} .hero-stats{width:100%;} .hero-layout{flex-direction:column;} }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
   </style>
 </head>
 <body>
 
-<!-- ── NAV ── -->
 <nav>
-  <a class="brand" href="../../dashboard.html">
-    <div class="brand-mark">✦</div>
-    Lingua<em>AI</em>
-  </a>
+  <a class="brand" href="../../dashboard.html"><div class="brand-mark">✦</div>Lingua<em>AI</em></a>
   <a class="nav-back" id="navBack" href="courses_dashboard.html">← My Courses</a>
 </nav>
 
-<!-- ── PAGE ── -->
 <div class="page">
 
-  <!-- Breadcrumb: My Courses / Course / Class -->
   <div class="breadcrumb">
     <a href="courses_dashboard.html">My Courses</a>
     <span class="breadcrumb-sep">/</span>
@@ -897,12 +318,8 @@
     <span class="breadcrumb-current" id="bcClass">Loading…</span>
   </div>
 
-  <!-- Hero Skeleton -->
-  <div class="hero-skeleton" id="heroSkeleton">
-    <div class="spinner dark"></div>
-  </div>
+  <div class="hero-skeleton" id="heroSkeleton"><div class="spinner dark"></div></div>
 
-  <!-- Class Hero -->
   <div class="class-hero" id="classHero">
     <div class="hero-layout">
       <div class="hero-main">
@@ -916,14 +333,8 @@
         <div class="hero-meta" id="heroMeta"></div>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-val" id="statTotal">—</div>
-          <div class="hero-stat-lbl">Students</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-val" id="statNew">—</div>
-          <div class="hero-stat-lbl">This month</div>
-        </div>
+        <div class="hero-stat"><div class="hero-stat-val" id="statTotal">—</div><div class="hero-stat-lbl">Students</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="statNew">—</div><div class="hero-stat-lbl">This month</div></div>
       </div>
     </div>
   </div>
@@ -931,45 +342,65 @@
   <!-- Feedback -->
   <div id="feedback"><div class="fb-inner" id="fb-inner"></div></div>
 
+  <!-- ═══════════════════════════════════════
+       ENGLISHPOLY GAME SECTION
+  ═══════════════════════════════════════ -->
+  <div id="gameBanner" class="game-banner">
+    <!-- Idle state (no active game) -->
+    <div id="gameBannerIdle" style="display:contents;">
+      <div class="game-banner-icon">🎲</div>
+      <div class="game-banner-body">
+        <div class="game-banner-title">ENGLISHPOLY — Multiplayer Board Game</div>
+        <div class="game-banner-sub">Start a live game session for this class. All enrolled students will be notified and can join the game room in real time.</div>
+      </div>
+      <div class="game-banner-actions">
+        <button class="btn-game" id="startGameBtn">
+          🎮 Start Game
+        </button>
+      </div>
+    </div>
+
+    <!-- Active game state -->
+    <div id="gameBannerActive" style="display:contents;">
+      <div class="game-banner-icon">🟢</div>
+      <div class="game-banner-body">
+        <div class="game-banner-title" style="display:flex;align-items:center;gap:.6rem;">
+          ENGLISHPOLY is live
+          <span class="live-pulse"><span class="live-dot"></span>Live</span>
+        </div>
+        <div class="game-banner-sub" id="gameBannerSub">A game is currently running for this class.</div>
+      </div>
+      <div class="game-banner-actions">
+        <a class="btn-join-game" id="joinGameLink" href="#" target="_blank">▶ Open Game Room</a>
+        <button class="btn-end-game" id="endGameBtn">⏹ End Game</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Section bar -->
   <div class="section-bar">
     <span class="section-label">Student Roster</span>
-    <button class="btn-create" id="openEnrollBtn">
-      <span class="ic">+</span>
-      Enroll Student
-    </button>
+    <button class="btn-create" id="openEnrollBtn"><span class="ic">+</span>Enroll Student</button>
   </div>
 
-  <!-- Loading -->
-  <div id="loadingState">
-    <div class="spinner dark"></div>
-    Loading roster…
-  </div>
-
-  <!-- Empty -->
+  <div id="loadingState"><div class="spinner dark"></div>Loading roster…</div>
   <div id="emptyState">
     <div class="empty-emoji">👤</div>
     <div class="empty-h">No students enrolled yet</div>
     <div class="empty-p">Enroll a student by their registered email address.</div>
-    <button class="btn-create" onclick="openEnroll()" style="margin: 0 auto;">
-      <span class="ic">+</span> Enroll First Student
-    </button>
+    <button class="btn-create" onclick="openEnroll()" style="margin:0 auto;"><span class="ic">+</span> Enroll First Student</button>
   </div>
 
-  <!-- Roster panel -->
   <div id="rosterWrap" style="display:none;">
     <div class="roster-panel">
-      <!-- Column labels -->
       <div class="roster-header">
-        <div></div><!-- avatar spacer -->
+        <div></div>
         <div class="roster-col-label">Student</div>
         <div class="roster-col-label">Level</div>
         <div class="roster-col-label">Enrolled</div>
         <div class="roster-col-label align-right">Action</div>
       </div>
-      <!-- Rows injected here -->
       <div id="studentList"></div>
-      <!-- Footer -->
       <div class="roster-footer" id="rosterFooter">
         <span id="rosterCount">0 students</span>
         <span id="rosterMonthCount"></span>
@@ -980,51 +411,33 @@
 </div><!-- /page -->
 
 
-<!-- ════════════════════════════════════════
-     ENROLL STUDENT MODAL (two-step)
-════════════════════════════════════════ -->
+<!-- ENROLL MODAL -->
 <div class="modal-backdrop" id="enrollModal" role="dialog" aria-modal="true" aria-label="Enroll a Student">
   <div class="modal" id="enrollModalCard">
-    <div class="modal-glow"       aria-hidden="true"></div>
+    <div class="modal-glow" aria-hidden="true"></div>
     <div class="modal-top-border" aria-hidden="true"></div>
-
     <button class="modal-x" id="modalXBtn" aria-label="Close">✕</button>
-
     <div class="modal-header">
       <div class="modal-icon-wrap" aria-hidden="true">🎓</div>
       <div class="modal-title" id="modalTitle">Enroll a Student</div>
       <div class="modal-sub"  id="modalSub">Enter the student's registered email to look them up.</div>
     </div>
-
     <div class="modal-body">
-      <!-- Step 1: Search by email -->
       <div class="enroll-step active" id="step1">
         <div class="fg">
           <label class="f-label" for="enrollEmail">Student Email</label>
-          <input class="f-input" type="email" id="enrollEmail"
-                 placeholder="student@example.com"
-                 autocomplete="off" spellcheck="false">
+          <input class="f-input" type="email" id="enrollEmail" placeholder="student@example.com" autocomplete="off" spellcheck="false">
         </div>
         <div class="modal-inline-err" id="lookupErr"></div>
       </div>
-
-      <!-- Step 2: Preview found student -->
       <div class="enroll-step" id="step2">
-        <div class="student-preview-card" id="previewCard">
-          <!-- populated by JS -->
-        </div>
-        <div class="already-warning" id="alreadyWarn" style="display:none;">
-          ⚠ This student is already enrolled in this class.
-        </div>
+        <div class="student-preview-card" id="previewCard"></div>
+        <div class="already-warning" id="alreadyWarn" style="display:none;">⚠ This student is already enrolled in this class.</div>
       </div>
     </div>
-
     <div class="modal-footer">
       <div class="footer-left">
-        <!-- Step 2 only: "Search again" back button -->
-        <button class="btn-text-sm" id="searchAgainBtn" style="display:none;" onclick="resetToStep1()">
-          ← Search again
-        </button>
+        <button class="btn-text-sm" id="searchAgainBtn" style="display:none;" onclick="resetToStep1()">← Search again</button>
       </div>
       <div class="footer-right">
         <button class="btn-cancel-modal" id="cancelEnrollBtn">Cancel</button>
@@ -1034,8 +447,7 @@
   </div>
 </div>
 
-
-<!-- ── REMOVE CONFIRM OVERLAY ── -->
+<!-- REMOVE CONFIRM OVERLAY -->
 <div class="overlay" id="confirmOverlay">
   <div class="confirm-box">
     <div class="confirm-icon">👤</div>
@@ -1049,476 +461,434 @@
 </div>
 
 
+<!-- Socket.io client -->
+<script src="http://localhost:3030/socket.io/socket.io.js"></script>
+
 <script>
-  /* ══════════════════════════════════════
-     CONFIG
-  ══════════════════════════════════════ */
-  const API       = 'http://localhost:3030/api/courses';
-  const token     = () => localStorage.getItem('token');
-  const authH     = (extra = {}) => ({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token()}`,
-    ...extra,
-  });
+/* ══════════════════════════════════════
+   CONFIG
+══════════════════════════════════════ */
+const API       = 'http://localhost:3030/api/courses';
+const GAME_API  = 'http://localhost:3030/api/game';
+const token     = () => localStorage.getItem('token');
+const authH     = (extra = {}) => ({ 'Content-Type':'application/json', 'Authorization':`Bearer ${token()}`, ...extra });
 
-  const params   = new URLSearchParams(window.location.search);
-  const courseId = params.get('courseId');
-  const classId  = params.get('id');
+const params   = new URLSearchParams(window.location.search);
+const courseId = params.get('courseId');
+const classId  = params.get('id');
 
-  // Computed API paths
-  const COURSE_URL = `${API}/${courseId}`;
-  const CLASS_URL  = `${API}/${courseId}/classes/${classId}`;
-  const ROSTER_URL = `${CLASS_URL}/students`;
-  const LOOKUP_URL = (email) => `${CLASS_URL}/lookup-student?email=${encodeURIComponent(email)}`;
-  const ENROLL_URL = `${CLASS_URL}/enroll`;
-  const REMOVE_URL = (sid) => `${CLASS_URL}/enroll/${sid}`;
+const COURSE_URL = `${API}/${courseId}`;
+const CLASS_URL  = `${API}/${courseId}/classes/${classId}`;
+const ROSTER_URL = `${CLASS_URL}/students`;
+const LOOKUP_URL = (email) => `${CLASS_URL}/lookup-student?email=${encodeURIComponent(email)}`;
+const ENROLL_URL = `${CLASS_URL}/enroll`;
+const REMOVE_URL = (sid) => `${CLASS_URL}/enroll/${sid}`;
+const GAME_SESSION_URL  = `${GAME_API}/classes/${classId}/session`;
+const GAME_START_URL    = `${GAME_API}/classes/${classId}/start`;
 
-  /* ══════════════════════════════════════
-     FEEDBACK
-  ══════════════════════════════════════ */
-  let fbTimer;
-  function showFeedback(msg, type = 'ok') {
-    const wrap  = document.getElementById('feedback');
-    const inner = document.getElementById('fb-inner');
-    inner.textContent = (type === 'ok' ? '✓ ' : '✕ ') + msg;
-    wrap.className    = type + ' show';
-    clearTimeout(fbTimer);
-    fbTimer = setTimeout(() => { wrap.className = type; }, 5000);
-  }
+/* ══════════════════════════════════════
+   GAME BANNER
+══════════════════════════════════════ */
+let activeSession = null;
 
-  /* ══════════════════════════════════════
-     AVATAR COLOR — deterministic hash
-  ══════════════════════════════════════ */
-  function avatarClass(name) {
-    let h = 0;
-    for (const c of (name || '')) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-    return `av-${h % 5}`;
-  }
-  function initials(name) {
-    if (!name) return '?';
-    const parts = name.trim().split(/\s+/);
-    return parts.length >= 2
-      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : parts[0].slice(0, 2).toUpperCase();
-  }
+function buildGameRoomUrl() {
+  return `../games/game_room.html?classId=${classId}&courseId=${courseId}`;
+}
 
-  /* ══════════════════════════════════════
-     MODAL OPEN / CLOSE
-  ══════════════════════════════════════ */
-  function openEnroll() {
-    resetToStep1();
-    document.getElementById('enrollModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => document.getElementById('enrollEmail').focus(), 420);
-  }
-
-  function closeEnroll() {
-    const modal = document.getElementById('enrollModalCard');
-    const bd    = document.getElementById('enrollModal');
-    modal.style.transition = 'transform 0.28s cubic-bezier(0.55, 0, 0.45, 1), opacity 0.22s ease';
-    modal.style.transform  = 'scale(0.9) translateY(20px)';
-    modal.style.opacity    = '0';
-    bd.style.transition    = 'opacity 0.28s ease';
-    bd.style.opacity       = '0';
-    setTimeout(() => {
-      bd.classList.remove('open');
-      bd.style.opacity = ''; bd.style.transition = '';
-      modal.style.transform = ''; modal.style.opacity = ''; modal.style.transition = '';
-      document.body.style.overflow = '';
-    }, 290);
-  }
-
-  /* ── Two-step modal state ── */
-  let foundStudent = null;
-
-  function resetToStep1() {
-    foundStudent = null;
-    document.getElementById('step1').classList.add('active');
-    document.getElementById('step2').classList.remove('active');
-    document.getElementById('searchAgainBtn').style.display = 'none';
-    document.getElementById('lookupErr').classList.remove('show');
-    document.getElementById('lookupErr').textContent = '';
-    document.getElementById('enrollEmail').value = '';
-    document.getElementById('enrollEmail').classList.remove('err');
-    document.getElementById('alreadyWarn').style.display = 'none';
-    document.getElementById('actionBtn').textContent = 'Find Student';
-    document.getElementById('actionBtn').disabled    = false;
-    document.getElementById('modalTitle').textContent = 'Enroll a Student';
-    document.getElementById('modalSub').textContent   = "Enter the student's registered email to look them up.";
-  }
-
-  function showStep2(student, alreadyEnrolled) {
-    foundStudent = student;
-
-    document.getElementById('step1').classList.remove('active');
-    document.getElementById('step2').classList.add('active');
-    document.getElementById('searchAgainBtn').style.display = 'block';
-    document.getElementById('modalTitle').textContent = 'Confirm Enrollment';
-    document.getElementById('modalSub').textContent   = 'Review the student details before enrolling.';
-
-    // Build preview card
-    const levelBadge = student.level
-      ? `<span class="badge badge-level" style="margin-left:auto;">${escHtml(student.level)}</span>`
-      : '';
-    document.getElementById('previewCard').innerHTML = `
-      <div class="student-avatar ${avatarClass(student.name)}" style="flex-shrink:0;">
-        ${initials(student.name)}
-      </div>
-      <div class="preview-info">
-        <div class="preview-name">${escHtml(student.name)}</div>
-        <div class="preview-email">${escHtml(student.email)}</div>
-      </div>
-      ${levelBadge}
-    `;
-
-    if (alreadyEnrolled) {
-      document.getElementById('alreadyWarn').style.display = 'flex';
-      document.getElementById('actionBtn').disabled    = true;
-      document.getElementById('actionBtn').textContent = 'Already Enrolled';
+async function checkActiveGame() {
+  try {
+    const res  = await fetch(GAME_SESSION_URL, { headers: authH() });
+    const data = await res.json();
+    if (data.success && data.session) {
+      setGameBannerActive(data.session);
     } else {
-      document.getElementById('alreadyWarn').style.display = 'none';
-      document.getElementById('actionBtn').disabled    = false;
-      document.getElementById('actionBtn').textContent = 'Enroll Student';
+      setGameBannerIdle();
     }
-  }
+  } catch { setGameBannerIdle(); }
+}
 
-  /* ── Action button — drives both steps ── */
-  document.getElementById('actionBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('actionBtn');
+function setGameBannerActive(session) {
+  activeSession = session;
+  document.getElementById('gameBannerIdle').style.display   = 'none';
+  document.getElementById('gameBannerActive').style.display = 'contents';
+  document.getElementById('gameBanner').classList.add('active-game');
 
-    if (!foundStudent) {
-      // Step 1: look up student by email
-      const email = document.getElementById('enrollEmail').value.trim();
-      if (!email) {
-        document.getElementById('enrollEmail').classList.add('err');
-        document.getElementById('lookupErr').textContent = 'Please enter an email address.';
-        document.getElementById('lookupErr').classList.add('show');
-        return;
-      }
+  const count = session.players?.length || 0;
+  document.getElementById('gameBannerSub').textContent =
+    `${count} player${count !== 1 ? 's' : ''} in the session. Click to open the game room.`;
+  document.getElementById('joinGameLink').href = buildGameRoomUrl();
+}
 
-      btn.disabled  = true;
-      btn.innerHTML = `<span class="spinner"></span> Searching…`;
-      document.getElementById('lookupErr').classList.remove('show');
+function setGameBannerIdle() {
+  activeSession = null;
+  document.getElementById('gameBannerIdle').style.display   = 'contents';
+  document.getElementById('gameBannerActive').style.display = 'none';
+  document.getElementById('gameBanner').classList.remove('active-game');
+}
 
-      try {
-        const res  = await fetch(LOOKUP_URL(email), { headers: authH() });
-        const data = await res.json();
+document.getElementById('startGameBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('startGameBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Starting…';
 
-        if (!res.ok || !data.success) {
-          document.getElementById('lookupErr').textContent = data.message || 'Student not found.';
-          document.getElementById('lookupErr').classList.add('show');
-          document.getElementById('enrollEmail').classList.add('err');
-          btn.disabled  = false;
-          btn.textContent = 'Find Student';
-          return;
-        }
+  try {
+    const res  = await fetch(GAME_START_URL, { method:'POST', headers: authH() });
+    const data = await res.json();
 
-        showStep2(data.student, data.already_enrolled);
-      } catch {
-        document.getElementById('lookupErr').textContent = 'Could not reach the server.';
-        document.getElementById('lookupErr').classList.add('show');
-        btn.disabled  = false;
-        btn.textContent = 'Find Student';
-      }
-
-    } else {
-      // Step 2: enroll the found student
-      btn.disabled  = true;
-      btn.innerHTML = `<span class="spinner"></span> Enrolling…`;
-
-      try {
-        const res  = await fetch(ENROLL_URL, {
-          method: 'POST',
-          headers: authH(),
-          body: JSON.stringify({ student_id: foundStudent.id }),
-        });
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          showFeedback(data.message || 'Enrollment failed.', 'err');
-          btn.disabled  = false;
-          btn.textContent = 'Enroll Student';
-          return;
-        }
-
-        closeEnroll();
-        showFeedback(`${foundStudent.name} enrolled successfully.`, 'ok');
-        loadStudents(); // reload the full list
-      } catch {
-        showFeedback('Server error.', 'err');
-        btn.disabled  = false;
-        btn.textContent = 'Enroll Student';
-      }
-    }
-  });
-
-  /* Allow Enter key in email field */
-  document.getElementById('enrollEmail').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('actionBtn').click();
-  });
-
-  document.getElementById('openEnrollBtn').addEventListener('click', openEnroll);
-  document.getElementById('cancelEnrollBtn').addEventListener('click', closeEnroll);
-  document.getElementById('modalXBtn').addEventListener('click', closeEnroll);
-  document.getElementById('enrollModal').addEventListener('click', function(e) {
-    if (e.target === this) closeEnroll();
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      if (document.getElementById('enrollModal').classList.contains('open'))    closeEnroll();
-      if (document.getElementById('confirmOverlay').classList.contains('open')) closeConfirm();
-    }
-  });
-
-  /* ══════════════════════════════════════
-     LOAD COURSE (breadcrumb + hero ref)
-  ══════════════════════════════════════ */
-  async function loadCourse() {
-    try {
-      const res  = await fetch(COURSE_URL, { headers: authH() });
-      const data = await res.json();
-      if (!res.ok || !data.success) return;
-
-      const name     = data.course.name;
-      const detailHref = `course_details.html?id=${courseId}`;
-
-      document.getElementById('bcCourse').textContent = name;
-      document.getElementById('bcCourse').href        = detailHref;
-      document.getElementById('navBack').textContent  = `← ${name}`;
-      document.getElementById('navBack').href         = detailHref;
-      document.getElementById('heroCourseLink').textContent = name;
-      document.getElementById('heroCourseLink').href        = detailHref;
-      document.getElementById('heroCourseRef').style.display = 'flex';
-    } catch { /* breadcrumb remains "—" */ }
-  }
-
-  /* ══════════════════════════════════════
-     LOAD CLASS (hero)
-  ══════════════════════════════════════ */
-  async function loadClass() {
-    try {
-      const res  = await fetch(CLASS_URL, { headers: authH() });
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        window.location.href = `course_details.html?id=${courseId}`;
-        return;
-      }
-      renderHero(data.class);
-    } catch {
-      document.getElementById('heroSkeleton').innerHTML =
-        '<span style="color:var(--error);font-size:.8rem;">Could not load class info.</span>';
-    }
-  }
-
-  function renderHero(cls) {
-    document.getElementById('heroSkeleton').style.display = 'none';
-    document.getElementById('classHero').style.display   = 'block';
-
-    document.title = `LinguaAI — ${cls.name}`;
-    document.getElementById('heroTitle').textContent   = cls.name;
-    document.getElementById('bcClass').textContent     = cls.name;
-
-    const activeBadge = cls.is_active
-      ? `<span class="badge badge-active">● Active</span>`
-      : `<span class="badge badge-inactive">● Inactive</span>`;
-    const scheduleBadge = cls.schedule
-      ? `<span class="badge badge-schedule">🕐 ${escHtml(cls.schedule)}</span>`
-      : '';
-    document.getElementById('heroBadges').innerHTML = activeBadge + scheduleBadge;
-
-    if (cls.description) {
-      const el = document.getElementById('heroDesc');
-      el.textContent  = cls.description;
-      el.style.display = 'block';
-    }
-
-    const created = new Date(cls.created_at).toLocaleDateString('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric'
-    });
-    document.getElementById('heroMeta').textContent = `Created ${created}`;
-  }
-
-  /* ══════════════════════════════════════
-     LOAD STUDENTS (roster)
-  ══════════════════════════════════════ */
-  async function loadStudents() {
-    const loading   = document.getElementById('loadingState');
-    const empty     = document.getElementById('emptyState');
-    const rosterWrap = document.getElementById('rosterWrap');
-    const list      = document.getElementById('studentList');
-
-    loading.style.display    = 'flex';
-    empty.style.display      = 'none';
-    rosterWrap.style.display = 'none';
-    list.innerHTML           = '';
-
-    try {
-      const res  = await fetch(ROSTER_URL, { headers: authH() });
-      const data = await res.json();
-      loading.style.display = 'none';
-
-      if (!res.ok || !data.success) {
-        showFeedback(data.message || 'Failed to load students.', 'err');
-        return;
-      }
-
-      if (!data.students.length) {
-        empty.style.display = 'block';
-        syncStats([]);
-        return;
-      }
-
-      rosterWrap.style.display = 'block';
-      data.students.forEach((s, i) => {
-        const row = buildRow(s);
-        row.style.animationDelay = `${i * 0.04}s`;
-        list.appendChild(row);
-      });
-      syncStats(data.students);
-
-    } catch {
-      loading.style.display = 'none';
-      showFeedback('Could not reach the server.', 'err');
-    }
-  }
-
-  /* ══════════════════════════════════════
-     BUILD STUDENT ROW
-  ══════════════════════════════════════ */
-  function buildRow(student) {
-    const el = document.createElement('div');
-    el.className = 'student-row';
-    el.id        = `student-${student.id}`;
-
-    const enrolledDate = new Date(student.enrolled_at).toLocaleDateString('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric'
-    });
-
-    el.innerHTML = `
-      <div class="student-avatar ${avatarClass(student.name)}">${initials(student.name)}</div>
-      <div class="student-info">
-        <div class="student-name">${escHtml(student.name)}</div>
-        <div class="student-email">${escHtml(student.email)}</div>
-      </div>
-      <div class="student-level">${escHtml(student.level || '—')}</div>
-      <div class="student-date">${enrolledDate}</div>
-      <div class="student-action">
-        <button class="btn-ghost-sm danger"
-                onclick="askRemove(${student.id}, '${escAttr(student.name)}')">
-          × Remove
-        </button>
-      </div>
-    `;
-    return el;
-  }
-
-  /* ══════════════════════════════════════
-     SYNC STATS
-  ══════════════════════════════════════ */
-  function syncStats(students) {
-    const total = students.length;
-    const now   = new Date();
-    const thisMonthCount = students.filter(s => {
-      const d = new Date(s.enrolled_at);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    }).length;
-
-    document.getElementById('statTotal').textContent = total;
-    document.getElementById('statNew').textContent   = thisMonthCount;
-
-    document.getElementById('rosterCount').textContent =
-      `${total} student${total !== 1 ? 's' : ''}`;
-    document.getElementById('rosterMonthCount').textContent =
-      thisMonthCount > 0 ? `${thisMonthCount} enrolled this month` : '';
-  }
-
-  /* ══════════════════════════════════════
-     REMOVE STUDENT
-  ══════════════════════════════════════ */
-  let pendingRemoveId = null;
-
-  function askRemove(id, name) {
-    pendingRemoveId = id;
-    document.getElementById('confirmText').textContent =
-      `Remove "${name}" from this class? They can be re-enrolled later.`;
-    document.getElementById('confirmOverlay').classList.add('open');
-  }
-
-  function closeConfirm() {
-    pendingRemoveId = null;
-    document.getElementById('confirmOverlay').classList.remove('open');
-  }
-
-  document.getElementById('confirmRemoveBtn').addEventListener('click', async () => {
-    if (!pendingRemoveId) return;
-    const id = pendingRemoveId;
-    closeConfirm();
-
-    try {
-      const res  = await fetch(REMOVE_URL(id), { method: 'DELETE', headers: authH() });
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        showFeedback(data.message || 'Remove failed.', 'err');
-        return;
-      }
-
-      const row = document.getElementById(`student-${id}`);
-      if (row) {
-        row.style.transition = 'opacity 0.2s, transform 0.2s';
-        row.style.opacity    = '0';
-        row.style.transform  = 'translateX(12px)';
-        setTimeout(() => {
-          row.remove();
-          const list = document.getElementById('studentList');
-          if (!list.children.length) {
-            document.getElementById('rosterWrap').style.display = 'none';
-            document.getElementById('emptyState').style.display = 'block';
-          }
-          // Re-sync stats from remaining DOM rows
-          const remaining = Array.from(list.children).length;
-          document.getElementById('statTotal').textContent = remaining;
-          document.getElementById('rosterCount').textContent =
-            `${remaining} student${remaining !== 1 ? 's' : ''}`;
-        }, 220);
-      }
-      showFeedback('Student removed from class.', 'ok');
-    } catch { showFeedback('Server error.', 'err'); }
-  });
-
-  document.getElementById('confirmOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('confirmOverlay')) closeConfirm();
-  });
-
-  /* ══════════════════════════════════════
-     ESCAPE HELPERS
-  ══════════════════════════════════════ */
-  function escHtml(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  function escAttr(s) {
-    return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
-  }
-
-  /* ══════════════════════════════════════
-     GUARD + INIT
-  ══════════════════════════════════════ */
-  (function init() {
-    const t = localStorage.getItem('token');
-    const r = localStorage.getItem('role_id');
-    if (!t)        { window.location.href = '../../index.html';         return; }
-    if (r !== '2') { window.location.href = '../../dashboard.html';     return; }
-    if (!courseId || !classId) {
-      window.location.href = './courses_dashboard.html';
+    if (!res.ok || !data.success) {
+      showFeedback(data.message || 'Could not start game.', 'err');
+      btn.disabled = false;
+      btn.textContent = '🎮 Start Game';
       return;
     }
-    loadCourse();
-    loadClass();
-    loadStudents();
-  })();
+
+    setGameBannerActive(data.session);
+    showFeedback('Game started! Students can now join.', 'ok');
+    // Open the game room for the teacher
+    window.open(buildGameRoomUrl(), '_blank');
+  } catch {
+    showFeedback('Server error.', 'err');
+    btn.disabled = false;
+    btn.textContent = '🎮 Start Game';
+  }
+});
+
+document.getElementById('endGameBtn').addEventListener('click', async () => {
+  if (!confirm('End the game for all students?')) return;
+  try {
+    const res  = await fetch(GAME_SESSION_URL, { method:'DELETE', headers: authH() });
+    const data = await res.json();
+    if (data.success) {
+      setGameBannerIdle();
+      showFeedback('Game session ended.', 'ok');
+    } else {
+      showFeedback(data.message || 'Could not end game.', 'err');
+    }
+  } catch {
+    showFeedback('Server error.', 'err');
+  }
+});
+
+/* ══════════════════════════════════════
+   SOCKET — listen for game_started / game_ended
+   so the banner updates if teacher opens game from another tab
+══════════════════════════════════════ */
+try {
+  const socket = io('http://localhost:3030', { transports: ['websocket','polling'] });
+  socket.on('connect', () => {
+    // Join the class room as observer
+    socket.emit('join_game', { classId, token: token() });
+  });
+  socket.on('game_started', () => { checkActiveGame(); });
+  socket.on('game_ended',   () => { setGameBannerIdle(); });
+  socket.on('game_state',   ({ session }) => {
+    if (session && session.status !== 'ended' && !activeSession) {
+      setGameBannerActive(session);
+    }
+  });
+} catch(e) { /* socket.io not loaded — game banner still works via REST */ }
+
+/* ══════════════════════════════════════
+   FEEDBACK
+══════════════════════════════════════ */
+let fbTimer;
+function showFeedback(msg, type = 'ok') {
+  const wrap  = document.getElementById('feedback');
+  const inner = document.getElementById('fb-inner');
+  inner.textContent = (type === 'ok' ? '✓ ' : '✕ ') + msg;
+  wrap.className = type + ' show';
+  clearTimeout(fbTimer);
+  fbTimer = setTimeout(() => { wrap.className = type; }, 5000);
+}
+
+/* ══════════════════════════════════════
+   AVATAR HELPERS
+══════════════════════════════════════ */
+function avatarClass(name) {
+  let h = 0;
+  for (const c of (name || '')) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+  return `av-${h % 5}`;
+}
+function initials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : parts[0].slice(0,2).toUpperCase();
+}
+
+/* ══════════════════════════════════════
+   ENROLL MODAL
+══════════════════════════════════════ */
+function openEnroll() {
+  resetToStep1();
+  document.getElementById('enrollModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('enrollEmail').focus(), 420);
+}
+function closeEnroll() {
+  const modal = document.getElementById('enrollModalCard');
+  const bd    = document.getElementById('enrollModal');
+  modal.style.transition = 'transform .28s cubic-bezier(.55,0,.45,1),opacity .22s ease';
+  modal.style.transform  = 'scale(.9) translateY(20px)';
+  modal.style.opacity    = '0';
+  bd.style.transition    = 'opacity .28s ease';
+  bd.style.opacity       = '0';
+  setTimeout(() => {
+    bd.classList.remove('open'); bd.style.opacity=''; bd.style.transition='';
+    modal.style.transform=''; modal.style.opacity=''; modal.style.transition='';
+    document.body.style.overflow='';
+  }, 290);
+}
+let foundStudent = null;
+function resetToStep1() {
+  foundStudent = null;
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('searchAgainBtn').style.display = 'none';
+  document.getElementById('lookupErr').classList.remove('show');
+  document.getElementById('lookupErr').textContent = '';
+  document.getElementById('enrollEmail').value = '';
+  document.getElementById('enrollEmail').classList.remove('err');
+  document.getElementById('alreadyWarn').style.display = 'none';
+  document.getElementById('actionBtn').textContent = 'Find Student';
+  document.getElementById('actionBtn').disabled = false;
+  document.getElementById('modalTitle').textContent = 'Enroll a Student';
+  document.getElementById('modalSub').textContent   = "Enter the student's registered email to look them up.";
+}
+function showStep2(student, alreadyEnrolled) {
+  foundStudent = student;
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+  document.getElementById('searchAgainBtn').style.display = 'block';
+  document.getElementById('modalTitle').textContent = 'Confirm Enrollment';
+  document.getElementById('modalSub').textContent   = 'Review the student details before enrolling.';
+  const levelBadge = student.level ? `<span class="badge badge-level" style="margin-left:auto;">${escHtml(student.level)}</span>` : '';
+  document.getElementById('previewCard').innerHTML = `
+    <div class="student-avatar ${avatarClass(student.name)}" style="flex-shrink:0;">${initials(student.name)}</div>
+    <div class="preview-info">
+      <div class="preview-name">${escHtml(student.name)}</div>
+      <div class="preview-email">${escHtml(student.email)}</div>
+    </div>${levelBadge}`;
+  if (alreadyEnrolled) {
+    document.getElementById('alreadyWarn').style.display = 'flex';
+    document.getElementById('actionBtn').disabled = true;
+    document.getElementById('actionBtn').textContent = 'Already Enrolled';
+  } else {
+    document.getElementById('alreadyWarn').style.display = 'none';
+    document.getElementById('actionBtn').disabled = false;
+    document.getElementById('actionBtn').textContent = 'Enroll Student';
+  }
+}
+
+document.getElementById('actionBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('actionBtn');
+  if (!foundStudent) {
+    const email = document.getElementById('enrollEmail').value.trim();
+    if (!email) {
+      document.getElementById('enrollEmail').classList.add('err');
+      document.getElementById('lookupErr').textContent = 'Please enter an email address.';
+      document.getElementById('lookupErr').classList.add('show');
+      return;
+    }
+    btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Searching…`;
+    document.getElementById('lookupErr').classList.remove('show');
+    try {
+      const res  = await fetch(LOOKUP_URL(email), { headers: authH() });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        document.getElementById('lookupErr').textContent = data.message || 'Student not found.';
+        document.getElementById('lookupErr').classList.add('show');
+        document.getElementById('enrollEmail').classList.add('err');
+        btn.disabled = false; btn.textContent = 'Find Student'; return;
+      }
+      showStep2(data.student, data.already_enrolled);
+    } catch {
+      document.getElementById('lookupErr').textContent = 'Could not reach the server.';
+      document.getElementById('lookupErr').classList.add('show');
+      btn.disabled = false; btn.textContent = 'Find Student';
+    }
+  } else {
+    btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Enrolling…`;
+    try {
+      const res  = await fetch(ENROLL_URL, { method:'POST', headers: authH(), body: JSON.stringify({ student_id: foundStudent.id }) });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        showFeedback(data.message || 'Enrollment failed.', 'err');
+        btn.disabled = false; btn.textContent = 'Enroll Student'; return;
+      }
+      closeEnroll();
+      showFeedback(`${foundStudent.name} enrolled successfully.`, 'ok');
+      loadStudents();
+    } catch {
+      showFeedback('Server error.', 'err');
+      btn.disabled = false; btn.textContent = 'Enroll Student';
+    }
+  }
+});
+document.getElementById('enrollEmail').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('actionBtn').click(); });
+document.getElementById('openEnrollBtn').addEventListener('click', openEnroll);
+document.getElementById('cancelEnrollBtn').addEventListener('click', closeEnroll);
+document.getElementById('modalXBtn').addEventListener('click', closeEnroll);
+document.getElementById('enrollModal').addEventListener('click', function(e) { if(e.target===this) closeEnroll(); });
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') {
+    if(document.getElementById('enrollModal').classList.contains('open')) closeEnroll();
+    if(document.getElementById('confirmOverlay').classList.contains('open')) closeConfirm();
+  }
+});
+
+/* ══════════════════════════════════════
+   LOAD COURSE
+══════════════════════════════════════ */
+async function loadCourse() {
+  try {
+    const res  = await fetch(COURSE_URL, { headers: authH() });
+    const data = await res.json();
+    if (!res.ok || !data.success) return;
+    const name = data.course.name;
+    const detailHref = `course_details.html?id=${courseId}`;
+    document.getElementById('bcCourse').textContent = name;
+    document.getElementById('bcCourse').href        = detailHref;
+    document.getElementById('navBack').textContent  = `← ${name}`;
+    document.getElementById('navBack').href         = detailHref;
+    document.getElementById('heroCourseLink').textContent = name;
+    document.getElementById('heroCourseLink').href        = detailHref;
+    document.getElementById('heroCourseRef').style.display = 'flex';
+  } catch {}
+}
+
+/* ══════════════════════════════════════
+   LOAD CLASS
+══════════════════════════════════════ */
+async function loadClass() {
+  try {
+    const res  = await fetch(CLASS_URL, { headers: authH() });
+    const data = await res.json();
+    if (!res.ok || !data.success) { window.location.href = `course_details.html?id=${courseId}`; return; }
+    renderHero(data.class);
+  } catch {
+    document.getElementById('heroSkeleton').innerHTML = '<span style="color:var(--error);font-size:.8rem;">Could not load class info.</span>';
+  }
+}
+function renderHero(cls) {
+  document.getElementById('heroSkeleton').style.display = 'none';
+  document.getElementById('classHero').style.display   = 'block';
+  document.title = `LinguaAI — ${cls.name}`;
+  document.getElementById('heroTitle').textContent = cls.name;
+  document.getElementById('bcClass').textContent   = cls.name;
+  const activeBadge  = cls.is_active ? `<span class="badge badge-active">● Active</span>` : `<span class="badge badge-inactive">● Inactive</span>`;
+  const scheduleBadge = cls.schedule ? `<span class="badge badge-schedule">🕐 ${escHtml(cls.schedule)}</span>` : '';
+  document.getElementById('heroBadges').innerHTML = activeBadge + scheduleBadge;
+  if (cls.description) { const el = document.getElementById('heroDesc'); el.textContent = cls.description; el.style.display='block'; }
+  const created = new Date(cls.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('heroMeta').textContent = `Created ${created}`;
+}
+
+/* ══════════════════════════════════════
+   LOAD STUDENTS
+══════════════════════════════════════ */
+async function loadStudents() {
+  const loading    = document.getElementById('loadingState');
+  const empty      = document.getElementById('emptyState');
+  const rosterWrap = document.getElementById('rosterWrap');
+  const list       = document.getElementById('studentList');
+  loading.style.display='flex'; empty.style.display='none'; rosterWrap.style.display='none'; list.innerHTML='';
+  try {
+    const res  = await fetch(ROSTER_URL, { headers: authH() });
+    const data = await res.json();
+    loading.style.display = 'none';
+    if (!res.ok || !data.success) { showFeedback(data.message||'Failed to load students.','err'); return; }
+    if (!data.students.length) { empty.style.display='block'; syncStats([]); return; }
+    rosterWrap.style.display = 'block';
+    data.students.forEach((s,i) => { const row=buildRow(s); row.style.animationDelay=`${i*.04}s`; list.appendChild(row); });
+    syncStats(data.students);
+  } catch {
+    loading.style.display = 'none';
+    showFeedback('Could not reach the server.','err');
+  }
+}
+function buildRow(student) {
+  const el = document.createElement('div');
+  el.className = 'student-row';
+  el.id = `student-${student.id}`;
+  const enrolledDate = new Date(student.enrolled_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  el.innerHTML = `
+    <div class="student-avatar ${avatarClass(student.name)}">${initials(student.name)}</div>
+    <div class="student-info">
+      <div class="student-name">${escHtml(student.name)}</div>
+      <div class="student-email">${escHtml(student.email)}</div>
+    </div>
+    <div class="student-level">${escHtml(student.level||'—')}</div>
+    <div class="student-date">${enrolledDate}</div>
+    <div class="student-action">
+      <button class="btn-ghost-sm danger" onclick="askRemove(${student.id},'${escAttr(student.name)}')">× Remove</button>
+    </div>`;
+  return el;
+}
+function syncStats(students) {
+  const total = students.length;
+  const now   = new Date();
+  const thisMonth = students.filter(s => { const d=new Date(s.enrolled_at); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); }).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statNew').textContent   = thisMonth;
+  document.getElementById('rosterCount').textContent = `${total} student${total!==1?'s':''}`;
+  document.getElementById('rosterMonthCount').textContent = thisMonth>0?`${thisMonth} enrolled this month`:'';
+}
+
+/* ══════════════════════════════════════
+   REMOVE STUDENT
+══════════════════════════════════════ */
+let pendingRemoveId = null;
+function askRemove(id,name) {
+  pendingRemoveId = id;
+  document.getElementById('confirmText').textContent = `Remove "${name}" from this class? They can be re-enrolled later.`;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm() { pendingRemoveId=null; document.getElementById('confirmOverlay').classList.remove('open'); }
+document.getElementById('confirmRemoveBtn').addEventListener('click', async () => {
+  if (!pendingRemoveId) return;
+  const id = pendingRemoveId;
+  closeConfirm();
+  try {
+    const res  = await fetch(REMOVE_URL(id),{method:'DELETE',headers:authH()});
+    const data = await res.json();
+    if (!res.ok||!data.success) { showFeedback(data.message||'Remove failed.','err'); return; }
+    const row = document.getElementById(`student-${id}`);
+    if (row) {
+      row.style.transition='opacity .2s,transform .2s'; row.style.opacity='0'; row.style.transform='translateX(12px)';
+      setTimeout(()=>{
+        row.remove();
+        const list=document.getElementById('studentList');
+        if(!list.children.length){document.getElementById('rosterWrap').style.display='none';document.getElementById('emptyState').style.display='block';}
+        const rem=list.children.length;
+        document.getElementById('statTotal').textContent=rem;
+        document.getElementById('rosterCount').textContent=`${rem} student${rem!==1?'s':''}`;
+      },220);
+    }
+    showFeedback('Student removed from class.','ok');
+  } catch { showFeedback('Server error.','err'); }
+});
+document.getElementById('confirmOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('confirmOverlay'))closeConfirm();});
+
+/* ══════════════════════════════════════
+   ESCAPE HELPERS
+══════════════════════════════════════ */
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escAttr(s){return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+(function init() {
+  const t = localStorage.getItem('token');
+  const r = localStorage.getItem('role_id');
+  if (!t)        { window.location.href='../../index.html'; return; }
+  if (r !== '2') { window.location.href='../../dashboard.html'; return; }
+  if (!courseId||!classId) { window.location.href='./courses_dashboard.html'; return; }
+  loadCourse();
+  loadClass();
+  loadStudents();
+  checkActiveGame();        // ← check if game already running
+})();
 </script>
 </body>
 </html>

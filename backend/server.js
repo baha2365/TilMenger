@@ -1,18 +1,32 @@
+/**
+ * server.js  — UPDATED VERSION
+ *
+ * Changes from original:
+ *  1. Import http + socket.io
+ *  2. Import gameRoutes (router + registerSocketHandlers)
+ *  3. Mount /api/game router
+ *  4. Attach io to app so routes can emit events
+ *  5. Register socket handlers
+ *  6. Listen on httpServer (not app) so socket.io works
+ */
+
 require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
+const http    = require('http');
+const { Server } = require('socket.io');
 const { connectDB } = require('./Db');
 const authRoutes    = require('./authRoutes');
 const vocabRoutes   = require('./vocabRoutes');
 const path = require('path');
-const quizRoutes = require('./quizRoutes');
-const courseRoutes = require('./courseRoutes');
+const quizRoutes    = require('./quizRoutes');
+const courseRoutes  = require('./courseRoutes');
 const studentRoutes = require('./studentRoutes');
+const { router: gameRouter, registerSocketHandlers } = require('./gameRoutes');
 
-
-
-const app  = express();
-const PORT = process.env.PORT || 3030;
+const app        = express();
+const httpServer = http.createServer(app);
+const PORT       = process.env.PORT || 3030;
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
@@ -20,7 +34,7 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .map((o) => o.trim())
   .filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
   origin: (origin, cb) => {
     if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
       cb(null, true);
@@ -29,24 +43,40 @@ app.use(cors({
     }
   },
   credentials: true,
-}));
+};
+app.use(cors(corsOptions));
+
+// ─── Socket.io (NEW) ──────────────────────────────────────────────────────────
+const io = new Server(httpServer, {
+  cors: {
+    origin: allowedOrigins.length ? allowedOrigins : '*',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
+// Make io available to route handlers via req.app.get('io')
+app.set('io', io);
+
+// Register all socket event handlers
+registerSocketHandlers(io);
 
 // ─── Body parsing ─────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-app.use('/api/auth',  authRoutes);
-app.use('/api/vocab', vocabRoutes);
+app.use('/api/auth',    authRoutes);
+app.use('/api/vocab',   vocabRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/student', studentRoutes);
+app.use('/api/game',    gameRouter);
 
+app.use(express.static(path.join(__dirname, '..')));
 
-app.use(express.static(path.join(__dirname, "..")));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "landing_page.html"));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'landing_page.html'));
 });
 
 app.use(
@@ -68,13 +98,14 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ success: false, message: err.message || 'Internal server error.' });
 });
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+// ─── Start (listen on httpServer, NOT app) ────────────────────────────────────
 (async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {                       // CHANGED: app.listen → httpServer.listen
       console.log(`🚀  Server running on http://localhost:${PORT}`);
-      
+      console.log(`🎮  Socket.io enabled`);
+
       console.log(`   POST /api/auth/register`);
       console.log(`   POST /api/auth/login`);
       console.log(`   GET  /api/auth/me        (protected)`);
@@ -89,13 +120,16 @@ app.use((err, _req, res, _next) => {
       console.log('   GET  /api/quizzes/:id     (protected)');
       console.log('   DELETE /api/quizzes/:id   (protected)');
 
-
       console.log('   POST   /api/courses              – create course');
       console.log('   GET    /api/courses              – list my courses');
       console.log('   GET    /api/courses/:id          – get one course');
       console.log('   PATCH  /api/courses/:id          – update course');
       console.log('   DELETE /api/courses/:id          – delete course');
       console.log('   POST   /api/courses/:id/regen    – new invite code');
+
+      console.log('   POST   /api/game/classes/:id/start   – teacher starts game');
+      console.log('   GET    /api/game/classes/:id/session – get active session');
+      console.log('   DELETE /api/game/classes/:id/session – teacher ends game');
     });
   } catch (err) {
     console.error('Failed to start server:', err);

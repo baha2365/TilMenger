@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENGLISHPOLY! — Game Room</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --red:#e03232; --yellow:#f5c518; --green:#2e9e4f; --blue:#2574c0;
+    --purple:#8b35b0; --brown:#8B5E3C; --orange:#e07820;
+    --board-bg:#b8d4a0; --cell-border:#2a2a2a; --gold:#ffd700;
+    --bg-dark:#0d1f33; --surface:rgba(255,255,255,0.06);
+    --border-light:rgba(255,255,255,0.14);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  body{
+    background:radial-gradient(ellipse at center,#1a3a5c 0%,#0d1f33 100%);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    font-family:'Nunito',sans-serif;padding:0;overflow-x:hidden;
+  }
+
+  /* ─── NAV ─── */
+  .nav{
+    width:100%;display:flex;align-items:center;justify-content:space-between;
+    padding:0 1.5rem;height:56px;background:rgba(0,0,0,0.35);
+    border-bottom:1px solid rgba(255,215,0,0.12);position:sticky;top:0;z-index:60;
+    backdrop-filter:blur(10px);flex-shrink:0;
+  }
+  .nav-brand{font-family:'Fredoka One',cursive;color:#ffd700;font-size:1.25rem;letter-spacing:1px;}
+  .nav-info{color:rgba(255,255,255,0.55);font-size:0.78rem;}
+  .nav-back{font-size:0.75rem;color:rgba(255,255,255,0.5);text-decoration:none;
+    border:1px solid rgba(255,255,255,0.15);padding:.3rem .8rem;border-radius:6px;
+    transition:all .18s;}
+  .nav-back:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
+
+  /* ─── CONNECTION STATUS BAR ─── */
+  .conn-bar{
+    width:100%;padding:.4rem 1.5rem;text-align:center;font-size:.75rem;font-weight:700;
+    letter-spacing:.05em;transition:background .4s;
+  }
+  .conn-bar.connecting{background:rgba(255,193,7,0.2);color:#ffd700;}
+  .conn-bar.connected{background:rgba(46,158,79,0.18);color:#5DBF8A;}
+  .conn-bar.disconnected{background:rgba(232,82,82,0.2);color:#E85252;}
+
+  /* ─── WAITING SCREEN ─── */
+  #waitingScreen{
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    min-height:60vh;gap:1.2rem;padding:2rem;text-align:center;
+  }
+  #waitingScreen.show{display:flex;}
+  .wait-spinner{
+    width:52px;height:52px;border:4px solid rgba(255,215,0,.2);
+    border-top-color:#ffd700;border-radius:50%;animation:spin .7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .wait-title{font-family:'Fredoka One',cursive;color:#ffd700;font-size:2rem;}
+  .wait-sub{color:rgba(255,255,255,.6);font-size:.9rem;max-width:360px;line-height:1.6;}
+  .wait-players{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-top:.5rem;}
+  .wait-player-chip{
+    padding:.35rem 1rem;border-radius:20px;font-size:.78rem;font-weight:700;
+    border:2px solid rgba(255,255,255,.15);color:#fff;
+  }
+  .wait-player-chip.online{border-color:#5DBF8A;background:rgba(93,191,138,.12);}
+  .wait-player-chip.offline{opacity:.4;}
+
+  /* ─── GAME ENDED SCREEN ─── */
+  #endScreen{
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    min-height:60vh;gap:1rem;padding:2rem;text-align:center;
+  }
+  #endScreen.show{display:flex;}
+  .end-trophy{font-size:5rem;}
+  .end-title{font-family:'Fredoka One',cursive;color:#ffd700;font-size:2.5rem;}
+  .end-sub{color:rgba(255,255,255,.7);font-size:1rem;}
+  .btn-back-class{
+    background:var(--green);color:#fff;border:none;border-radius:10px;
+    padding:.8rem 2rem;font-family:'Fredoka One',cursive;font-size:1.1rem;
+    cursor:pointer;box-shadow:0 4px 0 #1a6b2f;margin-top:.5rem;
+    transition:transform .1s;
+  }
+  .btn-back-class:hover{transform:translateY(-2px);}
+
+  /* ─── MAIN GAME ─── */
+  #gameScreen{display:none;}
+  #gameScreen.show{display:block;}
+
+  .game-header{
+    padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+    gap:1rem;flex-wrap:wrap;
+  }
+  .gh-title{font-family:'Fredoka One',cursive;color:#fff;font-size:1.5rem;letter-spacing:1px;}
+  .gh-round{color:var(--gold);font-size:.85rem;font-weight:800;}
+
+  .game-wrap{
+    display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;
+    justify-content:center;width:100%;max-width:1300px;
+    margin:0 auto;padding:0 12px 40px;
+  }
+
+  /* ─── BOARD ─── */
+  .board{
+    background:var(--board-bg);border:4px solid #2a2a2a;border-radius:12px;
+    display:grid;grid-template-columns:90px repeat(9,1fr) 90px;
+    grid-template-rows:90px repeat(6,1fr) 90px;
+    gap:2px;padding:2px;
+    box-shadow:0 12px 40px rgba(0,0,0,.6);
+    width:min(700px,98vw);height:min(700px,98vw);flex-shrink:0;position:relative;
+  }
+  .cell{
+    background:#d4e8b8;border:1.5px solid var(--cell-border);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;border-radius:3px;
+  }
+  .cell .cell-text{font-size:clamp(5px,1.1vw,11px);font-weight:700;text-align:center;padding:2px;line-height:1.2;color:#111;}
+  .cell .color-bar{width:100%;height:8px;flex-shrink:0;}
+  .cell.red{background:#fde8e8;} .cell.red .color-bar{background:var(--red);}
+  .cell.yellow{background:#fdf8dd;} .cell.yellow .color-bar{background:var(--yellow);}
+  .cell.green{background:#e2f7e8;} .cell.green .color-bar{background:var(--green);}
+  .cell.blue{background:#ddeeff;} .cell.blue .color-bar{background:var(--blue);}
+  .cell.purple{background:#f0e0ff;} .cell.purple .color-bar{background:var(--purple);}
+  .cell.brown{background:#f5e8d8;} .cell.brown .color-bar{background:var(--brown);}
+  .cell.orange{background:#ffeedd;} .cell.orange .color-bar{background:var(--orange);}
+  .cell.corner-start{background:#fff9e0;border:3px solid var(--red);}
+  .cell.corner-finish{background:#fff9e0;border:3px solid var(--green);}
+  .cell.corner-paf{background:linear-gradient(135deg,#5b21b6,#9333ea);border:3px solid #ffd700;}
+  .cell.corner-bonus{background:linear-gradient(135deg,#065f46,#10b981);border:3px solid var(--gold);}
+  .cell.question-cell{background:#fff7e0;}
+  .cell.exclaim-cell{background:#fff0f0;}
+  .cell-icon{font-size:clamp(10px,2.2vw,22px);line-height:1;}
+  .cell.corner-start .cell-text,.cell.corner-finish .cell-text,
+  .cell.corner-paf .cell-text,.cell.corner-bonus .cell-text{
+    font-size:clamp(7px,1.5vw,15px);font-weight:800;
+  }
+  .center{
+    grid-column:2/11;grid-row:2/8;
+    background:linear-gradient(135deg,#b8d4a0 0%,#9dcc80 100%);
+    border-radius:8px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:6px;padding:12px;position:relative;overflow:hidden;
+  }
+  .center-title{
+    font-family:'Fredoka One',cursive;font-size:clamp(1.2rem,3vw,2.4rem);color:white;
+    background:var(--red);padding:6px 24px;border-radius:8px;transform:skewX(-3deg);
+    letter-spacing:2px;text-shadow:2px 2px 0 #8b0000;text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  .center-turn{
+    background:rgba(0,0,0,.25);border-radius:8px;padding:6px 16px;
+    color:#fff;font-size:clamp(.55rem,1.3vw,1rem);font-weight:800;text-align:center;
+  }
+
+  /* ─── PLAYER TOKENS ─── */
+  .token{
+    width:clamp(12px,2.2vw,22px);height:clamp(12px,2.2vw,22px);
+    border-radius:50%;border:2px solid white;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);
+    position:absolute;transition:all .4s ease;z-index:5;
+    display:flex;align-items:center;justify-content:center;
+    font-size:clamp(6px,1.2vw,10px);font-weight:800;color:white;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar{display:flex;flex-direction:column;gap:14px;width:260px;flex-shrink:0;}
+  .panel{
+    background:var(--surface);border:2px solid var(--border-light);
+    border-radius:14px;padding:14px;backdrop-filter:blur(6px);
+  }
+  .panel h3{color:var(--gold);font-family:'Fredoka One',cursive;font-size:1rem;
+    letter-spacing:1px;margin-bottom:10px;text-align:center;text-transform:uppercase;}
+
+  /* ─── DICE ─── */
+  .dice-wrap{text-align:center;}
+  .dice{
+    width:72px;height:72px;background:white;border-radius:14px;border:3px solid #1a3a5c;
+    display:inline-grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;
+    gap:4px;padding:8px;margin:8px auto;
+    box-shadow:4px 4px 0 #1a3a5c,0 8px 20px rgba(0,0,0,.3);
+  }
+  .dice.rolling{animation:diceRoll .5s ease;}
+  @keyframes diceRoll{
+    0%{transform:rotate(0) scale(1);}25%{transform:rotate(90deg) scale(.9);}
+    50%{transform:rotate(180deg) scale(1.1);}75%{transform:rotate(270deg) scale(.9);}
+    100%{transform:rotate(360deg) scale(1);}
+  }
+  .dot{width:100%;height:100%;background:#1a3a5c;border-radius:50%;display:none;align-items:center;justify-content:center;}
+  .dot.on{display:flex;}
+  .dice-result{color:white;font-size:.85rem;font-weight:700;margin-top:4px;}
+  .roll-btn{
+    background:var(--red);color:white;border:none;border-radius:8px;
+    padding:8px 20px;font-family:'Fredoka One',cursive;font-size:1rem;letter-spacing:1px;
+    cursor:pointer;box-shadow:0 4px 0 #8b0000;transition:transform .1s,box-shadow .1s;width:100%;
+  }
+  .roll-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #8b0000;}
+  .roll-btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 #8b0000;}
+  .roll-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .your-turn-badge{
+    background:rgba(255,215,0,.18);border:1.5px solid rgba(255,215,0,.4);
+    border-radius:8px;padding:.4rem .8rem;color:#ffd700;font-size:.78rem;
+    font-weight:800;text-align:center;animation:pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+  /* ─── PLAYERS LIST ─── */
+  .players-list{display:flex;flex-direction:column;gap:6px;}
+  .player-row{
+    display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;
+    background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);transition:background .2s;
+  }
+  .player-row.active{background:rgba(255,215,0,.15);border-color:var(--gold);}
+  .player-row.offline{opacity:.4;}
+  .player-dot{
+    width:24px;height:24px;border-radius:50%;border:2px solid white;
+    display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:white;flex-shrink:0;
+  }
+  .player-info{flex:1;min-width:0;}
+  .player-name{color:white;font-size:.78rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .player-pos{color:rgba(255,255,255,.55);font-size:.65rem;}
+  .player-score{color:var(--gold);font-size:.8rem;font-weight:800;}
+  .online-dot{width:7px;height:7px;border-radius:50%;background:#5DBF8A;flex-shrink:0;}
+  .offline-dot{width:7px;height:7px;border-radius:50%;background:#666;flex-shrink:0;}
+
+  /* ─── TEACHER CONTROLS ─── */
+  .teacher-controls{display:flex;flex-direction:column;gap:6px;}
+  .ctrl-btn{
+    border:none;border-radius:8px;padding:7px 12px;font-family:'Fredoka One',cursive;
+    font-size:.85rem;cursor:pointer;transition:transform .1s;width:100%;
+  }
+  .ctrl-btn:hover{transform:translateY(-1px);}
+  .ctrl-btn.danger{background:#e03232;color:#fff;box-shadow:0 3px 0 #8b0000;}
+
+  /* ─── MODAL ─── */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;
+    align-items:center;justify-content:center;padding:16px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:white;border-radius:20px;padding:28px;max-width:520px;width:100%;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);position:relative;max-height:90vh;overflow-y:auto;
+    animation:modalPop .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes modalPop{from{transform:scale(.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .modal-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+  .modal h2{font-family:'Fredoka One',cursive;font-size:1.5rem;color:#1a1a2e;margin-bottom:8px;}
+  .modal .prompt{font-size:1rem;color:#333;font-weight:600;margin-bottom:16px;line-height:1.5;}
+  .scramble-area{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .letter-tile{background:#1a3a5c;color:white;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1.2rem;cursor:grab;user-select:none;box-shadow:0 3px 0 #0a1f3c;transition:transform .15s;}
+  .letter-tile:hover{transform:translateY(-3px);}
+  .letter-tile.dragging{opacity:.5;transform:scale(1.1);cursor:grabbing;}
+  .answer-slots{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;min-height:52px;}
+  .answer-slot{width:40px;height:40px;border-radius:8px;border:2px dashed #aaa;display:flex;align-items:center;justify-content:center;background:#f5f5f5;font-family:'Fredoka One',cursive;font-size:1.2rem;color:#1a3a5c;transition:background .2s,border-color .2s;}
+  .answer-slot.filled{border-style:solid;border-color:var(--green);background:#e8f7ed;}
+  .answer-slot.dragover{background:#ddeeff;border-color:var(--blue);}
+  .sentence-words{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .word-chip{background:var(--blue);color:white;padding:6px 12px;border-radius:20px;font-size:.85rem;font-weight:700;cursor:pointer;transition:transform .1s,background .2s;user-select:none;}
+  .word-chip:hover{transform:scale(1.05);}
+  .word-chip.used{background:#aaa;cursor:default;transform:none;}
+  .sentence-target{min-height:44px;border:2px dashed #aaa;border-radius:10px;padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;background:#fafafa;}
+  .word-placed{background:var(--green);color:white;padding:6px 12px;border-radius:20px;font-size:.85rem;font-weight:700;cursor:pointer;}
+  .word-placed:hover{background:var(--red);}
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .match-col{display:flex;flex-direction:column;gap:6px;}
+  .match-item{padding:8px 12px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;border:2px solid transparent;}
+  .match-item.left{background:#ddeeff;color:#1a3a5c;}
+  .match-item.right{background:#f0e0ff;color:#5b21b6;}
+  .match-item.selected{border-color:var(--gold);transform:scale(1.03);}
+  .match-item.correct{background:var(--green)!important;color:white!important;border-color:var(--green);}
+  .match-item.wrong{background:var(--red)!important;color:white!important;border-color:var(--red);}
+  .blank-input{border:2px solid #ddd;border-radius:8px;padding:8px 14px;font-size:1rem;font-weight:700;font-family:'Nunito',sans-serif;width:100%;margin-bottom:12px;outline:none;transition:border-color .2s;}
+  .blank-input:focus{border-color:var(--blue);}
+  .blank-input.correct{border-color:var(--green);background:#e8f7ed;}
+  .blank-input.wrong{border-color:var(--red);background:#fde8e8;}
+  .choices{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+  .choice-btn{background:#f0f4ff;border:2px solid #ddd;border-radius:10px;padding:10px 16px;font-size:.9rem;font-weight:700;color:#1a1a2e;cursor:pointer;text-align:left;transition:all .2s;}
+  .choice-btn:hover{background:#ddeeff;border-color:var(--blue);}
+  .choice-btn.correct{background:#e8f7ed;border-color:var(--green);color:var(--green);}
+  .choice-btn.wrong{background:#fde8e8;border-color:var(--red);color:var(--red);}
+  .feedback{padding:10px 16px;border-radius:10px;font-size:.9rem;font-weight:700;margin-bottom:12px;display:none;align-items:center;gap:8px;}
+  .feedback.show{display:flex;}
+  .feedback.correct{background:#e8f7ed;color:var(--green);}
+  .feedback.wrong{background:#fde8e8;color:var(--red);}
+  .modal-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-check{background:var(--green);color:white;border:none;border-radius:10px;padding:10px 24px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;box-shadow:0 3px 0 #1a6b2f;transition:transform .1s;}
+  .btn-check:hover{transform:translateY(-2px);}
+  .btn-close{background:#666;color:white;border:none;border-radius:10px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;}
+  .btn-skip{background:#aaa;color:white;border:none;border-radius:10px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;}
+  .event-icon{font-size:3rem;text-align:center;margin-bottom:8px;}
+  .event-title{font-family:'Fredoka One',cursive;font-size:1.6rem;text-align:center;margin-bottom:8px;}
+  .event-desc{font-size:.95rem;color:#555;text-align:center;line-height:1.5;margin-bottom:16px;}
+
+  /* ─── TOAST ─── */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:#1a3a5c;color:white;padding:12px 24px;border-radius:30px;
+    font-weight:700;font-size:.9rem;z-index:200;transition:transform .4s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  @media(max-width:800px){
+    .game-wrap{flex-direction:column;align-items:center;}
+    .sidebar{width:100%;max-width:500px;flex-direction:row;flex-wrap:wrap;}
+    .sidebar .panel{flex:1 1 180px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">ENGLISHPOLY!</div>
+  <div class="nav-info" id="navInfo">Connecting…</div>
+  <a class="nav-back" id="navBack" href="#">← Class</a>
+</nav>
+
+<!-- CONNECTION BAR -->
+<div class="conn-bar connecting" id="connBar">Connecting to game server…</div>
+
+<!-- WAITING SCREEN -->
+<div id="waitingScreen">
+  <div class="wait-spinner"></div>
+  <div class="wait-title">Waiting for players…</div>
+  <div class="wait-sub" id="waitSub">The teacher has started the game. Join the fun!</div>
+  <div class="wait-players" id="waitPlayers"></div>
+</div>
+
+<!-- ENDED SCREEN -->
+<div id="endScreen">
+  <div class="end-trophy">🏆</div>
+  <div class="end-title" id="endTitle">Game Over!</div>
+  <div class="end-sub"  id="endSub">Thanks for playing ENGLISHPOLY!</div>
+  <button class="btn-back-class" id="endBackBtn">← Back to Class</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen">
+  <div class="game-header">
+    <div class="gh-title">ENGLISHPOLY! 🎓</div>
+    <div class="gh-round" id="roundBadge">Round 1</div>
+  </div>
+
+  <div class="game-wrap">
+    <!-- BOARD -->
+    <div class="board" id="board">
+      <div class="center" id="boardCenter">
+        <div class="center-title">ENGLISHPOLY!</div>
+        <div class="center-turn" id="centerTurn">Waiting…</div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- TURN -->
+      <div class="panel" id="turnPanel">
+        <h3>🎯 Turn</h3>
+        <div style="text-align:center;padding:8px;background:rgba(255,215,0,.12);border-radius:8px;border:1.5px solid rgba(255,215,0,.3);">
+          <div style="color:rgba(255,255,255,.6);font-size:.7rem;text-transform:uppercase;letter-spacing:1px;">Playing now</div>
+          <div style="color:var(--gold);font-family:'Fredoka One',cursive;font-size:1.1rem;" id="turnName">—</div>
+        </div>
+        <div id="yourTurnBadge" style="display:none;margin-top:8px;" class="your-turn-badge">🎲 YOUR TURN!</div>
+      </div>
+
+      <!-- DICE -->
+      <div class="panel">
+        <h3>🎲 Dice</h3>
+        <div class="dice-wrap">
+          <div class="dice" id="diceEl">
+            <div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+            <div class="dot" id="d4"></div><div class="dot" id="d5"></div><div class="dot" id="d6"></div>
+            <div class="dot" id="d7"></div><div class="dot" id="d8"></div><div class="dot" id="d9"></div>
+          </div>
+          <div class="dice-result" id="diceResult">Wait for your turn</div>
+        </div>
+        <button class="roll-btn" id="rollBtn" disabled>🎲 ROLL DICE</button>
+      </div>
+
+      <!-- PLAYERS -->
+      <div class="panel">
+        <h3>👥 Players</h3>
+        <div class="players-list" id="playersList"></div>
+      </div>
+
+      <!-- TEACHER CONTROLS (only shown to teacher) -->
+      <div class="panel" id="teacherPanel" style="display:none;">
+        <h3>🎓 Teacher</h3>
+        <div class="teacher-controls">
+          <div style="color:rgba(255,255,255,.55);font-size:.7rem;text-align:center;margin-bottom:4px;">
+            Roll on behalf of any player
+          </div>
+          <button class="ctrl-btn" id="teacherRollBtn"
+            style="background:var(--blue);color:#fff;box-shadow:0 3px 0 #14437a;">
+            🎲 Force Roll
+          </button>
+          <button class="ctrl-btn danger" id="endGameBtn">⏹ End Game</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CHALLENGE MODAL -->
+<div class="modal-overlay" id="challengeModal">
+  <div class="modal" id="challengeContent"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- Socket.io client (loaded from same server) -->
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+// ═══════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════
+const API_BASE   = 'http://localhost:3030';
+const token      = localStorage.getItem('token');
+const roleId     = localStorage.getItem('role_id');      // '1' student | '2' teacher
+const isTeacher  = roleId === '2';
+
+const params  = new URLSearchParams(location.search);
+const classId = params.get('classId');
+const backUrl = isTeacher
+  ? `../courses/class_details.html?courseId=${params.get('courseId')}&id=${classId}`
+  : `../../student_class_details.html?id=${classId}`;
+
+document.getElementById('navBack').href = backUrl;
+document.getElementById('endBackBtn').addEventListener('click', () => { location.href = backUrl; });
+
+if (!token || !classId) { location.href = backUrl; }
+
+// ═══════════════════════════════════════
+//  BOARD DATA (identical to template)
+// ═══════════════════════════════════════
+const BOARD_CELLS = [
+  {id:0, type:'start',   color:'',       label:'START'},
+  {id:1, type:'question',color:'red',    label:'What is your favourite fruit?'},
+  {id:2, type:'question',color:'red',    label:'When is your birthday?'},
+  {id:3, type:'question',color:'red',    label:'Do you have a pet?'},
+  {id:4, type:'wild',    color:'',       label:''},
+  {id:5, type:'question',color:'brown',  label:'What is your favourite animal?'},
+  {id:6, type:'question',color:'brown',  label:'Where do you live?'},
+  {id:7, type:'question',color:'brown',  label:'Can you speak English?'},
+  {id:8, type:'exclaim', color:'',       label:''},
+  {id:9, type:'question',color:'blue',   label:'Do you have a sister?'},
+  {id:10,type:'paf',     color:'',       label:'PAF!'},
+  {id:11,type:'question',color:'blue',   label:'Do you like basketball?'},
+  {id:12,type:'wild',    color:'',       label:''},
+  {id:13,type:'question',color:'green',  label:'Can you drive a car?'},
+  {id:14,type:'question',color:'green',  label:'What is your favourite subject?'},
+  {id:15,type:'wild',    color:'',       label:''},
+  {id:16,type:'question',color:'green',  label:'What is your favourite day?'},
+  {id:17,type:'bonus',   color:'',       label:'BONUS!'},
+  {id:18,type:'question',color:'green',  label:'What is your favourite drink?'},
+  {id:19,type:'wild',    color:'',       label:''},
+  {id:20,type:'question',color:'yellow', label:'What is the weather like today?'},
+  {id:21,type:'question',color:'yellow', label:'Talk about your bedroom'},
+  {id:22,type:'question',color:'yellow', label:'What time do you go to bed?'},
+  {id:23,type:'exclaim', color:'',       label:''},
+  {id:24,type:'question',color:'red',    label:'Do you like pizza?'},
+  {id:25,type:'question',color:'red',    label:'Where is your school?'},
+  {id:26,type:'question',color:'red',    label:'What is your favourite subject?'},
+  {id:27,type:'bonus',   color:'',       label:'🚗'},
+  {id:28,type:'question',color:'orange', label:'Can you cook?'},
+  {id:29,type:'question',color:'orange', label:'Name 4 months of the year!'},
+  {id:30,type:'question',color:'orange', label:'Sing a song for 20 seconds!'},
+  {id:31,type:'wild',    color:'',       label:''},
+];
+
+const CHALLENGES = {
+  vocabulary:[
+    {type:'match',title:'Animal Match!',prompt:'Match each animal to its correct description:',pairs:[{left:'🐶 Dog',right:"Man's best friend"},{left:'🐱 Cat',right:'Loves to purr'},{left:'🐘 Elephant',right:'Never forgets'},{left:'🦁 Lion',right:'King of the jungle'}]},
+    {type:'choice',title:'What does it mean?',prompt:'What is the meaning of "ENORMOUS"?',choices:['Very small','Very fast','Very large','Very loud'],answer:2},
+    {type:'choice',title:'Opposite Words',prompt:'What is the opposite of "ANCIENT"?',choices:['Old','Modern','Slow','Dark'],answer:1},
+    {type:'choice',title:'School Vocabulary',prompt:'Which word means "a person who teaches"?',choices:['Student','Doctor','Teacher','Pilot'],answer:2},
+  ],
+  spelling:[
+    {type:'scramble',title:'Unscramble the Word!',prompt:'Unscramble the letters to make an animal:',scrambled:['T','A','R','R','O','P'],answer:'PARROT'},
+    {type:'scramble',title:'Unscramble the Word!',prompt:'Unscramble to make a fruit:',scrambled:['A','N','A','N','B','A'],answer:'BANANA'},
+    {type:'blank',title:'Fill in the Missing Letters!',prompt:'Complete the word: EL_ _PHANT',answer:'ELEPHANT',hint:"It's a huge grey animal!"},
+    {type:'blank',title:'Spell it Right!',prompt:'How do you spell the colour? _ _ _ _ _ _ (starts with P)',answer:'PURPLE',hint:'A colour mixed from red and blue'},
+  ],
+  grammar:[
+    {type:'choice',title:'Choose the Correct Verb!',prompt:'She ___ to school every day.',choices:['go','goes','going','goed'],answer:1},
+    {type:'choice',title:'Past or Present?',prompt:'Yesterday I ___ a movie.',choices:['watch','watches','watched','watching'],answer:2},
+    {type:'blank',title:'Fill in the Blank!',prompt:'Complete: "There ___ (be) two cats in the garden."',answer:'ARE',hint:'Two cats = plural!'},
+    {type:'choice',title:'Correct Article',prompt:'I saw ___ elephant at the zoo.',choices:['a','an','the','—'],answer:1},
+    {type:'choice',title:'Plurals!',prompt:'What is the plural of "child"?',choices:['childs','children','childrens','child'],answer:1},
+  ],
+  sentences:[
+    {type:'sentence',title:'Build the Sentence!',prompt:'Arrange the words to make a correct sentence:',words:['every','She','morning','breakfast','eats'],answer:'She eats breakfast every morning'},
+    {type:'sentence',title:'Put it in Order!',prompt:'Build a correct sentence from these words:',words:['does','He','football','play','not'],answer:'He does not play football'},
+    {type:'sentence',title:'Make a Sentence!',prompt:'Arrange these words correctly:',words:['birthday','When','your','is','?'],answer:'When is your birthday ?'},
+  ],
+  matching:[
+    {type:'match',title:'Match the Opposites!',prompt:'Match each word to its opposite:',pairs:[{left:'Hot',right:'Cold'},{left:'Big',right:'Small'},{left:'Happy',right:'Sad'},{left:'Fast',right:'Slow'}]},
+    {type:'match',title:'Jobs & Places!',prompt:'Match the job to its workplace:',pairs:[{left:'Doctor',right:'Hospital'},{left:'Teacher',right:'School'},{left:'Chef',right:'Restaurant'},{left:'Pilot',right:'Airport'}]},
+  ],
+};
+
+const DICE_PATTERNS={1:[5],2:[3,7],3:[3,5,7],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+
+// ═══════════════════════════════════════
+//  LOCAL UI STATE
+// ═══════════════════════════════════════
+let gameSession   = null;   // synced from server
+let myUserId      = null;   // set after /api/auth/me
+let awaitingChallenge = false;
+let challengeQueue    = null;
+let matchLeft=null,matchRight=null,matchedPairs=0,choiceSelected=null;
+let builtSentence=[];
+let dragSrc=null;
+
+// ═══════════════════════════════════════
+//  FETCH MY USER ID
+// ═══════════════════════════════════════
+async function fetchMe() {
+  try {
+    const res  = await fetch(`${API_BASE}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) myUserId = Number(data.user.id);
+  } catch {}
+}
+
+// ═══════════════════════════════════════
+//  SOCKET.IO
+// ═══════════════════════════════════════
+const socket = io(API_BASE, { transports: ['websocket','polling'] });
+
+socket.on('connect', () => {
+  updateConnBar('connected', '🟢 Connected');
+  socket.emit('join_game', { classId, token });
+});
+socket.on('disconnect', () => {
+  updateConnBar('disconnected', '🔴 Disconnected — trying to reconnect…');
+});
+socket.on('connect_error', () => {
+  updateConnBar('disconnected', '🔴 Connection failed');
+});
+socket.on('error', ({ message }) => {
+  showToast('⚠️ ' + message);
+});
+
+socket.on('game_state', ({ session }) => {
+  gameSession = session;
+  applyState(session);
+});
+
+socket.on('game_started', () => {
+  showToast('🎮 Game started! Get ready!');
+});
+
+socket.on('game_ended', ({ winner }) => {
+  if (winner) {
+    document.getElementById('endTitle').textContent = `🏆 ${winner.name} wins!`;
+    document.getElementById('endSub').textContent   = `Final score: ${winner.score} ⭐ — well played everyone!`;
+  }
+  showScreen('end');
+});
+
+// ═══════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ═══════════════════════════════════════
+function showScreen(which) {
+  document.getElementById('waitingScreen').classList.remove('show');
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('gameScreen').classList.remove('show');
+  if (which === 'waiting') document.getElementById('waitingScreen').classList.add('show');
+  if (which === 'end')     document.getElementById('endScreen').classList.add('show');
+  if (which === 'game')    document.getElementById('gameScreen').classList.add('show');
+}
+
+function updateConnBar(state, msg) {
+  const bar = document.getElementById('connBar');
+  bar.className = 'conn-bar ' + state;
+  bar.textContent = msg;
+}
+
+// ═══════════════════════════════════════
+//  APPLY SERVER STATE
+// ═══════════════════════════════════════
+function applyState(session) {
+  if (!session) { showScreen('waiting'); return; }
+
+  if (session.status === 'ended') { showScreen('end'); return; }
+  if (session.status === 'waiting') {
+    showScreen('waiting');
+    renderWaitPlayers(session.players);
+    return;
+  }
+
+  showScreen('game');
+  renderBoard();
+  renderTokens(session.players);
+  renderPlayers(session);
+  renderDice(session);
+  renderTurnControls(session);
+  document.getElementById('roundBadge').textContent = 'Round ' + session.round;
+  document.getElementById('navInfo').textContent    = `${session.players.length} players`;
+
+  // Check if we should open a challenge (only for the current player after dice roll)
+  if (session.diceRolled && !awaitingChallenge) {
+    const cp = session.players[session.currentIdx];
+    if (cp && (isTeacher || (myUserId && cp.userId === myUserId))) {
+      const cell = BOARD_CELLS[cp.pos];
+      if (cell) triggerCellChallenge(cell);
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+//  WAITING SCREEN PLAYERS
+// ═══════════════════════════════════════
+function renderWaitPlayers(players) {
+  const el = document.getElementById('waitPlayers');
+  el.innerHTML = players.map(p =>
+    `<div class="wait-player-chip ${p.online ? 'online' : 'offline'}" style="background:${p.color}22;border-color:${p.color};">
+      ${p.emoji} ${p.name} ${p.online ? '✓' : ''}
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════
+//  BOARD RENDERING
+// ═══════════════════════════════════════
+let boardBuilt = false;
+function renderBoard() {
+  if (boardBuilt) return;
+  boardBuilt = true;
+  const board = document.getElementById('board');
+  document.querySelectorAll('.cell').forEach(c => c.remove());
+
+  const positions = [];
+  for(let c=1;c<=11;c++) positions.push([c,8]);
+  for(let r=7;r>=2;r--) positions.push([11,r]);
+  for(let c=11;c>=1;c--) positions.push([c,1]);
+  for(let r=2;r<=7;r++) positions.push([1,r]);
+
+  BOARD_CELLS.forEach((cell, idx) => {
+    const [col, row] = positions[idx];
+    const el = document.createElement('div');
+    el.className   = 'cell ' + getCellClass(cell);
+    el.style.gridColumn = col;
+    el.style.gridRow    = row;
+    el.dataset.idx = idx;
+    el.innerHTML   = getCellHTML(cell);
+    board.appendChild(el);
+  });
+}
+
+function getCellClass(cell) {
+  const map = {start:'corner-start',finish:'corner-finish',paf:'corner-paf',bonus:'corner-bonus',wild:'question-cell',exclaim:'exclaim-cell'};
+  return map[cell.type] || cell.color || '';
+}
+function getCellHTML(cell) {
+  if(cell.type==='start')   return `<div class="cell-icon">🏁</div><div class="cell-text" style="font-family:'Fredoka One';color:var(--red);">START</div>`;
+  if(cell.type==='finish')  return `<div class="cell-icon">🎉</div><div class="cell-text" style="color:var(--green);">FINISH!</div>`;
+  if(cell.type==='paf')     return `<div style="font-family:'Fredoka One';font-size:clamp(9px,1.8vw,18px);color:#ffd700">PAF!</div><div class="cell-text" style="color:rgba(255,255,255,.8)">Go back 4</div>`;
+  if(cell.type==='bonus')   return `<div class="cell-icon">${cell.label==='🚗'?'🚗':'⭐'}</div>${cell.label!=='🚗'?'<div class="cell-text" style="color:white">BONUS!<br>+2</div>':''}`;
+  if(cell.type==='wild')    return `<div class="cell-icon" style="color:var(--red)">❓</div>`;
+  if(cell.type==='exclaim') return `<div class="cell-icon" style="color:var(--red)">❗</div>`;
+  return `<div class="color-bar" style="background:var(--${cell.color},#ccc)"></div><div class="cell-text">${cell.label}</div>`;
+}
+
+// ═══════════════════════════════════════
+//  TOKENS
+// ═══════════════════════════════════════
+function renderTokens(players) {
+  document.querySelectorAll('.token').forEach(t => t.remove());
+  const board = document.getElementById('board');
+
+  const positions = [];
+  for(let c=1;c<=11;c++) positions.push([c,8]);
+  for(let r=7;r>=2;r--) positions.push([11,r]);
+  for(let c=11;c>=1;c--) positions.push([c,1]);
+  for(let r=2;r<=7;r++) positions.push([1,r]);
+
+  const posGroups = {};
+  players.forEach((p,i) => { if(!posGroups[p.pos]) posGroups[p.pos]=[]; posGroups[p.pos].push(i); });
+
+  players.forEach((p, i) => {
+    const safePos = Math.min(p.pos, positions.length - 1);
+    const cell = board.querySelector(`[data-idx="${safePos}"]`);
+    if (!cell) return;
+    const token = document.createElement('div');
+    token.className = 'token';
+    token.id = `token${i}`;
+    token.style.background = p.color;
+    token.textContent = p.emoji;
+    const offsets = [[0,0],[12,0],[0,12],[12,12],[6,6],[18,6]];
+    const [ox,oy] = offsets[posGroups[p.pos].indexOf(i)] || [0,0];
+    token.style.top = oy+'px';
+    token.style.left= ox+'px';
+    cell.style.position = 'relative';
+    cell.appendChild(token);
+  });
+}
+
+// ═══════════════════════════════════════
+//  PLAYERS LIST
+// ═══════════════════════════════════════
+function renderPlayers(session) {
+  const list = document.getElementById('playersList');
+  list.innerHTML = session.players.map((p, i) => `
+    <div class="player-row ${i===session.currentIdx?'active':''} ${!p.online?'offline':''}">
+      <div class="player-dot" style="background:${p.color}">${p.emoji}</div>
+      <div class="player-info">
+        <div class="player-name">${p.name}</div>
+        <div class="player-pos">Square ${p.pos}</div>
+      </div>
+      <div class="${p.online?'online-dot':'offline-dot'}"></div>
+      <div class="player-score">${p.score}⭐</div>
+    </div>`).join('');
+
+  const cp = session.players[session.currentIdx];
+  document.getElementById('turnName').textContent = cp ? cp.name : '—';
+  document.getElementById('centerTurn').textContent = cp ? `${cp.emoji} ${cp.name}'s turn` : '';
+}
+
+// ═══════════════════════════════════════
+//  DICE DISPLAY
+// ═══════════════════════════════════════
+function showDice(n) {
+  const pat={1:[5],2:[3,7],3:[3,5,7],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+  for(let i=1;i<=9;i++) document.getElementById('d'+i).className='dot'+(pat[n].includes(i)?' on':'');
+}
+
+function renderDice(session) {
+  showDice(session.lastDice || 1);
+  const txt = session.diceRolled
+    ? `Rolled a ${session.lastDice}!`
+    : 'Waiting for roll…';
+  document.getElementById('diceResult').textContent = txt;
+}
+
+// ═══════════════════════════════════════
+//  TURN CONTROLS
+// ═══════════════════════════════════════
+function renderTurnControls(session) {
+  const cp       = session.players[session.currentIdx];
+  const isMyTurn = myUserId && cp && cp.userId === myUserId;
+  const canRoll  = !session.diceRolled && !awaitingChallenge;
+
+  // Teacher panel
+  const tp = document.getElementById('teacherPanel');
+  tp.style.display = isTeacher ? 'block' : 'none';
+  document.getElementById('teacherRollBtn').disabled  = !canRoll || session.diceRolled;
+  document.getElementById('endGameBtn').disabled      = false;
+
+  // Roll button (students)
+  const rb = document.getElementById('rollBtn');
+  if (isTeacher) {
+    rb.style.display = 'none';
+  } else {
+    rb.style.display = 'block';
+    rb.disabled = !isMyTurn || !canRoll;
+    rb.textContent = isMyTurn && canRoll ? '🎲 ROLL DICE' : (isMyTurn && session.diceRolled ? 'Challenge time!' : '🎲 Waiting…');
+  }
+
+  // "Your turn" badge
+  document.getElementById('yourTurnBadge').style.display =
+    isMyTurn && !session.diceRolled && !awaitingChallenge ? 'block' : 'none';
+}
+
+// ═══════════════════════════════════════
+//  ROLL ACTIONS
+// ═══════════════════════════════════════
+function doRoll() {
+  if (awaitingChallenge) { showToast('⚠️ Finish the challenge first!'); return; }
+  if (!gameSession || gameSession.diceRolled) { showToast('Already rolled!'); return; }
+
+  // Animate locally for visual feel, then emit
+  const diceEl = document.getElementById('diceEl');
+  diceEl.classList.add('rolling');
+  setTimeout(() => diceEl.classList.remove('rolling'), 500);
+
+  socket.emit('roll_dice', { classId, token });
+}
+
+document.getElementById('rollBtn').addEventListener('click', doRoll);
+document.getElementById('teacherRollBtn')?.addEventListener('click', doRoll);
+document.getElementById('endGameBtn')?.addEventListener('click', () => {
+  if (confirm('End the game for everyone?')) {
+    socket.emit('end_game', { classId, token });
+  }
+});
+
+// ═══════════════════════════════════════
+//  CELL CHALLENGE LOGIC
+// ═══════════════════════════════════════
+function triggerCellChallenge(cell) {
+  if (awaitingChallenge) return;
+  awaitingChallenge = true;
+
+  if (cell.type === 'paf') {
+    openSpecialModal('paf');
+    return;
+  }
+  if (cell.type === 'bonus') {
+    // bonus points handled server-side (socket challenge_done with 2 pts)
+    socket.emit('challenge_done', { classId, token, points: 2 });
+    awaitingChallenge = false;
+    showToast('⭐ Bonus! +2 points!');
+    return;
+  }
+  if (cell.type === 'question') {
+    openSpeakingCard(cell);
+    return;
+  }
+  if (cell.type === 'wild' || cell.type === 'exclaim') {
+    openRandomChallenge();
+    return;
+  }
+  // start/finish — no challenge
+  awaitingChallenge = false;
+}
+
+// ─── Speaking card (for question squares) ─────────────────────────────────────
+const COLOR_META = {
+  red:   {bg:'#fde8e8',accent:'#e03232',label:'Speaking'},
+  yellow:{bg:'#fdf8dd',accent:'#c89000',label:'Speaking'},
+  green: {bg:'#e2f7e8',accent:'#2e9e4f',label:'Speaking'},
+  blue:  {bg:'#ddeeff',accent:'#2574c0',label:'Speaking'},
+  purple:{bg:'#f0e0ff',accent:'#8b35b0',label:'Speaking'},
+  brown: {bg:'#f5e8d8',accent:'#8B5E3C',label:'Speaking'},
+  orange:{bg:'#ffeedd',accent:'#e07820',label:'Speaking'},
+};
+function openSpeakingCard(cell) {
+  const t = COLOR_META[cell.color] || COLOR_META.blue;
+  document.getElementById('challengeContent').innerHTML = `
+    <div style="text-align:center;margin-bottom:14px;">
+      <div class="modal-badge" style="background:${t.accent};color:white;">Speaking</div>
+    </div>
+    <div style="background:${t.bg};border-radius:16px;padding:24px 20px;text-align:center;margin-bottom:18px;border:2px solid ${t.accent}22;">
+      <h2 style="font-family:'Fredoka One';font-size:1.45rem;color:#1a1a2e;">${cell.label}</h2>
+    </div>
+    <div class="modal-actions" style="justify-content:center;gap:12px;">
+      <button class="btn-check" onclick="speakingDone(true)" style="background:${t.accent};">✅ Good answer! (+1)</button>
+      <button class="btn-skip"  onclick="speakingDone(false)">😅 Skip</button>
+    </div>`;
+  document.getElementById('challengeModal').classList.add('show');
+}
+function speakingDone(correct) {
+  document.getElementById('challengeModal').classList.remove('show');
+  awaitingChallenge = false;
+  if (correct) {
+    socket.emit('challenge_done', { classId, token, points: 1 });
+    showToast('🗣️ +1 point!');
+  } else {
+    socket.emit('challenge_skip', { classId, token });
+  }
+}
+
+// ─── Random interactive challenge ─────────────────────────────────────────────
+function openRandomChallenge() {
+  const keys = Object.keys(CHALLENGES);
+  const pool = CHALLENGES[keys[Math.floor(Math.random() * keys.length)]];
+  const ch   = pool[Math.floor(Math.random() * pool.length)];
+  challengeQueue = ch;
+  renderChallenge(ch);
+}
+
+function renderChallenge(ch) {
+  const modal = document.getElementById('challengeModal');
+  const content = document.getElementById('challengeContent');
+  matchLeft=null;matchRight=null;matchedPairs=0;choiceSelected=null;builtSentence=[];
+
+  let html = `<div class="modal-badge" style="background:#2574c0;color:white;">Challenge</div>`;
+  html += `<h2>${ch.title}</h2>`;
+
+  if(ch.type==='scramble')  html+=renderScramble(ch);
+  else if(ch.type==='sentence') html+=renderSentence(ch);
+  else if(ch.type==='match')    html+=renderMatch(ch);
+  else if(ch.type==='blank')    html+=renderBlank(ch);
+  else if(ch.type==='choice')   html+=renderChoice(ch);
+
+  html+=`<div class="feedback" id="challengeFeedback"></div>`;
+  html+=`<div class="modal-actions">
+    <button class="btn-check" onclick="checkAnswer()">✅ Check</button>
+    <button class="btn-skip"  onclick="skipCh()">⏭ Skip (−1)</button>
+    <button class="btn-close" onclick="closeCh()">✖ Close</button>
+  </div>`;
+
+  content.innerHTML = html;
+  modal.classList.add('show');
+
+  if(ch.type==='scramble')  initScrambleDrag();
+  if(ch.type==='sentence')  initSentenceBuild();
+}
+
+function renderScramble(ch){
+  const shuffled=[...ch.scrambled].sort(()=>Math.random()-.5);
+  return `<p class="prompt">${ch.prompt}</p>
+    <div class="scramble-area" id="tilesArea">${shuffled.map((l,i)=>`<div class="letter-tile" draggable="true" data-letter="${l}" id="tile${i}">${l}</div>`).join('')}</div>
+    <p style="font-size:.8rem;color:#888;margin-bottom:6px;">↓ Drop letters here:</p>
+    <div class="answer-slots" id="slotsArea">${ch.answer.split('').map((_,i)=>`<div class="answer-slot" data-slot="${i}" id="slot${i}"></div>`).join('')}</div>`;
+}
+function renderSentence(ch){
+  const shuffled=[...ch.words].sort(()=>Math.random()-.5);
+  return `<p class="prompt">${ch.prompt}</p>
+    <div class="sentence-words" id="wordBank">${shuffled.map((w,i)=>`<div class="word-chip" data-word="${w}" data-idx="${i}" onclick="pickWord(this)">${w}</div>`).join('')}</div>
+    <p style="font-size:.8rem;color:#888;margin-bottom:6px;">↓ Your sentence:</p>
+    <div class="sentence-target" id="sentenceTarget"></div>`;
+}
+function renderMatch(ch){
+  const sr=[...ch.pairs].map(p=>p.right).sort(()=>Math.random()-.5);
+  return `<p class="prompt">${ch.prompt}</p>
+    <div class="match-grid">
+      <div class="match-col">${ch.pairs.map((p,i)=>`<div class="match-item left" data-idx="${i}" onclick="selectMatch('left',this)">${p.left}</div>`).join('')}</div>
+      <div class="match-col">${sr.map((r,i)=>`<div class="match-item right" data-ridx="${i}" data-val="${r}" onclick="selectMatch('right',this)">${r}</div>`).join('')}</div>
+    </div>`;
+}
+function renderBlank(ch){
+  return `<p class="prompt">${ch.prompt}</p>
+    <p style="font-size:.78rem;color:#888;margin-bottom:6px;">Hint: ${ch.hint}</p>
+    <input type="text" class="blank-input" id="blankInput" placeholder="Type your answer…" onkeydown="if(event.key==='Enter')checkAnswer()" autocomplete="off">`;
+}
+function renderChoice(ch){
+  return `<p class="prompt">${ch.prompt}</p>
+    <div class="choices">${ch.choices.map((c,i)=>`<button class="choice-btn" data-idx="${i}" onclick="selectChoice(this,${i})">${c}</button>`).join('')}</div>`;
+}
+
+// ─── Scramble drag ─────────────────────────────────────────────────────────────
+function initScrambleDrag(){
+  document.querySelectorAll('.letter-tile').forEach(tile=>{
+    tile.addEventListener('dragstart',e=>{dragSrc=tile;tile.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    tile.addEventListener('dragend',()=>tile.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.answer-slot').forEach(slot=>{
+    slot.addEventListener('dragover',e=>{e.preventDefault();slot.classList.add('dragover');});
+    slot.addEventListener('dragleave',()=>slot.classList.remove('dragover'));
+    slot.addEventListener('drop',e=>{
+      e.preventDefault();slot.classList.remove('dragover');if(!dragSrc)return;
+      if(slot.textContent.trim()){const old=slot.textContent.trim();slot.textContent=dragSrc.textContent;slot.classList.add('filled');dragSrc.textContent=old;}
+      else{slot.textContent=dragSrc.textContent;slot.classList.add('filled');dragSrc.textContent='';}
+      dragSrc=null;
+    });
+    slot.addEventListener('dblclick',()=>{slot.textContent='';slot.classList.remove('filled');});
+  });
+}
+function initSentenceBuild(){builtSentence=[];}
+function pickWord(el){
+  if(el.classList.contains('used'))return;
+  builtSentence.push(el.dataset.word);el.classList.add('used');
+  const target=document.getElementById('sentenceTarget');
+  const chip=document.createElement('div');chip.className='word-placed';chip.textContent=el.dataset.word;
+  chip.onclick=()=>{builtSentence=builtSentence.filter((_,i)=>i!==builtSentence.lastIndexOf(el.dataset.word));chip.remove();el.classList.remove('used');};
+  target.appendChild(chip);
+}
+function selectMatch(side,el){
+  if(el.classList.contains('correct'))return;
+  if(side==='left'){document.querySelectorAll('.match-item.left.selected').forEach(e=>e.classList.remove('selected'));matchLeft=el;el.classList.add('selected');}
+  else{document.querySelectorAll('.match-item.right.selected').forEach(e=>e.classList.remove('selected'));matchRight=el;el.classList.add('selected');}
+  if(matchLeft&&matchRight){
+    const ch=challengeQueue;const leftIdx=parseInt(matchLeft.dataset.idx);const leftItem=ch.pairs[leftIdx];const rightVal=matchRight.dataset.val;
+    if(leftItem.right===rightVal){matchLeft.classList.remove('selected');matchLeft.classList.add('correct');matchRight.classList.remove('selected');matchRight.classList.add('correct');matchedPairs++;
+      if(matchedPairs>=ch.pairs.length)setTimeout(()=>{showFeedback(true,'Perfect match! +2 🎉');finishChallenge(2);},200);
+    }else{matchLeft.classList.add('wrong');matchRight.classList.add('wrong');setTimeout(()=>{matchLeft.classList.remove('wrong','selected');matchRight.classList.remove('wrong','selected');},700);}
+    matchLeft=null;matchRight=null;
+  }
+}
+function selectChoice(el,idx){document.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');choiceSelected=idx;}
+
+// ─── Check answer ──────────────────────────────────────────────────────────────
+function checkAnswer(){
+  const ch=challengeQueue;if(!ch)return;
+  if(ch.type==='scramble'){
+    const built=[...document.querySelectorAll('.answer-slot')].map(s=>s.textContent.trim()).join('');
+    if(built.toUpperCase()===ch.answer.toUpperCase()){showFeedback(true,'✅ Correct! +2');finishChallenge(2);}
+    else showFeedback(false,'❌ Answer: '+ch.answer);
+  }else if(ch.type==='sentence'){
+    const built=builtSentence.join(' ');
+    if(built.toLowerCase()===ch.answer.toLowerCase()){showFeedback(true,'✅ Perfect! +2');finishChallenge(2);}
+    else showFeedback(false,'❌ Correct: "'+ch.answer+'"');
+  }else if(ch.type==='blank'){
+    const val=document.getElementById('blankInput').value.trim();
+    const inp=document.getElementById('blankInput');
+    if(val.toUpperCase()===ch.answer.toUpperCase()){inp.classList.add('correct');showFeedback(true,'✅ Correct! +2');finishChallenge(2);}
+    else{inp.classList.add('wrong');showFeedback(false,'❌ Answer: '+ch.answer);}
+  }else if(ch.type==='choice'){
+    if(choiceSelected===null){showToast('Pick an answer first!');return;}
+    const btns=document.querySelectorAll('.choice-btn');
+    btns[ch.answer].classList.add('correct');
+    if(choiceSelected===ch.answer){showFeedback(true,'✅ Correct! +2');finishChallenge(2);}
+    else{btns[choiceSelected].classList.add('wrong');showFeedback(false,'❌ Correct: '+ch.choices[ch.answer]);}
+    btns.forEach(b=>b.onclick=null);
+  }else if(ch.type==='match'){
+    if(matchedPairs<ch.pairs.length)showFeedback(false,'❌ Match all pairs first!');
+  }
+}
+function finishChallenge(pts){
+  setTimeout(()=>{
+    document.getElementById('challengeModal').classList.remove('show');
+    awaitingChallenge=false;challengeQueue=null;
+    socket.emit('challenge_done',{classId,token,points:pts});
+    showToast(`+${pts} point${pts!==1?'s':''}!`);
+  },1200);
+}
+function showFeedback(ok,msg){
+  const fb=document.getElementById('challengeFeedback');
+  fb.className='feedback show '+(ok?'correct':'wrong');fb.textContent=msg;
+}
+function skipCh(){
+  document.getElementById('challengeModal').classList.remove('show');
+  awaitingChallenge=false;challengeQueue=null;
+  socket.emit('challenge_skip',{classId,token});
+}
+function closeCh(){
+  document.getElementById('challengeModal').classList.remove('show');
+  awaitingChallenge=false;challengeQueue=null;
+  socket.emit('challenge_skip',{classId,token});
+}
+
+// ─── Special events ────────────────────────────────────────────────────────────
+function openSpecialModal(type){
+  const msgs={paf:{icon:'💥',title:'PAF! Go back 4!',desc:'Oops! Move back 4 spaces!',btn:'OK'}};
+  const m=msgs[type]||msgs.paf;
+  document.getElementById('challengeContent').innerHTML=`
+    <div class="event-icon">${m.icon}</div>
+    <div class="event-title">${m.title}</div>
+    <div class="event-desc">${m.desc}</div>
+    <div class="modal-actions"><button class="btn-close" onclick="closeSpecial()">${m.btn}</button></div>`;
+  document.getElementById('challengeModal').classList.add('show');
+}
+function closeSpecial(){
+  document.getElementById('challengeModal').classList.remove('show');
+  awaitingChallenge=false;
+  socket.emit('challenge_done',{classId,token,points:0});
+}
+
+// ─── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+showScreen('waiting');
+fetchMe().then(() => {
+  // After getting userId, state will re-apply correctly on next game_state event
+});
+</script>
+</body>
+</html>
