@@ -395,6 +395,43 @@
   }
   .toast.show { transform:translateX(-50%) translateY(0); }
 
+  /* ─── DICE SHOWCASE (post-roll spotlight) ─── */
+  .dice-spotlight-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,20,35,0);
+    z-index: 499;
+    pointer-events: none;
+    transition: background 0.35s ease;
+  }
+
+  .dice-overlay {
+    position: fixed;
+    z-index: 500;
+    margin: 0;
+    pointer-events: none;
+    transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.45s ease, box-shadow 0.4s ease;
+    box-shadow: 4px 4px 0 #1a3a5c, 0 8px 20px rgba(0,0,0,0.3);
+  }
+  .dice-overlay.glow {
+    box-shadow: 4px 4px 0 #1a3a5c, 0 20px 50px rgba(0,0,0,0.5), 0 0 45px 14px rgba(255,215,0,0.55);
+  }
+
+  .dice-overlay-label {
+    position: fixed;
+    left: 50%;
+    z-index: 501;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    color: var(--gold);
+    text-shadow: 0 4px 14px rgba(0,0,0,0.6), 0 0 22px rgba(255,215,0,0.45);
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+    text-align: center;
+    white-space: nowrap;
+  }
+
   @media(max-width:800px) {
     .game-wrap { flex-direction:column;align-items:center; }
     .sidebar { width:100%;max-width:500px;flex-direction:row;flex-wrap:wrap; }
@@ -806,9 +843,92 @@ function rollDice() {
       lastDice = result;
       document.getElementById('diceResult').textContent = `Rolled a ${result}!`;
       diceRolled = true;
-      movePlayer(result);
+      // Show the result front-and-center before anything else happens,
+      // so players have time to actually see the number before tokens move.
+      showDiceShowcase(result).then(() => movePlayer(result));
     }
   }, 60);
+}
+
+/**
+ * Takes the dice that just finished rolling, flies a stand-in copy of it to
+ * the center of the screen, scales it up so the result is unmistakable,
+ * holds it there for a beat, then fades everything out. Resolves once the
+ * stage is clear — that's the cue for the token to start hopping.
+ */
+function showDiceShowcase(result) {
+  return new Promise(resolve => {
+    const diceEl = document.getElementById('diceEl');
+    const rect   = diceEl.getBoundingClientRect();
+
+    // Dim the rest of the screen so the result is the only thing in focus
+    const backdrop = document.createElement('div');
+    backdrop.className = 'dice-spotlight-backdrop';
+    backdrop.id = 'diceBackdrop';
+    document.body.appendChild(backdrop);
+
+    // Stand-in dice: an exact visual copy of the dice face that just landed
+    const overlay = document.createElement('div');
+    overlay.className = 'dice dice-overlay';
+    overlay.id = 'diceOverlayEl';
+    overlay.innerHTML   = diceEl.innerHTML;
+    overlay.style.left   = rect.left + 'px';
+    overlay.style.top    = rect.top + 'px';
+    overlay.style.width  = rect.width + 'px';
+    overlay.style.height = rect.height + 'px';
+    overlay.style.transform = 'translate(0px, 0px) scale(1)';
+    overlay.style.opacity   = '1';
+    document.body.appendChild(overlay);
+
+    // Big "Rolled a X!" label that appears once the dice has landed center-stage
+    const label = document.createElement('div');
+    label.className = 'dice-overlay-label';
+    label.id = 'diceOverlayLabel';
+    label.textContent = `🎲 ${result}!`;
+    document.body.appendChild(label);
+
+    // Hide the real dice while its stand-in performs (keeps sidebar layout intact)
+    diceEl.style.opacity = '0';
+
+    const vw    = window.innerWidth;
+    const vh    = window.innerHeight;
+    const scale = Math.min(3.4, (vh * 0.22) / rect.height);
+    const centerX = vw / 2 - (rect.left + rect.width / 2);
+    const centerY = vh / 2 - (rect.top + rect.height / 2) - 30;
+    const labelTop = vh / 2 + (rect.height * scale) / 2 + 22;
+
+    label.style.top       = labelTop + 'px';
+    label.style.transform = 'translate(-50%, 8px)';
+
+    requestAnimationFrame(() => {
+      backdrop.style.background = 'rgba(10,20,35,0.55)';
+      overlay.style.transform   = `translate(${centerX}px, ${centerY}px) scale(${scale})`;
+    });
+
+    // Once the dice arrives center stage: glow it and reveal the number label
+    setTimeout(() => {
+      overlay.classList.add('glow');
+      label.style.opacity   = '1';
+      label.style.transform = 'translate(-50%, 0px)';
+    }, 580);
+
+    // Hold the result clearly on screen, then fade everything out together
+    setTimeout(() => {
+      overlay.style.transform = `translate(${centerX}px, ${centerY}px) scale(${scale * 0.92})`;
+      overlay.style.opacity   = '0';
+      overlay.classList.remove('glow');
+      label.style.opacity     = '0';
+      backdrop.style.background = 'rgba(10,20,35,0)';
+
+      setTimeout(() => {
+        overlay.remove();
+        label.remove();
+        backdrop.remove();
+        diceEl.style.opacity = '1';
+        resolve();
+      }, 480);
+    }, 1450);
+  });
 }
 
 // ════════════════════════════════════════
