@@ -1064,11 +1064,11 @@
 <!-- ══════════ OVERLAY BACKDROP ══════════ -->
 <div id="panelBackdrop" style="position:fixed;inset:0;z-index:150;display:none;"></div>
 
-
+<script src=".././config.js"></script>
 
 <!-- ══════════ SCRIPTS ══════════ -->
 <script>
-  const API = 'http://localhost:3030/api/auth';
+  const API = `${LINGUA.base}/api/auth`;
 
   /* ─── Auth & init ─── */
   function logout() {
