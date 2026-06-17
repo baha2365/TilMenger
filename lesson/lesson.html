@@ -401,7 +401,7 @@
     </div>
   </div>
 </main>
-<script src="/config.js"></script>
+<script src="../config.js"></script>
 <script>
   const API   = LINGUA.auth;
   const VOCAB = LINGUA.vocab;
@@ -467,7 +467,7 @@
       let src = w.image;
       if (!src.startsWith('http')) {
         const filename = src.replace(/\\/g, '/').split('/').pop();
-        src = `http://localhost:3030/uploads/${filename}`;
+        src = LINGUA.base + `/uploads/${filename}`;
       }
 
       imageCard.classList.remove('no-image');

@@ -11,7 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const LINGUA = (() => {
-  const base = 'http://localhost:3030';
+  const base = 'https://ravine-decrease-staleness.ngrok-free.dev';
 
   return {
     base,
