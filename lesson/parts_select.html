@@ -3,120 +3,471 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LinguaAI — Choose a Part</title>
+  <title>LinguaAI — Learning Path</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cream:    #F5F0E8; --ink: #1A1612; --rust: #C4572A;
-      --sage:     #4A6741; --gold: #D4A853; --muted: #7A6E65;
-      --border:   #DDD5C8; --card-bg: #FDFAF5; --input-bg: #F9F5EE;
+      --green:        #58CC02;
+      --green-dark:   #46A302;
+      --green-pale:   #E8F9D4;
+      --orange:       #FF9600;
+      --orange-dark:  #CC7A00;
+      --orange-pale:  #FFF3D9;
+      --gray:         #D6D6D6;
+      --gray-dark:    #ABABAB;
+      --gray-pale:    #F2F2F2;
+      --navy:         #1C1D3E;
+      --bg:           #FFFFFF;
+      --ink:          #3C3C3C;
+      --muted:        #ABABAB;
+      --border:       #E5E5E5;
     }
 
-    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); }
+    html, body {
+      height: 100%;
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
 
     /* ── Navbar ── */
-    .navbar { background: var(--ink); padding: 1rem 2.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .nav-brand { font-family: 'Playfair Display', serif; color: var(--cream); font-size: 1.3rem; letter-spacing: -0.02em; text-decoration: none; }
-    .nav-brand span { color: var(--gold); }
-    .nav-right { display: flex; align-items: center; gap: 1rem; }
-    .nav-avatar { width: 38px; height: 38px; background: var(--rust); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.95rem; }
-    .btn-back { background: none; border: 1px solid rgba(255,255,255,0.2); color: #9A9089; padding: 0.4rem 1rem; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
-    .btn-back:hover { border-color: rgba(255,255,255,0.5); color: var(--cream); }
+    .navbar {
+      background: var(--navy);
+      padding: 0.9rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid rgba(88,204,2,0.25);
+    }
+    .nav-brand {
+      font-weight: 900;
+      color: white;
+      font-size: 1.35rem;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+    }
+    .nav-brand span { color: var(--green); }
+    .nav-right { display: flex; align-items: center; gap: 0.9rem; }
+    .nav-avatar {
+      width: 36px; height: 36px;
+      background: var(--orange);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 900; font-size: 0.9rem;
+      border: 2px solid var(--orange-dark);
+    }
+    .btn-back {
+      background: none;
+      border: 2px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.65);
+      padding: 0.38rem 1rem;
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.35rem;
+    }
+    .btn-back:hover { border-color: rgba(255,255,255,0.45); color: white; }
 
-    .main { max-width: 640px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+    .main { max-width: 500px; margin: 0 auto; padding: 2.2rem 1.5rem 5rem; }
 
     /* ── Page header ── */
-    .page-header { margin-bottom: 1.8rem; text-align: center; }
-    .page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 3vw, 2.1rem); color: var(--ink); margin-bottom: 0.4rem; }
-    .page-header h1 em { color: var(--rust); font-style: italic; }
-    .page-header p { font-size: 0.88rem; color: var(--muted); }
+    .page-header { margin-bottom: 1.5rem; text-align: center; }
+    .page-header h1 {
+      font-weight: 900;
+      font-size: clamp(1.55rem, 4vw, 2rem);
+      color: var(--ink);
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.02em;
+    }
+    .page-header h1 em { color: var(--orange); font-style: normal; }
+    .page-header p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
 
-    /* ── Overall progress card (sticky so it's visible while scrolling 33 parts) ── */
+    /* ── Progress card ── */
     .progress-wrap {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
-      padding: 1.2rem 1.5rem; margin-bottom: 2.2rem; display: flex; align-items: center; gap: 1.2rem;
-      position: sticky; top: 78px; z-index: 50; box-shadow: 0 4px 16px rgba(26,22,18,0.06);
+      background: var(--green-pale);
+      border: 2px solid #A3E063;
+      border-radius: 16px;
+      padding: 1rem 1.3rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 70px;
+      z-index: 50;
+      box-shadow: 0 4px 0 rgba(70,163,2,0.15);
     }
     .progress-info { flex: 1; }
-    .progress-label { font-size: 0.78rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
-    .progress-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .progress-bar-fill { height: 100%; background: var(--rust); border-radius: 3px; transition: width 0.5s ease; width: 0%; }
-    .progress-count { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--ink); white-space: nowrap; }
-    .progress-count span { font-size: 0.78rem; font-family: 'DM Sans', sans-serif; color: var(--muted); display: block; text-align: center; }
-
-    .jump-current {
-      flex-shrink: 0; background: var(--ink); color: var(--cream); border: none; border-radius: 8px;
-      padding: 0.5rem 0.9rem; font-size: 0.78rem; font-weight: 600; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
+    .progress-label {
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--green-dark);
+      margin-bottom: 0.45rem;
     }
-    .jump-current:hover { opacity: 0.85; }
+    .progress-bar-bg {
+      height: 10px;
+      background: rgba(70,163,2,0.18);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 5px;
+      transition: width 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+      width: 0%;
+      position: relative;
+    }
+    .progress-bar-fill::after {
+      content: '';
+      position: absolute;
+      right: 4px; top: 2px;
+      width: 3px; height: 6px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 2px;
+    }
+    .progress-count {
+      font-weight: 900;
+      font-size: 1.35rem;
+      color: var(--green-dark);
+      white-space: nowrap;
+      text-align: center;
+      line-height: 1.1;
+    }
+    .progress-count span {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--green);
+      display: block;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .jump-current {
+      flex-shrink: 0;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-bottom: 3px solid var(--green-dark);
+      border-radius: 10px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.72rem;
+      font-weight: 900;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: transform 0.1s, border-bottom-width 0.1s;
+    }
+    .jump-current:hover { opacity: 0.9; }
+    .jump-current:active { transform: translateY(2px); border-bottom-width: 1px; }
 
     /* ── Status screen ── */
-    .status-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; gap: 1rem; color: var(--muted); font-size: 0.9rem; }
-    .spinner { width: 28px; height: 28px; border: 2.5px solid var(--border); border-top-color: var(--rust); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .status-screen {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 50vh; gap: 1rem;
+      color: var(--muted); font-size: 0.9rem; font-weight: 700;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .btn-retry { padding: 0.5rem 1.4rem; background: var(--ink); color: var(--cream); border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; }
+    .btn-retry {
+      padding: 0.55rem 1.5rem;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-bottom: 3px solid var(--green-dark);
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
 
     /* ── Empty state ── */
-    .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--muted); font-size: 0.9rem; }
-    .empty-state .empty-icon { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+    .empty-state {
+      text-align: center; padding: 3rem 1.5rem;
+      color: var(--muted); font-size: 0.9rem; font-weight: 700;
+    }
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; }
 
     /* ══════════════════════════════════════════
-       The path: one winding trail with a node for
-       every part. Fully data-driven — 4 parts or
-       40 parts render the exact same way.
+       DUOLINGO-STYLE PATH
     ══════════════════════════════════════════ */
     .path-wrap { position: relative; }
-    .path-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-    .path-svg path { fill: none; stroke: var(--border); stroke-width: 4; stroke-dasharray: 2 14; stroke-linecap: round; }
 
-    .part-track { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 1.7rem; padding: 0.5rem 0; }
-
-    .part-node { display: flex; align-items: center; gap: 1rem; animation: fadeUp 0.35s ease both; }
-    .part-node:nth-child(odd)  { flex-direction: row; }
-    .part-node:nth-child(even) { flex-direction: row-reverse; }
-    .part-node:nth-child(even) .node-info { text-align: right; }
-    .part-node:nth-child(even) .node-meta { justify-content: flex-end; }
-
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-    .node-btn {
-      flex-shrink: 0; width: 58px; height: 58px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700;
-      border: 3px solid var(--card-bg);
-      cursor: pointer; transition: transform 0.18s, box-shadow 0.18s;
+    /* The winding road SVG */
+    .path-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      overflow: visible;
+      pointer-events: none;
     }
-    .node-btn:active:not(:disabled) { transform: scale(0.92); }
+    .path-road {
+      fill: none;
+      stroke: var(--green-pale);
+      stroke-width: 32;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .path-edge {
+      fill: none;
+      stroke: #A3E063;
+      stroke-width: 32;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1 58;
+      stroke-dashoffset: 0;
+    }
 
-    .part-node.is-completed .node-btn { background: var(--sage); color: white; box-shadow: 0 3px 12px rgba(74,103,65,0.3); }
-    .part-node.is-completed .node-btn:hover { box-shadow: 0 5px 16px rgba(74,103,65,0.45); transform: translateY(-2px); }
+    /* The node track */
+    .part-track {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2.2rem;
+      padding: 1rem 0 1rem;
+    }
 
-    .part-node.is-current .node-btn { background: var(--rust); color: white; box-shadow: 0 3px 14px rgba(196,87,42,0.4); animation: pulseRust 2.2s ease-in-out infinite; }
-    .part-node.is-current .node-btn:hover { transform: translateY(-2px); animation: none; box-shadow: 0 5px 18px rgba(196,87,42,0.55); }
-    @keyframes pulseRust { 0%,100% { box-shadow: 0 3px 14px rgba(196,87,42,0.4); } 50% { box-shadow: 0 3px 22px rgba(196,87,42,0.7); } }
+    /* Each part node row — zigzag left/right */
+    .part-node {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      animation: fadeUp 0.3s ease both;
+    }
+    .part-node:nth-child(odd)  {
+      flex-direction: row;
+      padding-left: 8%;
+    }
+    .part-node:nth-child(even) {
+      flex-direction: row-reverse;
+      padding-right: 8%;
+    }
+    .part-node:nth-child(even) .node-info { text-align: right; }
+    .part-node:nth-child(even) .node-tags { justify-content: flex-end; }
 
-    .part-node.is-locked .node-btn { background: var(--input-bg); color: var(--muted); border-color: var(--border); cursor: not-allowed; box-shadow: none; font-size: 1rem; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
+    /* ── Node button wrapper (holds the 3D button + START badge) ── */
+    .node-btn-wrap {
+      position: relative;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── The 3D Duolingo-style circle button ── */
+    .node-btn {
+      width: 76px; height: 76px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.9rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      position: relative;
+      /* Inner highlight ring */
+      outline: 4px solid rgba(255,255,255,0.35);
+      outline-offset: -6px;
+    }
+    .node-btn:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+    /* COMPLETED — green */
+    .part-node.is-completed .node-btn {
+      background: var(--green);
+      box-shadow: 0 7px 0 var(--green-dark), 0 10px 18px rgba(70,163,2,0.22);
+      color: white;
+    }
+    .part-node.is-completed .node-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 9px 0 var(--green-dark), 0 12px 22px rgba(70,163,2,0.3);
+    }
+    .part-node.is-completed .node-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 2px 0 var(--green-dark), 0 4px 8px rgba(70,163,2,0.15);
+    }
+
+    /* CURRENT — orange */
+    .part-node.is-current .node-btn {
+      background: var(--orange);
+      box-shadow: 0 7px 0 var(--orange-dark), 0 10px 18px rgba(204,122,0,0.25);
+      color: white;
+    }
+    .part-node.is-current .node-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 9px 0 var(--orange-dark), 0 12px 22px rgba(204,122,0,0.35);
+    }
+    .part-node.is-current .node-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 2px 0 var(--orange-dark), 0 4px 8px rgba(204,122,0,0.15);
+    }
+
+    /* LOCKED — gray */
+    .part-node.is-locked .node-btn {
+      background: var(--gray);
+      box-shadow: 0 7px 0 var(--gray-dark), 0 10px 18px rgba(0,0,0,0.06);
+      color: var(--gray-dark);
+      cursor: not-allowed;
+      font-size: 1.4rem;
+    }
+    .part-node.is-locked .node-btn:active {
+      transform: none;
+      box-shadow: 0 7px 0 var(--gray-dark);
+    }
+
+    /* ── START badge above the current node ── */
+    .start-badge {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--orange);
+      color: white;
+      font-weight: 900;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      padding: 0.28rem 0.75rem;
+      border-radius: 20px;
+      border-bottom: 2px solid var(--orange-dark);
+      white-space: nowrap;
+      animation: badgeBounce 1.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .start-badge::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--orange-dark);
+      margin-top: 0;
+    }
+    @keyframes badgeBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    /* ── Node info panel ── */
     .node-info { flex: 1; min-width: 0; }
-    .node-eyebrow { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.15rem; }
-    .part-node.is-current   .node-eyebrow { color: var(--rust); }
-    .part-node.is-completed .node-eyebrow { color: var(--sage); }
-    .node-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--ink); }
+    .node-eyebrow {
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.18rem;
+    }
+    .part-node.is-completed .node-eyebrow { color: var(--green-dark); }
+    .part-node.is-current   .node-eyebrow { color: var(--orange); }
+
+    .node-title {
+      font-weight: 900;
+      font-size: 1rem;
+      color: var(--ink);
+      line-height: 1.2;
+    }
     .part-node.is-locked .node-title { color: var(--muted); }
-    .node-meta { font-size: 0.74rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; margin-top: 0.2rem; }
+
+    .node-tags {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+    }
+    .tag-xp {
+      background: var(--green-pale);
+      color: var(--green-dark);
+    }
+    .tag-words {
+      background: #EEF2FF;
+      color: #6366F1;
+    }
+    .part-node.is-locked .tag-xp {
+      background: var(--gray-pale);
+      color: var(--gray-dark);
+    }
+    .part-node.is-current .tag-xp {
+      background: var(--orange-pale);
+      color: var(--orange-dark);
+    }
+
+    /* ── Divider / milestone banner (every 5 parts) ── */
+    .milestone-banner {
+      text-align: center;
+      padding: 0.8rem 1.2rem;
+      background: linear-gradient(135deg, #FFF9E6, #FFF3D9);
+      border: 2px solid #F6C544;
+      border-radius: 12px;
+      margin: 0.5rem 0;
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.3s ease both;
+    }
+    .milestone-banner span {
+      font-weight: 900;
+      font-size: 0.78rem;
+      color: #B8870A;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
 
     @media (max-width: 480px) {
-      .navbar { padding: 1rem; }
-      .progress-wrap { top: 66px; }
-      .part-node, .part-node:nth-child(even) { flex-direction: row; }
-      .part-node:nth-child(even) .node-info,
-      .part-node:nth-child(even) .node-meta { text-align: left; justify-content: flex-start; }
-      .node-btn { width: 50px; height: 50px; font-size: 1rem; }
+      .navbar { padding: 0.9rem 1rem; }
+      .progress-wrap { top: 64px; }
+      .part-node,
+      .part-node:nth-child(even) {
+        flex-direction: row;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+      .part-node:nth-child(even) .node-info { text-align: left; }
+      .part-node:nth-child(even) .node-tags { justify-content: flex-start; }
+      .node-btn { width: 64px; height: 64px; font-size: 1.5rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .start-badge { animation: none; }
+      .part-node   { animation: none; }
     }
   </style>
 </head>
@@ -132,22 +483,24 @@
 
 <div class="status-screen" id="statusScreen">
   <div class="spinner"></div>
-  <span>Loading your parts…</span>
+  <span>Loading your path…</span>
 </div>
 
 <main class="main" id="mainContent" style="display:none;">
   <div class="page-header">
-    <h1>Choose a <em>Part</em></h1>
-    <p>Work through the parts in order — finish one to unlock the next.</p>
+    <h1>Your <em>Learning</em> Path</h1>
+    <p>Complete each part to unlock the next one.</p>
   </div>
 
   <div class="progress-wrap">
     <div class="progress-info">
-      <div class="progress-label">Your progress</div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+      <div class="progress-label">Progress</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
     </div>
-    <div class="progress-count" id="progressCount">0<span>/ 0 parts</span></div>
-    <button class="jump-current" id="jumpCurrentBtn">Jump to current</button>
+    <div class="progress-count" id="progressCount">0<span>parts done</span></div>
+    <button class="jump-current" id="jumpCurrentBtn">Jump to<br>current</button>
   </div>
 
   <div class="path-wrap">
@@ -158,27 +511,26 @@
 
 <script src="../config.js"></script>
 <script>
-  const API   = LINGUA.auth;
-  const VOCAB = LINGUA.vocab;
+  /* ── Config guards ── */
+  const API   = (typeof LINGUA !== 'undefined') ? LINGUA.auth  : '';
+  const VOCAB = (typeof LINGUA !== 'undefined') ? LINGUA.vocab : '';
   const token = localStorage.getItem('token');
   if (!token) { window.location.href = 'index.html'; }
 
   let currentNodeEl = null;
 
+  /* ── Error display ── */
   function showError(message) {
     document.getElementById('statusScreen').innerHTML = `
-      <span style="font-size:2rem">⚠️</span>
-      <span>${message}</span>
+      <span style="font-size:2.5rem">⚠️</span>
+      <span style="font-weight:800">${message}</span>
       <button class="btn-retry" onclick="init()">Try again</button>
     `;
     document.getElementById('statusScreen').style.display = 'flex';
     document.getElementById('mainContent').style.display  = 'none';
   }
 
-  // A part is locked until the part before it has been completed. The first
-  // part not yet finished becomes "current"; everything after that is locked.
-  // This recomputes from scratch every load, so adding part #34 to the DB
-  // just slots a new node onto the end automatically.
+  /* ── Status calculation ── */
   function computeStatuses(parts, completedSet) {
     let chainOpen = true;
     return parts.map((p) => {
@@ -196,6 +548,7 @@
     });
   }
 
+  /* ── Render all part nodes ── */
   function renderParts(parts) {
     const track = document.getElementById('partTrack');
     track.innerHTML = '';
@@ -205,30 +558,63 @@
       track.innerHTML = `
         <div class="empty-state">
           <span class="empty-icon">📭</span>
-          No parts have been added yet — check back soon!
+          No parts yet — check back soon!
         </div>`;
       document.getElementById('pathSvg').innerHTML = '';
       return;
     }
 
-    parts.forEach((part) => {
+    parts.forEach((part, idx) => {
+      /* ── Milestone banner every 5 parts (before part 6, 11, 16…) ── */
+      if (idx > 0 && idx % 5 === 0) {
+        const banner = document.createElement('div');
+        banner.className = 'milestone-banner';
+        banner.style.animationDelay = `${idx * 0.04}s`;
+        banner.innerHTML = `<span>🏆 Checkpoint ${Math.floor(idx / 5)}</span>`;
+        track.appendChild(banner);
+      }
+
       const node = document.createElement('div');
       node.className = `part-node is-${part.status}`;
+      node.style.animationDelay = `${idx * 0.045}s`;
 
-      const icon    = part.status === 'completed' ? '✓' : part.status === 'locked' ? '🔒' : part.part_number;
+      /* Icons */
+      const icon = part.status === 'completed' ? '✓'
+                 : part.status === 'locked'    ? '🔒'
+                 : '★';
+
+      /* Eyebrow label */
       const eyebrow = part.status === 'completed' ? 'Completed'
                     : part.status === 'locked'    ? 'Locked'
-                    : 'Continue here';
-      const meta    = part.status === 'locked' ? 'Finish the previous part to unlock' : '3 words · sentence practice';
+                    : 'Up next';
+
+      /* Tags */
+      const xpTag    = part.status === 'locked'
+        ? `<span class="tag tag-xp">🔒 Locked</span>`
+        : `<span class="tag tag-xp">⚡ +10 XP</span>`;
+      const wordTag  = part.status !== 'locked'
+        ? `<span class="tag tag-words">📖 3 words</span>`
+        : '';
+
+      /* START badge only on the current node */
+      const startBadge = part.status === 'current'
+        ? `<div class="start-badge">START</div>` : '';
 
       node.innerHTML = `
-        <button class="node-btn" ${part.status === 'locked' ? 'disabled title="Finish the previous part to unlock"' : ''}>
-          <span>${icon}</span>
-        </button>
+        <div class="node-btn-wrap">
+          ${startBadge}
+          <button
+            class="node-btn"
+            ${part.status === 'locked' ? 'disabled title="Finish the previous part first"' : ''}
+            aria-label="Part ${part.part_number} — ${eyebrow}"
+          >
+            <span>${icon}</span>
+          </button>
+        </div>
         <div class="node-info">
           <div class="node-eyebrow">${eyebrow}</div>
           <div class="node-title">Part ${part.part_number}</div>
-          <div class="node-meta">${meta}</div>
+          <div class="node-tags">${xpTag}${wordTag}</div>
         </div>
       `;
 
@@ -240,34 +626,49 @@
       }
 
       if (part.status === 'current') currentNodeEl = node;
-
       track.appendChild(node);
     });
 
-    drawPath(parts.length);
+    /* Draw the winding path after layout settles */
+    requestAnimationFrame(() => requestAnimationFrame(drawPath));
   }
 
-  // Purely decorative winding line threading the nodes together.
-  function drawPath(count) {
+  /* ── Draw the winding green road through actual node positions ── */
+  function drawPath() {
     const svg  = document.getElementById('pathSvg');
     const wrap = document.querySelector('.path-wrap');
-    if (count < 2) { svg.innerHTML = ''; return; }
+    const btns = wrap.querySelectorAll('.node-btn');
+    if (btns.length < 2) { svg.innerHTML = ''; return; }
 
-    const height = wrap.offsetHeight;
-    const width  = wrap.offsetWidth;
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    const wRect = wrap.getBoundingClientRect();
+    const W     = wrap.offsetWidth;
+    const H     = wrap.offsetHeight;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-    const cx   = 29;
-    const step = height / count;
-    let d = `M ${cx} 29`;
-    for (let i = 1; i < count; i++) {
-      const y    = step * i + 29;
-      const sway = (i % 2 === 0) ? cx + 8 : cx - 8;
-      d += ` Q ${sway} ${y - step / 2}, ${cx} ${y}`;
+    /* Collect centre of each visible button relative to wrap */
+    const pts = Array.from(btns).map(b => {
+      const r = b.getBoundingClientRect();
+      return {
+        x: r.left - wRect.left + r.width  / 2,
+        y: r.top  - wRect.top  + r.height / 2,
+      };
+    });
+
+    /* Cubic-bezier S-curves: control points at vertical midpoint */
+    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i];
+      const my = ((a.y + b.y) / 2).toFixed(1);
+      d += ` C ${a.x.toFixed(1)} ${my}, ${b.x.toFixed(1)} ${my}, ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
     }
-    svg.innerHTML = `<path d="${d}"></path>`;
+
+    svg.innerHTML = `
+      <path class="path-road" d="${d}"/>
+      <path class="path-edge" d="${d}"/>
+    `;
   }
 
+  /* ── Progress bar + counter ── */
   function updateProgress(parts, completedSet) {
     const total = parts.length;
     const done  = parts.filter(p => completedSet.has(p.id)).length;
@@ -276,8 +677,15 @@
     document.getElementById('progressCount').innerHTML  = `${done}<span>/ ${total} parts</span>`;
   }
 
+  /* ── Redraw path on window resize ── */
+  window.addEventListener('resize', () => {
+    requestAnimationFrame(() => requestAnimationFrame(drawPath));
+  });
+
+  /* ── Main init ── */
   async function init() {
-    document.getElementById('statusScreen').innerHTML = `<div class="spinner"></div><span>Loading your parts…</span>`;
+    document.getElementById('statusScreen').innerHTML =
+      `<div class="spinner"></div><span>Loading your path…</span>`;
     document.getElementById('statusScreen').style.display = 'flex';
     document.getElementById('mainContent').style.display  = 'none';
 
@@ -309,9 +717,9 @@
         if (currentNodeEl) currentNodeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
 
-      // Land on the current part without scrolling through everything already done.
+      /* Auto-scroll to current part */
       if (currentNodeEl) {
-        setTimeout(() => currentNodeEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
+        setTimeout(() => currentNodeEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
       }
     } catch (err) {
       console.error(err);
