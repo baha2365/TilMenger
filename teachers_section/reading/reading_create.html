@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Reading Task — LinguaAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --purple:        #7c3aed;
+      --purple-dark:   #5b21b6;
+      --purple-light:  #ede9fe;
+      --purple-mid:    #a78bfa;
+      --yellow:        #f5a623;
+      --yellow-light:  #fef3dc;
+      --cream:         #faf8ff;
+      --ink:           #1e1b2e;
+      --ink-soft:      #6b5fa0;
+      --border:        #ddd6fe;
+      --bg:            #f0ebff;
+      --white:         #ffffff;
+      --mint:          #10b981;
+      --mint-light:    #d1fae5;
+      --coral:         #ef4444;
+      --coral-light:   #fee2e2;
+      --shadow-sm:     0 2px 8px rgba(124,58,237,0.10);
+      --shadow-md:     0 4px 20px rgba(124,58,237,0.15);
+      --radius:        14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--white);
+      border-bottom: 2px solid var(--border);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-logo {
+      font-family: 'Caveat', cursive;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--purple);
+      text-decoration: none;
+    }
+    .topbar-logo span { color: var(--yellow); }
+    .topbar-nav { display: flex; align-items: center; gap: 12px; }
+    .btn-nav {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-nav.outline {
+      background: none;
+      border: 2px solid var(--border);
+      color: var(--ink-soft);
+    }
+    .btn-nav.outline:hover { border-color: var(--purple); color: var(--purple); }
+    .btn-nav.filled {
+      background: var(--purple);
+      color: #fff;
+    }
+    .btn-nav.filled:hover { background: var(--purple-dark); }
+
+    /* ── Page header ── */
+    .page-header {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+      padding: 40px 32px 36px;
+      color: #fff;
+    }
+    .page-header-inner {
+      max-width: 840px;
+      margin: 0 auto;
+    }
+    .page-eyebrow {
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--purple-mid);
+      margin-bottom: 8px;
+    }
+    .page-title {
+      font-size: 1.9rem;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+    .page-title span { color: var(--yellow); }
+    .page-subtitle {
+      margin-top: 8px;
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.75);
+    }
+
+    /* ── Main layout ── */
+    .main {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 28px 32px;
+    }
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title::before {
+      content: '';
+      display: block;
+      width: 24px; height: 3px;
+      background: var(--purple);
+      border-radius: 2px;
+    }
+
+    /* ── Form elements ── */
+    .form-group { margin-bottom: 20px; }
+    .form-group:last-child { margin-bottom: 0; }
+    label.field-label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 7px;
+    }
+    label.field-label span {
+      font-weight: 600;
+      color: var(--ink-soft);
+      font-size: 0.82rem;
+    }
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--ink);
+      background: var(--cream);
+      transition: border-color 0.18s, box-shadow 0.18s;
+      outline: none;
+    }
+    input[type="text"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+      background: #fff;
+    }
+    textarea { resize: vertical; line-height: 1.7; min-height: 130px; }
+    .char-hint {
+      text-align: right;
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+
+    /* ── Questions ── */
+    .questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .q-card {
+      background: var(--cream);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 22px;
+      position: relative;
+    }
+    .q-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .q-num-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px; height: 30px;
+      background: var(--purple);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.85rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .q-title { font-weight: 800; font-size: 0.95rem; color: var(--ink); }
+    .btn-remove-q {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: var(--ink-soft);
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-remove-q:hover { background: var(--coral-light); color: var(--coral); }
+
+    .q-text-input {
+      margin-bottom: 14px;
+    }
+
+    /* ── Answer options ── */
+    .options-area { display: flex; flex-direction: column; gap: 10px; }
+    .option-row {
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+    .option-letter-badge {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--purple-light);
+      color: var(--purple-dark);
+      font-size: 0.82rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .option-row input[type="text"] {
+      padding: 9px 12px;
+      font-size: 0.9rem;
+    }
+    .option-row-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .correct-radio-wrap {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ink-soft);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .correct-radio-wrap input[type="radio"] {
+      width: 16px; height: 16px;
+      accent-color: var(--mint);
+      cursor: pointer;
+    }
+    .btn-remove-opt {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #ccc;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .btn-remove-opt:hover { color: var(--coral); background: var(--coral-light); }
+
+    .q-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-add-opt {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--purple);
+      background: var(--purple-light);
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-add-opt:hover { background: #ddd6fe; }
+    .btn-add-opt:disabled { opacity: 0.4; cursor: default; }
+    .opt-count-note {
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+
+    /* ── Add question ── */
+    .add-q-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    .btn-add-q {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--purple);
+      background: var(--white);
+      border: 2px dashed var(--purple-mid);
+      padding: 14px 32px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-add-q:hover { background: var(--purple-light); border-color: var(--purple); }
+
+    /* ── Submit ── */
+    .submit-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .submit-hint {
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+    .btn-submit {
+      padding: 14px 44px;
+      background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(124,58,237,0.35);
+      transition: transform 0.14s, box-shadow 0.14s, opacity 0.14s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+    .btn-submit:active { transform: none; }
+    .btn-submit:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: var(--ink);
+      color: #fff;
+      padding: 13px 24px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: var(--mint); }
+    .toast.error   { background: var(--coral); }
+
+    /* ── Auth gate ── */
+    .auth-gate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(30,27,46,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-gate.show { display: flex; }
+    .auth-gate-box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 40px 36px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+    }
+    .auth-gate-icon { font-size: 2.5rem; margin-bottom: 14px; }
+    .auth-gate-title { font-size: 1.25rem; font-weight: 900; color: var(--ink); margin-bottom: 8px; }
+    .auth-gate-sub { font-size: 0.9rem; color: var(--ink-soft); margin-bottom: 22px; }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 0 16px; }
+      .page-header { padding: 28px 16px 24px; }
+      .card { padding: 20px 18px; }
+      .option-row { grid-template-columns: 28px 1fr auto; }
+      .submit-wrap { flex-direction: column; align-items: stretch; }
+      .btn-submit { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth gate overlay (for non-teachers) -->
+<div class="auth-gate" id="authGate">
+  <div class="auth-gate-box">
+    <div class="auth-gate-icon">🔒</div>
+    <div class="auth-gate-title">Teachers Only</div>
+    <div class="auth-gate-sub">This page is only accessible to teacher accounts. Please log in with a teacher account to continue.</div>
+    <button class="btn-submit" style="width:100%;padding:12px;" onclick="window.location.href='login.html'">Go to Login</button>
+  </div>
+</div>
+
+<!-- Top bar -->
+<nav class="topbar">
+  <a class="topbar-logo" href="landing_page.html">Lingua<span>AI</span></a>
+  <div class="topbar-nav">
+    <button class="btn-nav outline" onclick="window.location.href='reading_dashboard.html'">📚 My Reading Tasks</button>
+    <button class="btn-nav outline" id="btnLogout">Log out</button>
+  </div>
+</nav>
+
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-eyebrow">📖 Reading Feature</div>
+    <div class="page-title">Create a <span>Reading Task</span></div>
+    <div class="page-subtitle">Write a passage, add comprehension questions, and assign the task to your class.</div>
+  </div>
+</div>
+
+<!-- Main form -->
+<div class="main">
+
+  <!-- Task info -->
+  <div class="card">
+    <div class="card-title">Task Details</div>
+    <div class="form-group">
+      <label class="field-label" for="taskTitle">Task Title</label>
+      <input type="text" id="taskTitle" placeholder='e.g. "My Wonderful Family"' maxlength="255" />
+    </div>
+    <div class="form-group">
+      <label class="field-label" for="taskLevel">Difficulty Level</label>
+      <select id="taskLevel">
+        <option value="beginner">🟢 Beginner</option>
+        <option value="intermediate">🟡 Intermediate</option>
+        <option value="advanced">🔴 Advanced</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Reading passage -->
+  <div class="card">
+    <div class="card-title">Reading Passage</div>
+    <div class="form-group">
+      <label class="field-label" for="taskPassage">Passage Text <span>(students will read this)</span></label>
+      <textarea id="taskPassage" placeholder="Write or paste the reading text here…" rows="8"></textarea>
+      <div class="char-hint" id="passageCharHint">0 characters</div>
+    </div>
+  </div>
+
+  <!-- Questions -->
+  <div class="card">
+    <div class="card-title">Comprehension Questions</div>
+    <div class="questions-list" id="questionsList"></div>
+    <div style="margin-top:16px">
+      <button class="btn-add-q" id="btnAddQuestion" onclick="addQuestion()">＋ Add Question</button>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="card">
+    <div class="submit-wrap">
+      <div class="submit-hint">All questions need a correct answer marked ✓</div>
+      <button class="btn-submit" id="btnSubmit" onclick="submitTask()">💾 Save Reading Task</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────────
+  const API = window.location.origin;
+  const LETTERS = ['A', 'B', 'C', 'D'];
+  let questionCount = 0;
+
+  // ── Auth guard ──────────────────────────────────────────────────────────────
+  (function initAuth() {
+    const token = localStorage.getItem('token');
+    const user  = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!token || !user) {
+      document.getElementById('authGate').classList.add('show');
+      return;
+    }
+    // role_id 2 = teacher, 3 = admin
+    if (user.roleId !== 2 && user.roleId !== 3) {
+      document.getElementById('authGate').classList.add('show');
+    }
+  })();
+
+  document.getElementById('btnLogout').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+  });
+
+  // ── Passage char counter ─────────────────────────────────────────────────
+  document.getElementById('taskPassage').addEventListener('input', function () {
+    document.getElementById('passageCharHint').textContent = this.value.length + ' characters';
+  });
+
+  // ── Question builder ─────────────────────────────────────────────────────
+  function addQuestion() {
+    questionCount++;
+    const qIndex = questionCount;
+
+    const qDiv = document.createElement('div');
+    qDiv.className = 'q-card';
+    qDiv.id = `q-${qIndex}`;
+    qDiv.dataset.qindex = qIndex;
+
+    qDiv.innerHTML = `
+      <div class="q-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="q-num-badge">${qIndex}</span>
+          <span class="q-title">Question ${qIndex}</span>
+        </div>
+        <button class="btn-remove-q" title="Remove question" onclick="removeQuestion(${qIndex})">🗑</button>
+      </div>
+      <div class="q-text-input">
+        <input type="text" class="q-text" placeholder='e.g. "How old is Sam?"' />
+      </div>
+      <div class="options-area" id="options-${qIndex}"></div>
+      <div class="q-actions">
+        <button class="btn-add-opt" id="addOptBtn-${qIndex}" onclick="addOption(${qIndex})">＋ Add Answer Option</button>
+        <span class="opt-count-note" id="optNote-${qIndex}">0 / 4 options</span>
+      </div>
+    `;
+
+    document.getElementById('questionsList').appendChild(qDiv);
+
+    // Add 2 default options
+    addOption(qIndex);
+    addOption(qIndex);
+  }
+
+  function removeQuestion(qIndex) {
+    const el = document.getElementById(`q-${qIndex}`);
+    if (el) el.remove();
+    renumberQuestions();
+  }
+
+  function renumberQuestions() {
+    const cards = document.querySelectorAll('.q-card');
+    cards.forEach((card, i) => {
+      const num = i + 1;
+      card.querySelector('.q-num-badge').textContent = num;
+      card.querySelector('.q-title').textContent = `Question ${num}`;
+    });
+  }
+
+  function getOptionCount(qIndex) {
+    const area = document.getElementById(`options-${qIndex}`);
+    return area ? area.querySelectorAll('.option-row').length : 0;
+  }
+
+  function updateOptionNote(qIndex) {
+    const count = getOptionCount(qIndex);
+    const noteEl = document.getElementById(`optNote-${qIndex}`);
+    const addBtn = document.getElementById(`addOptBtn-${qIndex}`);
+    if (noteEl) noteEl.textContent = `${count} / 4 options`;
+    if (addBtn) addBtn.disabled = count >= 4;
+  }
+
+  function addOption(qIndex) {
+    const area = document.getElementById(`options-${qIndex}`);
+    if (!area) return;
+    const count = getOptionCount(qIndex);
+    if (count >= 4) return;
+
+    const optIndex = count; // 0-based
+    const letter   = LETTERS[optIndex];
+    const optId    = `opt-${qIndex}-${Date.now()}`;
+
+    const row = document.createElement('div');
+    row.className = 'option-row';
+    row.innerHTML = `
+      <span class="option-letter-badge">${letter}</span>
+      <input type="text" class="opt-text" placeholder="Answer option ${letter}…" />
+      <div class="option-row-actions">
+        <label class="correct-radio-wrap" title="Mark as correct answer">
+          <input type="radio" name="correct-${qIndex}" value="${optId}" id="${optId}" />
+          ✓ Correct
+        </label>
+        <button class="btn-remove-opt" title="Remove option" onclick="removeOption(this, ${qIndex})">✕</button>
+      </div>
+    `;
+
+    area.appendChild(row);
+    updateOptionNote(qIndex);
+    relabelOptions(qIndex);
+  }
+
+  function removeOption(btn, qIndex) {
+    const area = document.getElementById(`options-${qIndex}`);
+    const count = getOptionCount(qIndex);
+    if (count <= 2) {
+      showToast('⚠️ Each question needs at least 2 options.', 'error');
+      return;
+    }
+    btn.closest('.option-row').remove();
+    updateOptionNote(qIndex);
+    relabelOptions(qIndex);
+  }
+
+  function relabelOptions(qIndex) {
+    const area = document.getElementById(`options-${qIndex}`);
+    if (!area) return;
+    area.querySelectorAll('.option-row').forEach((row, i) => {
+      const badge = row.querySelector('.option-letter-badge');
+      const input = row.querySelector('.opt-text');
+      if (badge) badge.textContent = LETTERS[i];
+      if (input) input.placeholder = `Answer option ${LETTERS[i]}…`;
+    });
+  }
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  async function submitTask() {
+    const token   = localStorage.getItem('token');
+    const title   = document.getElementById('taskTitle').value.trim();
+    const level   = document.getElementById('taskLevel').value;
+    const passage = document.getElementById('taskPassage').value.trim();
+
+    if (!title)   return showToast('⚠️ Please enter a title.', 'error');
+    if (!passage) return showToast('⚠️ Please enter the reading passage.', 'error');
+
+    // Collect questions
+    const qCards = document.querySelectorAll('.q-card');
+    if (qCards.length === 0) return showToast('⚠️ Add at least one question.', 'error');
+
+    const questions = [];
+    let valid = true;
+
+    qCards.forEach((card, qi) => {
+      if (!valid) return;
+      const qText = card.querySelector('.q-text').value.trim();
+      if (!qText) {
+        showToast(`⚠️ Question ${qi + 1} has no text.`, 'error');
+        valid = false;
+        return;
+      }
+      const optRows = card.querySelectorAll('.option-row');
+      if (optRows.length < 2) {
+        showToast(`⚠️ Question ${qi + 1} needs at least 2 options.`, 'error');
+        valid = false;
+        return;
+      }
+
+      const qIndex = card.dataset.qindex;
+      const checkedRadio = card.querySelector(`input[name="correct-${qIndex}"]:checked`);
+      if (!checkedRadio) {
+        showToast(`⚠️ Question ${qi + 1}: mark one option as the correct answer.`, 'error');
+        valid = false;
+        return;
+      }
+      const correctOptId = checkedRadio.id;
+
+      const options = [];
+      optRows.forEach((row) => {
+        const optText = row.querySelector('.opt-text').value.trim();
+        if (!optText) {
+          showToast(`⚠️ Question ${qi + 1}: all option texts must be filled in.`, 'error');
+          valid = false;
+          return;
+        }
+        const radio = row.querySelector('input[type="radio"]');
+        options.push({ option_text: optText, is_correct: radio.id === correctOptId });
+      });
+
+      questions.push({ question: qText, options });
+    });
+
+    if (!valid) return;
+
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.textContent = '⏳ Saving…';
+
+    try {
+      const res = await fetch(`${API}/api/reading`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body:    JSON.stringify({ title, passage, level, questions }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✅ Reading task saved!', 'success');
+        setTimeout(() => {
+          window.location.href = `reading_dashboard.html`;
+        }, 1200);
+      } else {
+        showToast('❌ ' + (data.message || 'Error saving task.'), 'error');
+        btn.disabled = false;
+        btn.textContent = '💾 Save Reading Task';
+      }
+    } catch (e) {
+      showToast('❌ Network error. Check your connection.', 'error');
+      btn.disabled = false;
+      btn.textContent = '💾 Save Reading Task';
+    }
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+  let toastTimer = null;
+  function showToast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.classList.remove('show'); }, 3200);
+  }
+
+  // Start with one question by default
+  addQuestion();
+</script>
+</body>
+</html>
