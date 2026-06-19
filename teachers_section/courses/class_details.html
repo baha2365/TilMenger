@@ -20,6 +20,10 @@
       /* game accent */
       --game:#8B35B0; --game-bg:rgba(139,53,176,0.12); --game-bd:rgba(139,53,176,0.25);
       --game-glow:rgba(139,53,176,0.35);
+      --reading:      #2E9E8F;
+      --reading-bg:   rgba(46,158,143,0.12);
+      --reading-bd:   rgba(46,158,143,0.28);
+      --reading-glow: rgba(46,158,143,0.4);
     }
     html { scroll-behavior: smooth; }
     body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5; -webkit-font-smoothing:antialiased; }
@@ -299,6 +303,37 @@
     ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:3px;}
     @media(max-width:640px){ .roster-header{display:none;} .student-row{grid-template-columns:34px 1fr auto;} .student-level,.student-date{display:none;} .hero-stats{width:100%;} .hero-layout{flex-direction:column;} }
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+
+      .reading-row {
+        display:grid; grid-template-columns: 1fr 100px 110px 100px 90px;
+        align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem;
+        border-bottom:1px solid var(--border); animation: rowIn .35s cubic-bezier(.22,1,.36,1) both;
+      }
+      .reading-row:last-child { border-bottom:none; }
+      .reading-row:hover { background:rgba(212,168,83,0.028); }
+      .reading-title { font-size:.88rem; font-weight:600; color:var(--text); }
+      .reading-level { font-size:.68rem; font-weight:700; text-transform:capitalize; }
+      .reading-level.beginner     { color:var(--success); }
+      .reading-level.intermediate { color:var(--gold); }
+      .reading-level.advanced     { color:var(--error); }
+      .reading-qcount, .reading-date { font-size:.7rem; color:var(--text-3); }
+
+      .task-pick-row {
+        display:flex; align-items:center; gap:.7rem; padding:.7rem .9rem;
+        background:rgba(0,0,0,0.2); border:1px solid var(--border-2); border-radius:9px;
+        cursor:pointer; transition:border-color .15s, background .15s;
+      }
+      .task-pick-row:hover { border-color: var(--reading); }
+      .task-pick-row.checked { border-color: var(--reading); background: var(--reading-bg); }
+      .task-pick-row input[type=checkbox] { width:16px; height:16px; accent-color: var(--reading); flex-shrink:0; }
+      .task-pick-info { flex:1; min-width:0; }
+      .task-pick-title { font-size:.85rem; font-weight:600; color:var(--text); }
+      .task-pick-meta { font-size:.68rem; color:var(--text-3); margin-top:.1rem; text-transform:capitalize; }
+      .task-pick-exposed-tag {
+        font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+        color:var(--reading); background:var(--reading-bg); border:1px solid var(--reading-bd);
+        padding:.15rem .5rem; border-radius:20px; flex-shrink:0;
+      }
   </style>
 </head>
 <body>
@@ -377,6 +412,30 @@
     </div>
   </div>
 
+
+  <!-- ═══════════════════════════════════════
+     READING TASKS SECTION
+═══════════════════════════════════════ -->
+<div class="section-bar">
+  <span class="section-label">📖 Reading Tasks</span>
+  <button class="btn-create" id="openExposeBtn"
+    style="background:linear-gradient(135deg,var(--reading),#1F7A6E);box-shadow:0 4px 18px var(--reading-glow),inset 0 1px 0 rgba(255,255,255,0.12);">
+    <span class="ic">+</span>Expose Reading Task
+  </button>
+</div>
+
+<div id="readingLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--text-3);font-size:.84rem;">
+  <div class="spinner dark"></div>Loading reading tasks…
+</div>
+<div id="readingEmptyState" style="display:none;text-align:center;padding:2.5rem 1.5rem;border:1px dashed var(--border-2);border-radius:var(--radius);background:var(--surface);margin-bottom:2rem;">
+  <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.7;">📖</div>
+  <div style="font-size:.92rem;font-weight:600;color:var(--text-2);margin-bottom:.25rem;">No reading tasks exposed</div>
+  <div style="font-size:.78rem;color:var(--text-3);">Expose a reading task so students can see and complete it.</div>
+</div>
+<div id="readingListWrap" style="display:none;margin-bottom:2rem;">
+  <div class="roster-panel" id="readingPanel"></div>
+</div>
+
   <!-- Section bar -->
   <div class="section-bar">
     <span class="section-label">Student Roster</span>
@@ -407,6 +466,33 @@
       </div>
     </div>
   </div>
+
+
+  <!-- EXPOSE READING TASK MODAL -->
+<div class="modal-backdrop" id="exposeModal" role="dialog" aria-modal="true" aria-label="Expose Reading Task">
+  <div class="modal" id="exposeModalCard">
+    <div class="modal-glow" aria-hidden="true"></div>
+    <div class="modal-top-border" aria-hidden="true"></div>
+    <button class="modal-x" id="exposeModalXBtn" aria-label="Close">✕</button>
+    <div class="modal-header">
+      <div class="modal-icon-wrap" aria-hidden="true">📖</div>
+      <div class="modal-title">Expose Reading Tasks</div>
+      <div class="modal-sub">Select one or more of your reading tasks to make visible to this class.</div>
+    </div>
+    <div class="modal-body">
+      <div id="exposeTaskList" style="display:flex;flex-direction:column;gap:.5rem;max-height:320px;overflow-y:auto;"></div>
+      <div class="modal-inline-err" id="exposeErr"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="footer-left"></div>
+      <div class="footer-right">
+        <button class="btn-cancel-modal" id="exposeCancelBtn">Cancel</button>
+        <button class="btn-submit-modal" id="exposeSubmitBtn"
+          style="background:linear-gradient(135deg,var(--reading),#1F7A6E);">Expose Selected</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </div><!-- /page -->
 
@@ -584,6 +670,8 @@ socketScript.onload = () => {
     socket.on('connect', () => {
       socket.emit('join_game', { classId, token: token() });
     });
+    socket.on('reading_assigned', () => { loadReadingTasks(); });
+    socket.on('reading_unassigned', () => { loadReadingTasks(); });
     socket.on('game_started', () => { checkActiveGame(); });
     socket.on('game_ended',   () => { setGameBannerIdle(); });
     socket.on('game_state',   ({ session }) => {
@@ -739,6 +827,8 @@ document.addEventListener('keydown', e => {
   if(e.key==='Escape') {
     if(document.getElementById('enrollModal').classList.contains('open')) closeEnroll();
     if(document.getElementById('confirmOverlay').classList.contains('open')) closeConfirm();
+    if(document.getElementById('exposeModal').classList.contains('open')) closeExposeModal();
+
   }
 });
 
@@ -882,6 +972,158 @@ function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function escAttr(s){return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
 /* ══════════════════════════════════════
+   READING TASKS
+══════════════════════════════════════ */
+const READING_API       = `${LINGUA.base}/api/reading`;
+const CLASS_READING_URL = `${CLASS_URL}/reading-tasks`;
+let exposedReadingTasks = [];
+let allTeacherTasks     = [];
+let selectedTaskIds     = new Set();
+
+async function loadReadingTasks() {
+  const loading = document.getElementById('readingLoadingState');
+  const empty   = document.getElementById('readingEmptyState');
+  const wrap    = document.getElementById('readingListWrap');
+  loading.style.display = 'flex'; empty.style.display = 'none'; wrap.style.display = 'none';
+  try {
+    const res  = await fetch(CLASS_READING_URL, { headers: authH() });
+    const data = await res.json();
+    loading.style.display = 'none';
+    if (!res.ok || !data.success) { showFeedback(data.message || 'Failed to load reading tasks.', 'err'); return; }
+    exposedReadingTasks = data.tasks || [];
+    renderReadingTasks();
+  } catch {
+    loading.style.display = 'none';
+    showFeedback('Could not reach the server.', 'err');
+  }
+}
+
+function renderReadingTasks() {
+  const empty = document.getElementById('readingEmptyState');
+  const wrap  = document.getElementById('readingListWrap');
+  const panel = document.getElementById('readingPanel');
+  if (!exposedReadingTasks.length) { empty.style.display = 'block'; wrap.style.display = 'none'; return; }
+  empty.style.display = 'none'; wrap.style.display = 'block';
+  panel.innerHTML = exposedReadingTasks.map(t => `
+    <div class="reading-row" id="reading-${t.id}">
+      <div class="reading-title">${escHtml(t.title)}</div>
+      <div class="reading-level ${t.level}">${t.level}</div>
+      <div class="reading-qcount">❓ ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
+      <div class="reading-date">${new Date(t.assigned_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>
+      <div class="student-action"><button class="btn-ghost-sm danger" onclick="removeReadingTask(${t.id})">× Remove</button></div>
+    </div>`).join('');
+}
+
+async function removeReadingTask(taskId) {
+  try {
+    const res  = await fetch(`${CLASS_READING_URL}/${taskId}`, { method:'DELETE', headers: authH() });
+    const data = await res.json();
+    if (!res.ok || !data.success) { showFeedback(data.message || 'Could not remove task.', 'err'); return; }
+    exposedReadingTasks = exposedReadingTasks.filter(t => t.id !== taskId);
+    renderReadingTasks();
+    showFeedback('Reading task removed from class.', 'ok');
+  } catch { showFeedback('Server error.', 'err'); }
+}
+
+async function openExposeModal() {
+  selectedTaskIds = new Set();
+  document.getElementById('exposeModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('exposeErr').classList.remove('show');
+  const listEl = document.getElementById('exposeTaskList');
+  listEl.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-3);font-size:.8rem;"><span class="spinner dark"></span> Loading your tasks…</div>';
+  try {
+    const res  = await fetch(READING_API, { headers: authH() });
+    const data = await res.json();
+    if (!res.ok || !data.success) { listEl.innerHTML = `<div style="color:var(--error);font-size:.82rem;">Could not load reading tasks.</div>`; return; }
+    allTeacherTasks = data.tasks || [];
+    renderExposeList();
+  } catch {
+    listEl.innerHTML = `<div style="color:var(--error);font-size:.82rem;">Could not reach the server.</div>`;
+  }
+}
+
+function renderExposeList() {
+  const listEl = document.getElementById('exposeTaskList');
+  const exposedIds = new Set(exposedReadingTasks.map(t => t.id));
+  if (!allTeacherTasks.length) {
+    listEl.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-3);font-size:.82rem;">You haven't created any reading tasks yet. <a href="reading_create.html" style="color:var(--reading);">Create one</a>.</div>`;
+    return;
+  }
+  listEl.innerHTML = allTeacherTasks.map(t => {
+    const already = exposedIds.has(t.id);
+    return `
+      <label class="task-pick-row" id="pick-${t.id}" style="${already ? 'opacity:.5;cursor:default;' : ''}">
+        <input type="checkbox" data-task-id="${t.id}" ${already ? 'disabled' : ''} onchange="toggleTaskPick(${t.id}, this)">
+        <div class="task-pick-info">
+          <div class="task-pick-title">${escHtml(t.title)}</div>
+          <div class="task-pick-meta">${t.level} · ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
+        </div>
+        ${already ? '<span class="task-pick-exposed-tag">Already exposed</span>' : ''}
+      </label>`;
+  }).join('');
+}
+
+function toggleTaskPick(taskId, checkbox) {
+  const row = document.getElementById(`pick-${taskId}`);
+  if (checkbox.checked) { selectedTaskIds.add(taskId); row.classList.add('checked'); }
+  else { selectedTaskIds.delete(taskId); row.classList.remove('checked'); }
+}
+
+function closeExposeModal() {
+  const modal = document.getElementById('exposeModalCard');
+  const bd    = document.getElementById('exposeModal');
+  modal.style.transition = 'transform .28s cubic-bezier(.55,0,.45,1),opacity .22s ease';
+  modal.style.transform  = 'scale(.9) translateY(20px)';
+  modal.style.opacity    = '0';
+  bd.style.transition    = 'opacity .28s ease';
+  bd.style.opacity       = '0';
+  setTimeout(() => {
+    bd.classList.remove('open'); bd.style.opacity=''; bd.style.transition='';
+    modal.style.transform=''; modal.style.opacity=''; modal.style.transition='';
+    document.body.style.overflow='';
+  }, 290);
+}
+
+document.getElementById('exposeSubmitBtn').addEventListener('click', async () => {
+  const btn   = document.getElementById('exposeSubmitBtn');
+  const errEl = document.getElementById('exposeErr');
+  errEl.classList.remove('show');
+  if (!selectedTaskIds.size) {
+    errEl.textContent = 'Select at least one reading task.';
+    errEl.classList.add('show');
+    return;
+  }
+  btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Exposing…`;
+  try {
+    const res  = await fetch(CLASS_READING_URL, {
+      method:'POST', headers: authH(),
+      body: JSON.stringify({ task_ids: Array.from(selectedTaskIds) })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      errEl.textContent = data.message || 'Could not expose tasks.';
+      errEl.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Expose Selected';
+      return;
+    }
+    closeExposeModal();
+    exposedReadingTasks = data.tasks;
+    renderReadingTasks();
+    showFeedback('Reading task(s) exposed to class.', 'ok');
+  } catch {
+    errEl.textContent = 'Server error.';
+    errEl.classList.add('show');
+  }
+  btn.disabled = false; btn.textContent = 'Expose Selected';
+});
+
+document.getElementById('openExposeBtn').addEventListener('click', openExposeModal);
+document.getElementById('exposeCancelBtn').addEventListener('click', closeExposeModal);
+document.getElementById('exposeModalXBtn').addEventListener('click', closeExposeModal);
+document.getElementById('exposeModal').addEventListener('click', function(e){ if(e.target===this) closeExposeModal(); });
+
+/* ══════════════════════════════════════
    INIT
 ══════════════════════════════════════ */
 (function init() {
@@ -893,7 +1135,8 @@ function escAttr(s){return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
   loadCourse();
   loadClass();
   loadStudents();
-  checkActiveGame();        // ← check if game already running
+  checkActiveGame();
+  loadReadingTasks();
 })();
 </script>
 </body>
