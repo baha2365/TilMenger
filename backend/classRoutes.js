@@ -335,4 +335,131 @@ router.get('/:id/students', authenticate, requireTeacher, async (req, res) => {
   }
 });
 
+// ─── GET /api/courses/:courseId/classes/:id/reading-tasks ────────────────────
+// List reading tasks currently exposed to this class.
+router.get('/:id/reading-tasks', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id } = req.params;
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    const { rows } = await pool.query(
+      `SELECT rt.id, rt.title, rt.level, cra.assigned_at,
+              COUNT(rq.id)::int AS question_count
+         FROM class_reading_assignments cra
+         JOIN reading_tasks rt ON rt.id = cra.task_id
+         LEFT JOIN reading_questions rq ON rq.task_id = rt.id
+        WHERE cra.class_id = $1
+        GROUP BY rt.id, cra.assigned_at
+        ORDER BY cra.assigned_at DESC`,
+      [id]
+    );
+    return res.json({ success: true, tasks: rows });
+  } catch (err) {
+    console.error('List class reading tasks error:', err);
+    return res.status(500).json({ success: false, message: 'Could not fetch reading tasks.' });
+  }
+});
+
+// ─── POST /api/courses/:courseId/classes/:id/reading-tasks ───────────────────
+// Body: { task_ids: [1, 2, 3] } — expose one or more of the teacher's own tasks.
+router.post('/:id/reading-tasks', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id } = req.params;
+  const { task_ids } = req.body;
+
+  if (!Array.isArray(task_ids) || !task_ids.length) {
+    return res.status(400).json({ success: false, message: 'task_ids (non-empty array) is required.' });
+  }
+  const cleanIds = [...new Set(task_ids.map(Number).filter(Number.isInteger))];
+  if (!cleanIds.length) {
+    return res.status(400).json({ success: false, message: 'task_ids must contain valid integers.' });
+  }
+
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    const { rows: classRows } = await pool.query(
+      `SELECT id FROM classes WHERE id = $1 AND course_id = $2`,
+      [id, courseId]
+    );
+    if (!classRows.length) {
+      return res.status(404).json({ success: false, message: 'Class not found.' });
+    }
+
+    // Confirm every task belongs to this teacher before exposing any of them
+    const { rows: ownedRows } = await pool.query(
+      `SELECT id FROM reading_tasks WHERE id = ANY($1::int[]) AND teacher_id = $2`,
+      [cleanIds, req.userId]
+    );
+    if (ownedRows.length !== cleanIds.length) {
+      return res.status(403).json({ success: false, message: 'One or more tasks are not yours.' });
+    }
+
+    for (const taskId of cleanIds) {
+      await pool.query(
+        `INSERT INTO class_reading_assignments (class_id, task_id, assigned_by)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (class_id, task_id) DO NOTHING`,
+        [id, taskId, req.userId]
+      );
+    }
+
+    const { rows: tasks } = await pool.query(
+      `SELECT rt.id, rt.title, rt.level, cra.assigned_at,
+              COUNT(rq.id)::int AS question_count
+         FROM class_reading_assignments cra
+         JOIN reading_tasks rt ON rt.id = cra.task_id
+         LEFT JOIN reading_questions rq ON rq.task_id = rt.id
+        WHERE cra.class_id = $1
+        GROUP BY rt.id, cra.assigned_at
+        ORDER BY cra.assigned_at DESC`,
+      [id]
+    );
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`class:${id}`).emit('reading_assigned', {
+        classId: id,
+        tasks: tasks.filter(t => cleanIds.includes(t.id)),
+      });
+    }
+
+    return res.status(201).json({ success: true, message: 'Reading task(s) exposed.', tasks });
+  } catch (err) {
+    console.error('Expose reading tasks error:', err);
+    return res.status(500).json({ success: false, message: 'Could not expose reading tasks.' });
+  }
+});
+
+// ─── DELETE /api/courses/:courseId/classes/:id/reading-tasks/:taskId ─────────
+router.delete('/:id/reading-tasks/:taskId', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id, taskId } = req.params;
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+
+    const { rowCount } = await pool.query(
+      `DELETE FROM class_reading_assignments WHERE class_id = $1 AND task_id = $2`,
+      [id, taskId]
+    );
+    if (!rowCount) {
+      return res.status(404).json({ success: false, message: 'Assignment not found.' });
+    }
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`class:${id}`).emit('reading_unassigned', { classId: id, taskId: Number(taskId) });
+    }
+
+    return res.json({ success: true, message: 'Reading task removed from class.' });
+  } catch (err) {
+    console.error('Remove class reading task error:', err);
+    return res.status(500).json({ success: false, message: 'Could not remove reading task.' });
+  }
+});
+
 module.exports = router;
