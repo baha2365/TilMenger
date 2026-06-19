@@ -351,7 +351,6 @@
           <div class="task-passage-preview">${escHtml(preview)}</div>
           <div class="task-card-footer" onclick="event.stopPropagation()">
             <button class="btn-card preview" onclick="openTask(${task.id})">👁 Preview</button>
-            <button class="btn-card copy"    onclick="copyLink(${task.id})">🔗 Copy Link</button>
             <button class="btn-card danger"  onclick="askDelete(${task.id})">🗑 Delete</button>
           </div>
         </div>`;
@@ -363,13 +362,6 @@
   }
 
   function openTask(id) { window.open(`reading_play.html?id=${id}`, '_blank'); }
-
-  function copyLink(id) {
-    const url = `${window.location.origin}/reading_play.html?id=${id}`;
-    navigator.clipboard.writeText(url)
-      .then(() => showToast('🔗 Student link copied!', 'success'))
-      .catch(() => prompt('Copy this link:', url));
-  }
 
   function askDelete(id) {
     pendingDeleteId = id;
