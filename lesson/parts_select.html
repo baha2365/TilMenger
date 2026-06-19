@@ -11,20 +11,20 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --green:        #58CC02;
-      --green-dark:   #46A302;
-      --green-pale:   #E8F9D4;
-      --orange:       #FF9600;
-      --orange-dark:  #CC7A00;
-      --orange-pale:  #FFF3D9;
-      --gray:         #D6D6D6;
-      --gray-dark:    #ABABAB;
-      --gray-pale:    #F2F2F2;
-      --navy:         #1C1D3E;
-      --bg:           #FFFFFF;
-      --ink:          #3C3C3C;
-      --muted:        #ABABAB;
-      --border:       #E5E5E5;
+      --green:       #58CC02;
+      --green-dark:  #46A302;
+      --green-pale:  #E8F9D4;
+      --orange:      #FF9600;
+      --orange-dark: #CC7A00;
+      --orange-pale: #FFF3D9;
+      --gray:        #D6D6D6;
+      --gray-dark:   #ABABAB;
+      --gray-pale:   #F2F2F2;
+      --navy:        #1C1D3E;
+      --bg:          #FFFFFF;
+      --ink:         #3C3C3C;
+      --muted:       #ABABAB;
+      --border:      #E5E5E5;
     }
 
     html, body {
@@ -91,11 +91,7 @@
       letter-spacing: -0.02em;
     }
     .page-header h1 em { color: var(--orange); font-style: normal; }
-    .page-header p {
-      font-size: 0.85rem;
-      color: var(--muted);
-      font-weight: 700;
-    }
+    .page-header p { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
 
     /* ── Progress card ── */
     .progress-wrap {
@@ -175,6 +171,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       transition: transform 0.1s, border-bottom-width 0.1s;
+      line-height: 1.4;
     }
     .jump-current:hover { opacity: 0.9; }
     .jump-current:active { transform: translateY(2px); border-bottom-width: 1px; }
@@ -214,60 +211,32 @@
     .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; }
 
     /* ══════════════════════════════════════════
-       DUOLINGO-STYLE PATH
+       ZIGZAG NODE TRACK
+       Works identically on desktop and mobile —
+       no media-query override that collapses it.
     ══════════════════════════════════════════ */
-    .path-wrap { position: relative; }
-
-    /* The winding road SVG */
-    .path-svg {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0;
-      overflow: visible;
-      pointer-events: none;
-    }
-    .path-road {
-      fill: none;
-      stroke: var(--green-pale);
-      stroke-width: 32;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    .path-edge {
-      fill: none;
-      stroke: #A3E063;
-      stroke-width: 32;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: 1 58;
-      stroke-dashoffset: 0;
-    }
-
-    /* The node track */
     .part-track {
-      position: relative;
-      z-index: 1;
       display: flex;
       flex-direction: column;
-      gap: 2.2rem;
+      gap: 2.4rem;
       padding: 1rem 0 1rem;
     }
 
-    /* Each part node row — zigzag left/right */
     .part-node {
       display: flex;
       align-items: center;
       gap: 1.1rem;
       animation: fadeUp 0.3s ease both;
     }
-    .part-node:nth-child(odd)  {
+
+    /* Odd rows push left, even rows push right */
+    .part-node:nth-child(odd) {
       flex-direction: row;
-      padding-left: 8%;
+      padding-left: 10%;
     }
     .part-node:nth-child(even) {
       flex-direction: row-reverse;
-      padding-right: 8%;
+      padding-right: 10%;
     }
     .part-node:nth-child(even) .node-info { text-align: right; }
     .part-node:nth-child(even) .node-tags { justify-content: flex-end; }
@@ -277,7 +246,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Node button wrapper (holds the 3D button + START badge) ── */
+    /* ── Node button wrapper (holds button + START badge) ── */
     .node-btn-wrap {
       position: relative;
       flex-shrink: 0;
@@ -286,7 +255,7 @@
       justify-content: center;
     }
 
-    /* ── The 3D Duolingo-style circle button ── */
+    /* ── 3D circle button ── */
     .node-btn {
       width: 76px; height: 76px;
       border-radius: 50%;
@@ -296,7 +265,7 @@
       cursor: pointer;
       transition: transform 0.1s ease, box-shadow 0.1s ease;
       position: relative;
-      /* Inner highlight ring */
+      /* subtle inner highlight ring */
       outline: 4px solid rgba(255,255,255,0.35);
       outline-offset: -6px;
     }
@@ -305,58 +274,58 @@
     /* COMPLETED — green */
     .part-node.is-completed .node-btn {
       background: var(--green);
-      box-shadow: 0 7px 0 var(--green-dark), 0 10px 18px rgba(70,163,2,0.22);
+      box-shadow: 0 7px 0 var(--green-dark), 0 10px 18px rgba(70,163,2,0.2);
       color: white;
     }
     .part-node.is-completed .node-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 9px 0 var(--green-dark), 0 12px 22px rgba(70,163,2,0.3);
+      box-shadow: 0 9px 0 var(--green-dark), 0 12px 22px rgba(70,163,2,0.28);
     }
     .part-node.is-completed .node-btn:active {
       transform: translateY(5px);
-      box-shadow: 0 2px 0 var(--green-dark), 0 4px 8px rgba(70,163,2,0.15);
+      box-shadow: 0 2px 0 var(--green-dark);
     }
 
     /* CURRENT — orange */
     .part-node.is-current .node-btn {
       background: var(--orange);
-      box-shadow: 0 7px 0 var(--orange-dark), 0 10px 18px rgba(204,122,0,0.25);
+      box-shadow: 0 7px 0 var(--orange-dark), 0 10px 18px rgba(204,122,0,0.22);
       color: white;
     }
     .part-node.is-current .node-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 9px 0 var(--orange-dark), 0 12px 22px rgba(204,122,0,0.35);
+      box-shadow: 0 9px 0 var(--orange-dark), 0 12px 22px rgba(204,122,0,0.32);
     }
     .part-node.is-current .node-btn:active {
       transform: translateY(5px);
-      box-shadow: 0 2px 0 var(--orange-dark), 0 4px 8px rgba(204,122,0,0.15);
+      box-shadow: 0 2px 0 var(--orange-dark);
     }
 
     /* LOCKED — gray */
     .part-node.is-locked .node-btn {
       background: var(--gray);
-      box-shadow: 0 7px 0 var(--gray-dark), 0 10px 18px rgba(0,0,0,0.06);
+      box-shadow: 0 7px 0 var(--gray-dark), 0 10px 16px rgba(0,0,0,0.05);
       color: var(--gray-dark);
       cursor: not-allowed;
-      font-size: 1.4rem;
+      font-size: 1.35rem;
     }
     .part-node.is-locked .node-btn:active {
       transform: none;
       box-shadow: 0 7px 0 var(--gray-dark);
     }
 
-    /* ── START badge above the current node ── */
+    /* ── Bouncing START badge above current node ── */
     .start-badge {
       position: absolute;
-      bottom: calc(100% + 12px);
+      bottom: calc(100% + 11px);
       left: 50%;
       transform: translateX(-50%);
       background: var(--orange);
       color: white;
       font-weight: 900;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       letter-spacing: 0.1em;
-      padding: 0.28rem 0.75rem;
+      padding: 0.26rem 0.72rem;
       border-radius: 20px;
       border-bottom: 2px solid var(--orange-dark);
       white-space: nowrap;
@@ -371,14 +340,13 @@
       transform: translateX(-50%);
       border: 5px solid transparent;
       border-top-color: var(--orange-dark);
-      margin-top: 0;
     }
     @keyframes badgeBounce {
       0%, 100% { transform: translateX(-50%) translateY(0); }
       50%       { transform: translateX(-50%) translateY(-5px); }
     }
 
-    /* ── Node info panel ── */
+    /* ── Node info text ── */
     .node-info { flex: 1; min-width: 0; }
     .node-eyebrow {
       font-size: 0.65rem;
@@ -415,56 +383,20 @@
       padding: 0.15rem 0.5rem;
       border-radius: 20px;
     }
-    .tag-xp {
-      background: var(--green-pale);
-      color: var(--green-dark);
-    }
-    .tag-words {
-      background: #EEF2FF;
-      color: #6366F1;
-    }
-    .part-node.is-locked .tag-xp {
-      background: var(--gray-pale);
-      color: var(--gray-dark);
-    }
-    .part-node.is-current .tag-xp {
-      background: var(--orange-pale);
-      color: var(--orange-dark);
-    }
+    .tag-xp    { background: var(--green-pale);  color: var(--green-dark); }
+    .tag-words { background: #EEF2FF;             color: #6366F1; }
+    .part-node.is-locked  .tag-xp { background: var(--gray-pale);   color: var(--gray-dark); }
+    .part-node.is-current .tag-xp { background: var(--orange-pale); color: var(--orange-dark); }
 
-    /* ── Divider / milestone banner (every 5 parts) ── */
-    .milestone-banner {
-      text-align: center;
-      padding: 0.8rem 1.2rem;
-      background: linear-gradient(135deg, #FFF9E6, #FFF3D9);
-      border: 2px solid #F6C544;
-      border-radius: 12px;
-      margin: 0.5rem 0;
-      position: relative;
-      z-index: 1;
-      animation: fadeUp 0.3s ease both;
-    }
-    .milestone-banner span {
-      font-weight: 900;
-      font-size: 0.78rem;
-      color: #B8870A;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-    }
-
+    /* ── Mobile: KEEP zigzag, just tighten the offset and shrink button ── */
     @media (max-width: 480px) {
       .navbar { padding: 0.9rem 1rem; }
       .progress-wrap { top: 64px; }
-      .part-node,
-      .part-node:nth-child(even) {
-        flex-direction: row;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-      }
-      .part-node:nth-child(even) .node-info { text-align: left; }
-      .part-node:nth-child(even) .node-tags { justify-content: flex-start; }
-      .node-btn { width: 64px; height: 64px; font-size: 1.5rem; }
+      .node-btn { width: 62px; height: 62px; font-size: 1.5rem; }
+      .part-node:nth-child(odd)  { padding-left: 5%; }
+      .part-node:nth-child(even) { padding-right: 5%; }
     }
+
     @media (prefers-reduced-motion: reduce) {
       .start-badge { animation: none; }
       .part-node   { animation: none; }
@@ -499,19 +431,15 @@
         <div class="progress-bar-fill" id="progressFill"></div>
       </div>
     </div>
-    <div class="progress-count" id="progressCount">0<span>parts done</span></div>
+    <div class="progress-count" id="progressCount">0<span>/ 0 parts</span></div>
     <button class="jump-current" id="jumpCurrentBtn">Jump to<br>current</button>
   </div>
 
-  <div class="path-wrap">
-    <svg class="path-svg" id="pathSvg" preserveAspectRatio="none"></svg>
-    <div class="part-track" id="partTrack"></div>
-  </div>
+  <div class="part-track" id="partTrack"></div>
 </main>
 
 <script src="../config.js"></script>
 <script>
-  /* ── Config guards ── */
   const API   = (typeof LINGUA !== 'undefined') ? LINGUA.auth  : '';
   const VOCAB = (typeof LINGUA !== 'undefined') ? LINGUA.vocab : '';
   const token = localStorage.getItem('token');
@@ -519,7 +447,6 @@
 
   let currentNodeEl = null;
 
-  /* ── Error display ── */
   function showError(message) {
     document.getElementById('statusScreen').innerHTML = `
       <span style="font-size:2.5rem">⚠️</span>
@@ -530,25 +457,18 @@
     document.getElementById('mainContent').style.display  = 'none';
   }
 
-  /* ── Status calculation ── */
   function computeStatuses(parts, completedSet) {
     let chainOpen = true;
     return parts.map((p) => {
       const isComplete = completedSet.has(p.id);
       let status;
-      if (!chainOpen) {
-        status = 'locked';
-      } else if (isComplete) {
-        status = 'completed';
-      } else {
-        status = 'current';
-        chainOpen = false;
-      }
+      if (!chainOpen)      { status = 'locked'; }
+      else if (isComplete) { status = 'completed'; }
+      else                 { status = 'current'; chainOpen = false; }
       return { ...p, status };
     });
   }
 
-  /* ── Render all part nodes ── */
   function renderParts(parts) {
     const track = document.getElementById('partTrack');
     track.innerHTML = '';
@@ -560,45 +480,25 @@
           <span class="empty-icon">📭</span>
           No parts yet — check back soon!
         </div>`;
-      document.getElementById('pathSvg').innerHTML = '';
       return;
     }
 
     parts.forEach((part, idx) => {
-      /* ── Milestone banner every 5 parts (before part 6, 11, 16…) ── */
-      if (idx > 0 && idx % 5 === 0) {
-        const banner = document.createElement('div');
-        banner.className = 'milestone-banner';
-        banner.style.animationDelay = `${idx * 0.04}s`;
-        banner.innerHTML = `<span>🏆 Checkpoint ${Math.floor(idx / 5)}</span>`;
-        track.appendChild(banner);
-      }
-
       const node = document.createElement('div');
       node.className = `part-node is-${part.status}`;
       node.style.animationDelay = `${idx * 0.045}s`;
 
-      /* Icons */
-      const icon = part.status === 'completed' ? '✓'
-                 : part.status === 'locked'    ? '🔒'
-                 : '★';
-
-      /* Eyebrow label */
+      const icon    = part.status === 'completed' ? '✓'
+                    : part.status === 'locked'    ? '🔒' : '★';
       const eyebrow = part.status === 'completed' ? 'Completed'
-                    : part.status === 'locked'    ? 'Locked'
-                    : 'Up next';
-
-      /* Tags */
-      const xpTag    = part.status === 'locked'
-        ? `<span class="tag tag-xp">🔒 Locked</span>`
-        : `<span class="tag tag-xp">⚡ +10 XP</span>`;
-      const wordTag  = part.status !== 'locked'
-        ? `<span class="tag tag-words">📖 3 words</span>`
-        : '';
-
-      /* START badge only on the current node */
+                    : part.status === 'locked'    ? 'Locked' : 'Up next';
+      const xpTag   = part.status === 'locked'
+                    ? `<span class="tag tag-xp">🔒 Locked</span>`
+                    : `<span class="tag tag-xp">⚡ +10 XP</span>`;
+      const wordTag = part.status !== 'locked'
+                    ? `<span class="tag tag-words">📖 3 words</span>` : '';
       const startBadge = part.status === 'current'
-        ? `<div class="start-badge">START</div>` : '';
+                    ? `<div class="start-badge">START</div>` : '';
 
       node.innerHTML = `
         <div class="node-btn-wrap">
@@ -607,9 +507,7 @@
             class="node-btn"
             ${part.status === 'locked' ? 'disabled title="Finish the previous part first"' : ''}
             aria-label="Part ${part.part_number} — ${eyebrow}"
-          >
-            <span>${icon}</span>
-          </button>
+          >${icon}</button>
         </div>
         <div class="node-info">
           <div class="node-eyebrow">${eyebrow}</div>
@@ -628,47 +526,8 @@
       if (part.status === 'current') currentNodeEl = node;
       track.appendChild(node);
     });
-
-    /* Draw the winding path after layout settles */
-    requestAnimationFrame(() => requestAnimationFrame(drawPath));
   }
 
-  /* ── Draw the winding green road through actual node positions ── */
-  function drawPath() {
-    const svg  = document.getElementById('pathSvg');
-    const wrap = document.querySelector('.path-wrap');
-    const btns = wrap.querySelectorAll('.node-btn');
-    if (btns.length < 2) { svg.innerHTML = ''; return; }
-
-    const wRect = wrap.getBoundingClientRect();
-    const W     = wrap.offsetWidth;
-    const H     = wrap.offsetHeight;
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-
-    /* Collect centre of each visible button relative to wrap */
-    const pts = Array.from(btns).map(b => {
-      const r = b.getBoundingClientRect();
-      return {
-        x: r.left - wRect.left + r.width  / 2,
-        y: r.top  - wRect.top  + r.height / 2,
-      };
-    });
-
-    /* Cubic-bezier S-curves: control points at vertical midpoint */
-    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i];
-      const my = ((a.y + b.y) / 2).toFixed(1);
-      d += ` C ${a.x.toFixed(1)} ${my}, ${b.x.toFixed(1)} ${my}, ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
-    }
-
-    svg.innerHTML = `
-      <path class="path-road" d="${d}"/>
-      <path class="path-edge" d="${d}"/>
-    `;
-  }
-
-  /* ── Progress bar + counter ── */
   function updateProgress(parts, completedSet) {
     const total = parts.length;
     const done  = parts.filter(p => completedSet.has(p.id)).length;
@@ -677,12 +536,6 @@
     document.getElementById('progressCount').innerHTML  = `${done}<span>/ ${total} parts</span>`;
   }
 
-  /* ── Redraw path on window resize ── */
-  window.addEventListener('resize', () => {
-    requestAnimationFrame(() => requestAnimationFrame(drawPath));
-  });
-
-  /* ── Main init ── */
   async function init() {
     document.getElementById('statusScreen').innerHTML =
       `<div class="spinner"></div><span>Loading your path…</span>`;
@@ -717,7 +570,6 @@
         if (currentNodeEl) currentNodeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
 
-      /* Auto-scroll to current part */
       if (currentNodeEl) {
         setTimeout(() => currentNodeEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
       }
