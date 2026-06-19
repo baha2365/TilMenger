@@ -512,9 +512,11 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<script src="../../config.js"></script>
+
 <script>
   // ── Config ──────────────────────────────────────────────────────────────────
-  const API = window.location.origin;
+  const API = LINGUA.base;
   const LETTERS = ['A', 'B', 'C', 'D'];
   let questionCount = 0;
 
@@ -558,7 +560,7 @@
 
     // Slow path: localStorage has token but no usable role → ask the server
     try {
-      const res  = await fetch(window.location.origin + '/api/auth/me', {
+      const res  = await fetch(API + '/api/auth/me', {
         headers: { Authorization: 'Bearer ' + token }
       });
       const data = await res.json();
