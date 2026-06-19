@@ -20,6 +20,7 @@ const LINGUA = (() => {
     quizzes: `${base}/api/quizzes`,
     courses: `${base}/api/courses`,
     student: `${base}/api/student`,
-    game: `${base}/api/game`
+    game: `${base}/api/game`,
+    reading: `${base}/api/reading`
   };
 })();

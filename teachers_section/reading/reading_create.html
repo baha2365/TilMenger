@@ -519,21 +519,63 @@
   let questionCount = 0;
 
   // ── Auth guard ──────────────────────────────────────────────────────────────
-  (function initAuth() {
+  /**
+   * Your login page stores:
+   *   localStorage.setItem('token', token)
+   *   localStorage.setItem('role_id', roleId)   ← raw number as string, NO 'user' object
+   *
+   * So we read 'role_id' directly first, then fall back to a 'user' object if present,
+   * then finally call /api/auth/me to be certain.
+   */
+  function getStoredRoleId() {
+    // Primary: login page stores role_id directly as a standalone key
+    const direct = localStorage.getItem('role_id');
+    if (direct !== null) return Number(direct);
+
+    // Secondary: some other page may have stored a user object
+    try {
+      const raw = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!raw) return NaN;
+      const obj = (raw.user && typeof raw.user === 'object') ? raw.user : raw;
+      const val = obj.roleId !== undefined ? obj.roleId : obj.role_id;
+      if (val !== undefined) return Number(val);
+    } catch (_) {}
+
+    return NaN;
+  }
+  function isTeacherOrAdmin() { const r = getStoredRoleId(); return r === 2 || r === 3; }
+
+  (async function initAuth() {
     const token = localStorage.getItem('token');
-    const user  = JSON.parse(localStorage.getItem('user') || 'null');
-    if (!token || !user) {
+
+    if (!token) {
       document.getElementById('authGate').classList.add('show');
       return;
     }
-    // role_id 2 = teacher, 3 = admin
-    if (user.roleId !== 2 && user.roleId !== 3) {
-      document.getElementById('authGate').classList.add('show');
-    }
+
+    // Fast path: we already know the role from localStorage
+    if (isTeacherOrAdmin()) return;
+
+    // Slow path: localStorage has token but no usable role → ask the server
+    try {
+      const res  = await fetch(window.location.origin + '/api/auth/me', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if (data.success && data.user) {
+        // Cache it so future fast path works
+        localStorage.setItem('role_id', String(data.user.roleId));
+        localStorage.setItem('user', JSON.stringify(data.user));
+        if (Number(data.user.roleId) === 2 || Number(data.user.roleId) === 3) return;
+      }
+    } catch (_) { /* network error — show gate */ }
+
+    document.getElementById('authGate').classList.add('show');
   })();
 
   document.getElementById('btnLogout').addEventListener('click', () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('role_id');
     localStorage.removeItem('user');
     window.location.href = 'login.html';
   });
