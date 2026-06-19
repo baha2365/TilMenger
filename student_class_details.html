@@ -37,6 +37,10 @@
       --game-bg:      rgba(139, 53, 176, 0.12);
       --game-bd:      rgba(139, 53, 176, 0.28);
       --game-glow:    rgba(139, 53, 176, 0.4);
+      --reading:      #2E9E8F;
+      --reading-bg:   rgba(46,158,143,0.12);
+      --reading-bd:   rgba(46,158,143,0.28);
+      --reading-glow: rgba(46,158,143,0.4);
     }
 
     html { scroll-behavior: smooth; }
@@ -394,6 +398,50 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
+
+    #readingBanner {
+      display: none;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(130deg, rgba(46,158,143,0.18) 0%, rgba(31,122,110,0.1) 100%);
+      border: 1px solid var(--reading-bd);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 2rem;
+      animation: bannerSlideIn .45s cubic-bezier(.34, 1.56, .64, 1) both;
+    }
+    #readingBanner.show { display: block; }
+    #readingBanner::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--reading), var(--gold), var(--reading), transparent);
+    }
+    #readingBanner::after {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 240px; height: 200px;
+      background: radial-gradient(ellipse at top right, rgba(46,158,143,0.25) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .reading-row {
+      display:grid; grid-template-columns: 1fr 100px 130px 110px;
+      align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem;
+      border-bottom:1px solid var(--border); animation: rowIn .35s cubic-bezier(.22,1,.36,1) both;
+    }
+    .reading-row:last-child { border-bottom:none; }
+    .reading-row:hover { background:rgba(212,168,83,0.028); }
+    .reading-title { font-size:.88rem; font-weight:600; color:var(--text); }
+    .reading-level { font-size:.68rem; font-weight:700; text-transform:capitalize; }
+    .reading-level.beginner     { color:var(--success); }
+    .reading-level.intermediate { color:var(--gold); }
+    .reading-level.advanced     { color:var(--error); }
+    .reading-qcount { font-size:.7rem; color:var(--text-3); }
+
+    @media (max-width: 640px) {
+      .reading-row { grid-template-columns: 1fr auto; }
+      .reading-level, .reading-qcount { display:none; }
+    }
   </style>
 </head>
 <body>
@@ -474,6 +522,46 @@
     </div>
   </div>
 
+  <!-- ════════════════════════════════
+     READING TASK NOTIFICATION BANNER
+════════════════════════════════ -->
+<div id="readingBanner">
+  <button class="game-banner-dismiss" id="dismissReadingBanner" title="Dismiss">✕</button>
+  <div class="game-banner-inner">
+    <div class="game-banner-emoji">📖</div>
+    <div class="game-banner-body">
+      <div class="game-banner-eyebrow" style="color:var(--reading);">
+        <span class="live-dot" style="background:var(--reading);"></span>
+        New Reading Task
+      </div>
+      <div class="game-banner-title" id="readingBannerTitle">A new reading task is available!</div>
+      <div class="game-banner-sub" id="readingBannerSub">Your teacher just assigned a reading task — give it a go!</div>
+    </div>
+    <a class="btn-join-game" id="readingBannerBtn" href="#" target="_blank"
+      style="background:linear-gradient(135deg,var(--reading),#1F7A6E);box-shadow:0 4px 20px var(--reading-glow),inset 0 1px 0 rgba(255,255,255,0.12);">
+      📖 Start Reading
+    </a>
+  </div>
+</div>
+
+<!-- Section bar -->
+<div class="section-bar">
+  <span class="section-label">📖 Reading Tasks</span>
+  <span class="section-hint">Assigned by your teacher</span>
+</div>
+
+<div id="readingLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--text-3);font-size:.84rem;">
+  <div class="spinner dark"></div>Loading reading tasks…
+</div>
+<div id="readingEmptyState" style="display:none;text-align:center;padding:2.5rem 1.5rem;border:1px dashed var(--border-2);border-radius:var(--radius);background:var(--surface);margin-bottom:2rem;">
+  <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.7;">📖</div>
+  <div style="font-size:.95rem;font-weight:600;color:var(--text-2);margin-bottom:.25rem;">No reading tasks yet</div>
+  <div style="font-size:.8rem;color:var(--text-3);">Your teacher hasn't assigned any reading tasks to this class.</div>
+</div>
+<div id="readingListWrap" style="display:none;margin-bottom:2rem;">
+  <div class="roster-panel" id="readingPanel"></div>
+</div>
+
   <!-- Section bar -->
   <div class="section-bar">
     <span class="section-label">Classmates</span>
@@ -528,6 +616,12 @@ const API_BASE = LINGUA.base;
 const API      = `${API_BASE}/api/student`;
 const AUTH_API = `${API_BASE}/api/auth`;
 const GAME_API = `${API_BASE}/api/game`;
+
+const READING_TASKS_URL = `${API}/classes/${classId}/reading-tasks`;
+// NOTE: adjust this if your reading pages live in a different folder
+const READING_PLAY_PATH = 'teachers_section/reading/reading_play.html';
+let exposedReadingTasks = [];
+
 const token    = () => localStorage.getItem('token');
 const authH    = () => ({ 'Content-Type':'application/json', 'Authorization':`Bearer ${token()}` });
 
@@ -627,6 +721,19 @@ async function checkExistingGame() {
 ══════════════════════════════════════ */
 function initSocket() {
   const socket = io(API_BASE, { transports: ['websocket', 'polling'] });
+
+    socket.on('reading_assigned', ({ classId: gClassId, tasks } = {}) => {
+      if (gClassId !== classId) return;
+      loadReadingTasks();
+      if (tasks && tasks.length) {
+        showReadingBanner(tasks[0]);
+        if (tasks.length > 1) showToast(`📖 ${tasks.length} new reading tasks assigned!`);
+      }
+    });
+    socket.on('reading_unassigned', ({ classId: gClassId } = {}) => {
+      if (gClassId !== classId) return;
+      loadReadingTasks();
+    });
 
   socket.on('connect', () => {
     // Join the class room so we receive game broadcasts
@@ -793,6 +900,55 @@ function buildRow(student) {
 }
 
 /* ══════════════════════════════════════
+   READING TASKS
+══════════════════════════════════════ */
+async function loadReadingTasks() {
+  const loading = document.getElementById('readingLoadingState');
+  const empty   = document.getElementById('readingEmptyState');
+  const wrap    = document.getElementById('readingListWrap');
+  loading.style.display = 'flex'; empty.style.display = 'none'; wrap.style.display = 'none';
+  try {
+    const res  = await fetch(READING_TASKS_URL, { headers: authH() });
+    const data = await res.json();
+    loading.style.display = 'none';
+    if (!res.ok || !data.success) { showFeedback(data.message || 'Failed to load reading tasks.'); return; }
+    exposedReadingTasks = data.tasks || [];
+    renderReadingTasks();
+  } catch {
+    loading.style.display = 'none';
+    showFeedback('Could not reach the server.');
+  }
+}
+
+function renderReadingTasks() {
+  const empty = document.getElementById('readingEmptyState');
+  const wrap  = document.getElementById('readingListWrap');
+  const panel = document.getElementById('readingPanel');
+  if (!exposedReadingTasks.length) { empty.style.display = 'block'; wrap.style.display = 'none'; return; }
+  empty.style.display = 'none'; wrap.style.display = 'block';
+  panel.innerHTML = exposedReadingTasks.map(t => `
+    <div class="reading-row">
+      <div class="reading-title">${escHtml(t.title)}</div>
+      <div class="reading-level ${t.level}">${t.level}</div>
+      <div class="reading-qcount">❓ ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
+      <a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,var(--reading),#1F7A6E);box-shadow:none;"
+         href="${READING_PLAY_PATH}?id=${t.id}" target="_blank">📖 Start</a>
+    </div>`).join('');
+}
+
+function showReadingBanner(task) {
+  const banner = document.getElementById('readingBanner');
+  document.getElementById('readingBannerTitle').textContent = `New task: "${task.title}"`;
+  document.getElementById('readingBannerSub').textContent   = `Your teacher just assigned a ${task.level} reading task. Give it a go!`;
+  document.getElementById('readingBannerBtn').href = `${READING_PLAY_PATH}?id=${task.id}`;
+  banner.classList.add('show');
+  setTimeout(() => banner.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+}
+document.getElementById('dismissReadingBanner').addEventListener('click', () => {
+  document.getElementById('readingBanner').classList.remove('show');
+});
+
+/* ══════════════════════════════════════
    GUARD + INIT
 ══════════════════════════════════════ */
 (async function init() {
@@ -806,7 +962,7 @@ function buildRow(student) {
   await loadMe();
 
   // 2. Load class info + roster in parallel
-  await Promise.all([ loadClass(), loadClassmates() ]);
+  await Promise.all([ loadClass(), loadClassmates(), loadReadingTasks() ]);
 
   // 3. Check if a game is already running (REST fallback — works even without socket)
   await checkExistingGame();
