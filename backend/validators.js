@@ -21,8 +21,7 @@ const registerValidation = [
     .notEmpty()
     .withMessage('Email is required.')
     .isEmail()
-    .withMessage('Please provide a valid email address.')
-    .normalizeEmail(),
+    .withMessage('Please provide a valid email address.'),
 
   body('password')
     .notEmpty()
@@ -47,8 +46,7 @@ const loginValidation = [
     .notEmpty()
     .withMessage('Email is required.')
     .isEmail()
-    .withMessage('Please provide a valid email address.')
-    .normalizeEmail(),
+    .withMessage('Please provide a valid email address.'),
 
   body('password')
     .notEmpty()
