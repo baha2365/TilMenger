@@ -1084,7 +1084,7 @@ function renderClassQuizzes() {
       <div class="quiz-title">${escHtml(q.title)}</div>
       <div class="quiz-qcount">❓ ${q.question_count} question${q.question_count !== 1 ? 's' : ''}</div>
       <a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,var(--quiz),#3450C2);box-shadow:none;"
-         href="${QUIZ_PLAY_PATH}?id=${q.id}" target="_blank">📝 Play</a>
+         href="${QUIZ_PLAY_PATH}?id=${q.id}&classId=${classId}" target="_blank">📝 Play</a>
     </div>`).join('');
 }
 
@@ -1092,13 +1092,10 @@ function showQuizBanner(quiz) {
   const banner = document.getElementById('quizBanner');
   document.getElementById('quizBannerTitle').textContent = `New quiz: "${quiz.title}"`;
   document.getElementById('quizBannerSub').textContent   = `Your teacher just assigned a quiz with ${quiz.question_count} question${quiz.question_count !== 1 ? 's' : ''}. Give it a go!`;
-  document.getElementById('quizBannerBtn').href = `${QUIZ_PLAY_PATH}?id=${quiz.id}`;
+  document.getElementById('quizBannerBtn').href = `${QUIZ_PLAY_PATH}?id=${quiz.id}&classId=${classId}`;
   banner.classList.add('show');
   setTimeout(() => banner.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
 }
-document.getElementById('dismissQuizBanner').addEventListener('click', () => {
-  document.getElementById('quizBanner').classList.remove('show');
-});
 
 /* ══════════════════════════════════════
    GUARD + INIT
