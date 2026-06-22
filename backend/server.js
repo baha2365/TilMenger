@@ -88,6 +88,11 @@ app.use(
   )
 );
 
+app.use(
+  '/audios',
+  express.static(path.join('C:/Users/HP/three_js_tutor/backend/audios/beginner_audios'))
+);
+
 // Health check
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
