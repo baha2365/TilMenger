@@ -10,6 +10,9 @@
 //    const VOCAB = LINGUA.vocab;
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ngrok url: https://ravine-decrease-staleness.ngrok-free.dev
+// localhost url: http://localhost:3030
+
 const LINGUA = (() => {
   const base = 'http://localhost:3030';
 
