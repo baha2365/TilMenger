@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pronunciation Practice — LinguaAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:  #F5F0E8;
+      --ink:    #1A1612;
+      --rust:   #C4572A;
+      --sage:   #4A6741;
+      --gold:   #D4A853;
+      --muted:  #7A6E65;
+      --border: #DDD5C8;
+      --s0:     #141210;
+      --s1:     #201C18;
+      --s2:     #2A2520;
+      --s3:     #322D28;
+      --warn:   #B8852A;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--s0);
+      color: var(--cream);
+      overflow: hidden;
+    }
+
+    .app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ── Header ─────────────────────────────────────────────────────────────── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.5rem;
+      background: var(--s1);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      flex-shrink: 0;
+      gap: 1rem;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 0.9rem; min-width: 0; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      color: var(--muted); text-decoration: none; font-size: 0.8rem;
+      white-space: nowrap; transition: color 0.2s; flex-shrink: 0;
+    }
+    .back-link:hover { color: var(--cream); }
+
+    .divider { width: 1px; height: 18px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
+
+    .brand-row { display: flex; align-items: center; gap: 0.5rem; }
+    .brand-icon { font-size: 1.05rem; }
+    .brand-name { font-family: 'Playfair Display', serif; font-size: 0.9rem; color: var(--cream); }
+    .brand-sep  { color: rgba(255,255,255,0.18); font-size: 0.9rem; }
+    .page-label { font-size: 0.78rem; color: var(--gold); font-weight: 500; }
+
+    .header-counter {
+      background: rgba(212,168,83,0.12);
+      border: 1px solid rgba(212,168,83,0.28);
+      color: var(--gold);
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+      padding: 0.28rem 0.75rem; border-radius: 20px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ── Scrollable main ─────────────────────────────────────────────────────── */
+    .app-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 1.5rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .app-main::-webkit-scrollbar { width: 3px; }
+    .app-main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+    /* ── Progress dots ──────────────────────────────────────────────────────── */
+    .dots-row {
+      display: flex; gap: 8px; justify-content: center;
+      padding-top: 0.25rem;
+    }
+    .progress-dot {
+      width: 32px; height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+      transition: background 0.4s, width 0.3s;
+    }
+    .progress-dot.active  { background: var(--gold); width: 44px; }
+    .progress-dot.done    { background: var(--sage); }
+    .progress-dot.failed  { background: var(--rust); }
+
+    /* ── Sentence card ──────────────────────────────────────────────────────── */
+    .sentence-card {
+      background: var(--s2);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-left: 3px solid var(--rust);
+      border-radius: 16px;
+      padding: 1.2rem 1.35rem;
+      animation: fadeDown 0.35s ease both;
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .sentence-eyebrow {
+      font-size: 0.68rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.55rem;
+    }
+    .sentence-kazakh {
+      font-size: 0.82rem; color: var(--muted);
+      line-height: 1.55; margin-bottom: 0.4rem;
+      font-style: italic;
+    }
+    .sentence-english {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem; color: var(--cream);
+      line-height: 1.4; letter-spacing: -0.01em;
+    }
+
+    /* ── Phase panels (each visibility toggled by JS) ───────────────────────── */
+    .phase-panel {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 1.1rem;
+      text-align: center;
+      animation: panelIn 0.3s ease both;
+    }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .phase-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem; color: var(--cream);
+      line-height: 1.3;
+    }
+    .phase-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── Reference audio play button ────────────────────────────────────────── */
+    .ref-play-btn {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      background: var(--s3);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--cream);
+      padding: 0.75rem 1.6rem;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .ref-play-btn:hover:not(:disabled) { background: rgba(212,168,83,0.15); border-color: rgba(212,168,83,0.4); color: var(--gold); }
+    .ref-play-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .ref-play-btn.playing { color: var(--gold); border-color: rgba(212,168,83,0.5); animation: softPulse 1.5s ease-in-out infinite; }
+    @keyframes softPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(212,168,83,0); }
+      50%      { box-shadow: 0 0 0 8px rgba(212,168,83,0.08); }
+    }
+
+    /* "I'm Ready" button */
+    .btn-ready {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--rust); color: white;
+      border: none; border-radius: 10px;
+      padding: 0.78rem 1.8rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-ready:hover:not(:disabled) { background: #d4622f; transform: translateY(-1px); }
+    .btn-ready:disabled { background: var(--s3); color: var(--muted); cursor: not-allowed; opacity: 0.55; }
+
+    /* Ready hint */
+    .listen-hint {
+      font-size: 0.73rem; color: rgba(255,255,255,0.22);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Mic button (ready phase) ────────────────────────────────────────────── */
+    .mic-wrap { position: relative; }
+    .mic-btn {
+      width: 82px; height: 82px;
+      border-radius: 50%; border: none;
+      background: var(--rust);
+      color: white; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.12s;
+      position: relative; z-index: 1;
+    }
+    .mic-btn:hover { background: #d4622f; transform: scale(1.04); }
+    .mic-btn:active { transform: scale(0.96); }
+
+    /* ── Recording phase ────────────────────────────────────────────────────── */
+    .recording-timer {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; color: var(--cream);
+      letter-spacing: -0.02em; line-height: 1;
+    }
+    .recording-timer.warn { color: #e55c5c; }
+
+    #waveformCanvas {
+      width: 240px; height: 38px;
+      border-radius: 6px; display: block;
+    }
+
+    .stop-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: #d63030; color: white;
+      border: none; border-radius: 50px;
+      padding: 0.78rem 2rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+      position: relative;
+    }
+    .stop-btn::before, .stop-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 50px;
+      border: 2px solid #d63030;
+      animation: stopPulse 2s ease-out infinite;
+    }
+    .stop-btn::after { animation-delay: 0.7s; }
+    @keyframes stopPulse {
+      0%   { transform: scale(1); opacity: 0.7; }
+      100% { transform: scale(1.55); opacity: 0; }
+    }
+    .stop-btn:hover { background: #b52020; }
+
+    .action-hint {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Recorded phase ──────────────────────────────────────────────────────── */
+    .recorded-row {
+      display: flex; gap: 0.75rem;
+      justify-content: center; flex-wrap: wrap;
+      width: 100%;
+    }
+    .playback-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--s3);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--cream);
+      padding: 0.72rem 1.4rem;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .playback-btn:hover:not(:disabled) { background: var(--s2); border-color: rgba(255,255,255,0.25); }
+    .playback-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .playback-btn.playing { color: var(--gold); border-color: rgba(212,168,83,0.5); animation: softPulse 1.5s ease-in-out infinite; }
+
+    .send-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      background: var(--rust); color: white;
+      border: none; border-radius: 50px;
+      padding: 0.72rem 1.6rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .send-btn:hover:not(:disabled) { background: #d4622f; transform: translateY(-1px); }
+    .send-btn:disabled { background: var(--s3); color: var(--muted); cursor: not-allowed; }
+
+    /* ── Submitting ──────────────────────────────────────────────────────────── */
+    .spinner {
+      width: 34px; height: 34px;
+      border: 3px solid rgba(255,255,255,0.08);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .submitting-label { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── Result phase ────────────────────────────────────────────────────────── */
+    .score-ring-wrap { position: relative; }
+    .score-ring-wrap svg circle:last-of-type {
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    .result-msg {
+      font-size: 0.95rem; font-weight: 500;
+      padding: 0.55rem 1.2rem;
+      border-radius: 50px;
+    }
+    .result-msg.pass { background: rgba(74,103,65,0.2); color: #8ab87e; border: 1px solid rgba(74,103,65,0.35); }
+    .result-msg.warn { background: rgba(184,133,42,0.15); color: var(--gold); border: 1px solid rgba(184,133,42,0.3); }
+    .result-msg.fail { background: rgba(196,87,42,0.15); color: #e07050; border: 1px solid rgba(196,87,42,0.3); }
+
+    /* Word diff */
+    .diff-box {
+      background: var(--s2);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      width: 100%; max-width: 420px;
+      text-align: left;
+    }
+    .diff-row { margin-bottom: 0.75rem; }
+    .diff-row:last-child { margin-bottom: 0; }
+    .diff-label {
+      font-size: 0.64rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 0.4rem; display: block;
+    }
+    .diff-words { display: flex; flex-wrap: wrap; gap: 4px; }
+    .diff-word {
+      padding: 0.18rem 0.5rem; border-radius: 4px;
+      font-size: 0.84rem; font-weight: 500;
+    }
+    .diff-word.correct { background: rgba(74,103,65,0.25); color: #8ab87e; }
+    .diff-word.missed  { background: rgba(196,87,42,0.22); color: #e07050; text-decoration: line-through; text-decoration-color: rgba(196,87,42,0.5); }
+    .diff-actual {
+      font-size: 0.84rem; color: var(--cream); line-height: 1.6;
+      font-style: italic;
+    }
+
+    /* Next button */
+    .btn-next-sentence {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      background: var(--rust); color: white;
+      border: none; border-radius: 10px;
+      padding: 0.82rem 2rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-next-sentence:hover { background: #d4622f; transform: translateY(-1px); }
+    .btn-next-sentence.final { background: var(--sage); }
+    .btn-next-sentence.final:hover { background: #3a5633; }
+
+    /* ── Complete screen ─────────────────────────────────────────────────────── */
+    #completeScreen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      text-align: center;
+      animation: panelIn 0.4s ease both;
+    }
+    #completeScreen.show { display: flex; }
+
+    .complete-trophy { font-size: 2.8rem; }
+
+    .complete-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.55rem; color: var(--cream);
+      letter-spacing: -0.015em;
+    }
+    .complete-sub { font-size: 0.83rem; color: var(--muted); }
+
+    .overall-label {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-top: -0.5rem;
+    }
+
+    /* Per-sentence result cards */
+    .results-list {
+      width: 100%; max-width: 420px;
+      display: flex; flex-direction: column; gap: 0.6rem;
+    }
+    .result-item {
+      background: var(--s2);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
+      text-align: left;
+    }
+    .result-item.item-pass { border-left: 3px solid var(--sage); }
+    .result-item.item-fail { border-left: 3px solid var(--rust); }
+
+    .item-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.35rem;
+    }
+    .item-num { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+    .item-score-badge {
+      font-size: 0.73rem; font-weight: 600;
+      padding: 0.2rem 0.6rem; border-radius: 20px;
+      color: var(--cream);
+    }
+    .item-sentence { font-size: 0.86rem; color: var(--cream); line-height: 1.5; margin-bottom: 0.2rem; }
+    .item-actual { font-size: 0.78rem; color: var(--muted); font-style: italic; }
+
+    /* Complete actions */
+    .complete-actions { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; max-width: 280px; }
+    .btn-choose-part {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+      background: var(--rust); color: white;
+      border: none; border-radius: 10px;
+      padding: 0.88rem 1.5rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      transition: all 0.2s; width: 100%;
+    }
+    .btn-choose-part:hover { background: #d4622f; transform: translateY(-1px); }
+    .btn-dashboard {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted); border-radius: 10px;
+      padding: 0.7rem 1.5rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+      cursor: pointer; text-decoration: none;
+      transition: all 0.2s; width: 100%;
+    }
+    .btn-dashboard:hover { color: var(--cream); border-color: rgba(255,255,255,0.25); }
+
+    /* ── Loading overlay ─────────────────────────────────────────────────────── */
+    .loader {
+      position: fixed; inset: 0;
+      background: var(--ink);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; z-index: 200; transition: opacity 0.5s;
+    }
+    .loader.gone { opacity: 0; pointer-events: none; }
+    .loader-label { font-size: 0.82rem; color: var(--muted); }
+
+    /* ── Toast ──────────────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--s2);
+      border: 1px solid rgba(196,87,42,0.35);
+      color: var(--cream);
+      padding: 0.65rem 1.1rem;
+      border-radius: 10px; font-size: 0.8rem;
+      opacity: 0; transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none; z-index: 100;
+      max-width: min(90vw, 360px);
+      text-align: center; line-height: 1.45;
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Responsive ─────────────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .app-header  { padding: 0.75rem 1rem; }
+      .app-main    { padding: 1.1rem 1rem 2rem; }
+      .mic-btn     { width: 70px; height: 70px; }
+      .sentence-english { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loader" id="loader">
+  <div class="spinner"></div>
+  <div class="loader-label" id="loaderLabel">Loading your sentences…</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<div class="app">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="header-left">
+      <a href="parts_select.html" class="back-link" id="backLink">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back
+      </a>
+      <div class="divider"></div>
+      <div class="brand-row">
+        <span class="brand-icon">🎤</span>
+        <span class="brand-name">LinguaAI</span>
+        <span class="brand-sep">·</span>
+        <span class="page-label">Pronunciation</span>
+      </div>
+    </div>
+    <div class="header-counter" id="headerCounter">—</div>
+  </header>
+
+  <!-- ── Main ────────────────────────────────────────────────────────────── -->
+  <main class="app-main" id="appMain">
+
+    <!-- Progress dots -->
+    <div class="dots-row" id="dotsRow"></div>
+
+    <!-- Sentence card (always visible during practice) -->
+    <div class="sentence-card" id="sentenceCard">
+      <div class="sentence-eyebrow" id="sentenceEyebrow">Sentence 1 of 3</div>
+      <div class="sentence-kazakh"  id="sentenceKazakh"></div>
+      <div class="sentence-english" id="sentenceEnglish">—</div>
+    </div>
+
+    <!-- ── Phase: listening ──────────────────────────────────────────────── -->
+    <div class="phase-panel" id="phase-listening">
+      <div class="phase-title">Listen carefully 👂</div>
+      <div class="phase-sub">Hear the sentence first, then you'll repeat it.</div>
+
+      <button class="ref-play-btn" id="refPlayBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Play Sentence
+      </button>
+
+      <button class="btn-ready" id="btnReady" disabled onclick="goToReady()">
+        I'm Ready →
+      </button>
+      <span class="listen-hint" id="listenHint">Listen first, then tap "I'm Ready"</span>
+    </div>
+
+    <!-- ── Phase: ready ──────────────────────────────────────────────────── -->
+    <div class="phase-panel" id="phase-ready" style="display:none">
+      <div class="phase-title">🎤 Your turn to speak</div>
+      <div class="phase-sub">Repeat the sentence as clearly as you can.</div>
+
+      <div class="mic-wrap">
+        <button class="mic-btn" id="micBtn" onclick="startRecording()" title="Start recording">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <rect x="9" y="2" width="6" height="11" rx="3" fill="currentColor"/>
+            <path d="M5 10v2a7 7 0 0 0 14 0v-2" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" fill="none"/>
+            <line x1="12" y1="21" x2="12" y2="19" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round"/>
+            <line x1="9" y1="23" x2="15" y2="23" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <span class="action-hint">Tap the mic to start recording</span>
+    </div>
+
+    <!-- ── Phase: recording ─────────────────────────────────────────────── -->
+    <div class="phase-panel" id="phase-recording" style="display:none">
+      <div class="recording-timer" id="timer">0:00</div>
+      <canvas id="waveformCanvas" width="240" height="38"></canvas>
+      <button class="stop-btn" id="stopBtn" onclick="stopRecording()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+        </svg>
+        Stop Recording
+      </button>
+      <span class="action-hint">Speak clearly, then tap to stop</span>
+    </div>
+
+    <!-- ── Phase: recorded ──────────────────────────────────────────────── -->
+    <div class="phase-panel" id="phase-recorded" style="display:none">
+      <div class="phase-title">Review your recording</div>
+      <div class="phase-sub">Listen to yourself, then send for scoring.</div>
+
+      <div class="recorded-row">
+        <button class="playback-btn" id="playbackBtn" onclick="playRecording()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Listen to Yourself
+        </button>
+
+        <button class="send-btn" id="sendBtn" disabled onclick="sendForCheck()">
+          Send
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+
+      <span class="action-hint" id="recordedHint">Listen first, then send</span>
+    </div>
+
+    <!-- ── Phase: submitting ─────────────────────────────────────────────── -->
+    <div class="phase-panel" id="phase-submitting" style="display:none">
+      <div class="spinner"></div>
+      <div class="submitting-label">Checking your pronunciation…</div>
+    </div>
+
+    <!-- ── Phase: result ─────────────────────────────────────────────────── -->
+    <div class="phase-panel" id="phase-result" style="display:none">
+      <div class="score-ring-wrap" id="scoreRing"></div>
+      <div id="resultMsg"></div>
+      <div id="diffDisplay"></div>
+      <button class="btn-next-sentence" id="nextBtn" onclick="nextSentence()">
+        Next Sentence →
+      </button>
+    </div>
+
+    <!-- ── Complete screen ───────────────────────────────────────────────── -->
+    <div id="completeScreen">
+      <div class="complete-trophy">🏆</div>
+      <div class="complete-title">Pronunciation Done!</div>
+      <div class="complete-sub" id="completeSubLabel">Part complete</div>
+
+      <div id="overallRing"></div>
+      <div class="overall-label">Overall Score</div>
+
+      <div class="results-list" id="resultsList"></div>
+
+      <div class="complete-actions">
+        <a href="parts_select.html" class="btn-choose-part" id="nextPartBtn">
+          Choose Next Part →
+        </a>
+        <a href="../dashboard.html" class="btn-dashboard">Dashboard</a>
+      </div>
+    </div>
+
+  </main>
+</div><!-- .app -->
+
+<script src="../config.js"></script>
+<script>
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+const token = localStorage.getItem('token');
+if (!token) location.href = 'index.html';
+
+const params = new URLSearchParams(location.search);
+const partId = params.get('part_id');
+if (!partId) location.href = 'parts_select.html';
+
+const BASE = (typeof LINGUA !== 'undefined' && LINGUA.pronunciation)
+  ? LINGUA.pronunciation
+  : `${location.origin}/api/pronunciation`;
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let sentences   = [];
+let partNumber  = 0;
+let currentIdx  = 0;
+let phase       = 'loading';
+let results     = [];          // [{ sentenceId, expected, actual, score, passed }]
+
+// Recording
+let recorder         = null;
+let chunks           = [];
+let micStream        = null;
+let audioCtx         = null;
+let analyser         = null;
+let rafId            = null;
+let timerInterval    = null;
+let recordingSeconds = 0;
+let recordedBlob     = null;
+let recordedUrl      = null;
+
+// Per-sentence flags
+let refAudioPlayed   = false;
+let recordingPlayed  = false;
+
+// ─── DOM helpers ─────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, ms = 3500) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('visible'), ms);
+}
+
+// ─── Phase management ─────────────────────────────────────────────────────────
+const PHASES = ['listening','ready','recording','recorded','submitting','result'];
+function setPhase(p) {
+  phase = p;
+  PHASES.forEach(name => {
+    const el = $(`phase-${name}`);
+    if (el) {
+      el.style.display = (p === name) ? '' : 'none';
+      if (p === name) el.style.animation = 'none', el.offsetWidth, el.style.animation = '';
+    }
+  });
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch(`${BASE}/sentences/${partId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401) { localStorage.clear(); location.href = 'index.html'; return; }
+
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+
+    sentences  = data.sentences;
+    partNumber = data.part_number;
+
+    $('backLink').href = `sentence_builder.html?part_id=${partId}`;
+    $('completeSubLabel').textContent = `Part ${partNumber} complete`;
+
+    const loader = $('loader');
+    loader.classList.add('gone');
+    setTimeout(() => loader.remove(), 600);
+
+    loadSentence(0);
+  } catch (err) {
+    console.error('init error:', err);
+    $('loaderLabel').textContent = 'Could not load sentences. Refresh to retry.';
+  }
+}
+
+// ─── Load sentence ────────────────────────────────────────────────────────────
+function loadSentence(idx) {
+  currentIdx      = idx;
+  refAudioPlayed  = false;
+  recordingPlayed = false;
+  recordedBlob    = null;
+  if (recordedUrl) { URL.revokeObjectURL(recordedUrl); recordedUrl = null; }
+
+  const s = sentences[idx];
+  $('sentenceEyebrow').textContent = `Sentence ${idx + 1} of ${sentences.length}`;
+  $('sentenceKazakh').textContent  = s.kazakh_sentence || '';
+  $('sentenceEnglish').textContent = s.correct_sentence;
+  $('headerCounter').textContent   = `${idx + 1} / ${sentences.length}`;
+
+  renderDots();
+
+  // Reset recorded-phase UI
+  const playbackBtn = $('playbackBtn');
+  if (playbackBtn) {
+    playbackBtn.textContent = '▶ Listen to Yourself';
+    playbackBtn.classList.remove('playing');
+    playbackBtn.disabled = false;
+    // Re-attach SVG icon
+    playbackBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Listen to Yourself`;
+  }
+  const sendBtn = $('sendBtn');
+  if (sendBtn) sendBtn.disabled = true;
+  $('recordedHint').textContent = 'Listen first, then send';
+
+  if (s.audio_url) {
+    setupRefAudio(s);
+    setPhase('listening');
+  } else {
+    // No audio — go straight to ready
+    setPhase('ready');
+  }
+}
+
+// ─── Reference audio ──────────────────────────────────────────────────────────
+function setupRefAudio(sentence) {
+  // Reset ready button
+  const btnReady = $('btnReady');
+  btnReady.disabled = true;
+  $('listenHint').textContent = 'Listen first, then tap "I\'m Ready"';
+
+  let src = sentence.audio_url;
+  if (src && !src.startsWith('http')) {
+    const filename = src.replace(/\\/g, '/').split('/').pop();
+    src = LINGUA.base + `/sentence-audios/${filename}`;
+  }
+
+  const refBtn = $('refPlayBtn');
+  // Remove old listener by replacing button clone
+  const newBtn = refBtn.cloneNode(true);
+  refBtn.parentNode.replaceChild(newBtn, refBtn);
+
+  let refAudio = null;
+
+  newBtn.addEventListener('click', () => {
+    if (refAudio) { refAudio.pause(); refAudio.currentTime = 0; }
+
+    refAudio = new Audio(src);
+    newBtn.disabled = true;
+    newBtn.classList.add('playing');
+    newBtn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Playing…`;
+
+    refAudio.onended = () => {
+      newBtn.disabled = false;
+      newBtn.classList.remove('playing');
+      newBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Play Again`;
+      unlockReady();
+    };
+    refAudio.onerror = () => {
+      newBtn.disabled = false;
+      newBtn.classList.remove('playing');
+      newBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Play Sentence`;
+      showToast('Could not play audio. Continue without it.');
+      unlockReady();
+    };
+    refAudio.play().catch(() => {
+      newBtn.disabled = false;
+      newBtn.classList.remove('playing');
+      unlockReady();
+    });
+
+    unlockReady(); // enable "I'm Ready" as soon as they press play
+  });
+}
+
+function unlockReady() {
+  if (!refAudioPlayed) {
+    refAudioPlayed = true;
+    $('btnReady').disabled = false;
+    $('listenHint').textContent = 'Tap "I\'m Ready" when you feel confident';
+  }
+}
+
+function goToReady() {
+  setPhase('ready');
+}
+
+// ─── Recording ────────────────────────────────────────────────────────────────
+async function startRecording() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    showToast(err.name === 'NotAllowedError'
+      ? 'Microphone access denied. Please enable it in your browser.'
+      : 'Could not access microphone.');
+    return;
+  }
+
+  audioCtx = new AudioContext();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 128;
+  audioCtx.createMediaStreamSource(micStream).connect(analyser);
+
+  chunks = [];
+  const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+    ? 'audio/webm;codecs=opus'
+    : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+
+  recorder = new MediaRecorder(micStream, mime ? { mimeType: mime } : {});
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = onRecordStop;
+  recorder.start(100);
+
+  setPhase('recording');
+  startTimer();
+  drawWave();
+
+  // Auto-stop after 30 s
+  setTimeout(() => { if (phase === 'recording') stopRecording(); }, 30000);
+}
+
+function stopRecording() {
+  if (recorder?.state !== 'inactive') recorder.stop();
+  micStream?.getTracks().forEach(t => t.stop());
+  cancelAnimationFrame(rafId);
+  audioCtx?.close();
+  stopTimer();
+}
+
+function onRecordStop() {
+  if (!chunks.length) {
+    setPhase('ready');
+    showToast('No audio captured. Please try again.');
+    return;
+  }
+
+  const mime = recorder?.mimeType || 'audio/webm';
+  recordedBlob = new Blob(chunks, { type: mime });
+
+  if (recordedBlob.size < 800) {
+    setPhase('ready');
+    showToast('Recording too short. Tap and hold longer.');
+    return;
+  }
+
+  if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+  recordedUrl    = URL.createObjectURL(recordedBlob);
+  recordingPlayed = false;
+  setPhase('recorded');
+}
+
+// ─── Playback (user's recording) ─────────────────────────────────────────────
+function playRecording() {
+  if (!recordedUrl) return;
+
+  const btn = $('playbackBtn');
+  btn.disabled = true;
+  btn.classList.add('playing');
+  btn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Playing…`;
+
+  const audio = new Audio(recordedUrl);
+  audio.onended = () => {
+    btn.disabled = false;
+    btn.classList.remove('playing');
+    btn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Listen Again`;
+  };
+  audio.onerror = () => {
+    btn.disabled = false;
+    btn.classList.remove('playing');
+  };
+  audio.play().catch(() => { btn.disabled = false; btn.classList.remove('playing'); });
+
+  // Unlock Send as soon as they start playback
+  if (!recordingPlayed) {
+    recordingPlayed = true;
+    $('sendBtn').disabled = false;
+    $('recordedHint').textContent = 'Ready to send? Tap Send.';
+  }
+}
+
+// ─── Send for scoring ─────────────────────────────────────────────────────────
+async function sendForCheck() {
+  if (!recordedBlob) return;
+  setPhase('submitting');
+
+  try {
+    const s    = sentences[currentIdx];
+    const mime = recordedBlob.type || 'audio/webm';
+    const ext  = mime.includes('ogg') ? 'ogg' : mime.includes('mp4') ? 'mp4' : 'webm';
+
+    const form = new FormData();
+    form.append('audio', recordedBlob, `rec.${ext}`);
+    form.append('sentence_id', String(s.id));
+
+    const res  = await fetch(`${BASE}/check`, {
+      method:  'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body:    form,
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+
+    results.push({
+      sentenceId: s.id,
+      expected:   data.expected,
+      actual:     data.actual,
+      score:      data.score,
+      passed:     data.passed,
+    });
+
+    showResult(data);
+  } catch (err) {
+    console.error('sendForCheck error:', err);
+    showToast('Something went wrong. Please try again.');
+    setPhase('recorded');
+  }
+}
+
+// ─── Result rendering ─────────────────────────────────────────────────────────
+function showResult(data) {
+  setPhase('result');
+
+  // Score ring (animated in via CSS transition)
+  $('scoreRing').innerHTML = buildScoreRing(data.score);
+  // Trigger transition by setting dashoffset after one frame
+  requestAnimationFrame(() => {
+    const circle = $('scoreRing').querySelector('circle.fill-arc');
+    if (circle) {
+      const r    = 44;
+      const circ = 2 * Math.PI * r;
+      circle.style.strokeDashoffset = (circ - (data.score / 100) * circ).toFixed(2);
+    }
+  });
+
+  // Message
+  const msgEl = $('resultMsg');
+  if (data.empty) {
+    msgEl.innerHTML = `<div class="result-msg fail">Nothing detected — speak a bit louder next time</div>`;
+  } else if (data.passed) {
+    msgEl.innerHTML = `<div class="result-msg pass">✓ Great pronunciation!</div>`;
+  } else if (data.score >= 50) {
+    msgEl.innerHTML = `<div class="result-msg warn">Good effort — keep going!</div>`;
+  } else {
+    msgEl.innerHTML = `<div class="result-msg fail">Keep practicing — you'll improve!</div>`;
+  }
+
+  // Word diff
+  renderWordDiff(data.expected, data.actual || '', $('diffDisplay'));
+
+  // Update this dot to reflect pass/fail
+  renderDots();
+
+  // Next button
+  const btn = $('nextBtn');
+  const isLast = currentIdx === sentences.length - 1;
+  if (isLast) {
+    btn.textContent = '🏆 See Results';
+    btn.classList.add('final');
+    btn.onclick = showComplete;
+  } else {
+    btn.textContent = 'Next Sentence →';
+    btn.classList.remove('final');
+    btn.onclick = () => loadSentence(currentIdx + 1);
+  }
+}
+
+function buildScoreRing(score) {
+  const r    = 44;
+  const circ = 2 * Math.PI * r;
+  const color = score >= 80 ? '#4A6741' : score >= 50 ? '#D4A853' : '#C4572A';
+
+  return `
+    <svg width="116" height="116" viewBox="0 0 116 116">
+      <circle cx="58" cy="58" r="${r}" fill="none"
+              stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+      <circle class="fill-arc" cx="58" cy="58" r="${r}" fill="none"
+              stroke="${color}" stroke-width="8"
+              stroke-dasharray="${circ.toFixed(2)}"
+              stroke-dashoffset="${circ.toFixed(2)}"
+              stroke-linecap="round" transform="rotate(-90 58 58)"
+              style="transition: stroke-dashoffset 1.1s cubic-bezier(0.34,1.1,0.64,1)"/>
+      <text x="58" y="53" text-anchor="middle"
+            font-family="Playfair Display,serif" font-size="20" font-weight="700"
+            fill="white">${score}</text>
+      <text x="58" y="69" text-anchor="middle"
+            font-family="DM Sans,sans-serif" font-size="10"
+            fill="rgba(255,255,255,0.38)">out of 100</text>
+    </svg>`;
+}
+
+// ─── Word diff ────────────────────────────────────────────────────────────────
+function normalizeWords(s) {
+  return (s || '').toLowerCase().replace(/[^\w\s]/g,'').trim().split(/\s+/).filter(Boolean);
+}
+
+function renderWordDiff(expected, actual, container) {
+  const expWords = normalizeWords(expected);
+  const actWords = normalizeWords(actual);
+
+  const actFreq = new Map();
+  actWords.forEach(w => actFreq.set(w, (actFreq.get(w) || 0) + 1));
+
+  const spans = expWords.map(w => {
+    const found = actFreq.has(w) && actFreq.get(w) > 0;
+    if (found) actFreq.set(w, actFreq.get(w) - 1);
+    return `<span class="diff-word ${found ? 'correct' : 'missed'}">${safe(w)}</span>`;
+  }).join(' ');
+
+  container.innerHTML = `
+    <div class="diff-box">
+      <div class="diff-row">
+        <span class="diff-label">Expected</span>
+        <div class="diff-words">${spans}</div>
+      </div>
+      <div class="diff-row">
+        <span class="diff-label">You said</span>
+        <div class="diff-actual">${actual ? safe(actual) : '<em style="opacity:0.45">nothing detected</em>'}</div>
+      </div>
+    </div>`;
+}
+
+// ─── Complete screen ──────────────────────────────────────────────────────────
+function showComplete() {
+  // Hide sentence card and all phases
+  $('sentenceCard').style.display = 'none';
+  $('dotsRow').style.display      = 'none';
+  PHASES.forEach(name => {
+    const el = $(`phase-${name}`);
+    if (el) el.style.display = 'none';
+  });
+
+  const total   = results.reduce((s, r) => s + r.score, 0);
+  const overall = results.length ? Math.round(total / results.length) : 0;
+
+  $('overallRing').innerHTML = buildScoreRing(overall);
+  requestAnimationFrame(() => {
+    const circle = $('overallRing').querySelector('circle.fill-arc');
+    if (circle) {
+      const circ = 2 * Math.PI * 44;
+      circle.style.strokeDashoffset = (circ - (overall / 100) * circ).toFixed(2);
+    }
+  });
+
+  $('headerCounter').textContent = '✓ Done';
+
+  const listEl = $('resultsList');
+  listEl.innerHTML = results.map((r, i) => {
+    const badge = r.score >= 80
+      ? 'background:rgba(74,103,65,0.3);color:#8ab87e'
+      : r.score >= 50
+        ? 'background:rgba(212,168,83,0.2);color:#D4A853'
+        : 'background:rgba(196,87,42,0.2);color:#e07050';
+
+    return `
+      <div class="result-item ${r.passed ? 'item-pass' : 'item-fail'}">
+        <div class="item-header">
+          <span class="item-num">Sentence ${i + 1}</span>
+          <span class="item-score-badge" style="${badge}">${r.score}%</span>
+        </div>
+        <div class="item-sentence">"${safe(r.expected)}"</div>
+        ${r.actual
+          ? `<div class="item-actual">You said: "${safe(r.actual)}"</div>`
+          : `<div class="item-actual" style="opacity:0.4">Nothing detected</div>`}
+      </div>`;
+  }).join('');
+
+  $('completeScreen').classList.add('show');
+}
+
+// ─── Progress dots ────────────────────────────────────────────────────────────
+function renderDots() {
+  const row = $('dotsRow');
+  row.innerHTML = sentences.map((_, i) => {
+    // Find result for this sentence if it exists
+    const res = results[i];
+    let cls = 'progress-dot';
+    if (res !== undefined) {
+      cls += res.passed ? ' done' : ' failed';
+    } else if (i === currentIdx) {
+      cls += ' active';
+    }
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+// ─── Timer ───────────────────────────────────────────────────────────────────
+function startTimer() {
+  recordingSeconds = 0;
+  $('timer').textContent = '0:00';
+  $('timer').classList.remove('warn');
+  timerInterval = setInterval(() => {
+    recordingSeconds++;
+    const m = Math.floor(recordingSeconds / 60);
+    const s = recordingSeconds % 60;
+    $('timer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    if (recordingSeconds >= 25) $('timer').classList.add('warn');
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+// ─── Waveform canvas ──────────────────────────────────────────────────────────
+function drawWave() {
+  const canvas = $('waveformCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W      = canvas.width;
+  const H      = canvas.height;
+  const buf    = analyser.frequencyBinCount;
+  const data   = new Uint8Array(buf);
+  const barW   = Math.max(2, (W / buf) * 2.2);
+
+  function frame() {
+    rafId = requestAnimationFrame(frame);
+    analyser.getByteFrequencyData(data);
+    ctx.clearRect(0, 0, W, H);
+    let x = 0;
+    for (let i = 0; i < buf; i++) {
+      const bH    = Math.max(2, (data[i] / 255) * H);
+      const alpha = 0.35 + (data[i] / 255) * 0.65;
+      ctx.fillStyle = `rgba(196, 87, 42, ${alpha})`;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, H - bH, barW, bH, 2);
+      else ctx.rect(x, H - bH, barW, bH);
+      ctx.fill();
+      x += barW + 1;
+    }
+  }
+  frame();
+}
+
+// ─── Utility ──────────────────────────────────────────────────────────────────
+function safe(s) {
+  return (s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── Go ───────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
