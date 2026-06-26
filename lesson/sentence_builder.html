@@ -918,6 +918,9 @@
     document.getElementById('scoreTotal').textContent    = sentences.length;
     document.getElementById('completeSubtitle').textContent =
       `You got ${correctCount} out of ${sentences.length} correct. Great job!`;
+
+    document.getElementById('pronunciationBtn').href = `pronunciation.html?part_id=${partId}`;
+
     document.getElementById('completeBanner').classList.add('show');
     document.getElementById('completeBanner').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
