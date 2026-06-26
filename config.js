@@ -25,7 +25,8 @@ const LINGUA = (() => {
     student: `${base}/api/student`,
     game: `${base}/api/game`,
     reading: `${base}/api/reading`,
-    aiTeacher: `${base}/api/ai-teacher`
+    aiTeacher: `${base}/api/ai-teacher`,
+    pronunciation: `${base}/api/pronunciation`,
   };
 })();
 
