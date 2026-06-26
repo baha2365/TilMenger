@@ -13,6 +13,7 @@ const courseRoutes     = require('./courseRoutes');
 const studentRoutes    = require('./studentRoutes');
 const readingRoutes    = require('./readingRoutes');
 const aiTeacherRoutes  = require('./aiTeacherRoutes');
+const pronunciationRoutes = require('./pronunciationRoutes');
 const { router: gameRouter, registerSocketHandlers } = require('./gameRoutes');
 
 const app        = express();
@@ -61,6 +62,7 @@ app.use('/api/student',    studentRoutes);
 app.use('/api/game',       gameRouter);
 app.use('/api/reading',    readingRoutes);
 app.use('/api/ai-teacher', aiTeacherRoutes);
+app.use('/api/pronunciation', pronunciationRoutes);
 
 // ─── Static files ─────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, '..')));
@@ -74,6 +76,10 @@ app.use(
 app.use(
   '/audios',
   express.static(path.join('C:/Users/HP/three_js_tutor/backend/audios/beginner_audios'))
+);
+app.use(
+  '/sentence-audios',
+  express.static(path.join(__dirname, '..', 'audios', 'sentence_audios'))
 );
 
 // ─── Health check ─────────────────────────────────────────────────────────────
@@ -140,6 +146,10 @@ app.use((err, _req, res, _next) => {
       console.log('   POST   /api/ai-teacher/transcribe (protected)');
       console.log('   POST   /api/ai-teacher/chat       (protected)');
       console.log('   POST   /api/ai-teacher/speak      (protected)');
+
+      console.log('\n── Pronunciation ────────────────────────────────');
+      console.log('   GET    /api/pronunciation/sentences/:partId (protected)');
+      console.log('   POST   /api/pronunciation/check             (protected)');
       console.log('');
     });
   } catch (err) {
