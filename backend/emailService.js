@@ -6,7 +6,7 @@ async function sendVerificationEmail({ to, name, code }) {
   const { data, error } = await resend.emails.send({
     from:    process.env.EMAIL_FROM,
     to:      [to],
-    subject: `${code} — Your LinguaAI verification code`,
+    subject: `${code} — Your TilMenger verification code`,
     html:    buildEmailHTML(name, code),
   });
 
@@ -41,7 +41,7 @@ function buildEmailHTML(name, code) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Verify your LinguaAI account</title>
+  <title>Verify your TilMenger account</title>
 </head>
 <body style="margin:0;padding:0;background-color:#F0EBE3;font-family:Arial,Helvetica,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F0EBE3;">
@@ -61,7 +61,7 @@ function buildEmailHTML(name, code) {
             <div style="display:inline-block;background:#C4572A;border-radius:16px;padding:14px 18px;margin-bottom:18px;">
               <span style="font-size:30px;line-height:1;">🎓</span>
             </div><br>
-            <span style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#F5F0E8;letter-spacing:-0.5px;">LinguaAI</span><br>
+            <span style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#F5F0E8;letter-spacing:-0.5px;">TilMenger</span><br>
             <span style="font-size:11px;color:#4A4540;letter-spacing:3px;text-transform:uppercase;">AI-Powered English Teacher</span>
           </td>
         </tr>
@@ -79,7 +79,7 @@ function buildEmailHTML(name, code) {
               Confirm your email address
             </h2>
             <p style="margin:0 0 30px;font-size:14px;color:#9A9089;line-height:1.8;">
-              To activate your LinguaAI account and start your personalized English learning journey,
+              To activate your TilMenger account and start your personalized English learning journey,
               enter the 6-digit code below in the browser window.
             </p>
 
@@ -110,7 +110,7 @@ function buildEmailHTML(name, code) {
             </table>
 
             <p style="margin:28px 0 0;font-size:13px;color:#4A4540;line-height:1.7;">
-              If you didn't create a LinguaAI account, you can safely ignore this email.
+              If you didn't create a TilMenger account, you can safely ignore this email.
               No account will be created.
             </p>
           </td>
@@ -121,7 +121,7 @@ function buildEmailHTML(name, code) {
         <tr>
           <td style="padding:22px 48px;text-align:center;">
             <p style="margin:0 0 4px;font-size:12px;color:#3A3530;">
-              © ${new Date().getFullYear()} LinguaAI. All rights reserved.
+              © ${new Date().getFullYear()} TilMenger. All rights reserved.
             </p>
             <p style="margin:0;font-size:11px;color:#2A2520;">
               This is an automated message — please do not reply.
