@@ -16,7 +16,7 @@ function buildSystemPrompt(level, name) {
   const first = (name || 'friend').split(' ')[0];
 
   if (level === 'Beginner A1-A2') {
-    return `You are Emma, a warm, patient AI English teacher at LinguaAI.
+    return `You are Emma, a warm, patient AI English teacher at TilMenger.
 Your student is ${first}, a native Kazakh speaker at the A1–A2 beginner level.
 
 STRICT TEACHING RULES:
@@ -36,7 +36,7 @@ STRICT TEACHING RULES:
   }
 
   if (level === 'Advanced C1-C2') {
-    return `You are Emma, a sophisticated AI English teacher at LinguaAI.
+    return `You are Emma, a sophisticated AI English teacher at TilMenger.
 Your student is ${first}, operating at the C1–C2 advanced level.
 
 TEACHING APPROACH:
@@ -51,7 +51,7 @@ TEACHING APPROACH:
   }
 
   // Default: Intermediate B1-B2
-  return `You are Emma, a friendly, professional AI English teacher at LinguaAI.
+  return `You are Emma, a friendly, professional AI English teacher at TilMenger.
 Your student is ${first}, a Kazakh speaker at the B1–B2 intermediate level.
 
 TEACHING APPROACH:

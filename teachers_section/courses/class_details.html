@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LinguaAI — Class Details</title>
+  <title>TilMenger — Class Details</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -370,7 +370,7 @@
 <body>
 
 <nav>
-  <a class="brand" href="../../dashboard.html"><div class="brand-mark">✦</div>Lingua<em>AI</em></a>
+  <a class="brand" href="../../dashboard.html"><div class="brand-mark">✦</div>Til<span>Menger</span></a>
   <a class="nav-back" id="navBack" href="courses_dashboard.html">← My Courses</a>
 </nav>
 
@@ -952,7 +952,7 @@ async function loadClass() {
 function renderHero(cls) {
   document.getElementById('heroSkeleton').style.display = 'none';
   document.getElementById('classHero').style.display   = 'block';
-  document.title = `LinguaAI — ${cls.name}`;
+  document.title = `TilMenger — ${cls.name}`;
   document.getElementById('heroTitle').textContent = cls.name;
   document.getElementById('bcClass').textContent   = cls.name;
   const activeBadge  = cls.is_active ? `<span class="badge badge-active">● Active</span>` : `<span class="badge badge-inactive">● Inactive</span>`;

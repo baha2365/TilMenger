@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LinguaAI — Dashboard</title>
+  <title>TilMenger — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -477,7 +477,7 @@
 
 <!-- Navbar -->
 <nav class="navbar">
-  <div class="nav-brand">Lingua<span>AI</span></div>
+  <div class="nav-brand">Til<span>Menger</span></div>
   <div class="nav-right">
     <div class="nav-avatar" id="navAvatar">…</div>
     <span class="nav-name" id="navName"></span>
@@ -640,7 +640,7 @@
     document.getElementById('navName').textContent    = user.name;
     document.getElementById('navAvatar').textContent  = user.name[0].toUpperCase();
     document.getElementById('userLevel').textContent  = user.level;
-    document.title = `LinguaAI — ${firstName}'s Dashboard`;
+    document.title = `TilMenger — ${firstName}'s Dashboard`;
 
     // ── Role-based visibility ──
     const roleId = localStorage.getItem('role_id');
