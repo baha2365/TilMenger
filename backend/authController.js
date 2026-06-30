@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt    = require('jsonwebtoken');
 const crypto = require('crypto');
 const { pool } = require('./Db');
-const { sendVerificationEmail } = require('./emailService');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('./emailService');
 
 const SALT_ROUNDS       = 12;
 const CODE_TTL_MINUTES  = 10;
@@ -103,7 +103,6 @@ async function verifyEmail(req, res) {
 
     const pending = rows[0];
 
-    // Too many wrong attempts
     if (pending.attempts >= MAX_ATTEMPTS) {
       return res.status(429).json({
         success: false,
@@ -111,7 +110,6 @@ async function verifyEmail(req, res) {
       });
     }
 
-    // Expired
     if (new Date() > new Date(pending.expires_at)) {
       return res.status(400).json({
         success: false,
@@ -126,7 +124,6 @@ async function verifyEmail(req, res) {
       [email]
     );
 
-    // Wrong code
     if (pending.code !== String(code).trim()) {
       const used      = pending.attempts + 1;
       const remaining = MAX_ATTEMPTS - used;
@@ -148,7 +145,6 @@ async function verifyEmail(req, res) {
 
     const user = userRows[0];
 
-    // Clean up
     await pool.query('DELETE FROM email_verifications WHERE email = $1', [email]);
 
     const token = signToken(user.id, user.role_id);
@@ -249,4 +245,252 @@ async function getMe(req, res) {
   }
 }
 
-module.exports = { register, login, getMe, verifyEmail, resendCode };
+// ─── POST /api/auth/forgot ────────────────────────────────────────────────────
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(422).json({ success: false, message: 'Email is required.' });
+  }
+
+  // Generic response used for BOTH found and not-found cases
+  // to prevent email enumeration attacks.
+  const genericOk = {
+    success: true,
+    message: 'If an account with that email exists, a reset code has been sent.',
+  };
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, name FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(200).json(genericOk);
+    }
+
+    const { name } = rows[0];
+    const code      = generateCode();
+    const expiresAt = new Date(Date.now() + CODE_TTL_MINUTES * 60 * 1000);
+
+    await pool.query(
+      `INSERT INTO password_resets (email, code, expires_at, attempts, verified, reset_token, created_at)
+       VALUES ($1, $2, $3, 0, false, NULL, NOW())
+       ON CONFLICT (email) DO UPDATE
+         SET code        = EXCLUDED.code,
+             expires_at  = EXCLUDED.expires_at,
+             attempts    = 0,
+             verified    = false,
+             reset_token = NULL,
+             created_at  = NOW()`,
+      [email, code, expiresAt]
+    );
+
+    await sendPasswordResetEmail({ to: email, name, code });
+
+    return res.status(200).json(genericOk);
+  } catch (err) {
+    console.error('forgotPassword error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+// ─── POST /api/auth/verify-reset ─────────────────────────────────────────────
+async function verifyResetCode(req, res) {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    return res.status(422).json({ success: false, message: 'Email and code are required.' });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM password_resets WHERE email = $1',
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No pending reset for this email. Please start again.',
+      });
+    }
+
+    const pending = rows[0];
+
+    if (pending.attempts >= MAX_ATTEMPTS) {
+      return res.status(429).json({
+        success: false,
+        message: 'Too many incorrect attempts. Please request a new code.',
+      });
+    }
+
+    if (new Date() > new Date(pending.expires_at)) {
+      return res.status(400).json({
+        success: false,
+        expired: true,
+        message: 'This code has expired. Please request a new one.',
+      });
+    }
+
+    // Increment attempts before checking (prevents timing attacks)
+    await pool.query(
+      'UPDATE password_resets SET attempts = attempts + 1 WHERE email = $1',
+      [email]
+    );
+
+    if (pending.code !== String(code).trim()) {
+      const used      = pending.attempts + 1;
+      const remaining = MAX_ATTEMPTS - used;
+      return res.status(400).json({
+        success: false,
+        message: remaining > 0
+          ? `Incorrect code — ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
+          : 'Too many incorrect attempts. Please request a new code.',
+      });
+    }
+
+    // ✅ Code correct — generate a short-lived reset token (15 minutes)
+    const resetToken  = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    await pool.query(
+      `UPDATE password_resets
+         SET verified    = true,
+             reset_token = $1,
+             expires_at  = $2
+       WHERE email = $3`,
+      [resetToken, tokenExpiry, email]
+    );
+
+    return res.status(200).json({
+      success: true,
+      resetToken,
+      message: 'Code verified. You may now set a new password.',
+    });
+  } catch (err) {
+    console.error('verifyResetCode error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+// ─── POST /api/auth/resend-reset ─────────────────────────────────────────────
+async function resendResetCode(req, res) {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(422).json({ success: false, message: 'Email is required.' });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM password_resets WHERE email = $1',
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No pending reset found. Please start again.',
+      });
+    }
+
+    const code      = generateCode();
+    const expiresAt = new Date(Date.now() + CODE_TTL_MINUTES * 60 * 1000);
+
+    await pool.query(
+      `UPDATE password_resets
+         SET code        = $1,
+             expires_at  = $2,
+             attempts    = 0,
+             verified    = false,
+             reset_token = NULL,
+             created_at  = NOW()
+       WHERE email = $3`,
+      [code, expiresAt, email]
+    );
+
+    // Look up user name for personalised email
+    const { rows: userRows } = await pool.query(
+      'SELECT name FROM users WHERE email = $1',
+      [email]
+    );
+    const name = userRows[0]?.name || 'there';
+
+    await sendPasswordResetEmail({ to: email, name, code });
+
+    return res.status(200).json({ success: true, message: 'New reset code sent.' });
+  } catch (err) {
+    console.error('resendResetCode error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+// ─── POST /api/auth/reset-password ───────────────────────────────────────────
+async function resetPassword(req, res) {
+  const { email, resetToken, password } = req.body;
+
+  if (!email || !resetToken || !password) {
+    return res.status(422).json({
+      success: false,
+      message: 'Email, reset token, and new password are required.',
+    });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM password_resets
+        WHERE email = $1 AND reset_token = $2 AND verified = true`,
+      [email, resetToken]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset session. Please start again.',
+      });
+    }
+
+    if (new Date() > new Date(rows[0].expires_at)) {
+      await pool.query('DELETE FROM password_resets WHERE email = $1', [email]);
+      return res.status(400).json({
+        success: false,
+        expired: true,
+        message: 'Reset session has expired. Please start the process again.',
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    const { rowCount } = await pool.query(
+      'UPDATE users SET password = $1 WHERE email = $2',
+      [hashedPassword, email]
+    );
+
+    if (rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Account not found.' });
+    }
+
+    // Clean up reset row
+    await pool.query('DELETE FROM password_resets WHERE email = $1', [email]);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password updated successfully! You can now sign in.',
+    });
+  } catch (err) {
+    console.error('resetPassword error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+module.exports = {
+  register,
+  login,
+  getMe,
+  verifyEmail,
+  resendCode,
+  forgotPassword,
+  verifyResetCode,
+  resendResetCode,
+  resetPassword,
+};
