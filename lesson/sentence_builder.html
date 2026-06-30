@@ -908,6 +908,7 @@
 
   function showComplete() {
 
+    // ── Track sentence-builder completion for parts_select arc ring ──
     try {
       const sbDone = JSON.parse(localStorage.getItem('lingua_sb_done') || '[]');
       const pid = Number(partId);
