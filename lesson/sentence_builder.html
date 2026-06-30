@@ -907,6 +907,16 @@
   }
 
   function showComplete() {
+
+    try {
+      const sbDone = JSON.parse(localStorage.getItem('lingua_sb_done') || '[]');
+      const pid = Number(partId);
+      if (!sbDone.includes(pid)) {
+        sbDone.push(pid);
+        localStorage.setItem('lingua_sb_done', JSON.stringify(sbDone));
+      }
+    } catch(e) {}
+
     document.getElementById('actionRow').style.display = 'none';
     document.getElementById('feedbackBar').className   = 'feedback-bar';
     document.querySelectorAll('.sentence-dot').forEach(d => {
