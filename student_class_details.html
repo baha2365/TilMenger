@@ -46,6 +46,11 @@
       --quiz-bg:   rgba(79,109,245,0.12);
       --quiz-bd:   rgba(79,109,245,0.28);
       --quiz-glow: rgba(79,109,245,0.4);
+
+      --race:      #E85252;
+      --race-bg:   rgba(232,82,82,0.12);
+      --race-bd:   rgba(232,82,82,0.28);
+      --race-glow: rgba(232,82,82,0.4);
     }
 
     html { scroll-behavior: smooth; }
@@ -474,7 +479,7 @@
     }
 
     .quiz-row {
-      display:grid; grid-template-columns: 1fr 140px 110px;
+      display:grid; grid-template-columns: 1fr 88px 110px 100px;
       align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem;
       border-bottom:1px solid var(--border); animation: rowIn .35s cubic-bezier(.22,1,.36,1) both;
     }
@@ -482,10 +487,30 @@
     .quiz-row:hover { background:rgba(212,168,83,0.028); }
     .quiz-title { font-size:.88rem; font-weight:600; color:var(--text); }
     .quiz-qcount { font-size:.7rem; color:var(--text-3); }
+    .quiz-mode-tag {
+      font-size:.6rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em;
+      padding:.2rem .5rem; border-radius:20px; text-align:center; white-space:nowrap;
+    }
+    .quiz-mode-tag.casual { color:var(--quiz); background:var(--quiz-bg); border:1px solid var(--quiz-bd); }
+    .quiz-mode-tag.racing { color:var(--race); background:var(--race-bg); border:1px solid var(--race-bd); }
+    .btn-race-cta {
+      display:inline-flex; align-items:center; gap:.35rem; padding:.5rem 1.1rem; border-radius:20px;
+      font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:700; text-decoration:none; white-space:nowrap;
+      transition:transform .15s;
+    }
+    .btn-race-cta:hover { transform:scale(1.05); }
+    .btn-race-cta.live {
+      background:linear-gradient(135deg,var(--race),#B83636); color:#fff;
+      box-shadow:0 3px 14px var(--race-glow);
+      animation: raceCtaPulse 1.6s ease-in-out infinite;
+    }
+    @keyframes raceCtaPulse { 0%,100%{box-shadow:0 3px 14px var(--race-glow);} 50%{box-shadow:0 3px 22px var(--race-glow);} }
+    .btn-race-cta.idle { background:rgba(232,82,82,.12); color:var(--race); border:1px solid var(--race-bd); }
+    .btn-race-cta.done { background:var(--success-bg); color:var(--success); border:1px solid var(--success-bd); }
 
     @media (max-width: 640px) {
       .quiz-row { grid-template-columns: 1fr auto; }
-      .quiz-qcount { display:none; }
+      .quiz-qcount, .quiz-mode-tag { display:none; }
     }
   </style>
 </head>
@@ -702,6 +727,7 @@ const API_BASE = LINGUA.base;
 const API      = `${API_BASE}/api/student`;
 const AUTH_API = `${API_BASE}/api/auth`;
 const GAME_API = `${API_BASE}/api/game`;
+const RACE_API = `${API_BASE}/api/race`;
 
 const token    = () => localStorage.getItem('token');
 const authH    = () => ({ 'Content-Type':'application/json', 'Authorization':`Bearer ${token()}` });
@@ -719,9 +745,11 @@ const READING_PLAY_PATH = 'teachers_section/reading/reading_play.html';
 let exposedReadingTasks = [];
 
 const QUIZ_TASKS_URL = `${API}/classes/${classId}/quizzes`;
-// NOTE: adjust this if your quiz pages live in a different folder
+// NOTE: adjust these if your quiz pages live in a different folder
 const QUIZ_PLAY_PATH = 'teachers_section/quiz/quiz_play.html';
+const QUIZ_RACE_PLAY_PATH = 'teachers_section/quiz/quiz_race_play.html';
 let exposedClassQuizzes = [];
+let liveRaceByQuiz = {}; // quizId -> true while a race is live for this class
 
 let currentUserId = null;
 let gameRoomUrl   = null;
@@ -824,6 +852,18 @@ function initSocket() {
   socket.on('quiz_unassigned', ({ classId: gClassId } = {}) => {
     if (gClassId !== classId) return;
     loadClassQuizzes();
+  });
+
+  socket.on('race_started', ({ classId: gClassId, quizId: gQuizId, quizTitle } = {}) => {
+    if (gClassId !== classId) return;
+    liveRaceByQuiz[gQuizId] = true;
+    updateQuizRowRaceCta(gQuizId);
+    showToast(`🏁 Race is live: "${quizTitle}" — join now!`);
+  });
+  socket.on('race_session_ended', ({ classId: gClassId, quizId: gQuizId } = {}) => {
+    if (gClassId !== classId) return;
+    delete liveRaceByQuiz[gQuizId];
+    loadClassQuizzes(); // refresh race_completed flags too
   });
 
     socket.on('reading_assigned', ({ classId: gClassId, tasks } = {}) => {
@@ -1053,7 +1093,7 @@ document.getElementById('dismissReadingBanner').addEventListener('click', () => 
 });
 
 /* ══════════════════════════════════════
-   QUIZZES
+   QUIZZES (casual + racing)
 ══════════════════════════════════════ */
 async function loadClassQuizzes() {
   const loading = document.getElementById('quizLoadingState');
@@ -1067,6 +1107,7 @@ async function loadClassQuizzes() {
     if (!res.ok || !data.success) { showFeedback(data.message || 'Failed to load quizzes.'); return; }
     exposedClassQuizzes = data.quizzes || [];
     renderClassQuizzes();
+    checkAllRaceStatuses();
   } catch {
     loading.style.display = 'none';
     showFeedback('Could not reach the server.');
@@ -1079,20 +1120,69 @@ function renderClassQuizzes() {
   const panel = document.getElementById('quizPanel');
   if (!exposedClassQuizzes.length) { empty.style.display = 'block'; wrap.style.display = 'none'; return; }
   empty.style.display = 'none'; wrap.style.display = 'block';
-  panel.innerHTML = exposedClassQuizzes.map(q => `
-    <div class="quiz-row">
+  panel.innerHTML = exposedClassQuizzes.map(q => {
+    if (q.mode === 'racing') {
+      return `
+      <div class="quiz-row" id="quiz-${q.id}">
+        <div class="quiz-title">${escHtml(q.title)}</div>
+        <span class="quiz-mode-tag racing">🏁 Racing</span>
+        <div class="quiz-qcount">❓ ${q.question_count} question${q.question_count !== 1 ? 's' : ''}</div>
+        <div id="race-cta-${q.id}"></div>
+      </div>`;
+    }
+    return `
+    <div class="quiz-row" id="quiz-${q.id}">
       <div class="quiz-title">${escHtml(q.title)}</div>
+      <span class="quiz-mode-tag casual">📝 Casual</span>
       <div class="quiz-qcount">❓ ${q.question_count} question${q.question_count !== 1 ? 's' : ''}</div>
       <a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,var(--quiz),#3450C2);box-shadow:none;"
          href="${QUIZ_PLAY_PATH}?id=${q.id}&classId=${classId}" target="_blank">📝 Play</a>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+
+  exposedClassQuizzes.filter(q => q.mode === 'racing').forEach(q => updateQuizRowRaceCta(q.id, q.race_completed));
+}
+
+async function checkAllRaceStatuses() {
+  const racingQuizzes = exposedClassQuizzes.filter(q => q.mode === 'racing' && !q.race_completed);
+  for (const q of racingQuizzes) {
+    try {
+      const res  = await fetch(`${RACE_API}/classes/${classId}/quizzes/${q.id}/session`, { headers: authH() });
+      const data = await res.json();
+      if (data.success && data.session) liveRaceByQuiz[q.id] = true;
+      else delete liveRaceByQuiz[q.id];
+    } catch { /* leave unknown — CTA defaults to idle */ }
+    updateQuizRowRaceCta(q.id, q.race_completed);
+  }
+}
+
+function updateQuizRowRaceCta(quizId, completedHint) {
+  const cell = document.getElementById(`race-cta-${quizId}`);
+  if (!cell) return;
+  const quizMeta = exposedClassQuizzes.find(q => q.id === quizId);
+  const completed = completedHint !== undefined ? completedHint : (quizMeta ? quizMeta.race_completed : false);
+  const href = `${QUIZ_RACE_PLAY_PATH}?classId=${classId}&quizId=${quizId}`;
+
+  if (completed) {
+    cell.innerHTML = `<a class="btn-race-cta done" href="${href}" target="_blank">✅ View Result</a>`;
+  } else if (liveRaceByQuiz[quizId]) {
+    cell.innerHTML = `<a class="btn-race-cta live" href="${href}" target="_blank">🔴 Join Race Now</a>`;
+  } else {
+    cell.innerHTML = `<a class="btn-race-cta idle" href="${href}" target="_blank">🏁 Waiting to Start</a>`;
+  }
 }
 
 function showQuizBanner(quiz) {
   const banner = document.getElementById('quizBanner');
-  document.getElementById('quizBannerTitle').textContent = `New quiz: "${quiz.title}"`;
-  document.getElementById('quizBannerSub').textContent   = `Your teacher just assigned a quiz with ${quiz.question_count} question${quiz.question_count !== 1 ? 's' : ''}. Give it a go!`;
-  document.getElementById('quizBannerBtn').href = `${QUIZ_PLAY_PATH}?id=${quiz.id}&classId=${classId}`;
+  const isRacing = quiz.mode === 'racing';
+  document.getElementById('quizBannerTitle').textContent = `New ${isRacing ? 'racing ' : ''}quiz: "${quiz.title}"`;
+  document.getElementById('quizBannerSub').textContent = isRacing
+    ? `Your teacher assigned a live racing quiz with ${quiz.question_count} question${quiz.question_count !== 1 ? 's' : ''}. It'll begin once your teacher starts it — one attempt only!`
+    : `Your teacher just assigned a quiz with ${quiz.question_count} question${quiz.question_count !== 1 ? 's' : ''}. Give it a go!`;
+  document.getElementById('quizBannerBtn').href = isRacing
+    ? `${QUIZ_RACE_PLAY_PATH}?classId=${classId}&quizId=${quiz.id}`
+    : `${QUIZ_PLAY_PATH}?id=${quiz.id}&classId=${classId}`;
+  document.getElementById('quizBannerBtn').textContent = isRacing ? '🏁 Get Ready' : '📝 Take Quiz';
   banner.classList.add('show');
   setTimeout(() => banner.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
 }
