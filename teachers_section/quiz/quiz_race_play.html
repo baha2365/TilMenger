@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quizzz — Race</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple-deep: #3d1e8e;
+    --purple-dark: #5a35cc;
+    --purple-mid:  #7c4dff;
+    --purple-bg:   #6c3de0;
+    --yellow:      #ffd740;
+    --yellow-dark: #e6b800;
+    --green:       #2ecc71;
+    --red:         #e21b3c;
+    --border:      rgba(255,255,255,0.15);
+    --text-muted:  rgba(255,255,255,0.60);
+    --gold-1: #FFD75E; --gold-2: #C9A227;
+    --sil-1:  #E7ECF2; --sil-2:  #9AA5B1;
+    --brz-1:  #E3A063; --brz-2:  #A5652D;
+  }
+  html, body { height:100%; width:100%; overflow:hidden; background:#5a35cc; }
+  #root {
+    font-family:'Nunito',sans-serif; background:#7c4dff;
+    height:100dvh; height:100vh; width:100%; max-width:700px; margin:0 auto;
+    overflow-y:auto; position:relative; display:flex; flex-direction:column;
+  }
+  .header { background:#6c3de0; padding:12px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .logo { font-size:18px; font-weight:900; color:#fff; letter-spacing:-.5px; flex-shrink:0; }
+  .logo span { color:var(--yellow); }
+  .back-btn {
+    background:rgba(255,255,255,0.12); border:none; border-radius:8px; color:#fff; font-size:18px;
+    width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    flex-shrink:0; line-height:1; font-family:sans-serif; transition:background .15s;
+  }
+  .back-btn:hover { background:rgba(255,255,255,0.22); }
+  .header-fill { flex:1; }
+  .rank-pill {
+    background:var(--yellow); color:var(--purple-deep); font-weight:900; font-size:12px;
+    padding:5px 12px; border-radius:20px; white-space:nowrap; flex-shrink:0; display:none;
+  }
+
+  .screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px 22px; text-align:center; gap:16px; min-height:0; }
+  .spinner { width:40px; height:40px; border:4px solid rgba(255,255,255,.15); border-top-color:var(--yellow); border-radius:50%; animation:spin .75s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg);} }
+  .em { font-size:52px; line-height:1; }
+  .h1 { font-size:clamp(19px,5vw,26px); font-weight:900; color:#fff; line-height:1.3; max-width:420px; }
+  .p1 { font-size:14px; font-weight:700; color:var(--text-muted); max-width:340px; line-height:1.55; }
+  .meta-pill { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.18); border-radius:16px; padding:10px 26px; font-size:14px; font-weight:800; color:var(--yellow); }
+  .btn {
+    background:var(--yellow); color:var(--purple-deep); border:none; border-radius:40px; padding:14px 44px;
+    font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; cursor:pointer; transition:transform .12s,background .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover { transform:scale(1.04); background:var(--yellow-dark); }
+  .btn:active { transform:scale(.96); }
+  .btn-ghost {
+    background:rgba(255,255,255,0.14); color:#fff; border:1px solid rgba(255,255,255,.22); border-radius:40px;
+    padding:12px 30px; font-family:'Nunito',sans-serif; font-size:14px; font-weight:800; cursor:pointer; transition:all .15s;
+  }
+  .btn-ghost:hover { background:rgba(255,255,255,.22); }
+  .pulse-dot { width:9px; height:9px; border-radius:50%; background:var(--green); animation:pulse 1.3s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(46,204,113,.6);} 50%{box-shadow:0 0 0 7px rgba(46,204,113,0);} }
+  .lobby-row { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; color:var(--yellow); }
+
+  /* ── QUESTION SCREEN ── */
+  #screenPlay { display:none; flex:1; flex-direction:column; min-height:0; padding:0; }
+  .timer-wrap { flex-shrink:0; padding:10px 20px 0; }
+  .timer-bar-bg { height:8px; background:rgba(255,255,255,.18); border-radius:20px; overflow:hidden; }
+  .timer-bar { height:100%; background:var(--yellow); border-radius:20px; transition:width .1s linear; }
+  .qmeta { display:flex; justify-content:space-between; align-items:center; padding:8px 20px 0; font-size:11px; font-weight:800; color:rgba(255,255,255,.7); text-transform:uppercase; letter-spacing:.6px; }
+  .question-area { flex-shrink:0; padding:14px 20px 8px; text-align:center; }
+  .question-text { font-size:clamp(15px,4vw,24px); font-weight:800; color:#fff; line-height:1.35; }
+  .answers-grid { flex:1; display:grid; gap:10px; padding:8px 14px 14px; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; min-height:0; }
+  .answers-grid.count-2 { grid-template-rows:1fr; }
+  .answers-grid.count-3 { grid-template-rows:1fr 1fr; }
+  .answers-grid.count-5 { grid-template-rows:1fr 1fr 1fr; }
+  .answers-grid.count-3 .answer-btn:nth-child(3), .answers-grid.count-5 .answer-btn:nth-child(5) { grid-column:1/-1; }
+  .answer-btn {
+    border:none; border-radius:14px; padding:12px 14px; font-family:'Nunito',sans-serif; font-size:clamp(13px,3.5vw,17px);
+    font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .12s,opacity .2s;
+    width:100%; height:100%; min-height:52px; text-align:center; color:#fff; line-height:1.25; position:relative; overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .answer-btn:hover:not(:disabled) { transform:scale(1.03); }
+  .answer-btn:active:not(:disabled) { transform:scale(.97); }
+  .answer-btn:disabled { cursor:default; }
+  .color-0 { background:#e21b3c; } .color-1 { background:#1368ce; } .color-2 { background:#26890c; } .color-3 { background:#e5a000; } .color-4 { background:#7c4dff; }
+  .answer-btn.correct { background:#2ecc71 !important; animation:pop .5s ease forwards; }
+  .answer-btn.wrong   { background:#e74c3c !important; animation:shake .6s ease forwards; }
+  .answer-btn.gone    { opacity:0; pointer-events:none; }
+  @keyframes pop { 0%{transform:scale(1);} 30%{transform:scale(1.08);} 60%{transform:scale(.97);} 100%{transform:scale(1);} }
+  @keyframes shake { 10%{transform:translateX(-7px);} 25%{transform:translateX(7px);} 40%{transform:translateX(-6px);} 55%{transform:translateX(5px);} 70%{transform:translateX(-3px);} 100%{transform:translateX(0);} }
+  .feedback-bar { text-align:center; padding:6px 16px 2px; font-size:clamp(13px,3.5vw,16px); font-weight:800; opacity:0; transition:opacity .2s; min-height:46px; flex-shrink:0; }
+  .feedback-bar.show { opacity:1; }
+  .feedback-bar.ok  { color:var(--green); }
+  .feedback-bar.bad { color:#ff6b6b; }
+  .feedback-pts { display:block; font-size:12px; color:var(--yellow); margin-top:2px; }
+
+  /* ── FINISHED / WAITING FOR OTHERS ── */
+  #screenFinishedWaiting { display:none; }
+  .my-score-box { background:rgba(255,255,255,.13); border-radius:20px; padding:20px 40px; }
+  .my-score-big { font-size:clamp(38px,11vw,52px); font-weight:900; color:var(--yellow); line-height:1; }
+  .my-score-label { font-size:12px; color:var(--text-muted); font-weight:700; margin-top:4px; }
+
+  /* ── RESULTS / PODIUM ── */
+  #screenResults { display:none; padding:24px 18px 40px; }
+  .podium { display:flex; align-items:flex-end; justify-content:center; gap:.8rem; margin:18px 0 22px; }
+  .podium-slot { display:flex; flex-direction:column; align-items:center; gap:.5rem; width:100px; }
+  .podium-avatar { width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem; color:#1a1408; border:3px solid rgba(255,255,255,.3); }
+  .podium-crown { font-size:1.3rem; margin-bottom:-.3rem; }
+  .podium-name { font-size:.78rem; font-weight:800; color:#fff; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:96px; }
+  .podium-score { font-size:.74rem; font-weight:800; color:var(--yellow); }
+  .podium-pedestal { width:100%; border-radius:10px 10px 0 0; display:flex; align-items:flex-start; justify-content:center; padding-top:.4rem; font-weight:900; font-size:1.2rem; color:rgba(0,0,0,.5); }
+  .pd-1 .podium-avatar { background:linear-gradient(135deg,var(--gold-1),var(--gold-2)); }
+  .pd-1 .podium-pedestal { height:95px; background:linear-gradient(180deg,var(--gold-1),var(--gold-2)); }
+  .pd-2 .podium-avatar { background:linear-gradient(135deg,var(--sil-1),var(--sil-2)); }
+  .pd-2 .podium-pedestal { height:68px; background:linear-gradient(180deg,var(--sil-1),var(--sil-2)); }
+  .pd-3 .podium-avatar { background:linear-gradient(135deg,var(--brz-1),var(--brz-2)); }
+  .pd-3 .podium-pedestal { height:50px; background:linear-gradient(180deg,var(--brz-1),var(--brz-2)); }
+  .pd-2 { order:1; } .pd-1 { order:2; } .pd-3 { order:3; }
+  .my-place-banner {
+    text-align:center; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.2); border-radius:16px;
+    padding:14px 18px; margin-bottom:18px; font-weight:800; color:#fff; font-size:14px;
+  }
+  .my-place-banner b { color:var(--yellow); font-size:1.15em; }
+  .results-list { background:rgba(0,0,0,.16); border-radius:14px; overflow:hidden; }
+  .results-row { display:grid; grid-template-columns:34px 1fr 60px; align-items:center; gap:.6rem; padding:.65rem 1rem; border-bottom:1px solid rgba(255,255,255,.08); font-size:.82rem; }
+  .results-row:last-child { border-bottom:none; }
+  .results-row.head { color:var(--text-muted); font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em; background:rgba(0,0,0,.15); }
+  .results-row.me { background:rgba(255,215,64,.12); }
+  .rr-rank { font-weight:900; color:#fff; }
+  .rr-name { font-weight:700; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rr-score { font-weight:900; color:var(--yellow); text-align:right; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="header">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <div class="logo">quiz<span>zz</span> · race</div>
+    <div class="header-fill"></div>
+    <div class="rank-pill" id="rankPill">—</div>
+  </div>
+
+  <div id="screenLoading" class="screen"><div class="spinner"></div></div>
+
+  <div id="screenError" class="screen" style="display:none;">
+    <div class="em">⚠️</div>
+    <div class="h1" id="errTitle">Something went wrong</div>
+    <div class="p1" id="errSub"></div>
+    <button class="btn" onclick="goBack()">Back to Class</button>
+  </div>
+
+  <div id="screenAlreadyDone" class="screen" style="display:none;">
+    <div class="em">✅</div>
+    <div class="h1">You already raced this one!</div>
+    <div class="p1">Racing quizzes are single-attempt. Here's how you did:</div>
+    <div class="my-score-box">
+      <div class="my-score-big" id="doneScore">0</div>
+      <div class="my-score-label" id="doneMeta">— correct</div>
+    </div>
+    <button class="btn" onclick="viewFullResults()">🏆 View Full Leaderboard</button>
+    <button class="btn-ghost" onclick="goBack()">Back to Class</button>
+  </div>
+
+  <div id="screenWaitingRoom" class="screen" style="display:none;">
+    <div class="em">🏁</div>
+    <div class="h1" id="waitTitle">Get ready to race!</div>
+    <div class="p1">Waiting for your teacher to start the race. Stay on this page — it'll begin automatically.</div>
+    <div class="meta-pill" id="waitMeta">— questions</div>
+    <div class="lobby-row"><span class="pulse-dot"></span> You're in the lobby</div>
+  </div>
+
+  <div id="screenPlay">
+    <div class="timer-wrap"><div class="timer-bar-bg"><div class="timer-bar" id="timerBar"></div></div></div>
+    <div class="qmeta"><span id="qNum">Question 1</span><span id="qScore">⭐ 0</span></div>
+    <div class="question-area"><div class="question-text" id="qText"></div></div>
+    <div class="answers-grid" id="answersGrid"></div>
+    <div class="feedback-bar" id="feedback"></div>
+  </div>
+
+  <div id="screenFinishedWaiting" class="screen">
+    <div class="em">🎉</div>
+    <div class="h1">Nice work — you're done!</div>
+    <div class="p1">Hang tight while everyone else finishes up…</div>
+    <div class="my-score-box">
+      <div class="my-score-big" id="finalScorePreview">0</div>
+      <div class="my-score-label">YOUR SCORE</div>
+    </div>
+  </div>
+
+  <div id="screenResults">
+    <div style="text-align:center;">
+      <div class="em">🏆</div>
+      <div class="h1">Race Complete!</div>
+    </div>
+    <div class="my-place-banner" id="myPlaceBanner"></div>
+    <div class="podium" id="podium"></div>
+    <div class="results-list" id="resultsList"></div>
+    <div style="text-align:center;margin-top:20px;">
+      <button class="btn" onclick="goBack()">← Back to Class</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../config.js"></script>
+<script>
+const token = () => localStorage.getItem('token');
+const authH = () => ({ 'Content-Type':'application/json', 'Authorization':`Bearer ${token()}` });
+
+const params  = new URLSearchParams(window.location.search);
+const classId = params.get('classId');
+const quizId  = params.get('quizId');
+
+function goBack() {
+  window.location.href = `../../student_class_details.html?id=${encodeURIComponent(classId || '')}`;
+}
+
+const SCREEN_DISPLAY = {
+  screenLoading: 'flex', screenError: 'flex', screenAlreadyDone: 'flex',
+  screenWaitingRoom: 'flex', screenPlay: 'flex', screenFinishedWaiting: 'flex',
+  screenResults: 'block',
+};
+function showScreen(id) {
+  Object.keys(SCREEN_DISPLAY).forEach(s => {
+    document.getElementById(s).style.display = (s === id) ? SCREEN_DISPLAY[s] : 'none';
+  });
+}
+function showError(title, sub) {
+  document.getElementById('errTitle').textContent = title;
+  document.getElementById('errSub').textContent = sub || '';
+  showScreen('screenError');
+}
+function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function initials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : parts[0].slice(0,2).toUpperCase();
+}
+
+let mySessionIdForResults = null; // used by the "already completed" screen
+
+/* ══════════════════════════════════════
+   RACE STATE
+══════════════════════════════════════ */
+let socket = null;
+let sessionId = null;
+let questions = [];       // [{id, question_text, answers:[{id,answer_text}]}]
+let qIndex = 0;
+let myScore = 0;
+let questionStartTs = 0;
+let timerRaf = null;
+let awaitingResult = false;
+const QUESTION_TIME_MS = 20000;
+
+async function init() {
+  const t = localStorage.getItem('token');
+  const r = localStorage.getItem('role_id');
+  if (!t)        { window.location.href = '../../index.html'; return; }
+  if (r !== '1') { window.location.href = '../../dashboard.html'; return; }
+  if (!classId || !quizId) { goBack(); return; }
+
+  try {
+    const myResRes = await fetch(`${LINGUA.race}/classes/${classId}/quizzes/${quizId}/my-result`, { headers: authH() });
+    const myRes = await myResRes.json();
+    if (!myResRes.ok) { showError('Could not check your status.', myRes.message || ''); return; }
+
+    if (myRes.hasPlayed) {
+      mySessionIdForResults = myRes.result.session_id;
+      document.getElementById('doneScore').textContent = myRes.result.score;
+      document.getElementById('doneMeta').textContent = `${myRes.result.correct_count}/${myRes.result.total_answered} correct`;
+      showScreen('screenAlreadyDone');
+      return;
+    }
+  } catch {
+    showError('Network error.', 'Could not reach the server.');
+    return;
+  }
+
+  // Load question content (race-safe — no answer key included)
+  try {
+    const qRes  = await fetch(`${LINGUA.race}/classes/${classId}/quizzes/${quizId}/questions`, { headers: authH() });
+    const qData = await qRes.json();
+    if (!qRes.ok || !qData.success) { showError('Could not load quiz.', qData.message || ''); return; }
+    questions = qData.questions;
+  } catch {
+    showError('Network error.', 'Could not reach the server.');
+    return;
+  }
+
+  showScreen('screenLoading');
+  connectSocket();
+}
+
+function connectSocket() {
+  const s = document.createElement('script');
+  s.src = `${LINGUA.base}/socket.io/socket.io.js`;
+  document.head.appendChild(s);
+  s.onload = () => {
+    socket = io(LINGUA.base, { transports: ['websocket','polling'] });
+
+    socket.on('connect', async () => {
+      // Resolve whether a session already exists; if not, sit in the class
+      // room and wait for the teacher to start one.
+      try {
+        const res  = await fetch(`${LINGUA.race}/classes/${classId}/quizzes/${quizId}/session`, { headers: authH() });
+        const data = await res.json();
+        if (data.success && data.session) {
+          sessionId = data.session.id;
+          socket.emit('race_join', { sessionId, token: token() });
+        } else {
+          document.getElementById('waitMeta').textContent = `${questions.length} question${questions.length !== 1 ? 's' : ''}`;
+          showScreen('screenWaitingRoom');
+          socket.emit('join_game', { classId, token: token() }); // reuse existing class-room join
+        }
+      } catch {
+        showError('Network error.', 'Could not reach the server.');
+      }
+    });
+
+    socket.on('race_started', ({ classId: gClassId, quizId: gQuizId, sessionId: sid }) => {
+      if (gClassId !== classId || String(gQuizId) !== String(quizId)) return;
+      sessionId = sid;
+      socket.emit('race_join', { sessionId, token: token() });
+    });
+
+    socket.on('race_state', ({ session }) => {
+      if (session.status === 'waiting') {
+        document.getElementById('waitTitle').textContent = `You're in! "${session.quizTitle}"`;
+        document.getElementById('waitMeta').textContent = `${session.questionCount} question${session.questionCount !== 1 ? 's' : ''}`;
+        showScreen('screenWaitingRoom');
+      } else if (session.status === 'active') {
+        beginPlaying();
+      } else {
+        fetchAndShowResults();
+      }
+    });
+
+    socket.on('race_begin', () => beginPlaying());
+
+    socket.on('race_answer_result', ({ isCorrect, points, totalScore }) => {
+      awaitingResult = false;
+      myScore = totalScore;
+      const fb = document.getElementById('feedback');
+      if (isCorrect) {
+        fb.innerHTML = `🎉 Correct!<span class="feedback-pts">+${points} points</span>`;
+        fb.className = 'feedback-bar show ok';
+      } else {
+        fb.innerHTML = `❌ Not quite.<span class="feedback-pts">+0 points</span>`;
+        fb.className = 'feedback-bar show bad';
+      }
+      setTimeout(nextQuestion, 1300);
+    });
+
+    socket.on('race_leaderboard_update', ({ leaderboard }) => {
+      const meId = getMyUserId();
+      const mine = leaderboard.find(p => p.studentId === meId);
+      if (mine) {
+        const pill = document.getElementById('rankPill');
+        pill.textContent = `#${mine.rank}`;
+        pill.style.display = 'block';
+      }
+    });
+
+    socket.on('race_ended', () => fetchAndShowResults());
+
+    socket.on('error', ({ message }) => {
+      // Non-fatal (e.g. dup join) — surface only if we're stuck loading
+      if (document.getElementById('screenLoading').style.display !== 'none') {
+        showError('Could not join the race.', message || '');
+      }
+    });
+  };
+}
+
+function getMyUserId() {
+  try {
+    const t = token();
+    const payload = JSON.parse(atob(t.split('.')[1]));
+    return Number(payload.sub);
+  } catch { return null; }
+}
+
+/* ══════════════════════════════════════
+   PLAY LOOP
+══════════════════════════════════════ */
+function beginPlaying() {
+  qIndex = 0;
+  myScore = 0;
+  showScreen('screenPlay');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (qIndex >= questions.length) { finishRace(); return; }
+
+  const q = questions[qIndex];
+  const cnt = q.answers.length;
+  document.getElementById('qNum').textContent = `Question ${qIndex + 1} / ${questions.length}`;
+  document.getElementById('qScore').textContent = `⭐ ${myScore}`;
+  document.getElementById('qText').textContent = q.question_text;
+  document.getElementById('feedback').className = 'feedback-bar';
+  document.getElementById('feedback').innerHTML = '';
+
+  const grid = document.getElementById('answersGrid');
+  grid.className = `answers-grid count-${cnt}`;
+  grid.innerHTML = q.answers.map((a, i) => `
+    <button class="answer-btn color-${i}" id="ans-${a.id}" onclick="selectAnswer(${a.id})">${escHtml(a.answer_text)}</button>
+  `).join('');
+
+  awaitingResult = false;
+  questionStartTs = performance.now();
+  runTimer();
+}
+
+function runTimer() {
+  const bar = document.getElementById('timerBar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  // force reflow so the transition re-applies
+  void bar.offsetWidth;
+  bar.style.transition = `width ${QUESTION_TIME_MS}ms linear`;
+  bar.style.width = '0%';
+
+  if (timerRaf) clearTimeout(timerRaf);
+  timerRaf = setTimeout(() => {
+    if (!awaitingResult && document.getElementById('screenPlay').style.display !== 'none') {
+      submitAnswer(null);
+    }
+  }, QUESTION_TIME_MS + 50);
+}
+
+function selectAnswer(answerId) {
+  if (awaitingResult) return;
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+  const btn = document.getElementById(`ans-${answerId}`);
+  if (btn) btn.style.transform = 'scale(0.95)';
+  submitAnswer(answerId);
+}
+
+function submitAnswer(answerId) {
+  if (awaitingResult) return;
+  awaitingResult = true;
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+  const timeMs = Math.round(performance.now() - questionStartTs);
+  const q = questions[qIndex];
+  socket.emit('race_answer', { sessionId, token: token(), questionId: q.id, answerId, timeMs });
+}
+
+function nextQuestion() {
+  qIndex += 1;
+  if (qIndex >= questions.length) { finishRace(); return; }
+  renderQuestion();
+}
+
+function finishRace() {
+  if (timerRaf) clearTimeout(timerRaf);
+  document.getElementById('finalScorePreview').textContent = myScore;
+  showScreen('screenFinishedWaiting');
+  socket.emit('race_finish', { sessionId, token: token() });
+}
+
+/* ══════════════════════════════════════
+   RESULTS
+══════════════════════════════════════ */
+async function fetchAndShowResults() {
+  const sid = sessionId || mySessionIdForResults;
+  if (!sid) return;
+  try {
+    const res  = await fetch(`${LINGUA.race}/sessions/${sid}/results`, { headers: authH() });
+    const data = await res.json();
+    if (!res.ok || !data.success) { showError('Could not load results.', data.message || ''); return; }
+    renderResults(data.leaderboard, data.podium);
+    showScreen('screenResults');
+  } catch {
+    showError('Network error.', 'Could not load results.');
+  }
+}
+
+function viewFullResults() {
+  fetchAndShowResults();
+}
+
+function renderResults(leaderboard, podium) {
+  const meId = getMyUserId();
+  const mine = leaderboard.find(p => p.studentId === meId);
+
+  const banner = document.getElementById('myPlaceBanner');
+  if (mine) {
+    const ord = mine.rank === 1 ? 'st' : mine.rank === 2 ? 'nd' : mine.rank === 3 ? 'rd' : 'th';
+    banner.innerHTML = `You placed <b>${mine.rank}${ord}</b> with <b>${mine.score}</b> points!`;
+  } else {
+    banner.style.display = 'none';
+  }
+
+  const podiumEl = document.getElementById('podium');
+  const order = [1, 0, 2];
+  podiumEl.innerHTML = order.map(i => {
+    const p = podium[i];
+    if (!p) return '';
+    const place = i + 1;
+    return `
+      <div class="podium-slot pd-${place}">
+        ${place === 1 ? '<div class="podium-crown">👑</div>' : ''}
+        <div class="podium-avatar">${initials(p.name)}</div>
+        <div class="podium-name">${escHtml(p.name)}</div>
+        <div class="podium-score">${p.score} pts</div>
+        <div class="podium-pedestal">${place}</div>
+      </div>`;
+  }).join('');
+
+  const list = document.getElementById('resultsList');
+  const rest = leaderboard.slice(3);
+  let html = `<div class="results-row head"><div>#</div><div>Student</div><div style="text-align:right;">Score</div></div>`;
+  if (rest.length) {
+    html += rest.map(p => `
+      <div class="results-row ${p.studentId === meId ? 'me' : ''}">
+        <div class="rr-rank">${p.rank}</div>
+        <div class="rr-name">${escHtml(p.name)}${p.studentId === meId ? ' (You)' : ''}</div>
+        <div class="rr-score">${p.score}</div>
+      </div>`).join('');
+  }
+  list.innerHTML = html;
+}
+
+init();
+</script>
+</body>
+</html>
