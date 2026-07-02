@@ -10,11 +10,12 @@
 //    const VOCAB = LINGUA.vocab;
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Render URL: https://ai-english-teacher-o9m4.onrender.com
 // ngrok url: https://ravine-decrease-staleness.ngrok-free.dev
 // localhost url: http://localhost:3030
 
 const LINGUA = (() => {
-  const base = 'http://localhost:3030';
+  const base = 'https://ai-english-teacher-o9m4.onrender.com';
 
   return {
     base,
