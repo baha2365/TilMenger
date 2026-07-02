@@ -586,7 +586,7 @@
           Your teacher has started a live board game for this class. Join now to play!
         </div>
       </div>
-      <a class="btn-join-game" id="joinGameBtn" href="#" target="_blank">
+      <a class="btn-join-game" id="joinGameBtn" href="#">
         🎮 Join Game
       </a>
     </div>
@@ -607,7 +607,7 @@
       <div class="game-banner-title" id="readingBannerTitle">A new reading task is available!</div>
       <div class="game-banner-sub" id="readingBannerSub">Your teacher just assigned a reading task — give it a go!</div>
     </div>
-    <a class="btn-join-game" id="readingBannerBtn" href="#" target="_blank"
+    <a class="btn-join-game" id="readingBannerBtn" href="#"
       style="background:linear-gradient(135deg,var(--reading),#1F7A6E);box-shadow:0 4px 20px var(--reading-glow),inset 0 1px 0 rgba(255,255,255,0.12);">
       📖 Start Reading
     </a>
@@ -648,7 +648,7 @@
       <div class="game-banner-title" id="quizBannerTitle">A new quiz is available!</div>
       <div class="game-banner-sub" id="quizBannerSub">Your teacher just assigned a quiz — give it a go!</div>
     </div>
-    <a class="btn-join-game" id="quizBannerBtn" href="#" target="_blank"
+    <a class="btn-join-game" id="quizBannerBtn" href="#"
       style="background:linear-gradient(135deg,var(--quiz),#3450C2);box-shadow:0 4px 20px var(--quiz-glow),inset 0 1px 0 rgba(255,255,255,0.12);">
       📝 Take Quiz
     </a>
@@ -1076,7 +1076,7 @@ function renderReadingTasks() {
       <div class="reading-level ${t.level}">${t.level}</div>
       <div class="reading-qcount">❓ ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
       <a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,var(--reading),#1F7A6E);box-shadow:none;"
-         href="${READING_PLAY_PATH}?id=${t.id}" target="_blank">📖 Start</a>
+         href="${READING_PLAY_PATH}?id=${t.id}">📖 Start</a>
     </div>`).join('');
 }
 
@@ -1136,7 +1136,7 @@ function renderClassQuizzes() {
       <span class="quiz-mode-tag casual">📝 Casual</span>
       <div class="quiz-qcount">❓ ${q.question_count} question${q.question_count !== 1 ? 's' : ''}</div>
       <a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,var(--quiz),#3450C2);box-shadow:none;"
-         href="${QUIZ_PLAY_PATH}?id=${q.id}&classId=${classId}" target="_blank">📝 Play</a>
+         href="${QUIZ_PLAY_PATH}?id=${q.id}&classId=${classId}">📝 Play</a>
     </div>`;
   }).join('');
 
@@ -1164,11 +1164,11 @@ function updateQuizRowRaceCta(quizId, completedHint) {
   const href = `${QUIZ_RACE_PLAY_PATH}?classId=${classId}&quizId=${quizId}`;
 
   if (completed) {
-    cell.innerHTML = `<a class="btn-race-cta done" href="${href}" target="_blank">✅ View Result</a>`;
+    cell.innerHTML = `<a class="btn-race-cta done" href="${href}">✅ View Result</a>`;
   } else if (liveRaceByQuiz[quizId]) {
-    cell.innerHTML = `<a class="btn-race-cta live" href="${href}" target="_blank">🔴 Join Race Now</a>`;
+    cell.innerHTML = `<a class="btn-race-cta live" href="${href}">🔴 Join Race Now</a>`;
   } else {
-    cell.innerHTML = `<a class="btn-race-cta idle" href="${href}" target="_blank">🏁 Waiting to Start</a>`;
+    cell.innerHTML = `<a class="btn-race-cta idle" href="${href}">🏁 Waiting to Start</a>`;
   }
 }
 
