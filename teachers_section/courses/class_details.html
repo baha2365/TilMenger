@@ -1325,7 +1325,7 @@ async function checkAllRaceStatuses() {
 function updateQuizRowRaceControls(quizId) {
   const cell = document.getElementById(`race-actions-${quizId}`);
   if (!cell) return; // row not rendered (or it's a casual quiz) — nothing to do
-  const monitorHref = `race_monitor.html?classId=${classId}&quizId=${quizId}&courseId=${courseId}`;
+  const monitorHref = `../quiz/race_monitor.html?classId=${classId}&quizId=${quizId}&courseId=${courseId}`;
   const removeBtn = `<button class="btn-ghost-sm danger" onclick="removeClassQuiz(${quizId})" title="Remove">×</button>`;
   if (liveRaceByQuiz[quizId]) {
     cell.innerHTML = `<a class="btn-monitor-race-sm" href="${monitorHref}" target="_blank">📡 Monitor Live</a>${removeBtn}`;
@@ -1342,7 +1342,7 @@ async function startRace(quizId) {
     liveRaceByQuiz[quizId] = true;
     updateQuizRowRaceControls(quizId);
     showFeedback('Race started! Students will be notified.', 'ok');
-    window.open(`race_monitor.html?classId=${classId}&quizId=${quizId}&sessionId=${data.session.id}&courseId=${courseId}`, '_blank');
+    window.open(`../quiz/race_monitor.html?classId=${classId}&quizId=${quizId}&sessionId=${data.session.id}&courseId=${courseId}`, '_blank');
   } catch {
     showFeedback('Server error.', 'err');
   }

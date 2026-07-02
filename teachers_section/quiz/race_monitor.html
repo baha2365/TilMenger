@@ -273,7 +273,7 @@ const classId = params.get('classId');
 const quizId  = params.get('quizId');
 let   sessionId = params.get('sessionId') || null;
 
-const backHref = `class_details.html?courseId=${encodeURIComponent(params.get('courseId') || '')}&id=${encodeURIComponent(classId || '')}`;
+const backHref = `../courses/class_details.html?courseId=${encodeURIComponent(params.get('courseId') || '')}&id=${encodeURIComponent(classId || '')}`;
 document.getElementById('navBack').href = backHref;
 document.getElementById('brandLink').href = backHref;
 document.getElementById('backToClassBtn').href = backHref;
