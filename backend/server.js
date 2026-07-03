@@ -68,9 +68,15 @@ app.use('/api/ai-teacher', aiTeacherRoutes);
 app.use('/api/pronunciation', pronunciationRoutes);
 
 // ─── Static files ─────────────────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, '..')));
+app.use(
+  express.static(path.join(__dirname, '..'), {
+    index: false
+  })
+);
 
-app.get('/', (_req, res) => res.sendFile(path.join(__dirname, '..', 'landing_page.html')));
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'landing_page.html'));
+});
 
 app.use(
   '/uploads',
