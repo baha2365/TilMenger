@@ -275,6 +275,7 @@ async function init() {
       document.getElementById('doneScore').textContent = myRes.result.score;
       document.getElementById('doneMeta').textContent = `${myRes.result.correct_count}/${myRes.result.total_answered} correct`;
       showScreen('screenAlreadyDone');
+      listenForFreshRace();
       return;
     }
   } catch {
@@ -295,6 +296,29 @@ async function init() {
 
   showScreen('screenLoading');
   connectSocket();
+}
+
+// While parked on the "already completed" screen, quietly listen for the
+// teacher starting a fresh round of this quiz, and re-check automatically
+// instead of making the student manually reload the page.
+let idleListenerSocket = null;
+function listenForFreshRace() {
+  if (idleListenerSocket) return; // already listening
+  const s = document.createElement('script');
+  s.src = `${LINGUA.base}/socket.io/socket.io.js`;
+  document.head.appendChild(s);
+  s.onload = () => {
+    idleListenerSocket = io(LINGUA.base, { transports: ['websocket', 'polling'] });
+    idleListenerSocket.on('connect', () => {
+      idleListenerSocket.emit('join_game', { classId, token: token() }); // reuse existing class-room join
+    });
+    idleListenerSocket.on('race_started', ({ classId: gClassId, quizId: gQuizId } = {}) => {
+      if (gClassId !== classId || String(gQuizId) !== String(quizId)) return;
+      idleListenerSocket.disconnect();
+      idleListenerSocket = null;
+      init(); // re-check my-result — it'll now correctly resolve to the fresh round
+    });
+  };
 }
 
 function connectSocket() {
