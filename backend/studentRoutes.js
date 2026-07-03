@@ -171,9 +171,15 @@ router.get('/classes/:id/quizzes', authenticate, authorizeRole(ROLE_IDS.student)
               EXISTS (
                 SELECT 1
                   FROM quiz_race_participants qrp
-                  JOIN quiz_race_sessions qrs ON qrs.id = qrp.session_id
-                 WHERE qrs.class_id = cqa.class_id AND qrs.quiz_id = cqa.quiz_id
-                   AND qrp.student_id = $2 AND qrp.finished_at IS NOT NULL
+                 WHERE qrp.student_id = $2
+                   AND qrp.finished_at IS NOT NULL
+                   AND qrp.session_id = (
+                     SELECT qrs2.id FROM quiz_race_sessions qrs2
+                      WHERE qrs2.class_id = cqa.class_id AND qrs2.quiz_id = cqa.quiz_id
+                        AND qrs2.created_at >= cqa.assigned_at
+                      ORDER BY qrs2.created_at DESC
+                      LIMIT 1
+                   )
               ) AS race_completed
          FROM class_quiz_assignments cqa
          JOIN quizzes q ON q.id = cqa.quiz_id
