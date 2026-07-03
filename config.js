@@ -15,7 +15,7 @@
 // localhost url: http://localhost:3030
 
 const LINGUA = (() => {
-  const base = 'http://localhost:3030';
+  const base = 'https://ai-english-teacher-o9m4.onrender.com';
 
   return {
     base,
