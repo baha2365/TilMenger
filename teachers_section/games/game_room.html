@@ -426,7 +426,7 @@ const classId = params.get('classId');
 // teacher class_details  → ../class_details.html
 // student class details  → ../../../student_class_details.html
 const backUrl = isTeacher
-  ? `../class_details.html?courseId=${params.get('courseId')}&id=${classId}`
+  ? `../courses/class_details.html?courseId=${params.get('courseId')}&id=${classId}`
   : `../../../student_class_details.html?id=${classId}`;
 
 document.getElementById('navBack').href = backUrl;
