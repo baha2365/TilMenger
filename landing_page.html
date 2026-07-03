@@ -13,28 +13,30 @@
            CSS VARIABLES & RESET
         ======================================== */
         :root {
-            --primary: #00C897;
-            --primary-dark: #00A67D;
-            --primary-light: #E6FAF3;
-            --secondary: #1E293B;
-            --accent: #FF6B6B;
-            --accent-warm: #FFB347;
-            --blue: #4A90D9;
-            --blue-light: #EBF4FD;
-            --purple: #9B6DD7;
-            --purple-light: #F3EEFB;
-            --text: #1E293B;
-            --text-light: #64748B;
-            --text-lighter: #94A3B8;
-            --bg: #FFFFFF;
-            --bg-warm: #FEF9F3;
-            --bg-green: #F0FDF6;
-            --bg-blue: #F0F7FF;
-            --border: #E2E8F0;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-            --shadow: 0 4px 24px rgba(0,0,0,0.06);
-            --shadow-lg: 0 12px 48px rgba(0,0,0,0.1);
-            --shadow-xl: 0 24px 80px rgba(0,0,0,0.12);
+            --primary: #4C7DFF;
+            --primary-dark: #3563E8;
+            --primary-light: rgba(76,125,255,0.14);
+            --secondary: #05070D;
+            --accent: #C9A961;
+            --accent-warm: #E0B978;
+            --blue: #6EA8FE;
+            --blue-light: rgba(110,168,254,0.14);
+            --purple: #8B93C9;
+            --purple-light: rgba(139,147,201,0.14);
+            --text: #EDEFF5;
+            --text-light: #9AA3B8;
+            --text-lighter: #6B7690;
+            --bg: #0A0D16;
+            --bg-warm: #0D111C;
+            --bg-green: #0B0F1A;
+            --bg-blue: #0C1020;
+            --border: rgba(255,255,255,0.08);
+            --card-bg: #10151F;
+            --card-bg-hover: #141A26;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow: 0 4px 24px rgba(0,0,0,0.35);
+            --shadow-lg: 0 12px 48px rgba(0,0,0,0.45);
+            --shadow-xl: 0 24px 80px rgba(0,0,0,0.6);
             --radius: 16px;
             --radius-lg: 24px;
             --radius-xl: 32px;
@@ -180,9 +182,10 @@
         }
 
         .navbar.scrolled {
-            background: rgba(255,255,255,0.95);
+            background: rgba(8,10,18,0.85);
             backdrop-filter: blur(20px);
             box-shadow: var(--shadow);
+            border-bottom: 1px solid var(--border);
             padding: 12px 0;
         }
 
@@ -275,13 +278,13 @@
         .btn-primary {
             background: var(--primary);
             color: white;
-            box-shadow: 0 4px 16px rgba(0,200,151,0.35);
+            box-shadow: 0 4px 16px rgba(76,125,255,0.35);
         }
 
         .btn-primary:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,200,151,0.45);
+            box-shadow: 0 8px 24px rgba(76,125,255,0.5);
         }
 
         .btn-outline {
@@ -297,12 +300,15 @@
         }
 
         .btn-white {
-            background: white;
-            color: var(--primary);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(201,169,97,0.4);
+            color: var(--accent);
             box-shadow: var(--shadow);
         }
 
         .btn-white:hover {
+            background: rgba(201,169,97,0.1);
+            border-color: var(--accent);
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
@@ -336,7 +342,10 @@
             display: flex;
             align-items: center;
             padding: 120px 0 80px;
-            background: var(--bg-green);
+            background:
+                radial-gradient(ellipse 900px 600px at 85% 0%, rgba(76,125,255,0.18), transparent 60%),
+                radial-gradient(ellipse 700px 500px at 0% 100%, rgba(201,169,97,0.08), transparent 60%),
+                var(--bg-green);
             position: relative;
             overflow: hidden;
         }
@@ -344,8 +353,8 @@
         .hero-bg-pattern {
             position: absolute;
             inset: 0;
-            opacity: 0.04;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
 
         .hero-shapes {
@@ -358,7 +367,8 @@
         .hero-shape {
             position: absolute;
             border-radius: 50%;
-            opacity: 0.12;
+            opacity: 0.35;
+            filter: blur(80px);
         }
 
         .hero-shape-1 {
@@ -405,10 +415,13 @@
             align-items: center;
             gap: 8px;
             padding: 8px 20px;
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 100px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
             color: var(--primary);
             box-shadow: var(--shadow);
             margin-bottom: 24px;
@@ -416,7 +429,7 @@
         }
 
         .hero-badge i {
-            color: var(--accent-warm);
+            color: var(--accent);
         }
 
         .hero-title {
@@ -494,7 +507,8 @@
 
         .hero-floating-card {
             position: absolute;
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 16px 20px;
             box-shadow: var(--shadow-lg);
@@ -527,7 +541,7 @@
         }
 
         .floating-card-icon.green { background: var(--primary-light); color: var(--primary); }
-        .floating-card-icon.coral { background: #FFF0F0; color: var(--accent); }
+        .floating-card-icon.coral { background: rgba(201,169,97,0.14); color: var(--accent); }
 
         .floating-card-text {
             font-size: 0.85rem;
@@ -590,9 +604,12 @@
             gap: 8px;
             padding: 8px 20px;
             background: var(--primary-light);
+            border: 1px solid rgba(76,125,255,0.25);
             border-radius: 100px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
             color: var(--primary);
             margin-bottom: 16px;
         }
@@ -623,7 +640,8 @@
         }
 
         .feature-card {
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 40px 32px;
             box-shadow: var(--shadow);
@@ -646,6 +664,8 @@
 
         .feature-card:hover {
             transform: translateY(-8px);
+            background: var(--card-bg-hover);
+            border-color: rgba(76,125,255,0.3);
             box-shadow: var(--shadow-lg);
         }
 
@@ -666,9 +686,9 @@
 
         .feature-icon.green { background: var(--primary-light); color: var(--primary); }
         .feature-icon.blue { background: var(--blue-light); color: var(--blue); }
-        .feature-icon.coral { background: #FFF0F0; color: var(--accent); }
+        .feature-icon.coral { background: rgba(201,169,97,0.14); color: var(--accent); }
         .feature-icon.purple { background: var(--purple-light); color: var(--purple); }
-        .feature-icon.warm { background: #FFF8E7; color: var(--accent-warm); }
+        .feature-icon.warm { background: rgba(224,185,120,0.14); color: var(--accent-warm); }
 
         .feature-title {
             font-size: 1.25rem;
@@ -718,7 +738,8 @@
         .levels-shape {
             position: absolute;
             border-radius: 50%;
-            opacity: 0.06;
+            opacity: 0.18;
+            filter: blur(90px);
         }
 
         .levels-shape-1 {
@@ -746,7 +767,8 @@
         }
 
         .level-card {
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 48px 32px;
             text-align: center;
@@ -821,7 +843,8 @@
 
         .level-topic {
             padding: 6px 14px;
-            background: var(--bg);
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
             border-radius: 100px;
             font-size: 0.8rem;
             font-weight: 500;
@@ -876,12 +899,12 @@
             font-weight: 800;
             margin: 0 auto 20px;
             position: relative;
-            box-shadow: 0 8px 24px rgba(0,200,151,0.3);
+            box-shadow: 0 8px 24px rgba(76,125,255,0.3);
         }
 
-        .step:nth-child(2) .step-number { background: var(--blue); box-shadow: 0 8px 24px rgba(74,144,217,0.3); }
-        .step:nth-child(3) .step-number { background: var(--accent); box-shadow: 0 8px 24px rgba(255,107,107,0.3); }
-        .step:nth-child(4) .step-number { background: var(--purple); box-shadow: 0 8px 24px rgba(155,109,215,0.3); }
+        .step:nth-child(2) .step-number { background: var(--blue); box-shadow: 0 8px 24px rgba(110,168,254,0.3); }
+        .step:nth-child(3) .step-number { background: var(--accent); color: var(--secondary); box-shadow: 0 8px 24px rgba(201,169,97,0.3); }
+        .step:nth-child(4) .step-number { background: var(--purple); box-shadow: 0 8px 24px rgba(139,147,201,0.3); }
 
         .step-title {
             font-size: 1.15rem;
@@ -899,7 +922,9 @@
         ======================================== */
         .teachers {
             padding: 100px 0;
-            background: var(--bg-green);
+            background:
+                radial-gradient(ellipse 800px 500px at 90% 20%, rgba(201,169,97,0.08), transparent 60%),
+                var(--bg-green);
             position: relative;
             overflow: hidden;
         }
@@ -923,7 +948,8 @@
 
         .teacher-floating-card {
             position: absolute;
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 16px 20px;
             box-shadow: var(--shadow-lg);
@@ -974,7 +1000,8 @@
             align-items: center;
             gap: 12px;
             padding: 14px 16px;
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
@@ -998,10 +1025,10 @@
 
         .teacher-tool-icon.green { background: var(--primary-light); color: var(--primary); }
         .teacher-tool-icon.blue { background: var(--blue-light); color: var(--blue); }
-        .teacher-tool-icon.coral { background: #FFF0F0; color: var(--accent); }
+        .teacher-tool-icon.coral { background: rgba(201,169,97,0.14); color: var(--accent); }
         .teacher-tool-icon.purple { background: var(--purple-light); color: var(--purple); }
-        .teacher-tool-icon.warm { background: #FFF8E7; color: var(--accent-warm); }
-        .teacher-tool-icon.teal { background: #E6FFFA; color: #38B2AC; }
+        .teacher-tool-icon.warm { background: rgba(224,185,120,0.14); color: var(--accent-warm); }
+        .teacher-tool-icon.teal { background: rgba(45,212,191,0.14); color: #2DD4BF; }
 
         .teacher-tool-text {
             font-size: 0.9rem;
@@ -1051,7 +1078,8 @@
             align-items: center;
             gap: 16px;
             padding: 20px 24px;
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
@@ -1074,8 +1102,8 @@
         }
 
         .game-icon.green { background: var(--primary-light); color: var(--primary); }
-        .game-icon.coral { background: #FFF0F0; color: var(--accent); }
-        .game-icon.warm { background: #FFF8E7; color: var(--accent-warm); }
+        .game-icon.coral { background: rgba(201,169,97,0.14); color: var(--accent); }
+        .game-icon.warm { background: rgba(224,185,120,0.14); color: var(--accent-warm); }
         .game-icon.purple { background: var(--purple-light); color: var(--purple); }
 
         .game-text {
@@ -1102,7 +1130,9 @@
         ======================================== */
         .cta {
             padding: 100px 0;
-            background: var(--bg-green);
+            background:
+                radial-gradient(ellipse 900px 500px at 50% 0%, rgba(76,125,255,0.16), transparent 65%),
+                var(--bg-green);
             position: relative;
             overflow: hidden;
         }
@@ -1124,7 +1154,8 @@
         .cta-shape {
             position: absolute;
             border-radius: 50%;
-            opacity: 0.1;
+            opacity: 0.28;
+            filter: blur(90px);
         }
 
         .cta-shape-1 {
@@ -1167,11 +1198,12 @@
             gap: 8px;
             margin-top: 24px;
             padding: 10px 24px;
-            background: white;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 100px;
             font-size: 0.9rem;
             font-weight: 600;
-            color: var(--primary);
+            color: var(--accent);
             box-shadow: var(--shadow);
         }
 
@@ -1332,7 +1364,7 @@
             font-size: 1.2rem;
             cursor: pointer;
             border: none;
-            box-shadow: 0 4px 16px rgba(0,200,151,0.35);
+            box-shadow: 0 4px 16px rgba(76,125,255,0.35);
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.3s ease;
@@ -1346,7 +1378,7 @@
 
         .scroll-top:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,200,151,0.45);
+            box-shadow: 0 8px 24px rgba(76,125,255,0.5);
         }
 
         /* ========================================
@@ -1392,7 +1424,8 @@
             width: 80%;
             max-width: 360px;
             height: 100vh;
-            background: white;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border);
             z-index: 1001;
             padding: 80px 32px 32px;
             transition: right 0.4s ease;
@@ -1524,20 +1557,6 @@
                         See How It Works
                     </a>
                 </div>
-                <div class="hero-stats">
-                    <div class="hero-stat">
-                        <span class="hero-stat-number">10K+</span>
-                        <span class="hero-stat-label">Active Learners</span>
-                    </div>
-                    <div class="hero-stat">
-                        <span class="hero-stat-number">500+</span>
-                        <span class="hero-stat-label">Expert Teachers</span>
-                    </div>
-                    <div class="hero-stat">
-                        <span class="hero-stat-number">50+</span>
-                        <span class="hero-stat-label">Interactive Lessons</span>
-                    </div>
-                </div>
             </div>
             <div class="hero-image-wrapper">
                 <div class="hero-image">
@@ -1572,6 +1591,10 @@
                 <div class="trust-item animate-on-scroll delay-3">
                     <div class="trust-number">100%</div>
                     <div class="trust-label">Free</div>
+                </div>
+                <div class="trust-item animate-on-scroll delay-3">
+                    <div class="trust-number">100+</div>
+                    <div class="trust-label">Interactive Lessons</div>
                 </div>
             </div>
         </div>
@@ -1991,7 +2014,7 @@
 
     <!-- Coming Soon Modal -->
     <div id="comingSoonModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-        <div style="background:white; padding:40px; border-radius:24px; text-align:center; max-width:400px; margin:20px; box-shadow:0 24px 80px rgba(0,0,0,0.2); animation: fadeInUp 0.3s ease;">
+        <div style="background:var(--card-bg); border:1px solid var(--border); padding:40px; border-radius:24px; text-align:center; max-width:400px; margin:20px; box-shadow:0 24px 80px rgba(0,0,0,0.5); animation: fadeInUp 0.3s ease;">
             <div style="width:64px; height:64px; background:var(--primary-light); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.8rem; color:var(--primary);">
                 <i class="fas fa-rocket"></i>
             </div>
@@ -2117,7 +2140,7 @@
            FLOATING PARTICLES
         ======================================== */
         const particlesContainer = document.getElementById('particles');
-        const colors = ['#00C897', '#4A90D9', '#FF6B6B', '#FFB347', '#9B6DD7'];
+        const colors = ['#4C7DFF', '#6EA8FE', '#C9A961', '#E0B978', '#8B93C9'];
 
         for (let i = 0; i < 15; i++) {
             const particle = document.createElement('div');
@@ -2271,8 +2294,8 @@
             }
         });
 
-        console.log('%c TilMenger ', 'background: #00C897; color: white; font-size: 20px; font-weight: bold; padding: 10px 20px; border-radius: 10px;');
-        console.log('%c Learn English via Kazakh - 100% Free ', 'color: #00C897; font-size: 14px;');
+        console.log('%c TilMenger ', 'background: #4C7DFF; color: white; font-size: 20px; font-weight: bold; padding: 10px 20px; border-radius: 10px;');
+        console.log('%c Learn English via Kazakh - 100% Free ', 'color: #4C7DFF; font-size: 14px;');
     </script>
 
 </body>
