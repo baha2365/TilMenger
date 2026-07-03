@@ -1,1712 +1,2279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SpeakNova — AI-Powered English Learning</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
-<style>
-/* ============================
-   RESET & VARIABLES
-============================ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TilMenger — Learn English via Kazakh | 100% Free</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ========================================
+           CSS VARIABLES & RESET
+        ======================================== */
+        :root {
+            --primary: #00C897;
+            --primary-dark: #00A67D;
+            --primary-light: #E6FAF3;
+            --secondary: #1E293B;
+            --accent: #FF6B6B;
+            --accent-warm: #FFB347;
+            --blue: #4A90D9;
+            --blue-light: #EBF4FD;
+            --purple: #9B6DD7;
+            --purple-light: #F3EEFB;
+            --text: #1E293B;
+            --text-light: #64748B;
+            --text-lighter: #94A3B8;
+            --bg: #FFFFFF;
+            --bg-warm: #FEF9F3;
+            --bg-green: #F0FDF6;
+            --bg-blue: #F0F7FF;
+            --border: #E2E8F0;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow: 0 4px 24px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 48px rgba(0,0,0,0.1);
+            --shadow-xl: 0 24px 80px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+        }
 
-:root {
-  --bg:       #03060e;
-  --bg2:      #06101f;
-  --card:     #0a1928;
-  --card-h:   #0f2138;
-  --border:   rgba(90,140,255,.10);
-  --borderb:  rgba(90,140,255,.22);
-  --cyan:     #00d4ff;
-  --cg:       rgba(0,212,255,.25);
-  --purple:   #8b5cf6;
-  --pg:       rgba(139,92,246,.25);
-  --gold:     #f59e0b;
-  --gg:       rgba(245,158,11,.25);
-  --emerald:  #10b981;
-  --text:     #dde8ff;
-  --muted:    #5a7090;
-  --fh: 'Syne', sans-serif;
-  --fb: 'DM Sans', sans-serif;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--fb);
-  overflow-x: hidden;
-  line-height: 1.6;
-  cursor: default;
-}
+        html {
+            scroll-behavior: smooth;
+        }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--borderb); border-radius: 3px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-/* ============================
-   BACKGROUND EFFECTS
-============================ */
-#bg-canvas {
-  position: fixed; inset: 0; z-index: 0;
-  pointer-events: none; overflow: hidden;
-}
-.orb {
-  position: absolute; border-radius: 50%;
-  filter: blur(110px); will-change: transform;
-}
-.orb1 {
-  width: 700px; height: 700px;
-  background: radial-gradient(circle, rgba(0,180,255,.18), transparent 65%);
-  top: -220px; left: -200px;
-  animation: o1 22s ease-in-out infinite;
-}
-.orb2 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(120,60,255,.16), transparent 65%);
-  top: 15%; right: -180px;
-  animation: o2 26s ease-in-out infinite;
-}
-.orb3 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(245,158,11,.12), transparent 65%);
-  bottom: 5%; left: 15%;
-  animation: o3 30s ease-in-out infinite;
-}
-@keyframes o1{0%,100%{transform:translate(0,0)}40%{transform:translate(60px,-80px)}70%{transform:translate(-40px,50px)}}
-@keyframes o2{0%,100%{transform:translate(0,0)}35%{transform:translate(-50px,60px)}65%{transform:translate(40px,-40px)}}
-@keyframes o3{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-60px)}}
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            line-height: 1.2;
+        }
 
-/* grid dot texture */
-.grid-texture {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: radial-gradient(rgba(90,140,255,.09) 1px, transparent 1px);
-  background-size: 36px 36px;
-}
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
 
-/* noise grain */
-body::after {
-  content: '';
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23f)' opacity='.025'/%3E%3C/svg%3E");
-  opacity: .5;
-}
+        img {
+            max-width: 100%;
+            height: auto;
+        }
 
-/* ============================
-   LAYOUT
-============================ */
-.wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 3; }
-section { position: relative; z-index: 3; }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
 
-/* ============================
-   NAVBAR
-============================ */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  padding: 18px 0;
-  transition: all .4s ease;
-}
-nav.scrolled {
-  background: rgba(3,6,14,.88);
-  backdrop-filter: blur(24px);
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-.nav-in {
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 1200px; margin: 0 auto; padding: 0 32px;
-}
-.logo {
-  display: flex; align-items: center; gap: 10px;
-  font-family: var(--fh); font-size: 22px; font-weight: 800;
-  color: var(--text); text-decoration: none;
-}
-.logo-mark {
-  width: 38px; height: 38px;
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  border-radius: 11px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-style: normal; letter-spacing: 0;
-  box-shadow: 0 0 20px var(--cg);
-}
-.logo em {
-  background: linear-gradient(to right, var(--cyan), var(--purple));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  font-style: normal;
-}
-.nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
-.nav-links a {
-  color: var(--muted); text-decoration: none;
-  font-size: 14px; font-weight: 500; transition: color .2s;
-}
-.nav-links a:hover { color: var(--text); }
-.nav-right { display: flex; align-items: center; gap: 10px; }
-.btn-ghost {
-  padding: 9px 20px;
-  border: 1px solid var(--borderb); border-radius: 10px;
-  color: var(--text); background: transparent;
-  font-family: var(--fb); font-size: 14px; font-weight: 500;
-  cursor: pointer; transition: all .2s; text-decoration: none;
-  display: inline-block;
-}
-.btn-ghost:hover { background: rgba(255,255,255,.06); }
-.btn-pill {
-  padding: 9px 22px;
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  border: none; border-radius: 10px; color: #fff;
-  font-family: var(--fb); font-size: 14px; font-weight: 600;
-  cursor: pointer; transition: all .3s; text-decoration: none;
-  display: inline-block; position: relative; overflow: hidden;
-  box-shadow: 0 8px 28px var(--cg);
-}
-.btn-pill::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--purple), var(--cyan));
-  opacity: 0; transition: opacity .3s;
-}
-.btn-pill:hover::before { opacity: 1; }
-.btn-pill:hover { transform: translateY(-1px); box-shadow: 0 12px 36px var(--cg); }
-.btn-pill span, .btn-pill-lg span { position: relative; z-index: 1; }
+        /* ========================================
+           ANIMATIONS
+        ======================================== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-/* ============================
-   HERO
-============================ */
-.hero {
-  min-height: 100vh; display: flex; align-items: center;
-  padding: 130px 0 80px;
-}
-.hero-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 64px; align-items: center;
-}
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 5px 14px 5px 7px;
-  background: rgba(0,212,255,.08);
-  border: 1px solid rgba(0,212,255,.22);
-  border-radius: 100px; font-size: 13px; font-weight: 500;
-  color: var(--cyan); margin-bottom: 28px;
-  animation: heroIn .8s ease both .1s;
-}
-.badge-dot {
-  width: 22px; height: 22px;
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
-}
-.pulse-ring {
-  width: 8px; height: 8px; background: var(--cyan); border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.55)}
-  50%{box-shadow:0 0 0 8px rgba(0,212,255,0)}
-}
-.hero-h1 {
-  font-family: var(--fh); font-size: 80px; font-weight: 800;
-  line-height: 1.02; letter-spacing: -2.5px; margin-bottom: 22px;
-  animation: heroIn .9s ease both .25s;
-}
-.grad {
-  background: linear-gradient(90deg, var(--cyan) 0%, var(--purple) 50%, var(--gold) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.hero-sub {
-  font-size: 18px; color: var(--muted); line-height: 1.75;
-  margin-bottom: 38px; max-width: 490px;
-  animation: heroIn .9s ease both .4s;
-}
-.hero-sub strong { color: var(--text); font-weight: 600; }
-.hero-btns { display: flex; gap: 14px; margin-bottom: 44px; animation: heroIn .9s ease both .55s; }
-.btn-pill-lg {
-  padding: 15px 32px;
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  border: none; border-radius: 14px; color: #fff;
-  font-family: var(--fb); font-size: 16px; font-weight: 600;
-  cursor: pointer; transition: all .3s; text-decoration: none;
-  display: inline-flex; align-items: center; gap: 8px;
-  box-shadow: 0 20px 55px var(--cg); position: relative; overflow: hidden;
-}
-.btn-pill-lg::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--purple), var(--cyan));
-  opacity: 0; transition: opacity .3s;
-}
-.btn-pill-lg:hover::before { opacity: 1; }
-.btn-pill-lg:hover { transform: translateY(-3px); box-shadow: 0 28px 65px var(--cg); }
-.btn-outline-lg {
-  padding: 15px 32px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid var(--borderb); border-radius: 14px; color: var(--text);
-  font-family: var(--fb); font-size: 16px; font-weight: 500;
-  cursor: pointer; transition: all .3s; text-decoration: none;
-  display: inline-flex; align-items: center; gap: 10px;
-}
-.btn-outline-lg:hover { background: rgba(255,255,255,.09); transform: translateY(-3px); }
-.play-circle {
-  width: 28px; height: 28px; background: rgba(255,255,255,.12);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px;
-}
-.social-proof { display: flex; align-items: center; gap: 14px; animation: heroIn .9s ease both .7s; }
-.avatars { display: flex; }
-.av {
-  width: 36px; height: 36px; border-radius: 50%;
-  border: 2px solid var(--bg); margin-left: -10px; overflow: hidden;
-}
-.av:first-child { margin-left: 0; }
-.av img { width: 100%; height: 100%; object-fit: cover; }
-.proof-text { font-size: 13px; color: var(--muted); }
-.proof-text strong { color: var(--text); }
-@keyframes heroIn { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:none} }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-/* Hero Visual */
-.hero-visual {
-  position: relative; display: flex; justify-content: center;
-  animation: heroIn 1s ease both .35s;
-}
-.app-card {
-  width: 100%; max-width: 460px;
-  background: var(--card); border: 1px solid var(--borderb);
-  border-radius: 28px; overflow: hidden;
-  box-shadow: 0 50px 130px rgba(0,0,0,.6), 0 0 0 1px var(--border), inset 0 1px 0 rgba(255,255,255,.06);
-  animation: mockFloat 7s ease-in-out infinite;
-}
-@keyframes mockFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
-.app-topbar {
-  background: rgba(255,255,255,.04); border-bottom: 1px solid var(--border);
-  padding: 13px 18px; display: flex; align-items: center; gap: 10px;
-}
-.dots { display: flex; gap: 6px; }
-.dots span {
-  width: 10px; height: 10px; border-radius: 50%;
-}
-.dots span:nth-child(1){ background:#ff5f57; }
-.dots span:nth-child(2){ background:#febc2e; }
-.dots span:nth-child(3){ background:#28c840; }
-.app-topbar-title { font-size: 12px; color: var(--muted); margin: 0 auto; }
-.app-body { padding: 22px 20px; }
-.sit-badge {
-  display: flex; align-items: center; gap: 12px;
-  background: rgba(0,212,255,.07); border: 1px solid rgba(0,212,255,.18);
-  border-radius: 14px; padding: 11px 14px; margin-bottom: 16px;
-}
-.sit-icon {
-  width: 40px; height: 40px;
-  background: linear-gradient(135deg, rgba(0,212,255,.2), rgba(139,92,246,.2));
-  border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;
-}
-.sit-label { font-size: 10px; color: var(--muted); margin-bottom: 2px; font-weight: 500; }
-.sit-name { font-family: var(--fh); font-size: 15px; font-weight: 700; }
-.chat-wrap { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
-.bubble {
-  padding: 9px 13px; border-radius: 14px;
-  font-size: 12.5px; line-height: 1.5; max-width: 88%;
-}
-.b-ai {
-  align-self: flex-start; border-bottom-left-radius: 4px;
-  background: rgba(255,255,255,.05); border: 1px solid var(--border);
-}
-.b-ai .who { font-size: 9px; color: var(--cyan); font-weight: 700; margin-bottom: 3px; letter-spacing:.5px; }
-.b-me {
-  align-self: flex-end; border-bottom-right-radius: 4px;
-  background: linear-gradient(135deg, rgba(0,212,255,.15), rgba(139,92,246,.18));
-  border: 1px solid rgba(139,92,246,.3);
-}
-.mock-input {
-  display: flex; gap: 9px; align-items: center;
-  background: rgba(255,255,255,.03); border: 1px solid var(--border);
-  border-radius: 12px; padding: 9px 13px;
-}
-.mic {
-  width: 28px; height: 28px;
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px;
-  animation: pulse 2.5s ease-in-out infinite; cursor: pointer; flex-shrink: 0;
-}
-.inp-hint { font-size: 11.5px; color: var(--muted); }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
 
-/* Floating chips */
-.chip {
-  position: absolute; background: var(--card);
-  border: 1px solid var(--borderb); border-radius: 16px;
-  padding: 12px 16px;
-  box-shadow: 0 20px 55px rgba(0,0,0,.5);
-  backdrop-filter: blur(8px);
-}
-.chip-word {
-  right: -24px; top: 18%;
-  animation: chipF1 5.5s ease-in-out infinite;
-  min-width: 155px;
-}
-@keyframes chipF1{0%,100%{transform:rotate(3deg) translateY(0)}50%{transform:rotate(5deg) translateY(-14px)}}
-.chip-en { font-family: var(--fh); font-size: 19px; font-weight: 800; }
-.chip-kz { font-size: 12.5px; color: var(--gold); margin-top: 3px; }
-.chip-kz .flag { margin-right: 5px; }
-.chip-divider { height: 2px; border-radius: 2px; margin-top: 9px; background: linear-gradient(to right, var(--cyan), var(--purple)); }
-.chip-level {
-  left: -24px; bottom: 18%;
-  animation: chipF2 7s ease-in-out infinite;
-  min-width: 140px;
-}
-@keyframes chipF2{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(-4deg) translateY(-12px)}}
-.chip-lv-row { display: flex; align-items: center; gap: 8px; }
-.lv-circle {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--purple), var(--cyan));
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-family: var(--fh); font-size: 11px; font-weight: 800;
-}
-.lv-meta .lv-small { font-size: 10px; color: var(--muted); }
-.lv-meta .lv-big { font-size: 14px; font-weight: 600; }
-.progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
-.progress-fill {
-  height: 100%; width: 62%;
-  background: linear-gradient(to right, var(--cyan), var(--purple));
-  border-radius: 2px;
-  animation: progAnim 3.5s ease-in-out infinite alternate;
-}
-@keyframes progAnim{0%{width:55%}100%{width:72%}}
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
 
-/* ============================
-   TICKER
-============================ */
-.ticker { padding: 18px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; background: rgba(255,255,255,.018); }
-.ticker-rail { display: flex; gap: 44px; width: max-content; animation: tickScroll 28s linear infinite; }
-.ticker-rail:hover { animation-play-state: paused; }
-@keyframes tickScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.tick { display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 500; color: var(--muted); white-space: nowrap; }
-.tick-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); flex-shrink: 0; }
-.tick:nth-child(3n) .tick-dot { background: var(--purple); }
-.tick:nth-child(3n+2) .tick-dot { background: var(--gold); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
 
-/* ============================
-   SECTION COMMONS
-============================ */
-.eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11.5px; font-weight: 700; letter-spacing: 2.2px;
-  text-transform: uppercase; color: var(--cyan); margin-bottom: 16px;
-}
-.eyebrow::before { content: ''; width: 22px; height: 2px; background: var(--cyan); }
-.eyebrow.center { justify-content: center; }
-.eyebrow.center::before { display: none; }
-.sec-title {
-  font-family: var(--fh); font-size: 54px; font-weight: 800;
-  line-height: 1.07; letter-spacing: -1.5px; margin-bottom: 16px;
-}
-.sec-sub { font-size: 17px; color: var(--muted); line-height: 1.72; max-width: 530px; }
-.sec-head { margin-bottom: 64px; }
-.sec-head.ctr { text-align: center; }
-.sec-head.ctr .sec-sub { margin: 0 auto; }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+        }
 
-/* ============================
-   FEATURES
-============================ */
-.feat-sec { padding: 130px 0; }
-.feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
-.feat-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 24px; padding: 34px; transition: all .4s ease;
-  position: relative; overflow: hidden; cursor: default;
-}
-.feat-card::after {
-  content: ''; position: absolute; inset: 0; opacity: 0;
-  transition: opacity .4s; pointer-events: none;
-}
-.feat-card:nth-child(1)::after { background: radial-gradient(ellipse at top left, rgba(0,212,255,.06), transparent 60%); }
-.feat-card:nth-child(2)::after { background: radial-gradient(ellipse at top left, rgba(139,92,246,.06), transparent 60%); }
-.feat-card:nth-child(3)::after { background: radial-gradient(ellipse at top left, rgba(245,158,11,.06), transparent 60%); }
-.feat-card:hover { transform: translateY(-10px); border-color: var(--borderb); box-shadow: 0 35px 90px rgba(0,0,0,.45); }
-.feat-card:hover::after { opacity: 1; }
-.feat-ico {
-  width: 62px; height: 62px; border-radius: 17px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px; margin-bottom: 26px;
-}
-.ic1 { background: rgba(0,212,255,.1); }
-.ic2 { background: rgba(139,92,246,.1); }
-.ic3 { background: rgba(245,158,11,.1); }
-.feat-title { font-family: var(--fh); font-size: 21px; font-weight: 700; margin-bottom: 12px; }
-.feat-desc { font-size: 14.5px; color: var(--muted); line-height: 1.72; margin-bottom: 22px; }
-.tags { display: flex; flex-wrap: wrap; gap: 7px; }
-.tag {
-  padding: 4px 11px; border-radius: 100px;
-  font-size: 11.5px; font-weight: 600;
-}
-.tc { background: rgba(0,212,255,.08); color: var(--cyan); border: 1px solid rgba(0,212,255,.18); }
-.tp { background: rgba(139,92,246,.08); color: var(--purple); border: 1px solid rgba(139,92,246,.18); }
-.tg { background: rgba(245,158,11,.08); color: var(--gold); border: 1px solid rgba(245,158,11,.18); }
-.te { background: rgba(16,185,129,.08); color: var(--emerald); border: 1px solid rgba(16,185,129,.18); }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
 
-/* ============================
-   VOCABULARY SECTION
-============================ */
-.vocab-sec { padding: 130px 0; background: var(--bg2); position: relative; overflow: hidden; }
-.vocab-sec::before {
-  content: ''; position: absolute; right: -200px; top: 50%;
-  transform: translateY(-50%);
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(245,158,11,.08), transparent 65%);
-  pointer-events: none;
-}
-.vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-.vocab-stage { position: relative; height: 400px; }
-.vc {
-  position: absolute; background: var(--card);
-  border: 1px solid var(--borderb); border-radius: 22px;
-  padding: 24px 26px; width: 260px;
-  transition: all .35s ease; cursor: pointer;
-  box-shadow: 0 20px 55px rgba(0,0,0,.35);
-}
-.vc:hover { transform: scale(1.07) !important; border-color: var(--cyan); box-shadow: 0 28px 70px rgba(0,212,255,.12); z-index: 10 !important; }
-.vc1 { top: 0; left: 10px; z-index: 3; animation: vf1 4.5s ease-in-out infinite; }
-.vc2 { top: 90px; left: 110px; z-index: 2; animation: vf2 5.5s ease-in-out infinite; }
-.vc3 { top: 200px; left: 20px; z-index: 1; animation: vf3 6s ease-in-out infinite; }
-@keyframes vf1{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(0deg) translateY(-12px)}}
-@keyframes vf2{0%,100%{transform:rotate(1deg) translateY(0)}50%{transform:rotate(3deg) translateY(-9px)}}
-@keyframes vf3{0%,100%{transform:rotate(-1deg) translateY(0)}50%{transform:rotate(1deg) translateY(8px)}}
-.vc-en { font-family: var(--fh); font-size: 26px; font-weight: 800; margin-bottom: 8px; }
-.vc-kz { font-size: 13.5px; color: var(--gold); margin-bottom: 12px; }
-.vc-kz .flag { margin-right: 5px; }
-.vc-ex { font-size: 12.5px; color: var(--muted); font-style: italic; border-left: 2px solid rgba(0,212,255,.35); padding-left: 10px; line-height: 1.6; }
-.vocab-info .sec-title { margin-bottom: 12px; }
-.vocab-list { display: flex; flex-direction: column; gap: 18px; margin-top: 36px; }
-.vi { display: flex; gap: 16px; align-items: flex-start; }
-.vi-ico {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: rgba(0,212,255,.08); display: flex; align-items: center;
-  justify-content: center; font-size: 20px; flex-shrink: 0;
-}
-.vi-text h4 { font-family: var(--fh); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.vi-text p { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
 
-/* ============================
-   SENTENCE BUILDER
-============================ */
-.builder-sec { padding: 130px 0; }
-.builder-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 80px; align-items: center; }
-.builder-demo {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 26px; padding: 32px; box-shadow: 0 40px 100px rgba(0,0,0,.4);
-}
-.bd-label {
-  font-size: 11px; font-weight: 700; letter-spacing: 1.8px;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
-}
-.bd-sentence {
-  font-size: 18px; line-height: 1.6; margin-bottom: 28px;
-  padding: 14px; background: rgba(255,255,255,.03);
-  border: 1px dashed var(--borderb); border-radius: 12px; min-height: 56px;
-  color: var(--text); font-weight: 500;
-}
-.bd-blank {
-  display: inline-block; min-width: 90px; height: 28px;
-  border-bottom: 2px solid var(--cyan); background: rgba(0,212,255,.07);
-  border-radius: 4px; margin: 0 4px; vertical-align: middle;
-  animation: blinkBorder 2s ease-in-out infinite;
-}
-@keyframes blinkBorder{0%,100%{border-color:var(--cyan)}50%{border-color:rgba(0,212,255,.3)}}
-.bd-hint { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
-.word-pool { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
-.word-chip {
-  padding: 9px 16px; border-radius: 10px;
-  background: rgba(255,255,255,.05); border: 1px solid var(--border);
-  font-size: 14px; font-weight: 500; cursor: grab;
-  transition: all .25s; user-select: none;
-}
-.word-chip:hover { background: rgba(139,92,246,.12); border-color: var(--purple); transform: translateY(-3px); }
-.word-chip.used { opacity: .3; cursor: not-allowed; }
-.word-chip.correct { background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.4); color: var(--emerald); }
-.bd-actions { display: flex; gap: 10px; }
-.bd-btn {
-  padding: 9px 18px; border-radius: 9px;
-  font-family: var(--fb); font-size: 13px; font-weight: 600; cursor: pointer;
-  border: none; transition: all .2s;
-}
-.bd-btn-check { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #fff; }
-.bd-btn-reset { background: rgba(255,255,255,.06); color: var(--muted); border: 1px solid var(--border); }
-.bd-feedback {
-  margin-top: 14px; padding: 10px 14px; border-radius: 10px;
-  font-size: 13px; font-weight: 500; display: none;
-}
-.fb-ok { background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.3); color: var(--emerald); }
-.fb-err { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #f87171; }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-/* ============================
-   SITUATIONS
-============================ */
-.sit-sec { padding: 130px 0; overflow: hidden; }
-.sit-scroll {
-  display: flex; gap: 18px; overflow-x: auto;
-  padding: 16px 32px 28px;
-  scrollbar-width: none; -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-}
-.sit-scroll::-webkit-scrollbar { display: none; }
-.sc {
-  min-width: 222px; border-radius: 24px; padding: 28px;
-  cursor: pointer; transition: all .4s ease;
-  position: relative; overflow: hidden; flex-shrink: 0;
-  border: 1px solid transparent;
-}
-.sc:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 35px 85px rgba(0,0,0,.55); }
-.sc::after {
-  content: ''; position: absolute;
-  bottom: 0; left: 0; right: 0; height: 55%;
-  background: linear-gradient(to top, rgba(0,0,0,.25), transparent);
-}
-.s-restaurant { background: linear-gradient(145deg, #0d2a18, #0a2535); border-color: rgba(16,185,129,.25); }
-.s-airport    { background: linear-gradient(145deg, #0d1840, #0a1540); border-color: rgba(99,102,241,.28); }
-.s-hotel      { background: linear-gradient(145deg, #2a1808, #3a2008); border-color: rgba(245,158,11,.25); }
-.s-shopping   { background: linear-gradient(145deg, #280d38, #1a0838); border-color: rgba(236,72,153,.25); }
-.s-doctor     { background: linear-gradient(145deg, #082035, #0a2838); border-color: rgba(14,165,233,.25); }
-.s-interview  { background: linear-gradient(145deg, #0a2318, #0d2820); border-color: rgba(34,197,94,.25); }
-.s-bank       { background: linear-gradient(145deg, #2a2008, #1e1805); border-color: rgba(234,179,8,.25); }
-.s-call       { background: linear-gradient(145deg, #180a38, #200d42); border-color: rgba(167,139,250,.28); }
-.s-emoji { font-size: 44px; display: block; margin-bottom: 14px; position: relative; z-index: 1; }
-.s-name { font-family: var(--fh); font-size: 17px; font-weight: 700; margin-bottom: 6px; position: relative; z-index: 1; }
-.s-desc { font-size: 12.5px; color: rgba(255,255,255,.6); position: relative; z-index: 1; line-height: 1.55; }
-.s-tag {
-  display: inline-block; margin-top: 14px;
-  padding: 3px 10px; background: rgba(255,255,255,.12); border-radius: 100px;
-  font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,.8);
-  position: relative; z-index: 1;
-}
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-/* ============================
-   LEVELS
-============================ */
-.levels-sec { padding: 130px 0; background: var(--bg2); }
-.lv-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 26px; }
-.lv-card {
-  border-radius: 28px; padding: 40px 32px;
-  position: relative; overflow: hidden;
-  transition: all .4s ease; cursor: pointer;
-}
-.lv-card:hover { transform: translateY(-10px); }
-.lv-beg {
-  background: linear-gradient(155deg, #0b2040, #081830);
-  border: 1px solid rgba(0,212,255,.18);
-}
-.lv-int {
-  background: linear-gradient(155deg, #180b40, #100830);
-  border: 1px solid rgba(139,92,246,.28);
-  transform: scale(1.04);
-}
-.lv-int::before {
-  content: 'Most Popular'; position: absolute; top: 16px; right: 16px;
-  background: linear-gradient(135deg, var(--purple), var(--cyan));
-  color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .8px;
-  padding: 3px 12px; border-radius: 100px; text-transform: uppercase;
-}
-.lv-adv {
-  background: linear-gradient(155deg, #2a1a0a, #1a1220);
-  border: 1px solid rgba(245,158,11,.18);
-}
-.lv-emoji { font-size: 44px; display: block; margin-bottom: 22px; }
-.lv-code {
-  font-size: 11.5px; font-weight: 700; letter-spacing: 2.5px;
-  text-transform: uppercase; margin-bottom: 8px;
-}
-.lv-beg .lv-code { color: var(--cyan); }
-.lv-int .lv-code { color: var(--purple); }
-.lv-adv .lv-code { color: var(--gold); }
-.lv-name { font-family: var(--fh); font-size: 26px; font-weight: 800; margin-bottom: 10px; }
-.lv-desc { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
-.lv-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.lv-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; }
-.chk {
-  width: 19px; height: 19px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; flex-shrink: 0; margin-top: 2px;
-}
-.lv-beg .chk { background: rgba(0,212,255,.15); color: var(--cyan); }
-.lv-int .chk { background: rgba(139,92,246,.15); color: var(--purple); }
-.lv-adv .chk { background: rgba(245,158,11,.15); color: var(--gold); }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
 
-/* ============================
-   TEACHERS
-============================ */
-.teachers-sec { padding: 130px 0; }
-.tc-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
-.tc-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 24px; overflow: hidden; transition: all .4s ease;
-}
-.tc-card:hover { transform: translateY(-8px); border-color: var(--borderb); box-shadow: 0 35px 90px rgba(0,0,0,.45); }
-.tc-img {
-  height: 198px; position: relative; overflow: hidden;
-}
-.tc-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
-.tc-card:hover .tc-img img { transform: scale(1.06); }
-.tc-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, var(--card));
-}
-.live-tag {
-  position: absolute; top: 13px; left: 13px;
-  display: flex; align-items: center; gap: 6px;
-  background: rgba(0,0,0,.6); backdrop-filter: blur(8px);
-  border: 1px solid rgba(16,185,129,.35);
-  border-radius: 100px; padding: 3px 10px;
-  font-size: 11px; font-weight: 700; color: var(--emerald);
-}
-.live-dot { width: 6px; height: 6px; background: var(--emerald); border-radius: 50%; animation: pulse 2s infinite; }
-.tc-body { padding: 22px; }
-.tc-name { font-family: var(--fh); font-size: 19px; font-weight: 700; margin-bottom: 3px; }
-.tc-spec { font-size: 12.5px; color: var(--cyan); font-weight: 600; margin-bottom: 13px; }
-.tc-meta { display: flex; gap: 14px; margin-bottom: 15px; }
-.tm { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); }
+        @keyframes wave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.8); }
+        }
 
-/* ============================
-   TEACHER TOOLS
-============================ */
-.tools-sec { padding: 130px 0; background: var(--bg2); }
-.tools-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 80px; align-items: center; }
-.tools-list { display: flex; flex-direction: column; gap: 14px; }
-.tl-item {
-  display: flex; gap: 18px; padding: 22px;
-  border-radius: 18px; background: var(--card); border: 1px solid var(--border);
-  transition: all .3s ease; cursor: pointer;
-}
-.tl-item:hover, .tl-item.act { border-color: var(--cyan); background: rgba(0,212,255,.04); }
-.tl-ico {
-  width: 46px; height: 46px; border-radius: 13px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
-}
-.ti1 { background: rgba(16,185,129,.12); }
-.ti2 { background: rgba(139,92,246,.12); }
-.ti3 { background: rgba(245,158,11,.12); }
-.ti4 { background: rgba(0,212,255,.12); }
-.tl-text h4 { font-family: var(--fh); font-size: 16px; font-weight: 700; margin-bottom: 5px; }
-.tl-text p { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
-.tools-mock {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 26px; overflow: hidden;
-  box-shadow: 0 45px 110px rgba(0,0,0,.5);
-}
-.tm-top {
-  background: rgba(255,255,255,.03); border-bottom: 1px solid var(--border);
-  padding: 13px 18px; display: flex; align-items: center; gap: 10px;
-}
-.tm-t { font-family: var(--fh); font-size: 13.5px; font-weight: 700; }
-.tm-live {
-  display: flex; align-items: center; gap: 5px; margin-left: auto;
-  padding: 3px 9px; background: rgba(16,185,129,.09);
-  border: 1px solid rgba(16,185,129,.28); border-radius: 100px;
-  font-size: 10.5px; color: var(--emerald); font-weight: 700;
-}
-.tm-body-p { padding: 18px; }
-.vid-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.vt {
-  border-radius: 11px; border: 1px solid var(--border);
-  aspect-ratio: 16/10; display: flex; align-items: center;
-  justify-content: center; position: relative; font-size: 30px; overflow: hidden;
-}
-.vt1 { background: linear-gradient(145deg,#0d2040,#1a1040); }
-.vt2 { background: linear-gradient(145deg,#0d1a30,#1a0d2a); }
-.vt3 { background: linear-gradient(145deg,#1a2020,#0d1a18); }
-.vt4 { background: linear-gradient(145deg,#1a0d18,#0d0d1a); font-size:12px; color:var(--muted); }
-.vt .nametag {
-  position: absolute; bottom: 5px; left: 5px;
-  background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
-  border-radius: 5px; padding: 2px 7px; font-size: 9.5px; font-weight: 600;
-}
-.quiz-box {
-  background: rgba(139,92,246,.07); border: 1px solid rgba(139,92,246,.2);
-  border-radius: 13px; padding: 14px;
-}
-.quiz-q { font-size: 12.5px; font-weight: 600; margin-bottom: 9px; }
-.q-opts { display: flex; flex-direction: column; gap: 6px; }
-.q-opt {
-  padding: 8px 11px; border-radius: 8px; font-size: 12px;
-  background: rgba(255,255,255,.04); border: 1px solid var(--border); cursor: pointer;
-  transition: all .2s;
-}
-.q-opt:hover { background: rgba(255,255,255,.08); }
-.q-opt.ok { background: rgba(16,185,129,.09); border-color: rgba(16,185,129,.35); color: var(--emerald); }
+        @keyframes confetti {
+            0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
 
-/* ============================
-   STATS
-============================ */
-.stats-sec { padding: 110px 0; text-align: center; }
-.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 40px; }
-.stat-num {
-  font-family: var(--fh); font-size: 58px; font-weight: 800;
-  line-height: 1; margin-bottom: 8px;
-  background: linear-gradient(to right, var(--cyan), var(--purple));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.stat-lbl { font-size: 15px; color: var(--muted); }
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-/* ============================
-   TESTIMONIALS
-============================ */
-.testi-sec { padding: 130px 0; background: var(--bg2); }
-.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
-.tt-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 24px; padding: 32px; transition: all .35s ease;
-}
-.tt-card:hover { transform: translateY(-6px); border-color: var(--borderb); }
-.tt-stars { display: flex; gap: 3px; margin-bottom: 16px; font-size: 15px; color: var(--gold); }
-.tt-q { font-size: 14.5px; color: var(--muted); line-height: 1.75; margin-bottom: 24px; font-style: italic; }
-.tt-q strong { color: var(--text); font-style: normal; }
-.tt-auth { display: flex; align-items: center; gap: 12px; }
-.tt-av { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid var(--borderb); }
-.tt-av img { width: 100%; height: 100%; object-fit: cover; }
-.tt-name { font-weight: 600; font-size: 14px; }
-.tt-info { font-size: 12px; color: var(--muted); }
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-/* ============================
-   HOW IT WORKS
-============================ */
-.how-sec { padding: 130px 0; }
-.how-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 40px; position: relative; }
-.how-grid::before {
-  content: ''; position: absolute;
-  top: 36px; left: calc(16.6% + 20px); right: calc(16.6% + 20px);
-  height: 1px; background: linear-gradient(to right, var(--cyan), var(--purple), var(--gold));
-  opacity: .3;
-}
-.hw-step { text-align: center; }
-.hw-num {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: var(--card); border: 1px solid var(--borderb);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--fh); font-size: 24px; font-weight: 800;
-  margin: 0 auto 22px;
-  position: relative; z-index: 1;
-  transition: all .35s;
-}
-.hw-step:hover .hw-num {
-  background: linear-gradient(135deg, var(--cyan), var(--purple));
-  box-shadow: 0 0 30px var(--cg);
-}
-.hw-step:nth-child(1) .hw-num { color: var(--cyan); }
-.hw-step:nth-child(2) .hw-num { color: var(--purple); }
-.hw-step:nth-child(3) .hw-num { color: var(--gold); }
-.hw-title { font-family: var(--fh); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
-.hw-desc { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 260px; margin: 0 auto; }
+        .animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+        .animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+        .animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+        .animate-on-scroll.delay-4 { transition-delay: 0.4s; }
+        .animate-on-scroll.delay-5 { transition-delay: 0.5s; }
 
-/* ============================
-   CTA
-============================ */
-.cta-sec {
-  padding: 150px 0; text-align: center; position: relative; overflow: hidden;
-}
-.cta-glow {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 900px; height: 600px;
-  background: radial-gradient(ellipse, rgba(0,212,255,.08) 0%, rgba(139,92,246,.06) 40%, transparent 70%);
-  pointer-events: none;
-}
-.cta-title {
-  font-family: var(--fh); font-size: 66px; font-weight: 800;
-  line-height: 1.07; letter-spacing: -2px; margin-bottom: 20px;
-}
-.cta-sub { font-size: 18px; color: var(--muted); margin-bottom: 40px; max-width: 500px; margin-left: auto; margin-right: auto; }
-.cta-btns { display: flex; gap: 14px; justify-content: center; margin-bottom: 22px; }
-.cta-note { font-size: 13px; color: var(--muted); }
-.cta-note span { margin: 0 8px; }
+        /* ========================================
+           NAVIGATION
+        ======================================== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 16px 0;
+            transition: all 0.4s ease;
+        }
 
-/* ============================
-   FOOTER
-============================ */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 64px 0 38px;
-}
-.foot-grid {
-  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 56px; margin-bottom: 52px;
-}
-.foot-brand .logo { margin-bottom: 14px; display: inline-flex; }
-.foot-brand p { font-size: 13.5px; color: var(--muted); line-height: 1.72; max-width: 270px; }
-.foot-col h4 { font-family: var(--fh); font-size: 13.5px; font-weight: 700; margin-bottom: 18px; }
-.foot-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.foot-col ul a { font-size: 13.5px; color: var(--muted); text-decoration: none; transition: color .2s; }
-.foot-col ul a:hover { color: var(--text); }
-.foot-bot {
-  border-top: 1px solid var(--border); padding-top: 26px;
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 13px; color: var(--muted);
-}
-.socials { display: flex; gap: 10px; }
-.soc-btn {
-  width: 36px; height: 36px; background: var(--card);
-  border: 1px solid var(--border); border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .2s; font-size: 14px; color: var(--muted);
-  text-decoration: none;
-}
-.soc-btn:hover { border-color: var(--borderb); color: var(--text); background: var(--card-h); }
+        .navbar.scrolled {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            padding: 12px 0;
+        }
 
-/* ============================
-   REVEAL
-============================ */
-.rv {
-  opacity: 0; transform: translateY(36px);
-  transition: opacity .85s ease, transform .85s ease;
-}
-.rv.in { opacity: 1; transform: none; }
-.d1 { transition-delay: .1s; } .d2 { transition-delay: .2s; }
-.d3 { transition-delay: .3s; } .d4 { transition-delay: .4s; }
-.d5 { transition-delay: .5s; }
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-/* ============================
-   RESPONSIVE
-============================ */
-@media(max-width:960px) {
-  .hero-grid, .vocab-grid, .builder-grid, .tools-grid { grid-template-columns: 1fr; }
-  .hero-visual, .vocab-stage { display: none; }
-  .hero-h1 { font-size: 52px; }
-  .sec-title { font-size: 38px; }
-  .feat-grid, .lv-grid, .tc-grid, .stats-grid, .testi-grid, .how-grid { grid-template-columns: 1fr 1fr; }
-  .foot-grid { grid-template-columns: 1fr 1fr; }
-  .nav-links { display: none; }
-  .lv-int { transform: none; }
-  .cta-title { font-size: 42px; }
-  .how-grid::before { display: none; }
-}
-@media(max-width:640px) {
-  .feat-grid, .lv-grid, .tc-grid, .stats-grid, .testi-grid, .how-grid { grid-template-columns: 1fr; }
-  .foot-grid { grid-template-columns: 1fr; }
-  .hero-h1 { font-size: 42px; }
-  .hero-btns { flex-direction: column; }
-  .cta-btns { flex-direction: column; align-items: center; }
-  .wrap { padding: 0 18px; }
-}
-</style>
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 16px rgba(0,200,151,0.35);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,200,151,0.45);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-lg {
+            padding: 16px 36px;
+            font-size: 1.05rem;
+            border-radius: 14px;
+        }
+
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .mobile-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        /* ========================================
+           HERO SECTION
+        ======================================== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+            background: var(--bg-green);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg-pattern {
+            position: absolute;
+            inset: 0;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hero-shapes {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .hero-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.12;
+        }
+
+        .hero-shape-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--primary);
+            top: -10%;
+            right: -5%;
+            animation: floatSlow 8s ease-in-out infinite;
+        }
+
+        .hero-shape-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent-warm);
+            bottom: 10%;
+            left: -5%;
+            animation: floatSlow 10s ease-in-out infinite reverse;
+        }
+
+        .hero-shape-3 {
+            width: 150px;
+            height: 150px;
+            background: var(--blue);
+            top: 30%;
+            left: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: white;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .hero-badge i {
+            color: var(--accent-warm);
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.7s ease-out 0.1s both;
+        }
+
+        .hero-title .highlight {
+            background: var(--primary);
+            color: white;
+            padding: 0 16px;
+            border-radius: 8px;
+            display: inline-block;
+            transform: rotate(-2deg);
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-bottom: 32px;
+            max-width: 480px;
+            animation: fadeInUp 0.7s ease-out 0.2s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.7s ease-out 0.3s both;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            animation: fadeInUp 0.7s ease-out 0.4s both;
+        }
+
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-stat-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .hero-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            animation: slideInRight 0.9s ease-out 0.2s both;
+        }
+
+        .hero-image {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-image img {
+            width: 100%;
+            max-width: 560px;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .hero-floating-card {
+            position: absolute;
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2;
+        }
+
+        .hero-floating-card-1 {
+            top: 10%;
+            left: -20px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .hero-floating-card-2 {
+            bottom: 15%;
+            right: -10px;
+            animation: float 5s ease-in-out infinite 1s;
+        }
+
+        .floating-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .floating-card-icon.green { background: var(--primary-light); color: var(--primary); }
+        .floating-card-icon.coral { background: #FFF0F0; color: var(--accent); }
+
+        .floating-card-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .floating-card-sub {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* ========================================
+           TRUST / STATS BAR
+        ======================================== */
+        .trust-bar {
+            background: var(--secondary);
+            padding: 40px 0;
+            position: relative;
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+
+        .trust-item {
+            color: white;
+        }
+
+        .trust-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .trust-label {
+            font-size: 0.9rem;
+            color: var(--text-lighter);
+            margin-top: 4px;
+        }
+
+        /* ========================================
+           SECTION HEADERS
+        ======================================== */
+        .section-header {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto 60px;
+        }
+
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: var(--primary-light);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-light);
+        }
+
+        /* ========================================
+           FEATURES SECTION
+        ======================================== */
+        .features {
+            padding: 100px 0;
+            background: var(--bg);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 40px 32px;
+            box-shadow: var(--shadow);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+        }
+
+        .feature-icon.green { background: var(--primary-light); color: var(--primary); }
+        .feature-icon.blue { background: var(--blue-light); color: var(--blue); }
+        .feature-icon.coral { background: #FFF0F0; color: var(--accent); }
+        .feature-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .feature-icon.warm { background: #FFF8E7; color: var(--accent-warm); }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feature-desc {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        .feature-image {
+            margin-top: 24px;
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .feature-image img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .feature-card:hover .feature-image img {
+            transform: scale(1.05);
+        }
+
+        /* ========================================
+           LEARNING PATH / LEVELS
+        ======================================== */
+        .levels {
+            padding: 100px 0;
+            background: var(--bg-warm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .levels-shapes {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .levels-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.06;
+        }
+
+        .levels-shape-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-warm);
+            top: -10%;
+            left: -10%;
+        }
+
+        .levels-shape-2 {
+            width: 350px;
+            height: 350px;
+            background: var(--primary);
+            bottom: -10%;
+            right: -10%;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 48px 32px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0;
+            background: var(--primary);
+            transition: height 0.4s ease;
+            z-index: 0;
+        }
+
+        .level-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .level-card:hover::after {
+            height: 6px;
+        }
+
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            border-radius: 24px;
+            font-size: 1.8rem;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-badge.beginner { background: var(--primary-light); color: var(--primary); }
+        .level-badge.intermediate { background: var(--blue-light); color: var(--blue); }
+        .level-badge.advanced { background: var(--purple-light); color: var(--purple); }
+
+        .level-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-desc {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-topics {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-topic {
+            padding: 6px 14px;
+            background: var(--bg);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .level-card.beginner:hover .level-badge { animation: bounce 0.6s ease; }
+        .level-card.intermediate:hover .level-badge { animation: pulse 0.6s ease; }
+        .level-card.advanced:hover .level-badge { animation: float 0.6s ease; }
+
+        /* ========================================
+           HOW IT WORKS
+        ======================================== */
+        .how-it-works {
+            padding: 100px 0;
+            background: var(--bg);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 36px;
+            right: -20px;
+            width: 40px;
+            height: 2px;
+            background: var(--border);
+            background-image: repeating-linear-gradient(90deg, var(--border) 0, var(--border) 6px, transparent 6px, transparent 12px);
+        }
+
+        .step-number {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 auto 20px;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0,200,151,0.3);
+        }
+
+        .step:nth-child(2) .step-number { background: var(--blue); box-shadow: 0 8px 24px rgba(74,144,217,0.3); }
+        .step:nth-child(3) .step-number { background: var(--accent); box-shadow: 0 8px 24px rgba(255,107,107,0.3); }
+        .step:nth-child(4) .step-number { background: var(--purple); box-shadow: 0 8px 24px rgba(155,109,215,0.3); }
+
+        .step-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* ========================================
+           TEACHER SECTION
+        ======================================== */
+        .teachers {
+            padding: 100px 0;
+            background: var(--bg-green);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .teachers-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .teachers-image {
+            position: relative;
+        }
+
+        .teachers-image img {
+            width: 100%;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .teacher-floating-card {
+            position: absolute;
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2;
+        }
+
+        .teacher-floating-card-1 {
+            top: 5%;
+            right: -20px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .teacher-floating-card-2 {
+            bottom: 10%;
+            left: -30px;
+            animation: float 5s ease-in-out infinite 1s;
+        }
+
+        .teachers-content .section-tag {
+            margin-bottom: 20px;
+        }
+
+        .teachers-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .teachers-desc {
+            font-size: 1.05rem;
+            color: var(--text-light);
+            margin-bottom: 32px;
+            line-height: 1.8;
+        }
+
+        .teacher-tools {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .teacher-tool {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .teacher-tool:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow);
+        }
+
+        .teacher-tool-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .teacher-tool-icon.green { background: var(--primary-light); color: var(--primary); }
+        .teacher-tool-icon.blue { background: var(--blue-light); color: var(--blue); }
+        .teacher-tool-icon.coral { background: #FFF0F0; color: var(--accent); }
+        .teacher-tool-icon.purple { background: var(--purple-light); color: var(--purple); }
+        .teacher-tool-icon.warm { background: #FFF8E7; color: var(--accent-warm); }
+        .teacher-tool-icon.teal { background: #E6FFFA; color: #38B2AC; }
+
+        .teacher-tool-text {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* ========================================
+           FUN LEARNING / GAMES
+        ======================================== */
+        .games {
+            padding: 100px 0;
+            background: var(--bg);
+        }
+
+        .games-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .games-content .section-tag {
+            margin-bottom: 20px;
+        }
+
+        .games-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .games-desc {
+            font-size: 1.05rem;
+            color: var(--text-light);
+            margin-bottom: 32px;
+            line-height: 1.8;
+        }
+
+        .games-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .game-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .game-item:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .game-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .game-icon.green { background: var(--primary-light); color: var(--primary); }
+        .game-icon.coral { background: #FFF0F0; color: var(--accent); }
+        .game-icon.warm { background: #FFF8E7; color: var(--accent-warm); }
+        .game-icon.purple { background: var(--purple-light); color: var(--purple); }
+
+        .game-text {
+            font-weight: 600;
+        }
+
+        .game-sub {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .games-image {
+            position: relative;
+        }
+
+        .games-image img {
+            width: 100%;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* ========================================
+           CTA SECTION
+        ======================================== */
+        .cta {
+            padding: 100px 0;
+            background: var(--bg-green);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-container {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-shapes {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .cta-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+
+        .cta-shape-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: -50%;
+            left: 10%;
+        }
+
+        .cta-shape-2 {
+            width: 250px;
+            height: 250px;
+            background: var(--accent-warm);
+            bottom: -50%;
+            right: 10%;
+        }
+
+        .cta-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .cta-desc {
+            font-size: 1.15rem;
+            color: var(--text-light);
+            margin-bottom: 40px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .cta-free-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            padding: 10px 24px;
+            background: white;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        /* ========================================
+           FOOTER
+        ======================================== */
+        .footer {
+            background: var(--secondary);
+            color: white;
+            padding: 80px 0 40px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand .logo {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .footer-brand .logo-icon {
+            background: var(--primary);
+        }
+
+        .footer-desc {
+            font-size: 0.95rem;
+            color: var(--text-lighter);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 12px;
+        }
+
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--text-lighter);
+            transition: all 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-column h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            font-size: 0.9rem;
+            color: var(--text-lighter);
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .footer-copyright {
+            font-size: 0.85rem;
+            color: var(--text-lighter);
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-legal a {
+            font-size: 0.85rem;
+            color: var(--text-lighter);
+            transition: color 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+            color: var(--primary);
+        }
+
+        /* ========================================
+           FLOATING PARTICLES
+        ======================================== */
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ========================================
+           SCROLL TO TOP
+        ======================================== */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 16px rgba(0,200,151,0.35);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,200,151,0.45);
+        }
+
+        /* ========================================
+           RESPONSIVE
+        ======================================== */
+        @media (max-width: 1024px) {
+            .hero-title { font-size: 3rem; }
+            .section-title { font-size: 2.25rem; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps { grid-template-columns: repeat(2, 1fr); }
+            .step::after { display: none; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-toggle { display: flex; }
+            .hero-container { grid-template-columns: 1fr; text-align: center; }
+            .hero-title { font-size: 2.5rem; }
+            .hero-subtitle { margin: 0 auto 32px; }
+            .hero-cta { justify-content: center; }
+            .hero-stats { justify-content: center; }
+            .hero-image-wrapper { order: -1; }
+            .features-grid { grid-template-columns: 1fr; }
+            .levels-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; }
+            .teachers-container { grid-template-columns: 1fr; }
+            .games-container { grid-template-columns: 1fr; }
+            .games-image { order: -1; }
+            .trust-grid { grid-template-columns: repeat(2, 1fr); }
+            .teacher-tools { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .cta-title { font-size: 2rem; }
+            .cta-buttons { flex-direction: column; align-items: center; }
+        }
+
+        /* Mobile menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 360px;
+            height: 100vh;
+            background: white;
+            z-index: 1001;
+            padding: 80px 32px 32px;
+            transition: right 0.4s ease;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-menu-links {
+            list-style: none;
+        }
+
+        .mobile-menu-links li {
+            margin-bottom: 20px;
+        }
+
+        .mobile-menu-links a {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .mobile-menu-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+    </style>
+<base target="_blank">
 </head>
 <body>
 
-<!-- Background -->
-<div id="bg-canvas">
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
-</div>
-<div class="grid-texture"></div>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
 
-<!-- ===== NAVBAR ===== -->
-<nav id="nav">
-  <div class="nav-in">
-    <a href="#" class="logo">
-      <span class="logo-mark">✦</span>
-      Til<em>Menger</em>
-    </a>
-    <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#situations">Situations</a></li>
-      <li><a href="#levels">Levels</a></li>
-      <li><a href="#teachers">Teachers</a></li>
-    </ul>
-    <div class="nav-right">
-      <a href="index.html" class="btn-ghost">Sign In</a>
-      <a href="index.html" class="btn-pill"><span>Get Started Free</span></a>
-    </div>
-  </div>
-</nav>
-
-<!-- ===== HERO ===== -->
-<section class="hero">
-  <div class="wrap">
-    <div class="hero-grid">
-
-      <!-- Left -->
-      <div>
-        <div class="hero-badge">
-          <span class="badge-dot">✦</span>
-          AI-Powered English Learning
-          <span class="pulse-ring"></span>
-        </div>
-        <h1 class="hero-h1">
-          Speak English<br>
-          <span class="grad">Fluently.</span>
-        </h1>
-        <p class="hero-sub">
-          Your personal <strong>AI teacher</strong> adapts to your level and guides you through real conversations. Backed by <strong>certified educators</strong>, with vocabulary in <strong>Kazakh</strong>.
-        </p>
-        <div class="hero-btns">
-          <a href="index.html" class="btn-pill-lg"><span>🚀 Start Learning Free</span></a>
-          <a href="#" class="btn-outline-lg">
-            <span class="play-circle">▶</span> Watch Demo
-          </a>
-        </div>
-        <div class="social-proof">
-          <div class="avatars">
-            <div class="av"><img src="https://i.pravatar.cc/80?img=3" alt=""></div>
-            <div class="av"><img src="https://i.pravatar.cc/80?img=9" alt=""></div>
-            <div class="av"><img src="https://i.pravatar.cc/80?img=15" alt=""></div>
-            <div class="av"><img src="https://i.pravatar.cc/80?img=22" alt=""></div>
-            <div class="av"><img src="https://i.pravatar.cc/80?img=29" alt=""></div>
-          </div>
-          <div class="proof-text"><strong>50,000+</strong> students already learning with SpeakNova</div>
-        </div>
-      </div>
-
-      <!-- Right: App Mockup -->
-      <div class="hero-visual">
-        <div class="app-card">
-          <div class="app-topbar">
-            <div class="dots"><span></span><span></span><span></span></div>
-            <div class="app-topbar-title">🎯 Speaking Practice</div>
-          </div>
-          <div class="app-body">
-            <div class="sit-badge">
-              <div class="sit-icon">🍽️</div>
-              <div>
-                <div class="sit-label">CURRENT SITUATION</div>
-                <div class="sit-name">At the Restaurant</div>
-              </div>
-            </div>
-            <div class="chat-wrap">
-              <div class="bubble b-ai">
-                <div class="who">🤖 AI WAITER</div>
-                Good evening! Welcome to La Bella. Do you have a reservation tonight?
-              </div>
-              <div class="bubble b-me">
-                Yes, a reservation for two under the name Johnson, please.
-              </div>
-              <div class="bubble b-ai">
-                <div class="who">🤖 AI WAITER</div>
-                Perfect! Right this way. Can I start you with some drinks?
-              </div>
-            </div>
-            <div class="mock-input">
-              <div class="mic">🎤</div>
-              <div class="inp-hint">Tap mic or type your response...</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Floating: Word card -->
-        <div class="chip chip-word">
-          <div class="chip-en">Reservation</div>
-          <div class="chip-kz"><span class="flag">🇰🇿</span>Брондау</div>
-          <div class="chip-divider"></div>
-        </div>
-
-        <!-- Floating: Level card -->
-        <div class="chip chip-level">
-          <div class="chip-lv-row">
-            <div class="lv-circle">B2</div>
-            <div class="lv-meta">
-              <div class="lv-small">Your Level</div>
-              <div class="lv-big">Intermediate</div>
-            </div>
-          </div>
-          <div class="progress-bar"><div class="progress-fill"></div></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ===== TICKER ===== -->
-<div class="ticker">
-  <div class="ticker-rail">
-    <span class="tick"><span class="tick-dot"></span>AI Speaking Partner</span>
-    <span class="tick"><span class="tick-dot"></span>Kazakh Vocabulary</span>
-    <span class="tick"><span class="tick-dot"></span>Sentence Builder</span>
-    <span class="tick"><span class="tick-dot"></span>Real Certified Teachers</span>
-    <span class="tick"><span class="tick-dot"></span>Live Online Meetings</span>
-    <span class="tick"><span class="tick-dot"></span>Quizzes & Worksheets</span>
-    <span class="tick"><span class="tick-dot"></span>Restaurant Situations</span>
-    <span class="tick"><span class="tick-dot"></span>Airport Conversations</span>
-    <span class="tick"><span class="tick-dot"></span>A1–C2 Levels</span>
-    <span class="tick"><span class="tick-dot"></span>Adaptive AI</span>
-    <span class="tick"><span class="tick-dot"></span>Progress Tracking</span>
-    <!-- duplicate for seamless loop -->
-    <span class="tick"><span class="tick-dot"></span>AI Speaking Partner</span>
-    <span class="tick"><span class="tick-dot"></span>Kazakh Vocabulary</span>
-    <span class="tick"><span class="tick-dot"></span>Sentence Builder</span>
-    <span class="tick"><span class="tick-dot"></span>Real Certified Teachers</span>
-    <span class="tick"><span class="tick-dot"></span>Live Online Meetings</span>
-    <span class="tick"><span class="tick-dot"></span>Quizzes & Worksheets</span>
-    <span class="tick"><span class="tick-dot"></span>Restaurant Situations</span>
-    <span class="tick"><span class="tick-dot"></span>Airport Conversations</span>
-    <span class="tick"><span class="tick-dot"></span>A1–C2 Levels</span>
-    <span class="tick"><span class="tick-dot"></span>Adaptive AI</span>
-    <span class="tick"><span class="tick-dot"></span>Progress Tracking</span>
-  </div>
-</div>
-
-<!-- ===== FEATURES ===== -->
-<section class="feat-sec" id="features">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div class="eyebrow">Core Features</div>
-      <h2 class="sec-title">Everything You Need<br>to Master English</h2>
-      <p class="sec-sub">Three powerful learning tools, designed to work together and fast-track your fluency.</p>
-    </div>
-    <div class="feat-grid">
-      <div class="feat-card rv d1">
-        <div class="feat-ico ic1">🎤</div>
-        <h3 class="feat-title">AI Speaking Partner</h3>
-        <p class="feat-desc">Your personal AI teacher adapts in real-time to your level. Practice conversations, get instant pronunciation feedback, and improve with every session.</p>
-        <div class="tags">
-          <span class="tag tc">Adaptive AI</span>
-          <span class="tag tc">Real-time Feedback</span>
-          <span class="tag tc">Speaking</span>
-        </div>
-      </div>
-      <div class="feat-card rv d2">
-        <div class="feat-ico ic2">📖</div>
-        <h3 class="feat-title">Smart Vocabulary</h3>
-        <p class="feat-desc">Learn new English words with their Kazakh translations using proven spaced repetition. Build 2,000+ words per level with contextual examples and audio.</p>
-        <div class="tags">
-          <span class="tag tp">Kazakh Translations</span>
-          <span class="tag tp">Spaced Repetition</span>
-          <span class="tag tp">Audio</span>
-        </div>
-      </div>
-      <div class="feat-card rv d3">
-        <div class="feat-ico ic3">🧩</div>
-        <h3 class="feat-title">Sentence Builder</h3>
-        <p class="feat-desc">Arrange separated words into correct sentences. Interactive grammar exercises that make learning structure fun, visual, and deeply effective.</p>
-        <div class="tags">
-          <span class="tag tg">Grammar</span>
-          <span class="tag tg">Drag & Drop</span>
-          <span class="tag tg">Interactive</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== VOCABULARY SECTION ===== -->
-<section class="vocab-sec">
-  <div class="wrap">
-    <div class="vocab-grid">
-      <!-- Floating word cards -->
-      <div class="vocab-stage rv">
-        <div class="vc vc1">
-          <div class="vc-en">Magnificent</div>
-          <div class="vc-kz"><span class="flag">🇰🇿</span>Ғажайып</div>
-          <div class="vc-ex">"The view from the mountain was simply magnificent."</div>
-        </div>
-        <div class="vc vc2">
-          <div class="vc-en">Opportunity</div>
-          <div class="vc-kz"><span class="flag">🇰🇿</span>Мүмкіндік</div>
-          <div class="vc-ex">"This is a great opportunity for your growth."</div>
-        </div>
-        <div class="vc vc3">
-          <div class="vc-en">Persevere</div>
-          <div class="vc-kz"><span class="flag">🇰🇿</span>Табандылық танытыңыз</div>
-          <div class="vc-ex">"You must persevere to achieve your goals."</div>
-        </div>
-      </div>
-      <!-- Info -->
-      <div class="vocab-info rv d2">
-        <div class="eyebrow">Smart Vocabulary</div>
-        <h2 class="sec-title">Learn Words in <span style="background:linear-gradient(to right,var(--gold),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Your Language</span></h2>
-        <p class="sec-sub">Every English word comes with its Kazakh translation, example sentences, and audio pronunciation. Learn faster by connecting to what you already know.</p>
-        <div class="vocab-list">
-          <div class="vi">
-            <div class="vi-ico">🇰🇿</div>
-            <div class="vi-text">
-              <h4>Native Kazakh Translations</h4>
-              <p>Every word includes its Kazakh equivalent for instant understanding and faster memorization.</p>
-            </div>
-          </div>
-          <div class="vi">
-            <div class="vi-ico">🔄</div>
-            <div class="vi-text">
-              <h4>Spaced Repetition System</h4>
-              <p>Our smart algorithm shows you words at the optimal time so they stick in long-term memory.</p>
-            </div>
-          </div>
-          <div class="vi">
-            <div class="vi-ico">🎯</div>
-            <div class="vi-text">
-              <h4>Contextual Examples</h4>
-              <p>Real sentences show you exactly how each word is used in natural English conversations.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== SENTENCE BUILDER ===== -->
-<section class="builder-sec">
-  <div class="wrap">
-    <div class="builder-grid">
-      <!-- Demo -->
-      <div class="builder-demo rv">
-        <div class="bd-label">Exercise 14 — Simple Present</div>
-        <div class="bd-sentence" id="sentence-display">
-          She <span class="bd-blank" id="blank1"></span> to school every morning <span class="bd-blank" id="blank2"></span> the bus.
-        </div>
-        <div class="bd-hint">👆 Click the word tiles below to fill in the blanks</div>
-        <div class="word-pool" id="word-pool">
-          <div class="word-chip" data-word="walks" onclick="fillBlank(this)">walks</div>
-          <div class="word-chip" data-word="by" onclick="fillBlank(this)">by</div>
-          <div class="word-chip" data-word="run" onclick="fillBlank(this)">run</div>
-          <div class="word-chip" data-word="takes" onclick="fillBlank(this)">takes</div>
-          <div class="word-chip" data-word="on" onclick="fillBlank(this)">on</div>
-          <div class="word-chip" data-word="with" onclick="fillBlank(this)">with</div>
-        </div>
-        <div class="bd-actions">
-          <button class="bd-btn bd-btn-check" onclick="checkAnswer()">✓ Check Answer</button>
-          <button class="bd-btn bd-btn-reset" onclick="resetBuilder()">↺ Reset</button>
-        </div>
-        <div class="bd-feedback" id="fb"></div>
-      </div>
-      <!-- Info -->
-      <div class="rv d2">
-        <div class="eyebrow">Sentence Builder</div>
-        <h2 class="sec-title">Grammar Made <span style="background:linear-gradient(to right,var(--gold),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Visual</span></h2>
-        <p class="sec-sub">Build sentences from separated word tiles. A hands-on approach that makes grammar intuitive — not something to memorize, but something you feel.</p>
-        <div class="vocab-list" style="margin-top:32px;">
-          <div class="vi">
-            <div class="vi-ico" style="background:rgba(245,158,11,.08)">🧩</div>
-            <div class="vi-text">
-              <h4>Drag & Drop Words</h4>
-              <p>Arrange shuffled word tiles into grammatically correct sentences with instant feedback.</p>
-            </div>
-          </div>
-          <div class="vi">
-            <div class="vi-ico" style="background:rgba(245,158,11,.08)">📊</div>
-            <div class="vi-text">
-              <h4>Hundreds of Exercises</h4>
-              <p>Exercises covering all tenses, sentence types, and structures from A1 to C2.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== SITUATIONS ===== -->
-<section class="sit-sec" id="situations">
-  <div class="wrap">
-    <div class="sec-head ctr rv">
-      <div class="eyebrow center">Speaking Situations</div>
-      <h2 class="sec-title">Practice Real-Life<br>Conversations</h2>
-      <p class="sec-sub">Choose from 20+ real-world scenarios and practice English with AI characters who respond naturally. It feels like the real thing.</p>
-    </div>
-  </div>
-  <div class="sit-scroll">
-    <div class="sc s-restaurant rv">
-      <span class="s-emoji">🍽️</span>
-      <div class="s-name">At the Restaurant</div>
-      <div class="s-desc">Order food, ask for recommendations, and handle dining situations with an AI waiter.</div>
-      <span class="s-tag">AI Waiter</span>
-    </div>
-    <div class="sc s-airport rv d1">
-      <span class="s-emoji">✈️</span>
-      <div class="s-name">At the Airport</div>
-      <div class="s-desc">Check-in, boarding passes, customs, and navigating with AI airport staff.</div>
-      <span class="s-tag">AI Staff</span>
-    </div>
-    <div class="sc s-hotel rv d2">
-      <span class="s-emoji">🏨</span>
-      <div class="s-name">At the Hotel</div>
-      <div class="s-desc">Check-in, room requests, room service, and hotel amenities.</div>
-      <span class="s-tag">AI Receptionist</span>
-    </div>
-    <div class="sc s-shopping rv d3">
-      <span class="s-emoji">🛍️</span>
-      <div class="s-name">Shopping</div>
-      <div class="s-desc">Ask about sizes, prices, make purchases, and handle returns.</div>
-      <span class="s-tag">AI Shop Assistant</span>
-    </div>
-    <div class="sc s-doctor rv">
-      <span class="s-emoji">🏥</span>
-      <div class="s-name">At the Doctor</div>
-      <div class="s-desc">Describe symptoms, understand medical advice, and ask questions.</div>
-      <span class="s-tag">AI Doctor</span>
-    </div>
-    <div class="sc s-interview rv d1">
-      <span class="s-emoji">💼</span>
-      <div class="s-name">Job Interview</div>
-      <div class="s-desc">Answer professional questions and present yourself confidently.</div>
-      <span class="s-tag">AI Interviewer</span>
-    </div>
-    <div class="sc s-bank rv d2">
-      <span class="s-emoji">🏦</span>
-      <div class="s-name">At the Bank</div>
-      <div class="s-desc">Open accounts, transfer money, and handle banking requests.</div>
-      <span class="s-tag">AI Banker</span>
-    </div>
-    <div class="sc s-call rv d3">
-      <span class="s-emoji">📞</span>
-      <div class="s-name">Phone Call</div>
-      <div class="s-desc">Make appointments, handle customer service, and phone etiquette.</div>
-      <span class="s-tag">AI Caller</span>
-    </div>
-  </div>
-</section>
-
-<!-- ===== LEVELS ===== -->
-<section class="levels-sec" id="levels">
-  <div class="wrap">
-    <div class="sec-head ctr rv">
-      <div class="eyebrow center">Learning Levels</div>
-      <h2 class="sec-title">Your English<br>Learning Journey</h2>
-      <p class="sec-sub">Three carefully structured levels, each building on the last. Start where you are — grow to where you want to be.</p>
-    </div>
-    <div class="lv-grid">
-      <div class="lv-card lv-beg rv d1">
-        <span class="lv-emoji">🌱</span>
-        <div class="lv-code">A1 — A2</div>
-        <h3 class="lv-name">Beginner</h3>
-        <p class="lv-desc">Build your foundation with everyday vocabulary, basic grammar, and simple conversations for daily life.</p>
-        <ul class="lv-list">
-          <li><span class="chk">✓</span>500+ words with Kazakh translations</li>
-          <li><span class="chk">✓</span>Greetings &amp; introductions</li>
-          <li><span class="chk">✓</span>Numbers, dates, and directions</li>
-          <li><span class="chk">✓</span>Basic sentence building</li>
-          <li><span class="chk">✓</span>AI beginner practice scenarios</li>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay" id="mobileOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-close" id="mobileClose"><i class="fas fa-times"></i></div>
+        <ul class="mobile-menu-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#levels">Levels</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#teachers">For Teachers</a></li>
+            <li><a href="#games">Games</a></li>
+            <li><a href="index.html" class="btn btn-primary" style="margin-top: 20px;">Start Learning Free</a></li>
         </ul>
-      </div>
-      <div class="lv-card lv-int rv d2">
-        <span class="lv-emoji">🚀</span>
-        <div class="lv-code">B1 — B2</div>
-        <h3 class="lv-name">Intermediate</h3>
-        <p class="lv-desc">Expand conversational skills, tackle complex grammar, and navigate real-life situations with confidence.</p>
-        <ul class="lv-list">
-          <li><span class="chk">✓</span>2,000+ vocabulary with Kazakh</li>
-          <li><span class="chk">✓</span>Complex grammar structures</li>
-          <li><span class="chk">✓</span>15+ real-life situations</li>
-          <li><span class="chk">✓</span>Business English basics</li>
-          <li><span class="chk">✓</span>Live teacher sessions</li>
-        </ul>
-      </div>
-      <div class="lv-card lv-adv rv d3">
-        <span class="lv-emoji">🏆</span>
-        <div class="lv-code">C1 — C2</div>
-        <h3 class="lv-name">Advanced</h3>
-        <p class="lv-desc">Achieve near-native fluency with nuanced vocabulary, academic writing, and professional communication.</p>
-        <ul class="lv-list">
-          <li><span class="chk">✓</span>Professional &amp; academic English</li>
-          <li><span class="chk">✓</span>Idioms &amp; natural expressions</li>
-          <li><span class="chk">✓</span>Debate &amp; presentation skills</li>
-          <li><span class="chk">✓</span>IELTS &amp; TOEFL preparation</li>
-          <li><span class="chk">✓</span>1-on-1 teacher mentorship</li>
-        </ul>
-      </div>
     </div>
-  </div>
-</section>
 
-<!-- ===== TEACHERS ===== -->
-<section class="teachers-sec" id="teachers">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div class="eyebrow">Real Teachers</div>
-      <h2 class="sec-title">Learn from Certified<br>English Educators</h2>
-      <p class="sec-sub">Expert teachers create structured courses, host live online classes, and guide you at every step — all inside SpeakNova.</p>
-    </div>
-    <div class="tc-grid">
-      <div class="tc-card rv d1">
-        <div class="tc-img">
-          <img src="https://cdn05.qazaqstan.tv/720x/old/articles/1/article_1120.jpg" alt="Kairat Nurtas">
-          <div class="tc-overlay"></div>
-          <div class="live-tag"><div class="live-dot"></div>Live Class</div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-name">Kairat Nurtas</div>
-          <div class="tc-spec">Business English Specialist</div>
-          <div class="tc-meta">
-            <div class="tm">⭐ <span>4.9 (312 reviews)</span></div>
-            <div class="tm">👥 <span>1,400 students</span></div>
-          </div>
-          <div class="tags">
-            <span class="tag tc">Business</span>
-            <span class="tag tp">Interviews</span>
-            <span class="tag tg">B2–C1</span>
-          </div>
-        </div>
-      </div>
-      <div class="tc-card rv d2">
-        <div class="tc-img">
-          <img src="https://cdn.mos.cms.futurecdn.net/gptDY3d4GoKT6xwSWrKndH.jpeg" alt="Gong Yoo">
-          <div class="tc-overlay"></div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-name">Gong Yoo</div>
-          <div class="tc-spec">General English &amp; IELTS Coach</div>
-          <div class="tc-meta">
-            <div class="tm">⭐ <span>4.8 (520 reviews)</span></div>
-            <div class="tm">👥 <span>2,100 students</span></div>
-          </div>
-          <div class="tags">
-            <span class="tag tc">IELTS</span>
-            <span class="tag tp">Grammar</span>
-            <span class="tag tg">A1–B2</span>
-          </div>
-        </div>
-      </div>
-      <div class="tc-card rv d3">
-        <div class="tc-img">
-          <img src="https://i.pinimg.com/736x/a0/7c/0e/a07c0e945f063fcc0f3f6c8e5c82f4f0.jpg" alt="CaseOh">
-          <div class="tc-overlay"></div>
-          <div class="live-tag"><div class="live-dot"></div>Live Class</div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-name">CaseOh</div>
-          <div class="tc-spec">Conversational English Expert</div>
-          <div class="tc-meta">
-            <div class="tm">⭐ <span>5.0 (198 reviews)</span></div>
-            <div class="tm">👥 <span>890 students</span></div>
-          </div>
-          <div class="tags">
-            <span class="tag tc">Speaking</span>
-            <span class="tag tp">Pronunciation</span>
-            <span class="tag tg">B1–C2</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== TEACHER TOOLS ===== -->
-<section class="tools-sec">
-  <div class="wrap">
-    <div class="tools-grid">
-      <div class="rv">
-        <div class="eyebrow">Teacher Toolkit</div>
-        <h2 class="sec-title">Everything Teachers Need, <span style="background:linear-gradient(to right,var(--emerald),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Built In.</span></h2>
-        <p class="sec-sub" style="margin-bottom:36px;">No extra apps. No extra fees. Create courses, host live classes, build quizzes and worksheets — all right here.</p>
-        <div class="tools-list">
-          <div class="tl-item act" onclick="switchTool(this)">
-            <div class="tl-ico ti1">🎥</div>
-            <div class="tl-text">
-              <h4>Online Meetings, Built Right In</h4>
-              <p>Host live classes directly on SpeakNova. No Zoom, no Google Meet — just click and start teaching.</p>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <div class="logo-icon"><i class="fas fa-language"></i></div>
+                TilMenger
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#levels">Levels</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#teachers">For Teachers</a></li>
+                <li><a href="#games">Games</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a href="index.html" class="btn btn-primary">Start Learning Free</a>
             </div>
-          </div>
-          <div class="tl-item" onclick="switchTool(this)">
-            <div class="tl-ico ti2">📝</div>
-            <div class="tl-text">
-              <h4>Create Quizzes &amp; Worksheets</h4>
-              <p>Build interactive quizzes and worksheets that students complete right inside the app.</p>
+            <div class="mobile-toggle" id="mobileToggle">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
-          </div>
-          <div class="tl-item" onclick="switchTool(this)">
-            <div class="tl-ico ti3">📊</div>
-            <div class="tl-text">
-              <h4>Track Student Progress</h4>
-              <p>See detailed analytics on performance, attendance, and learning milestones for every student.</p>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg-pattern"></div>
+        <div class="hero-shapes">
+            <div class="hero-shape hero-shape-1"></div>
+            <div class="hero-shape hero-shape-2"></div>
+            <div class="hero-shape hero-shape-3"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-star"></i>
+                    100% Free!
+                </div>
+                <h1 class="hero-title">
+                    Learn English<br>
+                    <span class="highlight">via Kazakh</span><br>
+                    With AI Power
+                </h1>
+                <p class="hero-subtitle">
+                    Master English naturally with interactive lessons, AI pronunciation grading, 
+                    vocabulary building, sentence construction, and fun games — all completely free.
+                </p>
+                <div class="hero-cta">
+                    <a href="index.html" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket"></i>
+                        Start Learning Free
+                    </a>
+                    <a href="#how-it-works" class="btn btn-outline btn-lg">
+                        <i class="fas fa-play-circle"></i>
+                        See How It Works
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-number">10K+</span>
+                        <span class="hero-stat-label">Active Learners</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number">500+</span>
+                        <span class="hero-stat-label">Expert Teachers</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number">50+</span>
+                        <span class="hero-stat-label">Interactive Lessons</span>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="tl-item" onclick="switchTool(this)">
-            <div class="tl-ico ti4">💰</div>
-            <div class="tl-text">
-              <h4>Monetize Your Courses</h4>
-              <p>Set your own pricing and earn directly from the students who enroll in your courses.</p>
+            <div class="hero-image-wrapper">
+                <div class="hero-image">
+                    <img src="images/hero-student.png" alt="Student learning English with TilMenger">
+                </div>
+                <div class="hero-floating-card hero-floating-card-1">
+                    <div class="floating-card-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <div class="floating-card-text">Lesson Completed!</div>
+                        <div class="floating-card-sub">+25 XP earned</div>
+                    </div>
+                </div>
+                <div class="hero-floating-card hero-floating-card-2">
+                    <div class="floating-card-icon coral"><i class="fas fa-microphone"></i></div>
+                    <div>
+                        <div class="floating-card-text">AI Score: 95%</div>
+                        <div class="floating-card-sub">Excellent pronunciation!</div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      <!-- Mock -->
-      <div class="tools-mock rv d2">
-        <div class="tm-top">
-          <span style="font-size:16px">🎥</span>
-          <div class="tm-t">English Speaking Workshop</div>
-          <div class="tm-live"><div class="live-dot"></div>LIVE</div>
-        </div>
-        <div class="tm-body-p">
-          <div class="vid-grid">
-            <div class="vt vt1">👩‍🏫<div class="nametag">Sarah (Teacher)</div></div>
-            <div class="vt vt2">🧑‍💻<div class="nametag">Aibek K.</div></div>
-            <div class="vt vt3">👩<div class="nametag">Zarina M.</div></div>
-            <div class="vt vt4">+14 more</div>
-          </div>
-          <div class="quiz-box">
-            <div class="quiz-q">📝 Quick Check — Choose the correct form:</div>
-            <div class="q-opts">
-              <div class="q-opt">He go to school every day.</div>
-              <div class="q-opt ok">✓ He goes to school every day.</div>
-              <div class="q-opt">He going to school every day.</div>
+    </section>
+
+    <!-- Trust Bar -->
+    <section class="trust-bar">
+        <div class="container">
+            <div class="trust-grid">
+                <div class="trust-item animate-on-scroll delay-2">
+                    <div class="trust-number">1000+</div>
+                    <div class="trust-label">Words Learned</div>
+                </div>
+                <div class="trust-item animate-on-scroll delay-3">
+                    <div class="trust-number">100%</div>
+                    <div class="trust-label">Free</div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ===== HOW IT WORKS ===== -->
-<section class="how-sec">
-  <div class="wrap">
-    <div class="sec-head ctr rv">
-      <div class="eyebrow center">How It Works</div>
-      <h2 class="sec-title">Start Speaking in<br>3 Simple Steps</h2>
-    </div>
-    <div class="how-grid">
-      <div class="hw-step rv d1">
-        <div class="hw-num">01</div>
-        <h3 class="hw-title">Take a Placement Test</h3>
-        <p class="hw-desc">Our AI evaluates your current English level and assigns you to the right learning path — A1 to C2.</p>
-      </div>
-      <div class="hw-step rv d2">
-        <div class="hw-num">02</div>
-        <h3 class="hw-title">Practice Daily with AI</h3>
-        <p class="hw-desc">Speak with your AI teacher in real situations, build vocabulary with Kazakh translations, and practice grammar.</p>
-      </div>
-      <div class="hw-step rv d3">
-        <div class="hw-num">03</div>
-        <h3 class="hw-title">Level Up with Real Teachers</h3>
-        <p class="hw-desc">Enroll in teacher-led courses, join live classes, and take quizzes to validate your progress and advance.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== STATS ===== -->
-<section class="stats-sec" style="background:var(--bg2);">
-  <div class="wrap">
-    <div class="stats-grid">
-      <div class="rv"><div class="stat-num" data-target="50000">0</div><div class="stat-lbl">Active Students</div></div>
-      <div class="rv d1"><div class="stat-num" data-target="500">0</div><div class="stat-lbl">Certified Teachers</div></div>
-      <div class="rv d2"><div class="stat-num" data-target="20">0</div><div class="stat-lbl">Practice Situations</div></div>
-      <div class="rv d3"><div class="stat-num" data-target="95">0</div><div class="stat-lbl">% Satisfaction Rate</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== TESTIMONIALS ===== -->
-<section class="testi-sec">
-  <div class="wrap">
-    <div class="sec-head ctr rv">
-      <div class="eyebrow center">Student Stories</div>
-      <h2 class="sec-title">Loved by Learners<br>Across Kazakhstan</h2>
-    </div>
-    <div class="testi-grid">
-      <div class="tt-card rv d1">
-        <div class="tt-stars">⭐⭐⭐⭐⭐</div>
-        <p class="tt-q">"The restaurant situation was the first thing I tried. I was anxious about ordering food in English, but after practicing with the <strong>AI waiter on SpeakNova</strong>, I felt completely confident at the real restaurant!"</p>
-        <div class="tt-auth">
-          <div class="tt-av"><img src="https://i.pravatar.cc/100?img=12" alt=""></div>
-          <div>
-            <div class="tt-name">Aizat Bekova</div>
-            <div class="tt-info">A2 → B1 in 3 months</div>
-          </div>
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-tag">
+                    <i class="fas fa-sparkles"></i>
+                    Powerful Features
+                </div>
+                <h2 class="section-title">Everything You Need to<br>Master English</h2>
+                <p class="section-subtitle">
+                    From vocabulary building to AI-powered pronunciation grading, 
+                    TilMenger provides all the tools you need to become fluent in English.
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon green"><i class="fas fa-book-open"></i></div>
+                    <h3 class="feature-title">Learn New Words</h3>
+                    <p class="feature-desc">
+                        Build your vocabulary with interactive flashcards showing English words 
+                        with Kazakh translations. Track your progress and master new words daily.
+                    </p>
+                    <div class="feature-image">
+                        <img src="images/feature-words.png" alt="Vocabulary Learning">
+                    </div>
+                </div>
+                <div class="feature-card animate-on-scroll delay-1">
+                    <div class="feature-icon blue"><i class="fas fa-puzzle-piece"></i></div>
+                    <h3 class="feature-title">Build Sentences</h3>
+                    <p class="feature-desc">
+                        Practice constructing sentences using the words you've learned. 
+                        Like building blocks, assemble words into perfect English sentences.
+                    </p>
+                    <div class="feature-image">
+                        <img src="images/feature-sentences.png" alt="Sentence Building">
+                    </div>
+                </div>
+                <div class="feature-card animate-on-scroll delay-2">
+                    <div class="feature-icon coral"><i class="fas fa-microphone"></i></div>
+                    <h3 class="feature-title">AI Pronunciation</h3>
+                    <p class="feature-desc">
+                        Speak sentences aloud and get instant AI-powered feedback on your 
+                        pronunciation with detailed scoring and improvement tips.
+                    </p>
+                    <div class="feature-image">
+                        <img src="images/feature-pronunciation.png" alt="AI Pronunciation Grading">
+                    </div>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon purple"><i class="fas fa-chalkboard-user"></i></div>
+                    <h3 class="feature-title">Expert Teachers</h3>
+                    <p class="feature-desc">
+                        Learn from professional English teachers who create structured courses, 
+                        interactive classes, and personalized learning paths for you.
+                    </p>
+                    <div class="feature-image">
+                        <img src="images/feature-teacher.png" alt="Professional Teachers">
+                    </div>
+                </div>
+                <div class="feature-card animate-on-scroll delay-1">
+                    <div class="feature-icon warm"><i class="fas fa-gamepad"></i></div>
+                    <h3 class="feature-title">Fun Games</h3>
+                    <p class="feature-desc">
+                        Learn through play with interactive games including our special Monopoly-style 
+                        speaking game where you improve English while having fun.
+                    </p>
+                    <div class="feature-image">
+                        <img src="images/feature-games.png" alt="Learning Games">
+                    </div>
+                </div>
+                <div class="feature-card animate-on-scroll delay-2">
+                    <div class="feature-icon green"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="feature-title">Track Progress</h3>
+                    <p class="feature-desc">
+                        Monitor your learning journey with detailed analytics, streak counters, 
+                        achievement badges, and personalized recommendations.
+                    </p>
+                    <div class="feature-image" style="background: var(--primary-light); display: flex; align-items: center; justify-content: center; height: 180px;">
+                        <i class="fas fa-trophy" style="font-size: 4rem; color: var(--primary); opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="tt-card rv d2">
-        <div class="tt-stars">⭐⭐⭐⭐⭐</div>
-        <p class="tt-q">"Having <strong>Kazakh translations for every word</strong> was a total game changer. I finally understand words in context instead of just memorizing. My vocabulary grew 3× faster than before."</p>
-        <div class="tt-auth">
-          <div class="tt-av"><img src="https://i.pravatar.cc/100?img=18" alt=""></div>
-          <div>
-            <div class="tt-name">Daniyar Seitkali</div>
-            <div class="tt-info">B1 → B2 in 4 months</div>
-          </div>
+    </section>
+
+    <!-- Levels Section -->
+    <section class="levels" id="levels">
+        <div class="levels-shapes">
+            <div class="levels-shape levels-shape-1"></div>
+            <div class="levels-shape levels-shape-2"></div>
         </div>
-      </div>
-      <div class="tt-card rv d3">
-        <div class="tt-stars">⭐⭐⭐⭐⭐</div>
-        <p class="tt-q">"As a teacher, I love that I can host live classes, make quizzes, and track student progress all in one app. <strong>No extra tools needed!</strong> My students are more engaged than ever."</p>
-        <div class="tt-auth">
-          <div class="tt-av"><img src="https://i.pravatar.cc/100?img=49" alt=""></div>
-          <div>
-            <div class="tt-name">Saltanat Nurlanovna</div>
-            <div class="tt-info">English Teacher, 5 years</div>
-          </div>
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-tag">
+                    <i class="fas fa-layer-group"></i>
+                    Learning Levels
+                </div>
+                <h2 class="section-title">Choose Your Level,<br>Start Your Journey</h2>
+                <p class="section-subtitle">
+                    Whether you're just starting or looking to polish your skills, 
+                    we have the perfect learning path for you.
+                </p>
+            </div>
+            <div class="levels-grid">
+                <div class="level-card beginner animate-on-scroll">
+                    <div class="level-badge beginner"><i class="fas fa-seedling"></i></div>
+                    <h3 class="level-title">Beginner</h3>
+                    <p class="level-desc">
+                        Start your English journey from scratch. Learn basic vocabulary, 
+                        simple sentences, and everyday conversations.
+                    </p>
+                    <div class="level-topics">
+                        <span class="level-topic">Greetings</span>
+                        <span class="level-topic">Numbers</span>
+                        <span class="level-topic">Colors</span>
+                        <span class="level-topic">Family</span>
+                        <span class="level-topic">Food</span>
+                        <span class="level-topic">Daily Life</span>
+                    </div>
+                </div>
+                <div class="level-card intermediate animate-on-scroll delay-1">
+                    <div class="level-badge intermediate"><i class="fas fa-tree"></i></div>
+                    <h3 class="level-title">Intermediate</h3>
+                    <p class="level-desc">
+                        Expand your skills with complex grammar, richer vocabulary, 
+                        and more natural conversation patterns.
+                    </p>
+                    <div class="level-topics">
+                        <span class="level-topic">Past Tense</span>
+                        <span class="level-topic">Future Plans</span>
+                        <span class="level-topic">Opinions</span>
+                        <span class="level-topic">Travel</span>
+                        <span class="level-topic">Work</span>
+                        <span class="level-topic">Stories</span>
+                    </div>
+                </div>
+                <div class="level-card advanced animate-on-scroll delay-2">
+                    <div class="level-badge advanced"><i class="fas fa-crown"></i></div>
+                    <h3 class="level-title">Advanced</h3>
+                    <p class="level-desc">
+                        Master fluent English with idioms, advanced grammar, 
+                        professional communication, and nuanced expression.
+                    </p>
+                    <div class="level-topics">
+                        <span class="level-topic">Idioms</span>
+                        <span class="level-topic">Debates</span>
+                        <span class="level-topic">Business</span>
+                        <span class="level-topic">Academic</span>
+                        <span class="level-topic">Presentation</span>
+                        <span class="level-topic">Fluency</span>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-tag">
+                    <i class="fas fa-list-ol"></i>
+                    Simple Process
+                </div>
+                <h2 class="section-title">How TilMenger Works</h2>
+                <p class="section-subtitle">
+                    Four simple steps to start your English learning journey
+                </p>
+            </div>
+            <div class="steps">
+                <div class="step animate-on-scroll">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Choose Your Level</h3>
+                    <p class="step-desc">Select from Beginner, Intermediate, or Advanced based on your current skills.</p>
+                </div>
+                <div class="step animate-on-scroll delay-1">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Learn Words</h3>
+                    <p class="step-desc">Study new vocabulary with flashcards featuring English and Kazakh translations.</p>
+                </div>
+                <div class="step animate-on-scroll delay-2">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Build & Speak</h3>
+                    <p class="step-desc">Create sentences and practice pronunciation with AI-powered feedback.</p>
+                </div>
+                <div class="step animate-on-scroll delay-3">
+                    <div class="step-number">4</div>
+                    <h3 class="step-title">Play & Improve</h3>
+                    <p class="step-desc">Reinforce learning with fun games and track your daily progress.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Teachers Section -->
+    <section class="teachers" id="teachers">
+        <div class="container">
+            <div class="teachers-container">
+                <div class="teachers-image animate-on-scroll">
+                    <img src="images/feature-teacher.png" alt="Teacher creating content">
+                    <div class="teacher-floating-card teacher-floating-card-1">
+                        <div class="floating-card-icon green"><i class="fas fa-users"></i></div>
+                        <div>
+                            <div class="floating-card-text">24 Students Online</div>
+                            <div class="floating-card-sub">Live class in progress</div>
+                        </div>
+                    </div>
+                    <div class="teacher-floating-card teacher-floating-card-2">
+                        <div class="floating-card-icon coral"><i class="fas fa-trophy"></i></div>
+                        <div>
+                            <div class="floating-card-text">Top Teacher Award</div>
+                            <div class="floating-card-sub">This month winner</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="teachers-content animate-on-scroll delay-1">
+                    <div class="section-tag">
+                        <i class="fas fa-chalkboard-user"></i>
+                        For Teachers
+                    </div>
+                    <h2 class="teachers-title">Powerful Tools for<br>English Teachers</h2>
+                    <p class="teachers-desc">
+                        Create engaging courses, manage classes, design interactive quizzes, 
+                        reading tasks, worksheets, and games — all in one platform. 
+                        Reach thousands of eager learners and make teaching fun and effective.
+                    </p>
+                    <div class="teacher-tools">
+                        <div class="teacher-tool">
+                            <div class="teacher-tool-icon green"><i class="fas fa-book"></i></div>
+                            <span class="teacher-tool-text">Create Courses</span>
+                        </div>
+                        <div class="teacher-tool">
+                            <div class="teacher-tool-icon blue"><i class="fas fa-users"></i></div>
+                            <span class="teacher-tool-text">Manage Classes</span>
+                        </div>
+                        <div class="teacher-tool">
+                            <div class="teacher-tool-icon coral"><i class="fas fa-question-circle"></i></div>
+                            <span class="teacher-tool-text">Quiz Games</span>
+                        </div>
+                        <div class="teacher-tool">
+                            <div class="teacher-tool-icon purple"><i class="fas fa-file-alt"></i></div>
+                            <span class="teacher-tool-text">Reading Tasks</span>
+                        </div>
+                        <div class="teacher-tool">
+                            <div class="teacher-tool-icon warm"><i class="fas fa-pen-fancy"></i></div>
+                            <span class="teacher-tool-text">Worksheets</span>
+                        </div>
+                        <div class="teacher-tool">
+                            <div class="teacher-tool-icon teal"><i class="fas fa-gamepad"></i></div>
+                            <span class="teacher-tool-text">Monopoly Game</span>
+                        </div>
+                    </div>
+                    <a href="#cta" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus"></i>
+                        Become a Teacher
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Section -->
+    <section class="games" id="games">
+        <div class="container">
+            <div class="games-container">
+                <div class="games-content animate-on-scroll">
+                    <div class="section-tag">
+                        <i class="fas fa-gamepad"></i>
+                        Fun Learning
+                    </div>
+                    <h2 class="games-title">Learning Through<br>Play is the Best Way</h2>
+                    <p class="games-desc">
+                        We believe learning should be fun! Our interactive games make practicing 
+                        English enjoyable and addictive. Students don't even realize they're learning 
+                        as they play and compete with friends.
+                    </p>
+                    <div class="games-list">
+                        <div class="game-item">
+                            <div class="game-icon green"><i class="fas fa-dice"></i></div>
+                            <div>
+                                <div class="game-text">Monopoly Speaking Game</div>
+                                <div class="game-sub">Answer speaking challenges as you move around the board</div>
+                            </div>
+                        </div>
+                        <div class="game-item">
+                            <div class="game-icon coral"><i class="fas fa-bolt"></i></div>
+                            <div>
+                                <div class="game-text">Speed Quiz Challenges</div>
+                                <div class="game-sub">Test your knowledge against the clock</div>
+                            </div>
+                        </div>
+                        <div class="game-item">
+                            <div class="game-icon warm"><i class="fas fa-book-reader"></i></div>
+                            <div>
+                                <div class="game-text">Interactive Reading Tasks</div>
+                                <div class="game-sub">Read stories and answer comprehension questions</div>
+                            </div>
+                        </div>
+                        <div class="game-item">
+                            <div class="game-icon purple"><i class="fas fa-puzzle-piece"></i></div>
+                            <div>
+                                <div class="game-text">Interactive Worksheets</div>
+                                <div class="game-sub">Fill in the blanks, match words, and solve puzzles</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="games-image animate-on-scroll delay-1">
+                    <img src="images/feature-games.png" alt="Students playing learning games">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta" id="cta">
+        <div class="cta-shapes">
+            <div class="cta-shape cta-shape-1"></div>
+            <div class="cta-shape cta-shape-2"></div>
+        </div>
+        <div class="container">
+            <div class="cta-container">
+                <h2 class="cta-title animate-on-scroll">Ready to Start<br>Your English Journey?</h2>
+                <p class="cta-desc animate-on-scroll delay-1">
+                    Join thousands of learners who are already improving their English with TilMenger. 
+                    It's completely free, fun, and effective!
+                </p>
+                <div class="cta-buttons animate-on-scroll delay-2">
+                    <a href="#" class="btn btn-primary btn-lg" onclick="showComingSoon(event)">
+                        <i class="fas fa-rocket"></i>
+                        Get Started Free
+                    </a>
+                    <a href="#" class="btn btn-white btn-lg" onclick="showComingSoon(event)">
+                        <i class="fas fa-chalkboard-user"></i>
+                        I'm a Teacher
+                    </a>
+                </div>
+                <div class="cta-free-badge animate-on-scroll delay-3">
+                    <i class="fas fa-gift"></i>
+                    No credit card required. No hidden fees. 100% Free!
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <div class="logo-icon"><i class="fas fa-language"></i></div>
+                        TilMenger
+                    </a>
+                    <p class="footer-desc">
+                        The most fun and effective way to learn English through Kazakh. 
+                        Interactive lessons, AI-powered pronunciation grading, and engaging games — 
+                        all completely free.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4>Learn</h4>
+                    <ul class="footer-links">
+                        <li><a href="#levels">Beginner Level</a></li>
+                        <li><a href="#levels">Intermediate Level</a></li>
+                        <li><a href="#levels">Advanced Level</a></li>
+                        <li><a href="#features">Vocabulary</a></li>
+                        <li><a href="#features">Pronunciation</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Teachers</h4>
+                    <ul class="footer-links">
+                        <li><a href="#teachers">Create Courses</a></li>
+                        <li><a href="#teachers">Manage Classes</a></li>
+                        <li><a href="#teachers">Quiz Games</a></li>
+                        <li><a href="#teachers">Reading Tasks</a></li>
+                        <li><a href="#teachers">Worksheets</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" onclick="showComingSoon(event)">About Us</a></li>
+                        <li><a href="#" onclick="showComingSoon(event)">Blog</a></li>
+                        <li><a href="#" onclick="showComingSoon(event)">Careers</a></li>
+                        <li><a href="#" onclick="showComingSoon(event)">Contact</a></li>
+                        <li><a href="#" onclick="showComingSoon(event)">Help Center</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">2025 TilMenger. All rights reserved. Made with love for language learners.</p>
+                <div class="footer-legal">
+                    <a href="#" onclick="showComingSoon(event)">Privacy Policy</a>
+                    <a href="#" onclick="showComingSoon(event)">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Coming Soon Modal -->
+    <div id="comingSoonModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; padding:40px; border-radius:24px; text-align:center; max-width:400px; margin:20px; box-shadow:0 24px 80px rgba(0,0,0,0.2); animation: fadeInUp 0.3s ease;">
+            <div style="width:64px; height:64px; background:var(--primary-light); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.8rem; color:var(--primary);">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h3 style="font-family:'Outfit',sans-serif; font-size:1.5rem; font-weight:700; margin-bottom:12px;">Coming Soon!</h3>
+            <p style="color:var(--text-light); margin-bottom:24px;">We're working hard to bring you this feature. Stay tuned for updates!</p>
+            <button onclick="closeComingSoon()" class="btn btn-primary" style="width:100%;">Got it!</button>
+        </div>
     </div>
-  </div>
-</section>
 
-<!-- ===== CTA ===== -->
-<section class="cta-sec">
-  <div class="cta-glow"></div>
-  <div class="wrap">
-    <div class="rv">
-      <div class="eyebrow center" style="margin-bottom:24px;">✦ Start Your Journey Today</div>
-      <h2 class="cta-title">
-        Ready to Speak<br>
-        <span class="grad">English Fluently?</span>
-      </h2>
-      <p class="cta-sub">Join 50,000+ students already transforming their English with AI-powered learning and real certified teachers.</p>
-      <div class="cta-btns">
-        <a href="index.html" class="btn-pill-lg"><span>🚀 Start for Free</span></a>
-        <a href="#" class="btn-outline-lg">Browse Teachers →</a>
-      </div>
-      <p class="cta-note">No credit card required <span>•</span> Free beginner access <span>•</span> Cancel anytime</p>
-    </div>
-  </div>
-</section>
+    <script>
+        /* ========================================
+           NAVBAR SCROLL EFFECT
+        ======================================== */
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
 
-<!-- ===== FOOTER ===== -->
-<footer>
-  <div class="wrap">
-    <div class="foot-grid">
-      <div class="foot-brand">
-        <a href="#" class="logo">
-          <span class="logo-mark">✦</span>
-          Speak<em>Nova</em>
-        </a>
-        <p>The smartest way to master English. AI-powered learning meets certified teaching expertise. Built for Kazakh learners.</p>
-      </div>
-      <div class="foot-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="#">AI Speaking</a></li>
-          <li><a href="#">Vocabulary</a></li>
-          <li><a href="#">Sentence Builder</a></li>
-          <li><a href="#">Situations</a></li>
-          <li><a href="#">Levels</a></li>
-        </ul>
-      </div>
-      <div class="foot-col">
-        <h4>Teachers</h4>
-        <ul>
-          <li><a href="#">Browse Teachers</a></li>
-          <li><a href="#">Become a Teacher</a></li>
-          <li><a href="#">Teacher Tools</a></li>
-          <li><a href="#">Host Classes</a></li>
-        </ul>
-      </div>
-      <div class="foot-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="#">About Us</a></li>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Careers</a></li>
-          <li><a href="#">Contact</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="foot-bot">
-      <div>© 2025 SpeakNova. All rights reserved. Made with ❤️ for Kazakhstan.</div>
-      <div class="socials">
-        <a href="#" class="soc-btn">𝕏</a>
-        <a href="#" class="soc-btn">in</a>
-        <a href="#" class="soc-btn">▶</a>
-        <a href="#" class="soc-btn">📷</a>
-      </div>
-    </div>
-  </div>
-</footer>
+        /* ========================================
+           SCROLL ANIMATIONS (Intersection Observer)
+        ======================================== */
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
 
-<script>
-/* ===== NAVBAR SCROLL ===== */
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 60);
-}, {passive:true});
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
 
-/* ===== REVEAL ON SCROLL ===== */
-const revEls = document.querySelectorAll('.rv');
-const obs = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('in'); }
-  });
-}, { threshold: 0.1 });
-revEls.forEach(el => obs.observe(el));
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
 
-// Kick in visible items immediately
-requestAnimationFrame(() => {
-  revEls.forEach(el => {
-    const r = el.getBoundingClientRect();
-    if (r.top < window.innerHeight * 0.98) el.classList.add('in');
-  });
-});
+        /* ========================================
+           SCROLL TO TOP
+        ======================================== */
+        const scrollTopBtn = document.getElementById('scrollTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        });
 
-/* ===== COUNTER ANIMATION ===== */
-function animCount(el) {
-  const target = +el.dataset.target;
-  const dur = 2200;
-  const t0 = Date.now();
-  (function tick() {
-    const p = Math.min((Date.now() - t0) / dur, 1);
-    const eased = 1 - Math.pow(1 - p, 3);
-    const val = Math.floor(eased * target);
-    if (target >= 1000) el.textContent = Math.round(val/1000) + 'k+';
-    else if (target === 95) el.textContent = val + '%';
-    else el.textContent = val + '+';
-    if (p < 1) requestAnimationFrame(tick);
-  })();
-}
-const countEls = document.querySelectorAll('.stat-num');
-const countObs = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) { animCount(e.target); countObs.unobserve(e.target); }
-  });
-}, { threshold: 0.5 });
-countEls.forEach(el => countObs.observe(el));
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
 
-/* ===== TEACHER TOOL TABS ===== */
-function switchTool(el) {
-  document.querySelectorAll('.tl-item').forEach(i => i.classList.remove('act'));
-  el.classList.add('act');
-}
+        /* ========================================
+           MOBILE MENU
+        ======================================== */
+        const mobileToggle = document.getElementById('mobileToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        const mobileClose = document.getElementById('mobileClose');
 
-/* ===== SENTENCE BUILDER ===== */
-let blank1 = null, blank2 = null;
-const correct = ['walks','on'];
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
 
-function fillBlank(chip) {
-  if (chip.classList.contains('used')) return;
-  const word = chip.dataset.word;
-  if (!blank1) {
-    blank1 = word;
-    document.getElementById('blank1').textContent = word;
-    document.getElementById('blank1').style.color = 'var(--text)';
-    document.getElementById('blank1').style.background = 'rgba(139,92,246,.12)';
-    chip.classList.add('used');
-  } else if (!blank2) {
-    blank2 = word;
-    document.getElementById('blank2').textContent = word;
-    document.getElementById('blank2').style.color = 'var(--text)';
-    document.getElementById('blank2').style.background = 'rgba(139,92,246,.12)';
-    chip.classList.add('used');
-  }
-  document.getElementById('fb').style.display = 'none';
-}
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
 
-function checkAnswer() {
-  const fb = document.getElementById('fb');
-  if (!blank1 || !blank2) { fb.className='bd-feedback fb-err'; fb.style.display='block'; fb.textContent='⚠️ Please fill in both blanks first!'; return; }
-  if (blank1 === correct[0] && blank2 === correct[1]) {
-    fb.className='bd-feedback fb-ok'; fb.style.display='block';
-    fb.textContent='🎉 Correct! "Walks" is 3rd person singular, and "on" is the right preposition for bus.';
-    document.getElementById('blank1').style.background='rgba(16,185,129,.12)';
-    document.getElementById('blank2').style.background='rgba(16,185,129,.12)';
-  } else {
-    fb.className='bd-feedback fb-err'; fb.style.display='block';
-    fb.textContent='❌ Not quite. Think about subject-verb agreement and the preposition for bus.';
-    document.getElementById('blank1').style.background='rgba(239,68,68,.1)';
-    document.getElementById('blank2').style.background='rgba(239,68,68,.1)';
-  }
-}
+        mobileToggle.addEventListener('click', openMobileMenu);
+        mobileClose.addEventListener('click', closeMobileMenu);
+        mobileOverlay.addEventListener('click', closeMobileMenu);
 
-function resetBuilder() {
-  blank1 = null; blank2 = null;
-  const b1 = document.getElementById('blank1');
-  const b2 = document.getElementById('blank2');
-  b1.textContent = ''; b1.style.color=''; b1.style.background='rgba(0,212,255,.07)';
-  b2.textContent = ''; b2.style.color=''; b2.style.background='rgba(0,212,255,.07)';
-  document.querySelectorAll('.word-chip').forEach(c => c.classList.remove('used','correct'));
-  document.getElementById('fb').style.display='none';
-}
+        document.querySelectorAll('.mobile-menu-links a').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
 
-/* ===== SITUATIONS SCROLL DRAG ===== */
-const scroll = document.querySelector('.sit-scroll');
-let isDown=false, startX, scrollLeft;
-scroll.addEventListener('mousedown', e => { isDown=true; scroll.style.cursor='grabbing'; startX=e.pageX-scroll.offsetLeft; scrollLeft=scroll.scrollLeft; });
-scroll.addEventListener('mouseleave', () => { isDown=false; scroll.style.cursor=''; });
-scroll.addEventListener('mouseup', () => { isDown=false; scroll.style.cursor=''; });
-scroll.addEventListener('mousemove', e => { if(!isDown)return; e.preventDefault(); scroll.scrollLeft = scrollLeft-(e.pageX-scroll.offsetLeft-startX); });
-</script>
+        /* ========================================
+           SMOOTH SCROLL FOR ANCHOR LINKS
+        ======================================== */
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return;
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        /* ========================================
+           COMING SOON MODAL
+        ======================================== */
+        function showComingSoon(event) {
+            event.preventDefault();
+            const modal = document.getElementById('comingSoonModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeComingSoon() {
+            const modal = document.getElementById('comingSoonModal');
+            modal.style.display = 'none';
+        }
+
+        document.getElementById('comingSoonModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeComingSoon();
+            }
+        });
+
+        /* ========================================
+           FLOATING PARTICLES
+        ======================================== */
+        const particlesContainer = document.getElementById('particles');
+        const colors = ['#00C897', '#4A90D9', '#FF6B6B', '#FFB347', '#9B6DD7'];
+
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.width = (4 + Math.random() * 8) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.animationDuration = (15 + Math.random() * 20) + 's';
+            particle.style.animationDelay = (Math.random() * 20) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        /* ========================================
+           HERO PARALLAX EFFECT
+        ======================================== */
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const heroShapes = document.querySelectorAll('.hero-shape');
+            heroShapes.forEach((shape, index) => {
+                const speed = 0.2 + (index * 0.1);
+                shape.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        /* ========================================
+           COUNTER ANIMATION
+        ======================================== */
+        function animateCounter(el, target, suffix = '') {
+            let current = 0;
+            const increment = target / 60;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    el.textContent = target + suffix;
+                    clearInterval(timer);
+                } else {
+                    el.textContent = Math.floor(current) + suffix;
+                }
+            }, 30);
+        }
+
+        const trustObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const numbers = entry.target.querySelectorAll('.trust-number');
+                    numbers.forEach(num => {
+                        const text = num.textContent;
+                        const value = parseInt(text);
+                        const suffix = text.replace(/[0-9]/g, '');
+                        if (!isNaN(value)) {
+                            num.textContent = '0' + suffix;
+                            setTimeout(() => animateCounter(num, value, suffix), 300);
+                        }
+                    });
+                    trustObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const trustBar = document.querySelector('.trust-bar');
+        if (trustBar) {
+            trustObserver.observe(trustBar);
+        }
+
+        /* ========================================
+           FEATURE CARD IMAGE PARALLAX
+        ======================================== */
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-8px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        /* ========================================
+           BUTTON RIPPLE EFFECT
+        ======================================== */
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255,255,255,0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s ease-out;
+                    pointer-events: none;
+                `;
+                
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add ripple keyframe
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `
+            @keyframes ripple {
+                to { transform: scale(2); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(rippleStyle);
+
+        /* ========================================
+           TYPING EFFECT FOR HERO TITLE
+        ======================================== */
+        function typeEffect(element, text, speed = 50) {
+            let i = 0;
+            element.textContent = '';
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // Add typing effect on page load
+        window.addEventListener('load', () => {
+            const heroSubtitle = document.querySelector('.hero-subtitle');
+            if (heroSubtitle) {
+                const originalText = heroSubtitle.textContent;
+                typeEffect(heroSubtitle, originalText, 30);
+            }
+        });
+
+        /* ========================================
+           KEYBOARD SHORTCUTS
+        ======================================== */
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+                closeComingSoon();
+            }
+        });
+
+        console.log('%c TilMenger ', 'background: #00C897; color: white; font-size: 20px; font-weight: bold; padding: 10px 20px; border-radius: 10px;');
+        console.log('%c Learn English via Kazakh - 100% Free ', 'color: #00C897; font-size: 14px;');
+    </script>
+
 </body>
 </html>
