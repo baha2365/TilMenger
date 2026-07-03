@@ -423,7 +423,7 @@ const params  = new URLSearchParams(location.search);
 const classId = params.get('classId');
 
 // game_room.html is at: teachers_section/courses/games/
-// teacher class_details  → ../class_details.html
+// teacher class_details  → ../courses/class_details.html
 // student class details  → ../../../student_class_details.html
 const backUrl = isTeacher
   ? `../courses/class_details.html?courseId=${params.get('courseId')}&id=${classId}`
