@@ -856,9 +856,11 @@ function initSocket() {
 
   socket.on('race_started', ({ classId: gClassId, quizId: gQuizId, quizTitle } = {}) => {
     if (gClassId !== classId) return;
-    liveRaceByQuiz[gQuizId] = true;
-    updateQuizRowRaceCta(gQuizId);
     showToast(`🏁 Race is live: "${quizTitle}" — join now!`);
+    // A fresh session means any previously-cached "already completed" status
+    // for this quiz is stale — re-fetch it rather than trusting liveRaceByQuiz
+    // combined with an old race_completed flag.
+    loadClassQuizzes();
   });
   socket.on('race_session_ended', ({ classId: gClassId, quizId: gQuizId } = {}) => {
     if (gClassId !== classId) return;
