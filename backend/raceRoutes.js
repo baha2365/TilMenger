@@ -321,19 +321,26 @@ router.get('/classes/:classId/quizzes/:quizId/my-result', authenticate, async (r
       return res.status(403).json({ success: false, message: 'You are not enrolled in this class.' });
     }
 
+    // Only a session tied to the *current* exposure counts — if the teacher
+    // removed and re-exposed this quiz, older sessions from before that
+    // shouldn't keep blocking students as "already completed".
     const { rows } = await pool.query(
       `SELECT qrp.session_id, qrp.score, qrp.correct_count, qrp.total_answered,
               qrp.finished_at, qrp.total_time_ms
-         FROM quiz_race_participants qrp
-         JOIN quiz_race_sessions qrs ON qrs.id = qrp.session_id
-        WHERE qrs.class_id = $1 AND qrs.quiz_id = $2
-          AND qrp.student_id = $3 AND qrp.finished_at IS NOT NULL
-        ORDER BY qrp.finished_at DESC
+         FROM class_quiz_assignments cqa
+         JOIN quiz_race_sessions qrs
+           ON qrs.class_id = cqa.class_id AND qrs.quiz_id = cqa.quiz_id
+          AND qrs.created_at >= cqa.assigned_at
+         LEFT JOIN quiz_race_participants qrp
+           ON qrp.session_id = qrs.id AND qrp.student_id = $3
+        WHERE cqa.class_id = $1 AND cqa.quiz_id = $2
+        ORDER BY qrs.created_at DESC
         LIMIT 1`,
       [classId, quizId, req.userId]
     );
 
-    if (!rows.length) return res.json({ success: true, hasPlayed: false, result: null });
+    const finished = rows.length > 0 && rows[0].finished_at;
+    if (!finished) return res.json({ success: true, hasPlayed: false, result: null });
     return res.json({ success: true, hasPlayed: true, result: rows[0] });
   } catch (err) {
     console.error('Get my race result error:', err);
@@ -514,16 +521,14 @@ function registerRaceSocketHandlers(io) {
 
           let participant = session.participants.get(userId);
           if (!participant) {
-            // Block replay: checked against EVERY session ever run for this class+quiz
-            // pair, not just this one — a student who finished an earlier round can't
-            // hop into a fresh round the teacher starts later for the same quiz.
+            // Block replay of THIS session only (covers server restarts losing
+            // in-memory state). Finishing an earlier session does NOT block
+            // joining a new one — when the teacher starts a fresh round, that's
+            // a legitimate new attempt.
             const { rows: doneRows } = await pool.query(
-              `SELECT 1
-                 FROM quiz_race_participants qrp
-                 JOIN quiz_race_sessions qrs ON qrs.id = qrp.session_id
-                WHERE qrs.class_id = $1 AND qrs.quiz_id = $2
-                  AND qrp.student_id = $3 AND qrp.finished_at IS NOT NULL`,
-              [session.classId, session.quizId, userId]
+              `SELECT 1 FROM quiz_race_participants
+                WHERE session_id = $1 AND student_id = $2 AND finished_at IS NOT NULL`,
+              [sessionId, userId]
             );
             if (doneRows.length) {
               return socket.emit('error', { message: 'You have already completed this race.' });
