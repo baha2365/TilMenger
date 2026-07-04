@@ -19,7 +19,7 @@
  *   Server → Client:
  *     game_state     { session }                     – full state broadcast
  *     game_started   { classId, sessionId }          – teacher started
- *     game_ended     {}                              – game over / ended
+ *     game_ended     { leaderboard }                 – game over — final standings
  *     error          { message }
  *
  * IMPORTANT — player membership:
@@ -29,6 +29,17 @@
  *   This means students who never open the game room are never part of
  *   the session, are never shown in the turn order, and can never be
  *   rolled for (by themselves or by the teacher's "Force Roll").
+ *
+ * IMPORTANT — finishing:
+ *   The board has one FINISH cell at the very end (index BOARD_LENGTH-1).
+ *   Landing on or past it marks a player `finished`. A finished player
+ *   stays parked on FINISH and is skipped in the turn rotation — they
+ *   don't roll again. The game itself doesn't end until EVERY player has
+ *   finished (who finishes first doesn't matter). At that point (or if
+ *   the teacher force-ends the game early), final standings are computed
+ *   purely from score — highest score wins, and players with an equal
+ *   score share the same place. That result set is what powers the
+ *   post-game "stage" (podium) shown in game_room.html.
  */
 
 'use strict';
@@ -63,21 +74,21 @@ const gameSessions = new Map();
  *
  * Player shape:
  * {
- *   userId:  number,
- *   name:    string,
- *   pos:     number,   // board square index 0..31
- *   score:   number,
- *   color:   string,
- *   emoji:   string,
- *   online:  boolean,
+ *   userId:   number,
+ *   name:     string,
+ *   pos:      number,   // board square index 0..BOARD_LENGTH-1
+ *   score:    number,
+ *   color:    string,
+ *   emoji:    string,
+ *   online:   boolean,
  *   socketId: string | null,
+ *   finished: boolean,  // true once they've reached the FINISH cell
  * }
  */
 
 const PLAYER_COLORS = ['#e03232','#2574c0','#2e9e4f','#8b35b0','#e07820','#f5c518'];
 const PLAYER_EMOJIS = ['😀','😎','🦊','🐼','🦋','🚀'];
-const WINNING_SCORE = 10;
-const BOARD_LENGTH  = 32; // squares 0-31
+const BOARD_LENGTH  = 33; // squares 0-32; square 32 is the FINISH cell.
 
 // ─── Helper: verify JWT from socket handshake ──────────────────────────────────
 function verifyToken(token) {
@@ -120,6 +131,45 @@ function broadcastState(io, classId) {
 // ─── Helper: generate a simple session ID ─────────────────────────────────────
 function makeId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// ─── Helper: has every player reached the FINISH cell? ────────────────────────
+function allPlayersFinished(session) {
+  return session.players.length > 0 && session.players.every(p => p.finished);
+}
+
+// ─── Helper: rank players by score, descending — ties share the same place ────
+// This is the only ranking rule for Englishpoly: reaching FINISH first has
+// no bearing on standings, only the final score does.
+function computeStandings(session) {
+  const sorted = [...session.players].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return String(a.name).localeCompare(String(b.name));
+  });
+
+  const leaderboard = [];
+  let rank = 0;
+  let prevScore = null;
+  for (const p of sorted) {
+    if (prevScore === null || p.score !== prevScore) {
+      rank += 1;
+      prevScore = p.score;
+    }
+    leaderboard.push({ studentId: p.userId, name: p.name, score: p.score, rank });
+  }
+  return leaderboard;
+}
+
+// ─── Helper: end the session (naturally or teacher-forced) and broadcast the
+//     final standings. Used by every code path that can end a game so the
+//     stage/podium always has real data to show. ────────────────────────────
+function finalizeSession(io, classId, session) {
+  session.status     = 'ended';
+  session.diceRolled = false;
+  const leaderboard = computeStandings(session);
+  broadcastState(io, classId);
+  io.to(`class:${classId}`).emit('game_ended', { leaderboard });
+  gameSessions.delete(classId);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -207,12 +257,14 @@ router.delete('/classes/:classId/session', authenticate, requireTeacher, async (
     return res.status(403).json({ success: false, message: 'You do not own this session.' });
   }
 
-  session.status = 'ended';
   const io = req.app.get('io');
   if (io) {
-    io.to(`class:${classId}`).emit('game_ended', {});
+    // Even a manual/early stop should show students a real stage with
+    // whatever standings exist at that moment, rather than a blank screen.
+    finalizeSession(io, classId, session);
+  } else {
+    gameSessions.delete(classId);
   }
-  gameSessions.delete(classId);
 
   return res.json({ success: true, message: 'Game ended.' });
 });
@@ -276,6 +328,7 @@ function registerSocketHandlers(io) {
             emoji:    PLAYER_EMOJIS[idx % PLAYER_EMOJIS.length],
             online:   true,
             socketId: socket.id,
+            finished: false,
           };
           session.players.push(player);
         } else {
@@ -309,10 +362,13 @@ function registerSocketHandlers(io) {
       }
 
       const currentPlayer = session.players[session.currentIdx];
+      if (!currentPlayer || currentPlayer.finished) {
+        return socket.emit('error', { message: 'No active player to roll for right now.' });
+      }
 
       // Only the current player (or teacher) can roll
       const isTeacher = Number(payload.roleId) === 2 && Number(session.teacherId) === userId;
-      const isCurrentPlayer = currentPlayer && currentPlayer.userId === userId;
+      const isCurrentPlayer = currentPlayer.userId === userId;
 
       if (!isTeacher && !isCurrentPlayer) {
         return socket.emit('error', { message: 'Not your turn.' });
@@ -326,21 +382,29 @@ function registerSocketHandlers(io) {
       session.lastDice   = dice;
       session.diceRolled = true;
 
-      // Move the current player
-      const player = session.players[session.currentIdx];
-      if (player) {
-        player.pos = Math.min(player.pos + dice, BOARD_LENGTH - 1);
+      const newPos = currentPlayer.pos + dice;
 
-        // Check win condition
-        if (player.score >= WINNING_SCORE || player.pos >= BOARD_LENGTH - 1) {
-          session.status = 'ended';
-          broadcastState(io, classId);
-          io.to(`class:${classId}`).emit('game_ended', { winner: player });
-          gameSessions.delete(classId);
+      if (newPos >= BOARD_LENGTH - 1) {
+        // Reached (or overshot) the FINISH cell. The player stops exactly
+        // on FINISH and is marked finished — no challenge triggers there,
+        // they simply wait for everyone else. Their turn resolves
+        // immediately (no grading step needed), so we advance the turn
+        // right here instead of waiting for a challenge_done from the
+        // client.
+        currentPlayer.pos      = BOARD_LENGTH - 1;
+        currentPlayer.finished = true;
+
+        if (allPlayersFinished(session)) {
+          finalizeSession(io, classId, session);
           return;
         }
+
+        advanceTurn(session);
+        broadcastState(io, classId);
+        return;
       }
 
+      currentPlayer.pos = newPos;
       broadcastState(io, classId);
     });
 
@@ -410,9 +474,7 @@ function registerSocketHandlers(io) {
         return socket.emit('error', { message: 'Only the teacher can end the game.' });
       }
 
-      session.status = 'ended';
-      io.to(`class:${classId}`).emit('game_ended', {});
-      gameSessions.delete(classId);
+      finalizeSession(io, classId, session);
     });
 
     // ── disconnect ───────────────────────────────────────────────────────────
@@ -433,12 +495,24 @@ function registerSocketHandlers(io) {
   });
 }
 
-// ─── Advance to next player's turn ────────────────────────────────────────────
+// ─── Advance to next player's turn, skipping anyone already finished ─────────
 function advanceTurn(session) {
   session.diceRolled = false;
-  if (!session.players.length) return;
-  session.currentIdx = (session.currentIdx + 1) % session.players.length;
-  if (session.currentIdx === 0) session.round++;
+  const n = session.players.length;
+  if (!n) return;
+
+  let next = session.currentIdx;
+  for (let i = 0; i < n; i++) {
+    next = (next + 1) % n;
+    if (!session.players[next].finished) {
+      if (next <= session.currentIdx) session.round++;
+      session.currentIdx = next;
+      return;
+    }
+  }
+  // Everyone left is finished — nothing to advance to. Callers are expected
+  // to have already checked allPlayersFinished() before reaching this
+  // point, so this is just a safe fallback that leaves currentIdx as-is.
 }
 
 module.exports = { router, registerSocketHandlers };
