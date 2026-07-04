@@ -21,6 +21,14 @@
  *     game_started   { classId, sessionId }          – teacher started
  *     game_ended     {}                              – game over / ended
  *     error          { message }
+ *
+ * IMPORTANT — player membership:
+ *   Players are NOT pre-populated from the class roster when the teacher
+ *   starts a game. A student only becomes a `player` (enters the turn
+ *   rotation) the moment their client actually connects via `join_game`.
+ *   This means students who never open the game room are never part of
+ *   the session, are never shown in the turn order, and can never be
+ *   rolled for (by themselves or by the teacher's "Force Roll").
  */
 
 'use strict';
@@ -42,7 +50,9 @@ const gameSessions = new Map();
  *   id:            string (uuid-like),
  *   classId:       string,
  *   teacherId:     number,
- *   players:       Player[],    // ordered; teacher is NOT a player unless they enroll
+ *   players:       Player[],    // ordered; ONLY students who have joined the
+ *                                // game room via join_game. Teacher is never
+ *                                // a player.
  *   currentIdx:    number,      // index into players[]
  *   round:         number,
  *   status:        'waiting' | 'playing' | 'ended',
@@ -87,17 +97,17 @@ async function getClassTeacher(classId) {
   return rows.length ? rows[0].teacher_id : null;
 }
 
-// ─── Helper: get enrolled students for a class ────────────────────────────────
-async function getEnrolledStudents(classId) {
+// ─── Helper: look up an enrolled student's name (used when they join a room) ──
+// Returns the student's name if they're enrolled in the class, otherwise null.
+async function getEnrolledStudentName(classId, userId) {
   const { rows } = await pool.query(
-    `SELECT u.id, u.name, u.level
-     FROM class_enrollments ce
-     JOIN users u ON u.id = ce.student_id
-     WHERE ce.class_id = $1
-     ORDER BY ce.enrolled_at ASC`,
-    [classId]
+    `SELECT u.name
+       FROM class_enrollments ce
+       JOIN users u ON u.id = ce.student_id
+      WHERE ce.class_id = $1 AND ce.student_id = $2`,
+    [classId, userId]
   );
-  return rows;
+  return rows.length ? rows[0].name : null;
 }
 
 // ─── Helper: broadcast game state to the room ─────────────────────────────────
@@ -139,24 +149,16 @@ router.post('/classes/:classId/start', authenticate, requireTeacher, async (req,
     // End any existing session
     gameSessions.delete(classId);
 
-    const students = await getEnrolledStudents(classId);
-
-    const players = students.map((s, i) => ({
-      userId:   s.id,
-      name:     s.name,
-      pos:      0,
-      score:    0,
-      color:    PLAYER_COLORS[i % PLAYER_COLORS.length],
-      emoji:    PLAYER_EMOJIS[i % PLAYER_EMOJIS.length],
-      online:   false,
-      socketId: null,
-    }));
-
+    // Players start empty. A student only enters the game (and the turn
+    // rotation) the moment they connect via join_game — see the socket
+    // handler below. This keeps unjoined students out of the session
+    // entirely, so a teacher's "Force Roll" can never roll for someone
+    // who never opened the game room.
     const session = {
       id:          makeId(),
       classId,
       teacherId:   Number(teacherId),
-      players,
+      players:     [],
       currentIdx:  0,
       round:       1,
       status:      'waiting',
@@ -231,6 +233,7 @@ function registerSocketHandlers(io) {
       const roleId = Number(payload.roleId);
 
       // Verify the user belongs to this class (student enrolled or teacher owns it)
+      let studentName = null;
       try {
         if (roleId === 2) {
           // teacher
@@ -240,11 +243,8 @@ function registerSocketHandlers(io) {
           }
         } else {
           // student — must be enrolled
-          const { rows } = await pool.query(
-            'SELECT 1 FROM class_enrollments WHERE class_id = $1 AND student_id = $2',
-            [classId, userId]
-          );
-          if (!rows.length) {
+          studentName = await getEnrolledStudentName(classId, userId);
+          if (studentName === null) {
             return socket.emit('error', { message: 'Not enrolled in this class.' });
           }
         }
@@ -256,21 +256,41 @@ function registerSocketHandlers(io) {
       socket.join(`class:${classId}`);
       socket.data = { classId, userId, roleId };
 
-      // Mark player online in session
       const session = gameSessions.get(classId);
-      if (session) {
-        const player = session.players.find(p => p.userId === userId);
-        if (player) {
+      if (!session) return;
+
+      if (roleId !== 2) {
+        // Student — add them as a player the first time they actually join
+        // the game room. Students who never open the room never appear
+        // here and are never part of the turn rotation.
+        let player = session.players.find(p => p.userId === userId);
+
+        if (!player) {
+          const idx = session.players.length;
+          player = {
+            userId,
+            name:     studentName,
+            pos:      0,
+            score:    0,
+            color:    PLAYER_COLORS[idx % PLAYER_COLORS.length],
+            emoji:    PLAYER_EMOJIS[idx % PLAYER_EMOJIS.length],
+            online:   true,
+            socketId: socket.id,
+          };
+          session.players.push(player);
+        } else {
+          // Reconnecting — just mark them back online.
           player.online   = true;
           player.socketId = socket.id;
-
-          // Auto-set status to playing once at least one student joins
-          if (session.status === 'waiting' && session.players.some(p => p.online)) {
-            session.status = 'playing';
-          }
         }
-        broadcastState(io, classId);
+
+        if (session.status === 'waiting') {
+          session.status = 'playing';
+        }
       }
+      // Teachers joining don't affect players — they just get a state resync.
+
+      broadcastState(io, classId);
     });
 
     // ── roll_dice ────────────────────────────────────────────────────────────
@@ -282,6 +302,10 @@ function registerSocketHandlers(io) {
       const session = gameSessions.get(classId);
       if (!session || session.status !== 'playing') {
         return socket.emit('error', { message: 'No active game.' });
+      }
+
+      if (!session.players.length) {
+        return socket.emit('error', { message: 'No students have joined the game yet.' });
       }
 
       const currentPlayer = session.players[session.currentIdx];
@@ -321,6 +345,11 @@ function registerSocketHandlers(io) {
     });
 
     // ── challenge_done ───────────────────────────────────────────────────────
+    // Only the teacher is expected to call this now (the frontend no longer
+    // exposes grading controls to students), but we keep the "current
+    // player can also call it" allowance server-side as a harmless no-op
+    // safety net rather than a trust boundary — the UI is what enforces
+    // "students can't grade themselves".
     socket.on('challenge_done', ({ classId, token, points } = {}) => {
       const payload = verifyToken(token);
       if (!payload) return socket.emit('error', { message: 'Invalid token.' });
@@ -407,6 +436,7 @@ function registerSocketHandlers(io) {
 // ─── Advance to next player's turn ────────────────────────────────────────────
 function advanceTurn(session) {
   session.diceRolled = false;
+  if (!session.players.length) return;
   session.currentIdx = (session.currentIdx + 1) % session.players.length;
   if (session.currentIdx === 0) session.round++;
 }
