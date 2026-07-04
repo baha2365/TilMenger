@@ -11,6 +11,9 @@
     --red:#e03232; --yellow:#f5c518; --green:#2e9e4f; --blue:#2574c0;
     --purple:#8b35b0; --brown:#8B5E3C; --orange:#e07820;
     --board-bg:#b8d4a0; --cell-border:#2a2a2a; --gold:#ffd700;
+    --gold-1:#FFD75E; --gold-2:#C9A227;
+    --sil-1:#E7ECF2;  --sil-2:#9AA5B1;
+    --brz-1:#E3A063;  --brz-2:#A5652D;
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -65,15 +68,48 @@
   .wait-player-chip.online{border-color:#5DBF8A;background:rgba(93,191,138,.12);}
   .wait-player-chip.offline{opacity:.4;}
 
-  /* ─── ENDED SCREEN ─── */
+  /* ─── ENDED / STAGE SCREEN ─── */
   #endScreen{
-    display:none;flex-direction:column;align-items:center;justify-content:center;
-    min-height:60vh;gap:1rem;padding:2rem;text-align:center;
+    display:none;flex-direction:column;align-items:stretch;justify-content:flex-start;
+    min-height:60vh;padding:32px 16px 60px;text-align:center;
   }
   #endScreen.show{display:flex;}
-  .end-trophy{font-size:5rem;}
-  .end-title{font-family:'Fredoka One',cursive;color:#ffd700;font-size:2.5rem;}
-  .end-sub{color:rgba(255,255,255,.7);font-size:1rem;}
+  .stage-wrap{ width:100%;max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:1.3rem; }
+  .stage-heading .trophy-em{ font-size:3.4rem;line-height:1; }
+  .stage-heading h1{ font-family:'Fredoka One',cursive;color:var(--gold);font-size:clamp(1.5rem,5vw,2.2rem);margin-top:.3rem; }
+  .stage-my-place{
+    text-align:center;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,215,0,.35);
+    border-radius:16px;padding:14px 18px;font-weight:800;color:#fff;font-size:.92rem;
+  }
+  .stage-my-place b{ color:var(--gold);font-size:1.2em; }
+  .podium{ display:flex;align-items:flex-end;justify-content:center;gap:.8rem;flex-wrap:wrap; }
+  .podium-slot{ display:flex;flex-direction:column;align-items:center;gap:.5rem;width:120px; }
+  .podium-crown{ font-size:1.4rem; }
+  .podium-occupants{ display:flex;flex-direction:column;align-items:center;gap:.4rem;max-height:170px;overflow-y:auto;padding:2px 0; }
+  .podium-occupant{ display:flex;flex-direction:column;align-items:center;gap:.15rem; }
+  .podium-avatar{
+    width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.82rem;color:#1a1408;border:3px solid rgba(255,255,255,.3);flex-shrink:0;
+  }
+  .podium-name{ font-size:.7rem;font-weight:800;color:#fff;text-align:center;max-width:108px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .podium-more{ font-size:.66rem;font-weight:700;color:rgba(255,255,255,.65);margin-top:.1rem; }
+  .podium-score{ font-size:.85rem;font-weight:900;color:var(--gold); }
+  .podium-pedestal{ width:100%;border-radius:10px 10px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:.4rem;font-weight:900;font-size:1.2rem;color:rgba(0,0,0,.5); }
+  .pd-1 .podium-avatar{ background:linear-gradient(135deg,var(--gold-1),var(--gold-2)); }
+  .pd-1 .podium-pedestal{ height:95px;background:linear-gradient(180deg,var(--gold-1),var(--gold-2)); }
+  .pd-2 .podium-avatar{ background:linear-gradient(135deg,var(--sil-1),var(--sil-2)); }
+  .pd-2 .podium-pedestal{ height:68px;background:linear-gradient(180deg,var(--sil-1),var(--sil-2)); }
+  .pd-3 .podium-avatar{ background:linear-gradient(135deg,var(--brz-1),var(--brz-2)); }
+  .pd-3 .podium-pedestal{ height:50px;background:linear-gradient(180deg,var(--brz-1),var(--brz-2)); }
+  .pd-2{ order:1; } .pd-1{ order:2; } .pd-3{ order:3; }
+  .stage-list{ background:rgba(0,0,0,.22);border-radius:14px;overflow:hidden;text-align:left; }
+  .stage-row{ display:grid;grid-template-columns:34px 1fr 70px;align-items:center;gap:.6rem;padding:.65rem 1rem;border-bottom:1px solid rgba(255,255,255,.08);font-size:.82rem; }
+  .stage-row:last-child{ border-bottom:none; }
+  .stage-row.head{ color:rgba(255,255,255,.55);font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;background:rgba(0,0,0,.18); }
+  .stage-row.me{ background:rgba(255,215,64,.14); }
+  .sr-rank{ font-weight:900;color:#fff; }
+  .sr-name{ font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .sr-score{ font-weight:900;color:var(--gold);text-align:right; }
   .btn-back-class{
     background:var(--green);color:#fff;border:none;border-radius:10px;
     padding:.8rem 2rem;font-family:'Fredoka One',cursive;font-size:1.1rem;
@@ -218,6 +254,7 @@
   }
   .player-row.active{background:rgba(255,215,0,.15);border-color:var(--gold);}
   .player-row.offline{opacity:.4;}
+  .player-row.finished-player{opacity:.6;}
   .player-dot{width:24px;height:24px;border-radius:50%;border:2px solid white;
     display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:white;flex-shrink:0;}
   .player-info{flex:1;min-width:0;}
@@ -324,12 +361,20 @@
   <div class="wait-players" id="waitPlayers"></div>
 </div>
 
-<!-- ENDED SCREEN -->
+<!-- ENDED / STAGE SCREEN -->
 <div id="endScreen">
-  <div class="end-trophy">🏆</div>
-  <div class="end-title" id="endTitle">Game Over!</div>
-  <div class="end-sub"  id="endSub">Thanks for playing ENGLISHPOLY!</div>
-  <button class="btn-back-class" id="endBackBtn">← Back to Class</button>
+  <div class="stage-wrap">
+    <div class="stage-heading">
+      <div class="trophy-em">🏆</div>
+      <h1>Game Complete!</h1>
+    </div>
+    <div class="stage-my-place" id="stageMyPlace" style="display:none;"></div>
+    <div class="podium" id="stagePodium"></div>
+    <div class="stage-list" id="stageList"></div>
+    <div style="text-align:center;margin-top:8px;">
+      <button class="btn-back-class" id="endBackBtn">← Back to Class</button>
+    </div>
+  </div>
 </div>
 
 <!-- GAME SCREEN -->
@@ -359,6 +404,9 @@
           <div style="color:var(--gold);font-family:'Fredoka One',cursive;font-size:1.1rem;" id="turnName">—</div>
         </div>
         <div id="yourTurnBadge" style="display:none;margin-top:8px;" class="your-turn-badge">🎲 YOUR TURN!</div>
+        <div id="finishedNote" style="display:none;margin-top:8px;text-align:center;color:rgba(255,255,255,.7);font-size:.78rem;line-height:1.5;">
+          🏁 You've reached the finish! Waiting for other players…
+        </div>
       </div>
 
       <!-- DICE -->
@@ -463,6 +511,8 @@ const PICTURE_CHALLENGES = [
 
 // ═══════════════════════════════════════════════════════════
 //  BOARD DATA
+//  Cell id 32 is the FINISH cell — reaching/passing it ends a player's
+//  movement for the rest of the game (server marks them `finished`).
 // ═══════════════════════════════════════════════════════════
 const BOARD_CELLS = [
   {id:0,  type:'start',    color:'',       label:'START'},
@@ -497,6 +547,7 @@ const BOARD_CELLS = [
   {id:29, type:'question', color:'orange', label:'Name 4 months of the year!'},
   {id:30, type:'question', color:'orange', label:'Sing a song for 20 seconds!'},
   {id:31, type:'wild',     color:'',       label:''},
+  {id:32, type:'finish',   color:'',       label:'FINISH'},
 ];
 
 const PLAYER_OFFSETS = [[3,3],[15,3],[3,15],[15,15],[9,9],[21,9]];
@@ -544,11 +595,8 @@ socket.on('game_state', ({ session }) => {
 
 socket.on('game_started', () => showToast('🎮 Game started! Get ready!'));
 
-socket.on('game_ended', ({ winner } = {}) => {
-  if (winner) {
-    document.getElementById('endTitle').textContent = `🏆 ${winner.name} wins!`;
-    document.getElementById('endSub').textContent   = `Final score: ${winner.score} ⭐ — well played everyone!`;
-  }
+socket.on('game_ended', ({ leaderboard } = {}) => {
+  renderStage(Array.isArray(leaderboard) ? leaderboard : []);
   showScreen('end');
 });
 
@@ -972,19 +1020,21 @@ function renderPlayers(session) {
   }
 
   document.getElementById('playersList').innerHTML = session.players.map((p, i) => `
-    <div class="player-row ${i===session.currentIdx?'active':''} ${!p.online?'offline':''}">
+    <div class="player-row ${i===session.currentIdx?'active':''} ${!p.online?'offline':''} ${p.finished?'finished-player':''}">
       <div class="player-dot" style="background:${p.color}">${p.emoji}</div>
       <div class="player-info">
-        <div class="player-name">${p.name}</div>
-        <div class="player-pos">Square ${p.pos}</div>
+        <div class="player-name">${p.name}${p.finished ? ' 🏁' : ''}</div>
+        <div class="player-pos">${p.finished ? 'Finished' : 'Square ' + p.pos}</div>
       </div>
       <div class="${p.online?'online-dot':'offline-dot'}"></div>
       <div class="player-score">${p.score}⭐</div>
     </div>`).join('');
 
   const cp = session.players[session.currentIdx];
-  document.getElementById('turnName').textContent    = cp ? cp.name : '—';
-  document.getElementById('centerTurn').textContent  = cp ? `${cp.emoji} ${cp.name}'s turn` : '';
+  document.getElementById('turnName').textContent = cp ? cp.name : '—';
+  document.getElementById('centerTurn').textContent = cp
+    ? `${cp.emoji} ${cp.name}'s turn`
+    : (session.players.every(p => p.finished) ? 'Finishing up…' : '');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -993,7 +1043,10 @@ function renderPlayers(session) {
 function renderTurnControls(session) {
   const cp       = session.players[session.currentIdx];
   const isMyTurn = myUserId && cp && String(cp.userId) === String(myUserId);
-  const canRoll  = session.players.length > 0 && !session.diceRolled && !awaitingChallenge && !isMoving;
+  const canRoll  = session.players.length > 0 && cp && !cp.finished && !session.diceRolled && !awaitingChallenge && !isMoving;
+
+  const myPlayer    = myUserId ? session.players.find(p => String(p.userId) === String(myUserId)) : null;
+  const iAmFinished = !!(myPlayer && myPlayer.finished);
 
   // Teacher panel
   document.getElementById('teacherPanel').style.display = isTeacher ? 'block' : 'none';
@@ -1008,15 +1061,19 @@ function renderTurnControls(session) {
     rb.style.display = 'none';
   } else {
     rb.style.display = 'block';
-    rb.disabled      = !isMyTurn || !canRoll;
-    rb.textContent   = isMyTurn && canRoll
-      ? '🎲 ROLL DICE'
-      : (isMyTurn && session.diceRolled ? 'Challenge time!' : '🎲 Waiting…');
+    rb.disabled      = iAmFinished || !isMyTurn || !canRoll;
+    rb.textContent   = iAmFinished
+      ? '🏁 Finished!'
+      : (isMyTurn && canRoll ? '🎲 ROLL DICE' : (isMyTurn && session.diceRolled ? 'Challenge time!' : '🎲 Waiting…'));
   }
 
   // "Your turn" badge
   document.getElementById('yourTurnBadge').style.display =
     isMyTurn && !session.diceRolled && !awaitingChallenge ? 'block' : 'none';
+
+  // "You've finished, waiting for others" note (students only)
+  document.getElementById('finishedNote').style.display =
+    (!isTeacher && iAmFinished) ? 'block' : 'none';
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1055,6 +1112,8 @@ document.getElementById('endGameBtn').addEventListener('click', () => {
 //  who lands on a question only ever sees the prompt with a Close button —
 //  closing it does NOT award points or advance the turn. The turn only
 //  advances once the teacher grades it, which resyncs everyone's screen.
+//  Landing on FINISH never triggers a challenge — the server resolves that
+//  turn on its own.
 // ═══════════════════════════════════════════════════════════
 function triggerCellChallenge(cell, session) {
   if (awaitingChallenge) return;
@@ -1177,7 +1236,6 @@ function openSpecialModal(type) {
   const msgs = {
     paf:   { icon:'💥', title:'PAF! Go back 4!', desc:'Oops! Move back 4 spaces!', btn:'OK' },
     bonus: { icon:'⭐', title:'Bonus Points!', desc:'You earned 2 extra points!', btn:'🎉 Awesome!' },
-    finish:{ icon:'🏆', title:'FINISHED!', desc:'You reached the end! +5 bonus points!', btn:'🎉 Celebrate!' },
   };
   const m = msgs[type] || msgs.paf;
   const actionHtml = isTeacher
@@ -1194,6 +1252,91 @@ function closeSpecial() {
   document.getElementById('challengeModal').classList.remove('show');
   awaitingChallenge = false;
   socket.emit('challenge_done', { classId, token, points:0 });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STAGE / FINAL RESULTS  (podium)
+//
+//  Ranking rule for Englishpoly: purely by score, highest first. Reaching
+//  FINISH earlier has no bearing on placement. Students with an equal
+//  score share the exact same place — a pedestal can hold more than one
+//  occupant.
+// ═══════════════════════════════════════════════════════════
+function stageInitials(name) {
+  if (!name) return '?';
+  const parts = String(name).trim().split(/\s+/);
+  return parts.length >= 2
+    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+    : parts[0].slice(0, 2).toUpperCase();
+}
+function escStage(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderStage(leaderboard) {
+  const podiumGroups = { 1: [], 2: [], 3: [] };
+  const rest = [];
+  leaderboard.forEach(p => {
+    if (p.rank >= 1 && p.rank <= 3) podiumGroups[p.rank].push(p);
+    else rest.push(p);
+  });
+
+  // "My place" banner — only meaningful for a student who actually played.
+  const myPlaceEl = document.getElementById('stageMyPlace');
+  const mine = (!isTeacher && myUserId)
+    ? leaderboard.find(p => String(p.studentId) === String(myUserId))
+    : null;
+  if (mine) {
+    const ord = mine.rank === 1 ? 'st' : mine.rank === 2 ? 'nd' : mine.rank === 3 ? 'rd' : 'th';
+    myPlaceEl.innerHTML = `You placed <b>${mine.rank}${ord}</b> with <b>${mine.score}</b> points!`;
+    myPlaceEl.style.display = 'block';
+  } else {
+    myPlaceEl.style.display = 'none';
+  }
+
+  // Podium — up to 3 pedestals; a pedestal is skipped entirely if no
+  // distinct score group occupies that place (e.g. only 2 players played).
+  const MAX_SHOWN = 4;
+  const podiumEl = document.getElementById('stagePodium');
+  podiumEl.innerHTML = [1, 2, 3].map(place => {
+    const group = podiumGroups[place];
+    if (!group.length) return '';
+    const shown = group.slice(0, MAX_SHOWN);
+    const extra = group.length - shown.length;
+    const occupantsHtml = shown.map(p => `
+      <div class="podium-occupant">
+        <div class="podium-avatar">${stageInitials(p.name)}</div>
+        <div class="podium-name">${escStage(p.name)}</div>
+      </div>`).join('') + (extra > 0 ? `<div class="podium-more">+${extra} more</div>` : '');
+    return `
+      <div class="podium-slot pd-${place}">
+        ${place === 1 ? '<div class="podium-crown">👑</div>' : ''}
+        <div class="podium-occupants">${occupantsHtml}</div>
+        <div class="podium-score">${group[0].score} pts</div>
+        <div class="podium-pedestal">${place}</div>
+      </div>`;
+  }).join('');
+
+  // Everyone below the podium places
+  const listEl = document.getElementById('stageList');
+  if (!leaderboard.length) {
+    listEl.innerHTML = `<div class="stage-row"><div class="sr-rank">—</div><div class="sr-name" style="color:rgba(255,255,255,.55);">No students joined this game.</div><div></div></div>`;
+  } else if (!rest.length) {
+    listEl.innerHTML = `<div class="stage-row"><div class="sr-rank">—</div><div class="sr-name" style="color:rgba(255,255,255,.55);">Everyone placed on the podium! 🎉</div><div></div></div>`;
+  } else {
+    let html = `<div class="stage-row head"><div>#</div><div>Student</div><div style="text-align:right;">Score</div></div>`;
+    html += rest.map(p => {
+      const isMe = !isTeacher && myUserId && String(p.studentId) === String(myUserId);
+      return `
+        <div class="stage-row ${isMe ? 'me' : ''}">
+          <div class="sr-rank">${p.rank}</div>
+          <div class="sr-name">${escStage(p.name)}${isMe ? ' (You)' : ''}</div>
+          <div class="sr-score">${p.score}</div>
+        </div>`;
+    }).join('');
+    listEl.innerHTML = html;
+  }
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
