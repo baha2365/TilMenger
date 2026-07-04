@@ -226,6 +226,7 @@
   .player-score{color:var(--gold);font-size:.8rem;font-weight:800;}
   .online-dot{width:7px;height:7px;border-radius:50%;background:#5DBF8A;flex-shrink:0;}
   .offline-dot{width:7px;height:7px;border-radius:50%;background:#666;flex-shrink:0;}
+  .no-players-note{color:rgba(255,255,255,.5);font-size:.78rem;text-align:center;padding:10px 4px;line-height:1.5;}
 
   /* ─── TEACHER CONTROLS ─── */
   .teacher-controls{display:flex;flex-direction:column;gap:6px;}
@@ -282,6 +283,7 @@
   .event-icon{font-size:3rem;text-align:center;margin-bottom:8px;}
   .event-title{font-family:'Fredoka One',cursive;font-size:1.6rem;text-align:center;margin-bottom:8px;}
   .event-desc{font-size:.95rem;color:#555;text-align:center;line-height:1.5;margin-bottom:16px;}
+  .student-wait-note{font-size:.82rem;color:#777;text-align:center;margin-bottom:14px;line-height:1.5;}
 
   /* ─── TOAST ─── */
   .toast{
@@ -436,7 +438,9 @@ if (!token || !classId) { location.href = backUrl; }
 
 // ═══════════════════════════════════════════════════════════
 //  PICTURE CHALLENGES  (teacher-editable — no JS required)
-//  land on ❓ or ❗ → pick random entry from this list
+//  land on ❓ or ❗ → pick a deterministic entry from this list so that
+//  the teacher and the current student always see the exact same
+//  picture/question, even though each is running their own client.
 // ═══════════════════════════════════════════════════════════
 const PICTURE_CHALLENGES = [
   { image: 'https://gru-games.s3.eu-west-2.amazonaws.com/assets/img/no-level/no-level__extras__park-scene-2.jpg',
@@ -590,9 +594,19 @@ async function handleStateUpdate(session, prev) {
     tokensInited = true;
   }
 
-  // Re-init tokens if player count changed (new session started)
+  // Re-init tokens if player count changed (new session started, or a new
+  // student just joined the game room mid-session)
   if (tokensInited && prev && prev.players.length !== session.players.length) {
     initTokens(session.players);
+  }
+
+  // If the server already moved on (e.g. the teacher graded the current
+  // player's challenge, which resets diceRolled) but our own modal is still
+  // open from a stale render, close it so we don't get stuck looking at an
+  // already-resolved question.
+  if (!session.diceRolled && awaitingChallenge && !isMoving) {
+    document.getElementById('challengeModal').classList.remove('show');
+    awaitingChallenge = false;
   }
 
   // Detect whose token needs to move (server already moved the pos, we animate it)
@@ -624,7 +638,7 @@ async function handleStateUpdate(session, prev) {
       const cp = session.players[session.currentIdx];
       if (cp && (isTeacher || (myUserId && String(cp.userId) === String(myUserId)))) {
         const cell = BOARD_CELLS[cp.pos];
-        if (cell) triggerCellChallenge(cell);
+        if (cell) triggerCellChallenge(cell, session);
       }
     }
   } else {
@@ -640,7 +654,7 @@ async function handleStateUpdate(session, prev) {
       const cp = session.players[session.currentIdx];
       if (cp && (isTeacher || (myUserId && String(cp.userId) === String(myUserId)))) {
         const cell = BOARD_CELLS[cp.pos];
-        if (cell) triggerCellChallenge(cell);
+        if (cell) triggerCellChallenge(cell, session);
       }
     }
   }
@@ -664,6 +678,13 @@ function detectMove(prev, next) {
 //  WAITING SCREEN
 // ═══════════════════════════════════════════════════════════
 function renderWaitPlayers(players) {
+  if (!players || !players.length) {
+    document.getElementById('waitPlayers').innerHTML = '';
+    document.getElementById('waitSub').textContent =
+      'The teacher has started the game. Open this page to join!';
+    return;
+  }
+  document.getElementById('waitSub').textContent = 'The teacher has started the game. Join the fun!';
   document.getElementById('waitPlayers').innerHTML = players.map(p =>
     `<div class="wait-player-chip ${p.online?'online':'offline'}" style="background:${p.color}22;border-color:${p.color};">
       ${p.emoji} ${p.name} ${p.online?'✓':''}
@@ -942,6 +963,14 @@ function renderDice(session) {
 //  PLAYERS LIST SIDEBAR
 // ═══════════════════════════════════════════════════════════
 function renderPlayers(session) {
+  if (!session.players.length) {
+    document.getElementById('playersList').innerHTML =
+      `<div class="no-players-note">No students have joined the game room yet.</div>`;
+    document.getElementById('turnName').textContent   = '—';
+    document.getElementById('centerTurn').textContent = 'Waiting for players…';
+    return;
+  }
+
   document.getElementById('playersList').innerHTML = session.players.map((p, i) => `
     <div class="player-row ${i===session.currentIdx?'active':''} ${!p.online?'offline':''}">
       <div class="player-dot" style="background:${p.color}">${p.emoji}</div>
@@ -964,7 +993,7 @@ function renderPlayers(session) {
 function renderTurnControls(session) {
   const cp       = session.players[session.currentIdx];
   const isMyTurn = myUserId && cp && String(cp.userId) === String(myUserId);
-  const canRoll  = !session.diceRolled && !awaitingChallenge && !isMoving;
+  const canRoll  = session.players.length > 0 && !session.diceRolled && !awaitingChallenge && !isMoving;
 
   // Teacher panel
   document.getElementById('teacherPanel').style.display = isTeacher ? 'block' : 'none';
@@ -996,6 +1025,7 @@ function renderTurnControls(session) {
 function doRoll() {
   if (awaitingChallenge) { showToast('⚠️ Finish the challenge first!'); return; }
   if (!gameSession || gameSession.diceRolled || isMoving) { showToast('🎲 Wait for your turn.'); return; }
+  if (!gameSession.players.length) { showToast('⏳ Waiting for players to join the game.'); return; }
 
   // Spin the sidebar dice locally (feel)
   const diceEl = document.getElementById('diceEl');
@@ -1020,8 +1050,13 @@ document.getElementById('endGameBtn').addEventListener('click', () => {
 
 // ═══════════════════════════════════════════════════════════
 //  CELL CHALLENGE LOGIC
+//
+//  Only the teacher can grade a challenge (award points / skip). A student
+//  who lands on a question only ever sees the prompt with a Close button —
+//  closing it does NOT award points or advance the turn. The turn only
+//  advances once the teacher grades it, which resyncs everyone's screen.
 // ═══════════════════════════════════════════════════════════
-function triggerCellChallenge(cell) {
+function triggerCellChallenge(cell, session) {
   if (awaitingChallenge) return;
   awaitingChallenge = true;
 
@@ -1029,20 +1064,41 @@ function triggerCellChallenge(cell) {
     openSpecialModal('paf'); return;
   }
   if (cell.type === 'bonus') {
-    // Bonus handled server-side; just award + advance
-    socket.emit('challenge_done', { classId, token, points:2 });
+    if (isTeacher) {
+      // Only the teacher's client actually awards the points — this
+      // prevents the bonus from being double-applied if both the teacher
+      // and the student are connected at the same moment.
+      socket.emit('challenge_done', { classId, token, points:2 });
+      showToast('⭐ Bonus! +2 points!');
+    } else {
+      showToast('⭐ Bonus square! Your teacher will add the points.');
+    }
     awaitingChallenge = false;
-    showToast('⭐ Bonus! +2 points!');
     return;
   }
   if (cell.type === 'question') {
     openSpeakingCard(cell); return;
   }
   if (cell.type === 'wild' || cell.type === 'exclaim') {
-    openPictureChallenge(); return;
+    openPictureChallenge(session); return;
   }
   // start / finish — no challenge
   awaitingChallenge = false;
+}
+
+/** Non-grading close — used by students. Just hides the modal locally;
+ *  it does not touch score or turn state. The turn only advances once
+ *  the teacher grades the challenge from their own screen. */
+function dismissChallengeModal() {
+  document.getElementById('challengeModal').classList.remove('show');
+}
+
+/** Simple deterministic hash so every client picks the same array index
+ *  from the same seed, without needing the server to broadcast it. */
+function seededPick(seedStr, listLength) {
+  let h = 0;
+  for (const c of seedStr) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h % listLength;
 }
 
 // ─── Speaking card (coloured question squares) ────────────────────────────────
@@ -1061,6 +1117,11 @@ function openSpeakingCard(cell) {
   const imageHtml = cell.image
     ? `<img src="${cell.image}" alt="" style="width:100%;border-radius:14px;margin-bottom:14px;max-height:260px;object-fit:cover;display:block;">`
     : '';
+  const actionsHtml = isTeacher
+    ? `<button class="btn-check" onclick="speakingDone(true)" style="background:${t.accent};box-shadow:0 3px 0 ${t.accent}88;">✅ Good answer! (+1)</button>
+       <button class="btn-skip"  onclick="speakingDone(false)">😅 Skip</button>`
+    : `<div class="student-wait-note">Answer out loud — your teacher will grade it.</div>
+       <button class="btn-close" onclick="dismissChallengeModal()">Close</button>`;
   document.getElementById('challengeContent').innerHTML = `
     <div style="text-align:center;margin-bottom:14px;">
       <div class="modal-badge" style="background:${t.accent};color:white;">Speaking</div>
@@ -1069,10 +1130,7 @@ function openSpeakingCard(cell) {
     <div style="background:${t.bg};border-radius:16px;padding:24px 20px;text-align:center;margin-bottom:18px;border:2px solid ${t.accent}22;">
       <h2 style="font-family:'Fredoka One';font-size:1.45rem;color:#1a1a2e;margin-bottom:0;">${cell.label}</h2>
     </div>
-    <div class="modal-actions" style="justify-content:center;gap:12px;">
-      <button class="btn-check" onclick="speakingDone(true)" style="background:${t.accent};box-shadow:0 3px 0 ${t.accent}88;">✅ Good answer! (+1)</button>
-      <button class="btn-skip"  onclick="speakingDone(false)">😅 Skip</button>
-    </div>`;
+    <div class="modal-actions" style="justify-content:center;gap:12px;flex-direction:column;align-items:center;">${actionsHtml}</div>`;
   document.getElementById('challengeModal').classList.add('show');
 }
 
@@ -1088,11 +1146,20 @@ function speakingDone(correct) {
 }
 
 // ─── Picture challenge (❓ / ❗ squares) ──────────────────────────────────────
-function openPictureChallenge() {
-  const item = PICTURE_CHALLENGES[Math.floor(Math.random() * PICTURE_CHALLENGES.length)];
+function openPictureChallenge(session) {
+  const cp   = session.players[session.currentIdx];
+  // Deterministic pick keyed on player/position/round so the teacher and
+  // the current student see the exact same image and question.
+  const seed = `${cp.userId}-${cp.pos}-${session.round}`;
+  const item = PICTURE_CHALLENGES[seededPick(seed, PICTURE_CHALLENGES.length)];
   const imageHtml = item.image
     ? `<img src="${item.image}" alt="" style="width:100%;border-radius:14px;margin-bottom:14px;max-height:280px;object-fit:cover;display:block;">`
     : '';
+  const actionsHtml = isTeacher
+    ? `<button class="btn-check" onclick="speakingDone(true)" style="background:var(--purple);box-shadow:0 3px 0 #5b21b6;">✅ Good answer! (+1)</button>
+       <button class="btn-skip"  onclick="speakingDone(false)">😅 Skip</button>`
+    : `<div class="student-wait-note">Answer out loud — your teacher will grade it.</div>
+       <button class="btn-close" onclick="dismissChallengeModal()">Close</button>`;
   document.getElementById('challengeContent').innerHTML = `
     <div style="text-align:center;margin-bottom:14px;">
       <div class="modal-badge" style="background:var(--purple);color:white;">Picture Question</div>
@@ -1101,10 +1168,7 @@ function openPictureChallenge() {
     <div style="background:#f0e0ff;border-radius:16px;padding:22px 20px;text-align:center;margin-bottom:18px;border:2px solid #8b35b022;">
       <h2 style="font-family:'Fredoka One';font-size:1.3rem;color:#1a1a2e;margin-bottom:0;">${item.question}</h2>
     </div>
-    <div class="modal-actions" style="justify-content:center;gap:12px;">
-      <button class="btn-check" onclick="speakingDone(true)" style="background:var(--purple);box-shadow:0 3px 0 #5b21b6;">✅ Good answer! (+1)</button>
-      <button class="btn-skip"  onclick="speakingDone(false)">😅 Skip</button>
-    </div>`;
+    <div class="modal-actions" style="justify-content:center;gap:12px;flex-direction:column;align-items:center;">${actionsHtml}</div>`;
   document.getElementById('challengeModal').classList.add('show');
 }
 
@@ -1116,13 +1180,14 @@ function openSpecialModal(type) {
     finish:{ icon:'🏆', title:'FINISHED!', desc:'You reached the end! +5 bonus points!', btn:'🎉 Celebrate!' },
   };
   const m = msgs[type] || msgs.paf;
+  const actionHtml = isTeacher
+    ? `<button class="btn-close" onclick="closeSpecial()">${m.btn}</button>`
+    : `<button class="btn-close" onclick="dismissChallengeModal()">Close</button>`;
   document.getElementById('challengeContent').innerHTML = `
     <div class="event-icon">${m.icon}</div>
     <div class="event-title">${m.title}</div>
     <div class="event-desc">${m.desc}</div>
-    <div class="modal-actions" style="justify-content:center;">
-      <button class="btn-close" onclick="closeSpecial()">${m.btn}</button>
-    </div>`;
+    <div class="modal-actions" style="justify-content:center;">${actionHtml}</div>`;
   document.getElementById('challengeModal').classList.add('show');
 }
 function closeSpecial() {
