@@ -524,6 +524,56 @@
   <div class="roster-panel" id="quizPanel"></div>
 </div>
 
+
+<!-- ═══════════════════════════════════════
+     TOPICS & HOMEWORKS SECTION
+═══════════════════════════════════════ -->
+<div class="section-bar">
+  <span class="section-label">📋 Topics & Homeworks</span>
+  <button class="btn-create" id="openExposeTopicBtn"
+    style="background:linear-gradient(135deg,#7F77DD,#5B52C7);box-shadow:0 4px 18px rgba(127,119,221,0.4),inset 0 1px 0 rgba(255,255,255,0.12);">
+    <span class="ic">+</span>Expose Topic
+  </button>
+</div>
+
+<div id="topicLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--text-3);font-size:.84rem;">
+  <div class="spinner dark"></div>Loading topics…
+</div>
+<div id="topicEmptyState" style="display:none;text-align:center;padding:2.5rem 1.5rem;border:1px dashed var(--border-2);border-radius:var(--radius);background:var(--surface);margin-bottom:2rem;">
+  <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.7;">📋</div>
+  <div style="font-size:.92rem;font-weight:600;color:var(--text-2);margin-bottom:.25rem;">No topics exposed</div>
+  <div style="font-size:.78rem;color:var(--text-3);">Expose a topic/homework so students can watch the video and answer the questions.</div>
+</div>
+<div id="topicListWrap" style="display:none;margin-bottom:2rem;">
+  <div class="roster-panel" id="topicPanel"></div>
+</div>
+
+<!-- EXPOSE TOPIC MODAL -->
+<div class="modal-backdrop" id="exposeTopicModal" role="dialog" aria-modal="true" aria-label="Expose Topic">
+  <div class="modal" id="exposeTopicModalCard">
+    <div class="modal-glow" aria-hidden="true"></div>
+    <div class="modal-top-border" aria-hidden="true"></div>
+    <button class="modal-x" id="exposeTopicModalXBtn" aria-label="Close">✕</button>
+    <div class="modal-header">
+      <div class="modal-icon-wrap" aria-hidden="true">📋</div>
+      <div class="modal-title">Expose Topics & Homeworks</div>
+      <div class="modal-sub">Select one or more of your topics to make visible to this class.</div>
+    </div>
+    <div class="modal-body">
+      <div id="exposeTopicList" style="display:flex;flex-direction:column;gap:.5rem;max-height:320px;overflow-y:auto;"></div>
+      <div class="modal-inline-err" id="exposeTopicErr"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="footer-left"></div>
+      <div class="footer-right">
+        <button class="btn-cancel-modal" id="exposeTopicCancelBtn">Cancel</button>
+        <button class="btn-submit-modal" id="exposeTopicSubmitBtn"
+          style="background:linear-gradient(135deg,#7F77DD,#5B52C7);">Expose Selected</button>
+      </div>
+    </div>
+  </div>
+</div>
+
   <!-- Section bar -->
   <div class="section-bar">
     <span class="section-label">Student Roster</span>
