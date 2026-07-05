@@ -1226,6 +1226,58 @@ function showQuizBanner(quiz) {
 }
 
 /* ══════════════════════════════════════
+   TOPICS & HOMEWORKS (student)
+══════════════════════════════════════ */
+const TOPIC_TASKS_URL = `${API}/classes/${classId}/topics`;
+const TOPIC_PLAY_PATH = 'teachers_section/topics/topics_play.html';
+let exposedTopicTasks = [];
+
+async function loadTopicTasks() {
+  const loading = document.getElementById('topicLoadingState');
+  const empty   = document.getElementById('topicEmptyState');
+  const wrap    = document.getElementById('topicListWrap');
+  loading.style.display = 'flex'; empty.style.display = 'none'; wrap.style.display = 'none';
+  try {
+    const res  = await fetch(TOPIC_TASKS_URL, { headers: authH() });
+    const data = await res.json();
+    loading.style.display = 'none';
+    if (!res.ok || !data.success) { showFeedback(data.message || 'Failed to load topics.'); return; }
+    exposedTopicTasks = data.tasks || [];
+    renderTopicTasks();
+  } catch {
+    loading.style.display = 'none';
+    showFeedback('Could not reach the server.');
+  }
+}
+
+function renderTopicTasks() {
+  const empty = document.getElementById('topicEmptyState');
+  const wrap  = document.getElementById('topicListWrap');
+  const panel = document.getElementById('topicPanel');
+  if (!exposedTopicTasks.length) { empty.style.display = 'block'; wrap.style.display = 'none'; return; }
+  empty.style.display = 'none'; wrap.style.display = 'block';
+  panel.innerHTML = exposedTopicTasks.map(t => `
+    <div class="reading-row">
+      <div class="reading-title">🎬 ${escHtml(t.title)}</div>
+      <div class="reading-qcount">❓ ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
+      ${t.submitted
+        ? `<span style="font-size:.68rem;font-weight:700;color:var(--success);">✅ Completed</span>`
+        : `<a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,#7F77DD,#5B52C7);box-shadow:none;" href="${TOPIC_PLAY_PATH}?id=${t.id}">📋 Start</a>`}
+    </div>`).join('');
+}
+
+function showTopicBanner(task) {
+  const banner = document.getElementById('topicBanner');
+  document.getElementById('topicBannerTitle').textContent = `New topic: "${task.title}"`;
+  document.getElementById('topicBannerBtn').href = `${TOPIC_PLAY_PATH}?id=${task.id}`;
+  banner.style.display = 'block';
+  setTimeout(() => banner.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+}
+document.getElementById('dismissTopicBanner').addEventListener('click', () => {
+  document.getElementById('topicBanner').style.display = 'none';
+});
+
+/* ══════════════════════════════════════
    GUARD + INIT
 ══════════════════════════════════════ */
 (async function init() {
