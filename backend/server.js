@@ -16,6 +16,7 @@ const aiTeacherRoutes  = require('./aiTeacherRoutes');
 const pronunciationRoutes = require('./pronunciationRoutes');
 const { router: gameRouter, registerSocketHandlers } = require('./gameRoutes');
 const { router: raceRouter, registerRaceSocketHandlers } = require('./raceRoutes');
+const topicRoutes = require('./topicRoutes');
 
 const app        = express();
 const httpServer = http.createServer(app);
@@ -66,6 +67,7 @@ app.use('/api/race',       raceRouter);
 app.use('/api/reading',    readingRoutes);
 app.use('/api/ai-teacher', aiTeacherRoutes);
 app.use('/api/pronunciation', pronunciationRoutes);
+app.use('/api/topics', topicRoutes);
 
 // ─── Static files ─────────────────────────────────────────────────────────────
 app.use(
