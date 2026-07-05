@@ -598,4 +598,127 @@ router.delete('/:id/quizzes/:quizId', authenticate, requireTeacher, async (req, 
   }
 });
 
+// ─── GET /api/courses/:courseId/classes/:id/topics ───────────────────────────
+// List topics/homeworks currently exposed to this class.
+router.get('/:id/topics', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id } = req.params;
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+    const { rows } = await pool.query(
+      `SELECT tt.id, tt.title, tt.video_url, cta.assigned_at,
+              COUNT(tq.id)::int AS question_count
+         FROM class_topic_assignments cta
+         JOIN topic_tasks tt ON tt.id = cta.task_id
+         LEFT JOIN topic_questions tq ON tq.task_id = tt.id
+        WHERE cta.class_id = $1
+        GROUP BY tt.id, cta.assigned_at
+        ORDER BY cta.assigned_at DESC`,
+      [id]
+    );
+    return res.json({ success: true, tasks: rows });
+  } catch (err) {
+    console.error('List class topics error:', err);
+    return res.status(500).json({ success: false, message: 'Could not fetch topics.' });
+  }
+});
+
+// ─── POST /api/courses/:courseId/classes/:id/topics ──────────────────────────
+// Body: { task_ids: [1, 2, 3] } — expose one or more of the teacher's own topics.
+router.post('/:id/topics', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id } = req.params;
+  const { task_ids } = req.body;
+
+  if (!Array.isArray(task_ids) || !task_ids.length) {
+    return res.status(400).json({ success: false, message: 'task_ids (non-empty array) is required.' });
+  }
+  const cleanIds = [...new Set(task_ids.map(Number).filter(Number.isInteger))];
+  if (!cleanIds.length) {
+    return res.status(400).json({ success: false, message: 'task_ids must contain valid integers.' });
+  }
+
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+    const { rows: classRows } = await pool.query(
+      `SELECT id FROM classes WHERE id = $1 AND course_id = $2`,
+      [id, courseId]
+    );
+    if (!classRows.length) {
+      return res.status(404).json({ success: false, message: 'Class not found.' });
+    }
+
+    const { rows: ownedRows } = await pool.query(
+      `SELECT id FROM topic_tasks WHERE id = ANY($1::int[]) AND teacher_id = $2`,
+      [cleanIds, req.userId]
+    );
+    if (ownedRows.length !== cleanIds.length) {
+      return res.status(403).json({ success: false, message: 'One or more topics are not yours.' });
+    }
+
+    for (const taskId of cleanIds) {
+      await pool.query(
+        `INSERT INTO class_topic_assignments (class_id, task_id, assigned_by)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (class_id, task_id) DO NOTHING`,
+        [id, taskId, req.userId]
+      );
+    }
+
+    const { rows: tasks } = await pool.query(
+      `SELECT tt.id, tt.title, tt.video_url, cta.assigned_at,
+              COUNT(tq.id)::int AS question_count
+         FROM class_topic_assignments cta
+         JOIN topic_tasks tt ON tt.id = cta.task_id
+         LEFT JOIN topic_questions tq ON tq.task_id = tt.id
+        WHERE cta.class_id = $1
+        GROUP BY tt.id, cta.assigned_at
+        ORDER BY cta.assigned_at DESC`,
+      [id]
+    );
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`class:${id}`).emit('topic_assigned', {
+        classId: id,
+        tasks: tasks.filter(t => cleanIds.includes(t.id)),
+      });
+    }
+
+    return res.status(201).json({ success: true, message: 'Topic(s) exposed.', tasks });
+  } catch (err) {
+    console.error('Expose topics error:', err);
+    return res.status(500).json({ success: false, message: 'Could not expose topics.' });
+  }
+});
+
+// ─── DELETE /api/courses/:courseId/classes/:id/topics/:taskId ────────────────
+router.delete('/:id/topics/:taskId', authenticate, requireTeacher, async (req, res) => {
+  const { courseId, id, taskId } = req.params;
+  try {
+    if (!(await ownsCourse(courseId, req.userId))) {
+      return res.status(404).json({ success: false, message: 'Course not found.' });
+    }
+    const { rowCount } = await pool.query(
+      `DELETE FROM class_topic_assignments WHERE class_id = $1 AND task_id = $2`,
+      [id, taskId]
+    );
+    if (!rowCount) {
+      return res.status(404).json({ success: false, message: 'Assignment not found.' });
+    }
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`class:${id}`).emit('topic_unassigned', { classId: id, taskId: Number(taskId) });
+    }
+
+    return res.json({ success: true, message: 'Topic removed from class.' });
+  } catch (err) {
+    console.error('Remove class topic error:', err);
+    return res.status(500).json({ success: false, message: 'Could not remove topic.' });
+  }
+});
+
 module.exports = router;
