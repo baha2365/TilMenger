@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Topic — TilMenger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#0C0A08;--surface:#181410;--surface-2:#211D17;
+    --border:rgba(212,168,83,0.1);--border-2:rgba(212,168,83,0.18);
+    --rust:#D4622E;--gold:#E8B84A;
+    --text:#F0EAE0;--text-2:#A89D92;--text-3:#6B6058;
+    --success:#5DBF8A;--success-bg:rgba(93,191,138,0.1);--success-bd:rgba(93,191,138,0.22);
+    --error:#E85252;--error-bg:rgba(232,82,82,0.1);--error-bd:rgba(232,82,82,0.25);
+    --amber:#f5a623;--amber-bg:rgba(245,166,35,0.12);
+    --topic:#7F77DD;--topic-dark:#5B52C7;--topic-bg:rgba(127,119,221,0.12);--topic-bd:rgba(127,119,221,0.28);--topic-glow:rgba(127,119,221,0.4);
+    --radius:16px;--radius-sm:9px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+
+  nav{background:rgba(12,10,8,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .brand{text-decoration:none;display:flex;align-items:center;gap:.55rem;color:var(--text);font-size:1.05rem;font-weight:700;}
+  .brand-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--rust),var(--gold));display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+  .brand em{font-style:normal;color:var(--gold);}
+  .btn-back{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem 1rem;border-radius:8px;font-size:.82rem;font-weight:600;color:var(--text-3);background:none;border:1px solid var(--border-2);cursor:pointer;transition:all .15s;}
+  .btn-back:hover{border-color:var(--topic);color:var(--text);}
+
+  .main{max-width:820px;margin:0 auto;padding:2rem 1.2rem 2rem;display:flex;flex-direction:column;gap:1.4rem;}
+
+  .hero{background:linear-gradient(148deg,#15120C 0%,var(--surface) 60%,#0F0D09 100%);border:1px solid var(--border-2);border-radius:var(--radius);padding:1.8rem 2rem;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--topic),transparent);}
+  .hero-eyebrow{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--topic);margin-bottom:.5rem;}
+  .hero-title{font-size:clamp(1.3rem,3vw,1.8rem);font-weight:700;color:var(--text);letter-spacing:-.02em;}
+  .hero-desc{font-size:.85rem;color:var(--text-2);margin-top:.6rem;line-height:1.6;}
+  .hero-meta{font-size:.75rem;color:var(--text-3);margin-top:.6rem;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.6rem;}
+  .card-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--topic);margin-bottom:1.1rem;display:flex;align-items:center;gap:.5rem;}
+  .card-title::before{content:'';width:20px;height:2px;background:var(--topic);border-radius:2px;}
+
+  .video-wrap{border-radius:12px;overflow:hidden;background:#000;}
+  .video-wrap iframe{width:100%;aspect-ratio:16/9;border:none;display:block;}
+  .video-fallback{padding:2.4rem 1.5rem;text-align:center;background:rgba(0,0,0,0.25);border-radius:12px;}
+  .video-fallback .vf-icon{font-size:2.4rem;margin-bottom:.8rem;}
+  .btn-watch{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.6rem;background:linear-gradient(135deg,var(--topic),var(--topic-dark));color:#fff;border-radius:50px;text-decoration:none;font-weight:700;font-size:.9rem;margin-top:.8rem;box-shadow:0 4px 18px var(--topic-glow);}
+
+  .already-banner{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:var(--amber-bg);border:1px solid rgba(245,166,35,0.3);border-radius:12px;font-size:.85rem;color:#f5c877;}
+
+  .progress-label{display:flex;justify-content:space-between;font-size:.72rem;font-weight:700;color:var(--text-3);margin-bottom:.5rem;}
+  .progress-track{height:7px;background:var(--border-2);border-radius:99px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--topic),#9c94ee);border-radius:99px;transition:width .4s ease;}
+
+  .question-block{margin-bottom:1.8rem;padding-bottom:1.8rem;border-bottom:1px dashed var(--border-2);}
+  .question-block:last-of-type{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+  .question-header{display:flex;align-items:flex-start;gap:.7rem;margin-bottom:.9rem;}
+  .q-num{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;background:var(--gold);color:#1a1a1a;border-radius:50%;font-size:.8rem;font-weight:700;flex-shrink:0;}
+  .question-text{font-size:.95rem;font-weight:700;color:var(--text);line-height:1.4;}
+
+  .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+  .option-label{display:flex;align-items:center;gap:.65rem;padding:.7rem .85rem;border-radius:10px;border:1px solid var(--border-2);background:rgba(0,0,0,0.2);cursor:pointer;transition:all .15s;font-size:.85rem;font-weight:500;color:var(--text-2);user-select:none;}
+  .option-label:hover:not(.locked){border-color:var(--topic);background:var(--topic-bg);color:var(--text);}
+  .option-label.selected{border-color:var(--topic);background:var(--topic-bg);color:var(--topic);}
+  .option-label.correct{border-color:var(--success);background:var(--success-bg);color:var(--success);}
+  .option-label.wrong{border-color:var(--error);background:var(--error-bg);color:var(--error);}
+  .option-label.locked{cursor:default;}
+  .opt-letter{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:rgba(127,119,221,0.2);color:var(--topic);font-size:.75rem;font-weight:700;flex-shrink:0;}
+  .option-label.correct .opt-letter{background:var(--success);color:#fff;}
+  .option-label.wrong .opt-letter{background:var(--error);color:#fff;}
+  .option-label.selected .opt-letter{background:var(--topic);color:#fff;}
+
+  .feedback-row{display:none;align-items:center;gap:.4rem;margin-top:.7rem;font-size:.78rem;font-weight:600;}
+  .feedback-row.show{display:flex;}
+  .feedback-row.correct{color:var(--success);}
+  .feedback-row.wrong{color:var(--error);}
+
+  .actions-wrap{display:flex;flex-direction:column;align-items:center;gap:.9rem;margin-top:1.6rem;}
+  .btn-check{display:inline-flex;align-items:center;gap:.6rem;padding:.9rem 2.8rem;border-radius:50px;background:linear-gradient(135deg,var(--topic),var(--topic-dark));color:#fff;border:none;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 4px 18px var(--topic-glow);transition:transform .15s,box-shadow .15s,opacity .15s;}
+  .btn-check:hover{transform:translateY(-2px);box-shadow:0 8px 26px var(--topic-glow);}
+  .btn-check:disabled{opacity:.5;cursor:default;transform:none;box-shadow:none;}
+  .warn-msg{display:none;font-size:.82rem;font-weight:600;color:var(--error);text-align:center;}
+  .warn-msg.show{display:block;}
+
+  .one-attempt-note{font-size:.72rem;color:var(--text-3);text-align:center;}
+
+  .score-banner{display:none;border-radius:14px;padding:1.4rem 1.6rem;text-align:center;font-weight:700;font-size:1rem;}
+  .score-banner.show{display:block;}
+  .score-banner.great{background:var(--success-bg);color:var(--success);}
+  .score-banner.good{background:var(--amber-bg);color:#f5c877;}
+  .score-banner.tryagain{background:var(--error-bg);color:var(--error);}
+  .score-num{font-size:2.2rem;font-weight:800;display:block;margin-bottom:.2rem;}
+
+  .state-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:.9rem;text-align:center;padding:2.5rem 1.2rem;}
+  .state-icon{font-size:2.8rem;}
+  .state-title{font-size:1.15rem;font-weight:700;color:var(--text);}
+  .state-sub{font-size:.85rem;color:var(--text-3);}
+
+  .sk{display:block;height:16px;border-radius:6px;background:linear-gradient(90deg,var(--surface) 25%,var(--surface-2) 50%,var(--surface) 75%);background-size:200% 100%;animation:shimmer 1.3s infinite;margin-bottom:.7rem;}
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+  @media(max-width:600px){
+    .hero{padding:1.4rem 1.4rem;}
+    .card{padding:1.2rem;}
+    .options-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="#" onclick="history.back();return false;"><div class="brand-mark">✦</div>Til<em>Menger</em></a>
+  <button class="btn-back" onclick="history.back()">← Back</button>
+</nav>
+
+<div id="app"></div>
+
+<script src="../../config.js"></script>
+<script>
+  const API    = LINGUA.base;
+  const params = new URLSearchParams(window.location.search);
+  const taskId = params.get('id');
+  const token  = localStorage.getItem('token');
+  const LETTERS = ['A','B','C','D'];
+
+  let taskData    = null;
+  let selections  = {};
+  let alreadyDone = false;
+
+  (async function boot() {
+    if (!token) { renderState('🔒', 'Login Required', 'Please log in to view this topic.', true); return; }
+    if (!taskId) { renderState('⚠️', 'No Topic Found', 'No topic ID was provided in the URL.'); return; }
+    renderLoading();
+    try {
+      const res  = await fetch(`${API}/api/topics/${taskId}/play`, { headers: { Authorization: 'Bearer ' + token } });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'Topic not found.');
+      taskData = data.task;
+      if (data.submission) {
+        alreadyDone = true;
+        renderTask();
+        applyReview(data.submission, data.review);
+      } else {
+        renderTask();
+      }
+    } catch (e) {
+      renderState('📭', 'Topic Not Found', e.message || 'This topic could not be loaded.');
+    }
+  })();
+
+  function renderLoading() {
+    document.getElementById('app').innerHTML =
+      '<div class="main"><div class="card"><div class="sk" style="width:40%;height:20px;margin-bottom:18px"></div>' +
+      '<div class="sk" style="width:100%;height:220px"></div></div></div>';
+  }
+
+  function renderState(icon, title, sub, showLogin) {
+    document.getElementById('app').innerHTML =
+      '<div class="state-screen"><div class="state-icon">' + icon + '</div>' +
+      '<div class="state-title">' + title + '</div><div class="state-sub">' + sub + '</div>' +
+      (showLogin ? '<button onclick="window.location.href=\'../../index.html\'" style="margin-top:10px;padding:12px 30px;background:var(--topic);color:#fff;border:none;border-radius:50px;font-family:DM Sans,sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;">Go to Login</button>' : '') +
+      '</div>';
+  }
+
+  function getYouTubeEmbed(url) {
+    try {
+      const u = new URL(url);
+      if (u.hostname.replace('www.', '') === 'youtube.com') {
+        const v = u.searchParams.get('v');
+        if (v) return `https://www.youtube.com/embed/${v}`;
+        const parts = u.pathname.split('/').filter(Boolean);
+        if ((parts[0] === 'embed' || parts[0] === 'shorts') && parts[1]) return `https://www.youtube.com/embed/${parts[1]}`;
+      }
+      if (u.hostname === 'youtu.be' && u.pathname.length > 1) return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
+    } catch (_) {}
+    return null;
+  }
+
+  function renderTask() {
+    const task = taskData;
+    const embed = getYouTubeEmbed(task.video_url);
+    const videoHtml = embed
+      ? `<div class="video-wrap"><iframe src="${embed}" allowfullscreen></iframe></div>`
+      : `<div class="video-fallback"><div class="vf-icon">🎬</div><div style="font-size:.85rem;color:var(--text-3);">This video is hosted on another platform.</div>
+         <a class="btn-watch" href="${esc(task.video_url)}" target="_blank" rel="noopener">▶ Watch Video</a></div>`;
+
+    const qBlocks = task.questions.map((q, qi) => {
+      const opts = q.options.map((opt, oi) =>
+        `<div class="option-label" id="opt-${q.id}-${opt.id}" onclick="selectOption(${q.id},${opt.id},this)">
+           <span class="opt-letter">${LETTERS[oi]}</span>${esc(opt.option_text)}</div>`
+      ).join('');
+      return `<div class="question-block" id="qblock-${q.id}">
+        <div class="question-header"><span class="q-num">${qi+1}</span><span class="question-text">${esc(q.question)}</span></div>
+        <div class="options-grid" id="opts-grid-${q.id}">${opts}</div>
+        <div class="feedback-row" id="fb-${q.id}"></div></div>`;
+    }).join('');
+
+    document.getElementById('app').innerHTML = `
+      <div class="main">
+        <div class="hero">
+          <div class="hero-eyebrow">📋 Topic / Homework</div>
+          <div class="hero-title">${esc(task.title)}</div>
+          ${task.description ? `<div class="hero-desc">${esc(task.description)}</div>` : ''}
+          <div class="hero-meta">👤 ${esc(task.teacher_name || 'Your teacher')} · ❓ ${task.questions.length} question${task.questions.length !== 1 ? 's' : ''}</div>
+        </div>
+
+        <div id="alreadyBanner"></div>
+
+        <div class="card"><div class="card-title">Video</div>${videoHtml}</div>
+
+        <div class="card" id="progressCard">
+          <div class="progress-label"><span>Your progress</span><span id="progressText">0 / ${task.questions.length} answered</span></div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Comprehension Questions</div>
+          ${qBlocks}
+          <div class="actions-wrap" id="actionsWrap">
+            <div class="warn-msg" id="warnMsg">⚠️ Please answer all questions before submitting.</div>
+            <button class="btn-check" id="btnCheck" onclick="submitAnswers()">✅ Submit Answers</button>
+            <div class="one-attempt-note">⚠️ You only get one attempt — answers cannot be changed after submitting.</div>
+            <div class="score-banner" id="scoreBanner"></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function selectOption(questionId, optionId, el) {
+    if (alreadyDone) return;
+    const grid = document.getElementById('opts-grid-' + questionId);
+    grid.querySelectorAll('.option-label').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selections[questionId] = optionId;
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = taskData.questions.length;
+    const answered = Object.keys(selections).length;
+    const pct = total > 0 ? (answered / total) * 100 : 0;
+    const fill = document.getElementById('progressFill');
+    const text = document.getElementById('progressText');
+    if (fill) fill.style.width = pct + '%';
+    if (text) text.textContent = answered + ' / ' + total + ' answered';
+  }
+
+  async function submitAnswers() {
+    const total = taskData.questions.length;
+    const answered = Object.keys(selections).length;
+    const warnEl = document.getElementById('warnMsg');
+
+    if (answered < total) {
+      warnEl.classList.add('show');
+      const unanswered = taskData.questions.find(q => !selections[q.id]);
+      if (unanswered) document.getElementById('qblock-' + unanswered.id).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    warnEl.classList.remove('show');
+
+    if (!confirm('This is your only attempt — once submitted, answers cannot be changed. Submit now?')) return;
+
+    const btn = document.getElementById('btnCheck');
+    btn.disabled = true; btn.textContent = '⏳ Submitting…';
+
+    try {
+      const answers = {};
+      for (const qId in selections) answers[qId] = selections[qId];
+      const res  = await fetch(`${API}/api/topics/${taskId}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ answers }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      alreadyDone = true;
+      revealResults(data.score, data.total, data.results);
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = '✅ Submit Answers';
+      alert('Error submitting: ' + e.message);
+    }
+  }
+
+  function revealResults(score, total, results) {
+    taskData.questions.forEach(q => {
+      const grid = document.getElementById('opts-grid-' + q.id);
+      const fbEl = document.getElementById('fb-' + q.id);
+      const result = results[String(q.id)];
+      if (!result) return;
+
+      const selectedOptId = selections[q.id];
+      const correctOptId  = result.correct_option_id;
+
+      grid.querySelectorAll('.option-label').forEach(label => {
+        label.classList.add('locked');
+        const optId = parseInt(label.id.split('-').pop());
+        if (optId === selectedOptId && result.correct) { label.classList.remove('selected'); label.classList.add('correct'); }
+        else if (optId === selectedOptId && !result.correct) { label.classList.remove('selected'); label.classList.add('wrong'); }
+        else if (optId === correctOptId && !result.correct) { label.classList.add('correct'); }
+      });
+
+      if (result.correct) { fbEl.innerHTML = '✅ Correct!'; fbEl.className = 'feedback-row show correct'; }
+      else { fbEl.innerHTML = '❌ Not quite — the correct answer is highlighted.'; fbEl.className = 'feedback-row show wrong'; }
+    });
+
+    showScoreBanner(score, total);
+    document.getElementById('btnCheck').style.display = 'none';
+    document.querySelector('.one-attempt-note').textContent = '✅ Submitted — this task cannot be retaken.';
+    document.getElementById('scoreBanner').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function showScoreBanner(score, total) {
+    const banner = document.getElementById('scoreBanner');
+    let cls, msg;
+    if (score === total) { cls = 'great'; msg = '🎉 Perfect score! Outstanding work!'; }
+    else if (score >= Math.ceil(total * 0.6)) { cls = 'good'; msg = '👍 Good job!'; }
+    else { cls = 'tryagain'; msg = '💪 Keep reviewing the video — you\'ll get it next time.'; }
+    banner.innerHTML = '<span class="score-num">' + score + ' / ' + total + '</span>' + msg;
+    banner.className = 'score-banner show ' + cls;
+  }
+
+  // ── If the student already submitted, render read-only review immediately ──
+  function applyReview(submission, review) {
+    document.getElementById('alreadyBanner').innerHTML =
+      `<div class="already-banner">✅ <div>You already completed this topic on
+       ${new Date(submission.submitted_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
+       — scored <strong>${submission.score}/${submission.total}</strong>. Submissions can't be retaken.</div></div>`;
+
+    document.getElementById('progressCard').style.display = 'none';
+    document.getElementById('warnMsg').classList.remove('show');
+    document.getElementById('btnCheck').style.display = 'none';
+    document.querySelector('.one-attempt-note').textContent = '✅ Submitted — this task cannot be retaken.';
+
+    const answersByQ = {};
+    (review && review.answers ? review.answers : []).forEach(a => { answersByQ[a.question_id] = a; });
+
+    taskData.questions.forEach(q => {
+      const ans = answersByQ[q.id];
+      const grid = document.getElementById('opts-grid-' + q.id);
+      const fbEl = document.getElementById('fb-' + q.id);
+      if (!ans) return;
+      grid.querySelectorAll('.option-label').forEach(label => {
+        label.classList.add('locked');
+        const optId = parseInt(label.id.split('-').pop());
+        if (optId === ans.option_id && ans.is_correct) label.classList.add('correct');
+        else if (optId === ans.option_id && !ans.is_correct) label.classList.add('wrong');
+        else if (optId === ans.correct_option_id && !ans.is_correct) label.classList.add('correct');
+      });
+      if (ans.is_correct) { fbEl.innerHTML = '✅ Correct!'; fbEl.className = 'feedback-row show correct'; }
+      else { fbEl.innerHTML = '❌ Not quite — the correct answer is highlighted.'; fbEl.className = 'feedback-row show wrong'; }
+    });
+
+    showScoreBanner(submission.score, submission.total);
+  }
+
+  function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>
