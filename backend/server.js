@@ -168,6 +168,16 @@ app.use((err, _req, res, _next) => {
       console.log('\n── Pronunciation ────────────────────────────────');
       console.log('   GET    /api/pronunciation/sentences/:partId (protected)');
       console.log('   POST   /api/pronunciation/check             (protected)');
+
+      console.log('\n── Topics & Homeworks ────────────────────────────');
+      console.log('   POST   /api/topics');
+      console.log('   GET    /api/topics');
+      console.log('   GET    /api/topics/:id');
+      console.log('   GET    /api/topics/:id/results');
+      console.log('   PATCH  /api/topics/:id');
+      console.log('   DELETE /api/topics/:id');
+      console.log('   GET    /api/topics/:id/play');
+      console.log('   POST   /api/topics/:id/submit');
       console.log('');
     });
   } catch (err) {
