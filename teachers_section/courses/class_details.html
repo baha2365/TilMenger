@@ -1527,6 +1527,158 @@ document.getElementById('exposeQuizModalXBtn').addEventListener('click', closeEx
 document.getElementById('exposeQuizModal').addEventListener('click', function(e){ if(e.target===this) closeExposeQuizModal(); });
 
 /* ══════════════════════════════════════
+   TOPICS & HOMEWORKS
+══════════════════════════════════════ */
+const TOPIC_API       = `${LINGUA.base}/api/topics`;
+const CLASS_TOPIC_URL = `${CLASS_URL}/topics`;
+let exposedTopics   = [];
+let allTeacherTopics = [];
+let selectedTopicIds = new Set();
+
+async function loadClassTopics() {
+  const loading = document.getElementById('topicLoadingState');
+  const empty   = document.getElementById('topicEmptyState');
+  const wrap    = document.getElementById('topicListWrap');
+  loading.style.display = 'flex'; empty.style.display = 'none'; wrap.style.display = 'none';
+  try {
+    const res  = await fetch(CLASS_TOPIC_URL, { headers: authH() });
+    const data = await res.json();
+    loading.style.display = 'none';
+    if (!res.ok || !data.success) { showFeedback(data.message || 'Failed to load topics.', 'err'); return; }
+    exposedTopics = data.tasks || [];
+    renderClassTopics();
+  } catch {
+    loading.style.display = 'none';
+    showFeedback('Could not reach the server.', 'err');
+  }
+}
+
+function renderClassTopics() {
+  const empty = document.getElementById('topicEmptyState');
+  const wrap  = document.getElementById('topicListWrap');
+  const panel = document.getElementById('topicPanel');
+  if (!exposedTopics.length) { empty.style.display = 'block'; wrap.style.display = 'none'; return; }
+  empty.style.display = 'none'; wrap.style.display = 'block';
+  panel.innerHTML = exposedTopics.map(t => `
+    <div class="reading-row" id="topic-${t.id}" style="grid-template-columns:1fr 90px 130px 90px;">
+      <div class="reading-title">🎬 ${escHtml(t.title)}</div>
+      <div class="reading-qcount">❓ ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
+      <div class="reading-date">${new Date(t.assigned_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</div>
+      <div class="student-action"><button class="btn-ghost-sm danger" onclick="removeClassTopic(${t.id})">× Remove</button></div>
+    </div>`).join('');
+}
+
+async function removeClassTopic(taskId) {
+  try {
+    const res  = await fetch(`${CLASS_TOPIC_URL}/${taskId}`, { method:'DELETE', headers: authH() });
+    const data = await res.json();
+    if (!res.ok || !data.success) { showFeedback(data.message || 'Could not remove topic.', 'err'); return; }
+    exposedTopics = exposedTopics.filter(t => t.id !== taskId);
+    renderClassTopics();
+    showFeedback('Topic removed from class.', 'ok');
+  } catch { showFeedback('Server error.', 'err'); }
+}
+
+async function openExposeTopicModal() {
+  selectedTopicIds = new Set();
+  document.getElementById('exposeTopicModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('exposeTopicErr').classList.remove('show');
+  const listEl = document.getElementById('exposeTopicList');
+  listEl.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--text-3);font-size:.8rem;"><span class="spinner dark"></span> Loading your topics…</div>';
+  try {
+    const res  = await fetch(TOPIC_API, { headers: authH() });
+    const data = await res.json();
+    if (!res.ok || !data.success) { listEl.innerHTML = `<div style="color:var(--error);font-size:.82rem;">Could not load topics.</div>`; return; }
+    allTeacherTopics = data.tasks || [];
+    renderExposeTopicList();
+  } catch {
+    listEl.innerHTML = `<div style="color:var(--error);font-size:.82rem;">Could not reach the server.</div>`;
+  }
+}
+
+function renderExposeTopicList() {
+  const listEl = document.getElementById('exposeTopicList');
+  const exposedIds = new Set(exposedTopics.map(t => t.id));
+  if (!allTeacherTopics.length) {
+    listEl.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-3);font-size:.82rem;">You haven't created any topics yet. <a href="../topics/topics_create.html" style="color:#7F77DD;">Create one</a>.</div>`;
+    return;
+  }
+  listEl.innerHTML = allTeacherTopics.map(t => {
+    const already = exposedIds.has(t.id);
+    return `
+      <label class="task-pick-row" id="topicpick-${t.id}" style="${already ? 'opacity:.5;cursor:default;' : ''}">
+        <input type="checkbox" data-topic-id="${t.id}" ${already ? 'disabled' : ''} onchange="toggleTopicPick(${t.id}, this)">
+        <div class="task-pick-info">
+          <div class="task-pick-title">🎬 ${escHtml(t.title)}</div>
+          <div class="task-pick-meta">${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
+        </div>
+        ${already ? '<span class="task-pick-exposed-tag" style="color:#7F77DD;background:rgba(127,119,221,0.12);border-color:rgba(127,119,221,0.28);">Already exposed</span>' : ''}
+      </label>`;
+  }).join('');
+}
+
+function toggleTopicPick(taskId, checkbox) {
+  const row = document.getElementById(`topicpick-${taskId}`);
+  if (checkbox.checked) { selectedTopicIds.add(taskId); row.classList.add('checked'); }
+  else { selectedTopicIds.delete(taskId); row.classList.remove('checked'); }
+}
+
+function closeExposeTopicModal() {
+  const modal = document.getElementById('exposeTopicModalCard');
+  const bd    = document.getElementById('exposeTopicModal');
+  modal.style.transition = 'transform .28s cubic-bezier(.55,0,.45,1),opacity .22s ease';
+  modal.style.transform  = 'scale(.9) translateY(20px)';
+  modal.style.opacity    = '0';
+  bd.style.transition    = 'opacity .28s ease';
+  bd.style.opacity       = '0';
+  setTimeout(() => {
+    bd.classList.remove('open'); bd.style.opacity=''; bd.style.transition='';
+    modal.style.transform=''; modal.style.opacity=''; modal.style.transition='';
+    document.body.style.overflow='';
+  }, 290);
+}
+
+document.getElementById('exposeTopicSubmitBtn').addEventListener('click', async () => {
+  const btn   = document.getElementById('exposeTopicSubmitBtn');
+  const errEl = document.getElementById('exposeTopicErr');
+  errEl.classList.remove('show');
+  if (!selectedTopicIds.size) {
+    errEl.textContent = 'Select at least one topic.';
+    errEl.classList.add('show');
+    return;
+  }
+  btn.disabled = true; btn.innerHTML = `<span class="spinner"></span> Exposing…`;
+  try {
+    const res  = await fetch(CLASS_TOPIC_URL, {
+      method:'POST', headers: authH(),
+      body: JSON.stringify({ task_ids: Array.from(selectedTopicIds) })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      errEl.textContent = data.message || 'Could not expose topics.';
+      errEl.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Expose Selected';
+      return;
+    }
+    closeExposeTopicModal();
+    exposedTopics = data.tasks;
+    renderClassTopics();
+    showFeedback('Topic(s) exposed to class.', 'ok');
+  } catch {
+    errEl.textContent = 'Server error.';
+    errEl.classList.add('show');
+  }
+  btn.disabled = false; btn.textContent = 'Expose Selected';
+});
+
+document.getElementById('openExposeTopicBtn').addEventListener('click', openExposeTopicModal);
+document.getElementById('exposeTopicCancelBtn').addEventListener('click', closeExposeTopicModal);
+document.getElementById('exposeTopicModalXBtn').addEventListener('click', closeExposeTopicModal);
+document.getElementById('exposeTopicModal').addEventListener('click', function(e){ if(e.target===this) closeExposeTopicModal(); });
+
+
+/* ══════════════════════════════════════
    INIT
 ══════════════════════════════════════ */
 (function init() {
