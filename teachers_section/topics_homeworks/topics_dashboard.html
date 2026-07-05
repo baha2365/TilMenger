@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TilMenger — Topics & Homeworks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#0C0A08;--surface:#181410;--surface-2:#211D17;--surface-3:#2A2520;
+    --border:rgba(212,168,83,0.1);--border-2:rgba(212,168,83,0.18);
+    --rust:#D4622E;--rust-dark:#B8501F;--rust-glow:rgba(212,98,46,0.35);
+    --gold:#E8B84A;--gold-dim:rgba(232,184,74,0.15);
+    --text:#F0EAE0;--text-2:#A89D92;--text-3:#6B6058;
+    --success:#5DBF8A;--success-bg:rgba(93,191,138,0.1);--success-bd:rgba(93,191,138,0.22);
+    --error:#E85252;--error-bg:rgba(232,82,82,0.1);--error-bd:rgba(232,82,82,0.25);
+    --topic:#7F77DD;--topic-bg:rgba(127,119,221,0.12);--topic-bd:rgba(127,119,221,0.28);--topic-glow:rgba(127,119,221,0.4);
+    --radius:14px;--radius-sm:9px;
+  }
+  html{scroll-behavior:smooth;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(212,168,83,0.045) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;}
+
+  nav{position:sticky;top:0;z-index:50;height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;background:rgba(12,10,8,0.82);backdrop-filter:blur(22px);border-bottom:1px solid var(--border);}
+  .brand{text-decoration:none;display:flex;align-items:center;gap:.55rem;color:var(--text);font-size:1.05rem;font-weight:700;letter-spacing:-.025em;}
+  .brand-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--rust) 0%,var(--gold) 100%);display:flex;align-items:center;justify-content:center;font-size:.9rem;box-shadow:0 2px 12px var(--rust-glow);}
+  .brand em{font-style:normal;color:var(--gold);}
+  .nav-actions{display:flex;gap:.6rem;}
+  .nav-back{font-size:.78rem;font-weight:500;color:var(--text-3);text-decoration:none;border:1px solid var(--border);padding:.38rem .95rem;border-radius:7px;transition:all .18s;background:none;cursor:pointer;}
+  .nav-back:hover{color:var(--text);border-color:var(--border-2);background:var(--surface-2);}
+
+  .page{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:2.6rem 1.5rem 6rem;}
+
+  .page-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;margin-bottom:1.8rem;}
+  .hero-eyebrow{display:flex;align-items:center;gap:.45rem;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--topic);margin-bottom:.5rem;}
+  .hero-eyebrow-line{display:block;width:16px;height:2px;border-radius:2px;background:var(--topic);}
+  .page-title{font-size:clamp(1.5rem,3.2vw,2.1rem);font-weight:700;letter-spacing:-.03em;color:var(--text);}
+  .page-sub{font-size:.83rem;color:var(--text-3);margin-top:.35rem;}
+
+  .btn-create{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.87rem;font-weight:600;background:linear-gradient(135deg,var(--topic),#5B52C7);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 18px var(--topic-glow),inset 0 1px 0 rgba(255,255,255,0.12);transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s ease;white-space:nowrap;text-decoration:none;}
+  .btn-create:hover{transform:translateY(-2px);box-shadow:0 8px 28px var(--topic-glow);}
+  .btn-create .ic{width:20px;height:20px;background:rgba(255,255,255,0.18);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-bottom:1.8rem;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;}
+  .stat-val{font-size:1.5rem;font-weight:700;color:var(--text);line-height:1;}
+  .stat-lbl{font-size:.68rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:.35rem;}
+
+  .search-wrap{position:relative;margin-bottom:1.4rem;}
+  .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.9rem;color:var(--text-3);pointer-events:none;}
+  .search-input{width:100%;padding:.72rem 1rem .72rem 2.4rem;background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.86rem;color:var(--text);outline:none;transition:border-color .18s;}
+  .search-input::placeholder{color:var(--text-3);}
+  .search-input:focus{border-color:var(--topic);}
+
+  #loadingState,#emptyState{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;padding:4rem 2rem;color:var(--text-3);font-size:.84rem;text-align:center;}
+  #emptyState{display:none;border:1px dashed var(--border-2);border-radius:var(--radius);background:var(--surface);}
+  .empty-emoji{font-size:2.2rem;opacity:.7;}
+  .empty-h{font-size:1rem;font-weight:600;color:var(--text-2);}
+
+  .topics-panel{display:flex;flex-direction:column;gap:.9rem;}
+  .topic-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:blockIn .35s cubic-bezier(.22,1,.36,1) both;}
+  @keyframes blockIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+  .topic-row{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.3rem;cursor:pointer;transition:background .15s;}
+  .topic-row:hover{background:var(--surface-2);}
+  .topic-icon{width:42px;height:42px;border-radius:11px;background:var(--topic-bg);border:1px solid var(--topic-bd);display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;}
+  .topic-info{flex:1;min-width:0;}
+  .topic-title{font-size:.95rem;font-weight:600;color:var(--text);letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .topic-desc{font-size:.76rem;color:var(--text-3);margin-top:.15rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .topic-meta{display:flex;gap:.9rem;font-size:.72rem;color:var(--text-3);margin-top:.35rem;flex-wrap:wrap;}
+  .topic-meta span{display:flex;align-items:center;gap:.3rem;}
+  .avg-pill{font-weight:700;padding:.05rem .5rem;border-radius:20px;}
+  .avg-good{background:var(--success-bg);color:var(--success);}
+  .avg-mid{background:var(--gold-dim);color:var(--gold);}
+  .avg-low{background:var(--error-bg);color:var(--error);}
+
+  .topic-actions{display:flex;align-items:center;gap:.4rem;flex-shrink:0;}
+  .btn-ghost-sm{display:inline-flex;align-items:center;gap:.3rem;padding:.4rem .75rem;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:500;background:none;border:1px solid var(--border);border-radius:7px;color:var(--text-3);cursor:pointer;transition:all .18s;white-space:nowrap;text-decoration:none;}
+  .btn-ghost-sm:hover{border-color:var(--border-2);color:var(--text);background:var(--surface-3);}
+  .btn-ghost-sm.danger{border-color:rgba(232,82,82,0.2);color:var(--error);}
+  .btn-ghost-sm.danger:hover{background:var(--error-bg);border-color:rgba(232,82,82,0.35);}
+  .chevron{font-size:.75rem;color:var(--text-3);transition:transform .22s;flex-shrink:0;width:16px;text-align:center;}
+  .topic-block.open .chevron{transform:rotate(180deg);}
+
+  .grades-drawer{display:none;border-top:1px solid var(--border);background:rgba(0,0,0,0.16);padding:1rem 1.3rem 1.2rem;}
+  .topic-block.open .grades-drawer{display:block;}
+  .drawer-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:.8rem;}
+  .grade-row{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border);}
+  .grade-row:last-child{border-bottom:none;}
+  .grade-avatar{width:30px;height:30px;border-radius:50%;background:var(--topic-bg);color:var(--topic);border:1px solid var(--topic-bd);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;text-transform:uppercase;}
+  .grade-info{flex:1;min-width:0;}
+  .grade-name{font-size:.85rem;font-weight:600;color:var(--text);}
+  .grade-email{font-size:.68rem;color:var(--text-3);}
+  .grade-score{font-size:.78rem;font-weight:700;padding:.25rem .7rem;border-radius:20px;white-space:nowrap;}
+  .grade-date{font-size:.66rem;color:var(--text-3);margin-left:.6rem;white-space:nowrap;}
+  .drawer-empty{font-size:.8rem;color:var(--text-3);padding:.6rem 0;}
+  .drawer-loading{font-size:.8rem;color:var(--text-3);padding:.6rem 0;display:flex;align-items:center;gap:.5rem;}
+
+  .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.18);border-top-color:currentColor;border-radius:50%;animation:spin .55s linear infinite;}
+  .spinner.dark{border-color:rgba(0,0,0,0.1);border-top-color:var(--text-3);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1rem;z-index:300;}
+  .overlay.open{display:flex;animation:bdin .22s ease;}
+  @keyframes bdin{from{opacity:0;}to{opacity:1;}}
+  .confirm-box{background:var(--surface);border:1px solid var(--border-2);border-radius:16px;padding:1.8rem;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:popIn .28s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes popIn{from{transform:scale(.88);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .confirm-icon{width:42px;height:42px;border-radius:10px;background:var(--error-bg);border:1px solid var(--error-bd);display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.9rem;}
+  .confirm-title{font-size:.95rem;font-weight:700;margin-bottom:.3rem;}
+  .confirm-text{font-size:.78rem;color:var(--text-3);line-height:1.6;margin-bottom:1.4rem;}
+  .confirm-btns{display:flex;gap:.5rem;justify-content:flex-end;}
+  .btn-cf-cancel{padding:.5rem 1rem;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;background:none;border:1px solid var(--border);color:var(--text-3);cursor:pointer;transition:all .18s;}
+  .btn-cf-cancel:hover{border-color:var(--border-2);color:var(--text);}
+  .btn-cf-delete{padding:.5rem 1rem;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;background:var(--error-bg);border:1px solid var(--error-bd);color:var(--error);cursor:pointer;transition:all .18s;}
+  .btn-cf-delete:hover{background:rgba(232,82,82,0.2);}
+
+  .auth-gate{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;align-items:center;justify-content:center;}
+  .auth-gate.show{display:flex;}
+  .auth-gate-box{background:var(--surface);border:1px solid var(--border-2);border-radius:18px;padding:2.4rem 2rem;max-width:360px;width:90%;text-align:center;}
+  .auth-gate-icon{font-size:2.2rem;margin-bottom:.8rem;}
+  .auth-gate-title{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.4rem;}
+  .auth-gate-sub{font-size:.82rem;color:var(--text-3);margin-bottom:1.3rem;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a2e;color:#fff;padding:12px 24px;border-radius:30px;font-weight:600;font-size:.85rem;z-index:500;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 24px rgba(0,0,0,.5);pointer-events:none;border:1px solid rgba(127,119,221,0.4);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:3px;}
+  @media(max-width:640px){
+    .topic-row{flex-wrap:wrap;}
+    .topic-actions{width:100%;justify-content:flex-end;}
+    .stats-row{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-gate-box">
+    <div class="auth-gate-icon">🔒</div>
+    <div class="auth-gate-title">Teachers Only</div>
+    <div class="auth-gate-sub">This page is only accessible to teacher accounts.</div>
+    <button class="btn-create" style="width:100%;justify-content:center;" onclick="window.location.href='../../index.html'">Go to Login</button>
+  </div>
+</div>
+
+<div class="overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Delete this topic?</div>
+    <p class="confirm-text">This permanently removes the video, its questions, and all student submissions. This cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn-cf-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-cf-delete" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <a class="brand" href="../teacher_dashboard.html"><div class="brand-mark">✦</div>Til<em>Menger</em></a>
+  <div class="nav-actions">
+    <a class="nav-back" href="../teacher_dashboard.html">← Dashboard</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-hero">
+    <div>
+      <div class="hero-eyebrow"><span class="hero-eyebrow-line"></span> Topics & Homeworks</div>
+      <div class="page-title">Your Topics & Homeworks</div>
+      <div class="page-sub">Post an explainer video, attach comprehension questions, and see who's completed it.</div>
+    </div>
+    <a class="btn-create" href="topics_create.html"><span class="ic">+</span>Create New Topic</a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Total Topics</div></div>
+    <div class="stat-card"><div class="stat-val" id="statSubs">—</div><div class="stat-lbl">Total Submissions</div></div>
+    <div class="stat-card"><div class="stat-val" id="statAvg">—</div><div class="stat-lbl">Avg Score</div></div>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" type="text" placeholder="Search by title…" oninput="renderTasks()" />
+  </div>
+
+  <div id="loadingState"><div class="spinner dark"></div>Loading your topics…</div>
+  <div id="emptyState">
+    <div class="empty-emoji">📋</div>
+    <div class="empty-h">No topics yet</div>
+    <div style="font-size:.82rem;color:var(--text-3);">Create your first topic to get started.</div>
+    <a class="btn-create" href="topics_create.html" style="margin-top:.5rem;"><span class="ic">+</span>Create New Topic</a>
+  </div>
+
+  <div class="topics-panel" id="topicsPanel" style="display:none;"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../../config.js"></script>
+<script>
+  const API   = `${LINGUA.base}/api/topics`;
+  const token = localStorage.getItem('token');
+  let allTasks = [];
+  let pendingDeleteId = null;
+  const gradesCache = {}; // taskId -> submissions[]
+
+  function getStoredRoleId() {
+    const direct = localStorage.getItem('role_id');
+    if (direct !== null) return Number(direct);
+    try {
+      const raw = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!raw) return NaN;
+      const obj = (raw.user && typeof raw.user === 'object') ? raw.user : raw;
+      const val = obj.roleId !== undefined ? obj.roleId : obj.role_id;
+      if (val !== undefined) return Number(val);
+    } catch (_) {}
+    return NaN;
+  }
+  function isTeacherOrAdmin() { const r = getStoredRoleId(); return r === 2 || r === 3; }
+
+  (async function initAuth() {
+    if (!token) { document.getElementById('authGate').classList.add('show'); return; }
+    if (isTeacherOrAdmin()) { loadTasks(); return; }
+    try {
+      const res  = await fetch(`${LINGUA.base}/api/auth/me`, { headers: { Authorization: 'Bearer ' + token } });
+      const data = await res.json();
+      if (data.success && data.user) {
+        localStorage.setItem('role_id', String(data.user.roleId));
+        localStorage.setItem('user', JSON.stringify(data.user));
+        if (Number(data.user.roleId) === 2 || Number(data.user.roleId) === 3) { loadTasks(); return; }
+      }
+    } catch (_) {}
+    document.getElementById('authGate').classList.add('show');
+  })();
+
+  async function loadTasks() {
+    try {
+      const res  = await fetch(API, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      document.getElementById('loadingState').style.display = 'none';
+      if (!data.success) throw new Error(data.message || 'Failed to load.');
+      allTasks = data.tasks;
+      updateStats();
+      renderTasks();
+    } catch (e) {
+      document.getElementById('loadingState').style.display = 'none';
+      showToast('❌ ' + e.message);
+    }
+  }
+
+  function updateStats() {
+    document.getElementById('statTotal').textContent = allTasks.length;
+    const totalSubs = allTasks.reduce((sum, t) => sum + t.submission_count, 0);
+    document.getElementById('statSubs').textContent = totalSubs;
+    const withAvg = allTasks.filter(t => t.avg_score_pct !== null);
+    const overallAvg = withAvg.length
+      ? Math.round(withAvg.reduce((s, t) => s + t.avg_score_pct, 0) / withAvg.length)
+      : null;
+    document.getElementById('statAvg').textContent = overallAvg === null ? '—' : overallAvg + '%';
+  }
+
+  function renderTasks() {
+    const search = document.getElementById('searchInput').value.trim().toLowerCase();
+    const filtered = allTasks.filter(t => !search || t.title.toLowerCase().includes(search));
+    const panel = document.getElementById('topicsPanel');
+    const empty = document.getElementById('emptyState');
+
+    if (!allTasks.length) { empty.style.display = 'flex'; panel.style.display = 'none'; return; }
+    if (!filtered.length) {
+      empty.style.display = 'flex'; panel.style.display = 'none';
+      document.querySelector('.empty-h').textContent = 'No topics match your search';
+      return;
+    }
+    empty.style.display = 'none'; panel.style.display = 'flex';
+
+    panel.innerHTML = filtered.map(t => {
+      const date = new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      const avgClass = t.avg_score_pct === null ? '' : (t.avg_score_pct >= 80 ? 'avg-good' : t.avg_score_pct >= 50 ? 'avg-mid' : 'avg-low');
+      const avgHtml = t.avg_score_pct === null ? '' : `<span class="avg-pill ${avgClass}">📈 ${t.avg_score_pct}% avg</span>`;
+      return `
+      <div class="topic-block" id="block-${t.id}">
+        <div class="topic-row" onclick="toggleGrades(${t.id})">
+          <div class="topic-icon">🎬</div>
+          <div class="topic-info">
+            <div class="topic-title">${escHtml(t.title)}</div>
+            ${t.description ? `<div class="topic-desc">${escHtml(t.description)}</div>` : ''}
+            <div class="topic-meta">
+              <span>❓ ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</span>
+              <span>🎓 ${t.submission_count} submission${t.submission_count !== 1 ? 's' : ''}</span>
+              ${avgHtml}
+              <span>📅 ${date}</span>
+            </div>
+          </div>
+          <div class="topic-actions">
+            <a class="btn-ghost-sm" href="${escAttr(t.video_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ Watch</a>
+            <button class="btn-ghost-sm danger" onclick="event.stopPropagation();askDelete(${t.id})">🗑</button>
+            <span class="chevron">▾</span>
+          </div>
+        </div>
+        <div class="grades-drawer" id="drawer-${t.id}">
+          <div class="drawer-title">Student Submissions</div>
+          <div id="drawer-content-${t.id}"><div class="drawer-loading"><span class="spinner dark"></span> Loading…</div></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function toggleGrades(taskId) {
+    const block = document.getElementById(`block-${taskId}`);
+    const wasOpen = block.classList.contains('open');
+    block.classList.toggle('open');
+    if (wasOpen || gradesCache[taskId]) { renderGrades(taskId); return; }
+
+    try {
+      const res  = await fetch(`${API}/${taskId}/results`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'Failed to load submissions.');
+      gradesCache[taskId] = data.submissions;
+      renderGrades(taskId);
+    } catch (e) {
+      document.getElementById(`drawer-content-${taskId}`).innerHTML =
+        `<div class="drawer-empty" style="color:var(--error);">${escHtml(e.message)}</div>`;
+    }
+  }
+
+  function renderGrades(taskId) {
+    const subs = gradesCache[taskId] || [];
+    const el = document.getElementById(`drawer-content-${taskId}`);
+    if (!subs.length) {
+      el.innerHTML = `<div class="drawer-empty">No submissions yet — students haven't completed this topic.</div>`;
+      return;
+    }
+    el.innerHTML = subs.map(s => {
+      const pct = Math.round((s.score / s.total) * 100);
+      const cls = pct >= 80 ? 'avg-good' : pct >= 50 ? 'avg-mid' : 'avg-low';
+      const date = new Date(s.submitted_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+      return `
+      <div class="grade-row">
+        <div class="grade-avatar">${initials(s.name)}</div>
+        <div class="grade-info">
+          <div class="grade-name">${escHtml(s.name)}</div>
+          <div class="grade-email">${escHtml(s.email)}</div>
+        </div>
+        <span class="avg-pill ${cls}">${s.score}/${s.total} · ${pct}%</span>
+        <span class="grade-date">${date}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function askDelete(id) {
+    pendingDeleteId = id;
+    document.getElementById('confirmOverlay').classList.add('open');
+    document.getElementById('confirmDeleteBtn').onclick = confirmDelete;
+  }
+  function closeConfirm() { pendingDeleteId = null; document.getElementById('confirmOverlay').classList.remove('open'); }
+  async function confirmDelete() {
+    if (!pendingDeleteId) return;
+    const id = pendingDeleteId;
+    closeConfirm();
+    try {
+      const res  = await fetch(`${API}/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'Delete failed.');
+      allTasks = allTasks.filter(t => t.id !== id);
+      delete gradesCache[id];
+      updateStats();
+      renderTasks();
+      showToast('🗑️ Topic deleted.');
+    } catch (e) {
+      showToast('❌ ' + e.message);
+    }
+  }
+
+  function initials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    return parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
+  }
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function escAttr(s) { return String(s).replace(/"/g,'&quot;'); }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>
