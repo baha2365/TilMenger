@@ -877,6 +877,19 @@ async function checkExistingGame() {
 function initSocket() {
   const socket = io(API_BASE, { transports: ['websocket', 'polling'] });
 
+  socket.on('topic_assigned', ({ classId: gClassId, tasks } = {}) => {
+     if (gClassId !== classId) return;
+     loadTopicTasks();
+     if (tasks && tasks.length) {
+       showTopicBanner(tasks[0]);
+       if (tasks.length > 1) showToast(`📋 ${tasks.length} new topics assigned!`);
+     }
+   });
+   socket.on('topic_unassigned', ({ classId: gClassId } = {}) => {
+     if (gClassId !== classId) return;
+     loadTopicTasks();
+   });
+
   socket.on('quiz_assigned', ({ classId: gClassId, quizzes } = {}) => {
     if (gClassId !== classId) return;
     loadClassQuizzes();
