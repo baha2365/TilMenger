@@ -1010,6 +1010,7 @@ document.addEventListener('keydown', e => {
     if(document.getElementById('confirmOverlay').classList.contains('open')) closeConfirm();
     if(document.getElementById('exposeModal').classList.contains('open')) closeExposeModal();
     if(document.getElementById('exposeQuizModal').classList.contains('open')) closeExposeQuizModal();
+    if(document.getElementById('exposeTopicModal').classList.contains('open')) closeExposeTopicModal();
   }
 });
 
@@ -1695,7 +1696,8 @@ document.getElementById('exposeTopicModal').addEventListener('click', function(e
   loadStudents();
   checkActiveGame();
   loadReadingTasks();
-  loadClassQuizzes()
+  loadClassQuizzes();
+  loadClassTopics();
 })();
 </script>
 </body>
