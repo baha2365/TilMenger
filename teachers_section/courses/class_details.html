@@ -843,6 +843,9 @@ socketScript.onload = () => {
     socket.on('quiz_assigned', () => { loadClassQuizzes(); });
     socket.on('quiz_unassigned', () => { loadClassQuizzes(); });
 
+    socket.on('topic_assigned', () => { loadClassTopics(); });
+    socket.on('topic_unassigned', () => { loadClassTopics(); });
+
     socket.on('game_state',   ({ session }) => {
       if (session && session.status !== 'ended' && !activeSession) {
         setGameBannerActive(session);
