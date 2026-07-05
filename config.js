@@ -24,6 +24,7 @@ const LINGUA = (() => {
     quizzes: `${base}/api/quizzes`,
     courses: `${base}/api/courses`,
     student: `${base}/api/student`,
+    topics: `${base}/api/topics`,
     game: `${base}/api/game`,
     reading: `${base}/api/reading`,
     aiTeacher: `${base}/api/ai-teacher`,
