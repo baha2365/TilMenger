@@ -196,4 +196,40 @@ router.get('/classes/:id/quizzes', authenticate, authorizeRole(ROLE_IDS.student)
   }
 });
 
+// ─── GET /api/student/classes/:id/topics ──────────────────────────────────────
+// List topics/homeworks exposed to a class — only if the student is enrolled.
+// Each topic carries `submitted` so the frontend can show "Completed" vs "Start".
+router.get('/classes/:id/topics', authenticate, authorizeRole(ROLE_IDS.student), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows: enrolled } = await pool.query(
+      `SELECT 1 FROM class_enrollments WHERE class_id = $1 AND student_id = $2`,
+      [id, req.userId]
+    );
+    if (!enrolled.length) {
+      return res.status(403).json({ success: false, message: 'You are not enrolled in this class.' });
+    }
+
+    const { rows } = await pool.query(
+      `SELECT tt.id, tt.title, tt.description, tt.video_url, cta.assigned_at,
+              COUNT(tq.id)::int AS question_count,
+              EXISTS(
+                SELECT 1 FROM topic_submissions ts
+                 WHERE ts.task_id = tt.id AND ts.student_id = $2
+              ) AS submitted
+         FROM class_topic_assignments cta
+         JOIN topic_tasks tt ON tt.id = cta.task_id
+         LEFT JOIN topic_questions tq ON tq.task_id = tt.id
+        WHERE cta.class_id = $1
+        GROUP BY tt.id, cta.assigned_at
+        ORDER BY cta.assigned_at DESC`,
+      [id, req.userId]
+    );
+    return res.json({ success: true, tasks: rows });
+  } catch (err) {
+    console.error('List class topics (student) error:', err);
+    return res.status(500).json({ success: false, message: 'Could not fetch topics.' });
+  }
+});
+
 module.exports = router;
