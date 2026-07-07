@@ -1,6 +1,8 @@
 const OpenAI     = require('openai');
 const { toFile } = require('openai');
 const { pool }   = require('./Db');
+const { awardPronunciationXp } = require('./xpService');
+
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -121,11 +123,19 @@ async function checkPronunciation(req, res) {
       });
     }
 
-    const rawScore = wordSimilarity(expected, actual);
-    const score    = Math.round(rawScore * 100);
-    const passed   = rawScore >= 0.8;
+      const rawScore = wordSimilarity(expected, actual);
+      const score    = Math.round(rawScore * 100);
+      const passed   = rawScore >= 0.8;
 
-    return res.json({ success: true, expected, actual, score, passed, empty: false });
+      let xpAwarded = false;
+      let xp;
+      if (passed && String(req.userRoleId) === '1') {
+        const result = await awardPronunciationXp(req.userId, sentenceId);
+        xpAwarded = result.awarded;
+        xp = result.xp;
+      }
+
+      return res.json({ success: true, expected, actual, score, passed, empty: false, xpAwarded, xp });
   } catch (err) {
     console.error('checkPronunciation error:', err);
     return res.status(500).json({
