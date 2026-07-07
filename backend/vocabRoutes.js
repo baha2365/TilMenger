@@ -1,6 +1,7 @@
 const express  = require('express');
 const { authenticate } = require('./authMiddleware');
 const { pool } = require('./Db');
+const { awardWordXp, awardSentenceBuildXp } = require('./xpService');
 
 const router = express.Router();
 
@@ -152,6 +153,68 @@ router.post('/progress/complete', async (req, res) => {
     return res.json({ success: true, message: 'Part marked as complete.' });
   } catch (err) {
     console.error('POST /vocab/progress/complete error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+});
+
+// ─── POST /api/vocab/words/:wordId/learn ──────────────────────────────────────
+// Called once per word when a student marks it "Got it". Awards 1 XP the first
+// time this student learns this specific word; safe to call on replays.
+router.post('/words/:wordId/learn', async (req, res) => {
+  const wordId = parseInt(req.params.wordId, 10);
+  if (isNaN(wordId)) {
+    return res.status(400).json({ success: false, message: 'Invalid word ID.' });
+  }
+
+  // Only students earn XP.
+  if (String(req.userRoleId) !== '1') {
+    return res.json({ success: true, awarded: false });
+  }
+
+  try {
+    const { awarded, xp } = await awardWordXp(req.userId, wordId);
+    return res.json({ success: true, awarded, xp });
+  } catch (err) {
+    console.error('POST /vocab/words/:wordId/learn error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+});
+
+// ─── POST /api/vocab/sentences/:sentenceId/build ──────────────────────────────
+// Body: { built_sentence }. Verifies correctness server-side (never trusts the
+// client's own check) and awards 1 XP the first time this student builds this
+// sentence correctly.
+router.post('/sentences/:sentenceId/build', async (req, res) => {
+  const sentenceId = parseInt(req.params.sentenceId, 10);
+  const { built_sentence } = req.body;
+
+  if (isNaN(sentenceId)) {
+    return res.status(400).json({ success: false, message: 'Invalid sentence ID.' });
+  }
+  if (typeof built_sentence !== 'string' || !built_sentence.trim()) {
+    return res.status(400).json({ success: false, message: 'built_sentence is required.' });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT correct_sentence FROM sentences WHERE id = $1',
+      [sentenceId]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ success: false, message: 'Sentence not found.' });
+    }
+
+    const isCorrect =
+      built_sentence.trim().toLowerCase() === rows[0].correct_sentence.trim().toLowerCase();
+
+    if (String(req.userRoleId) !== '1' || !isCorrect) {
+      return res.json({ success: true, correct: isCorrect, awarded: false });
+    }
+
+    const { awarded, xp } = await awardSentenceBuildXp(req.userId, sentenceId);
+    return res.json({ success: true, correct: true, awarded, xp });
+  } catch (err) {
+    console.error('POST /vocab/sentences/:sentenceId/build error:', err);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 });
