@@ -417,6 +417,34 @@
     }
     .card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 1.2rem; color: var(--ink); }
 
+
+    /* ── XP Showcase Card ── */
+    .xp-showcase {
+      background: linear-gradient(135deg, var(--ink) 0%, #241d16 100%);
+      border: 1px solid rgba(212,168,83,0.28);
+      position: relative;
+      overflow: hidden;
+    }
+    .xp-showcase::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 220px; height: 220px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,168,83,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .xp-showcase-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 1.3rem; }
+    .xp-icon {
+      width: 56px; height: 56px; flex-shrink: 0;
+      background: rgba(212,168,83,0.14);
+      border: 1px solid rgba(212,168,83,0.3);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem;
+    }
+    .xp-info { flex: 1; min-width: 0; }
+    .xp-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); opacity: 0.9; margin-bottom: 0.3rem; }
+    .xp-value { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--cream); line-height: 1; margin-bottom: 0.4rem; }
+    .xp-sub { font-size: 0.78rem; color: #9A9089; line-height: 1.5; }
     /* ══════════════════════════════════════════
        ── My Classes Card ──
        Students only, shown if enrolled in 1+ classes.
@@ -519,6 +547,18 @@
     <div class="level-badge">
       <div class="badge-label">Your level</div>
       <div class="badge-value" id="userLevel"></div>
+    </div>
+  </div>
+
+  <!-- ── XP Showcase (students only) ── -->
+  <div class="card xp-showcase" id="xpCard" style="display:none; margin-bottom: 1.5rem;">
+    <div class="xp-showcase-inner">
+      <div class="xp-icon">⭐</div>
+      <div class="xp-info">
+        <div class="xp-label">Total XP Earned</div>
+        <div class="xp-value" id="xpValue">0</div>
+        <div class="xp-sub">Earn XP by learning new words, building sentences, and practicing pronunciation.</div>
+      </div>
     </div>
   </div>
 
@@ -654,6 +694,8 @@
     // Load "My Classes" only for students (role_id === '1').
     if (roleId === '1') {
       loadMyClasses();
+      document.getElementById('xpCard').style.display = 'block';
+      document.getElementById('xpValue').textContent = (user.xp || 0).toLocaleString();
     }
 
     document.getElementById('statusScreen').style.display = 'none';
