@@ -621,6 +621,13 @@
     document.getElementById('learnedBtn').disabled = true;
     renderDots();
 
+    // Award XP server-side — idempotent per user+word, so it's harmless to
+    // call even if this word was learned in an earlier session.
+    fetch(`${VOCAB}/words/${w.id}/learn`, {
+      method:  'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => { /* XP is best-effort — never block the lesson on it */ });
+
     if (learnedInPart.size === words.length) {
       await markPartComplete();
     } else {
