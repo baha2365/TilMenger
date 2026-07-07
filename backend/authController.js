@@ -232,7 +232,7 @@ async function login(req, res) {
 async function getMe(req, res) {
   try {
     const { rows } = await pool.query(
-      'SELECT id, name, email, level, role_id, created_at FROM users WHERE id = $1',
+      'SELECT id, name, email, level, role_id, xp, created_at FROM users WHERE id = $1',
       [req.userId]
     );
     if (rows.length === 0) {
