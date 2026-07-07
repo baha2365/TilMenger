@@ -842,14 +842,27 @@
     dragId = null; dragSrc = null;
   }
 
-  function checkAnswer() {
+  async function checkAnswer() {
     if (isChecked) return;
     isChecked = true;
 
     const sent       = sentences[currentIdx];
     const userAnswer = answerWords.map(c => c.text).join(' ');
     const correct    = sent.correct_sentence.trim();
-    const isRight    = userAnswer.toLowerCase() === correct.toLowerCase();
+
+    // Verify server-side (this also awards XP the first time it's built
+    // correctly). Falls back to the local check if the request fails, so
+    // the exercise itself never breaks — only the XP award would be missed.
+    let isRight = userAnswer.toLowerCase() === correct.toLowerCase();
+    try {
+      const res  = await fetch(`${VOCAB}/sentences/${sent.id}/build`, {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ built_sentence: userAnswer }),
+      });
+      const data = await res.json();
+      if (data.success) isRight = data.correct;
+    } catch (e) { /* use the local check computed above */ }
 
     const az = document.getElementById('answerZone');
     const fb = document.getElementById('feedbackBar');
