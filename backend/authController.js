@@ -24,6 +24,7 @@ function safeUser(row) {
     email:     row.email,
     level:     row.level,
     roleId:    row.role_id,
+    xp:        row.xp || 0,
     createdAt: row.created_at,
   };
 }
