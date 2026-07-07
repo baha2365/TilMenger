@@ -969,6 +969,8 @@ async function sendForCheck() {
     });
     saveState();   // persist the result before rendering, so a refresh recovers it
 
+    if (data.xpAwarded) showToast('⭐ +1 XP earned!');
+
     showResult(data);
   } catch (err) {
     console.error('sendForCheck error:', err);
