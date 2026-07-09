@@ -650,6 +650,11 @@ function setState(s) {
 }
 
 // ─── Session init ─────────────────────────────────────────────────────────────
+// The ONLY thing the loader waits on now is the /session lookup (a fast DB
+// read for name + level). As soon as that's back, the app is revealed and
+// Emma's opening line streams in afterwards via loadGreeting(), same as any
+// other reply — the person is never stuck staring at a blank loading screen
+// waiting on the LLM.
 async function init() {
   try {
     const res = await fetch(`${BASE}/session`, {
@@ -664,32 +669,40 @@ async function init() {
     levelBadge.textContent = level;
     introSub.textContent   = `Level: ${level}`;
 
-    // Generate personalised greeting
-    loaderLbl.textContent = 'Emma is preparing your lesson…';
-    const first = (name || 'there').split(' ')[0];
-
-    const greeting = await callChat([{
-      role: 'user',
-      content: `My name is ${first}. Please greet me warmly, introduce yourself as Emma, and ask what I'd like to practise today.`,
-    }], /* silent */ true);
-
-    // Seed history with just the greeting — keep the init prompt invisible
-    history = [{ role: 'assistant', content: greeting }];
-
-    addMsg('teacher', greeting);
-    await playTTS(greeting);
-
+    // Reveal the app right away — don't hold the UI hostage to Emma's first reply.
     loader.classList.add('gone');
-    setTimeout(() => loader.remove(), 600);
+    setTimeout(() => loader.remove(), 500);
+
+    // Kick off Emma's opening line in the background; UI is already interactive.
+    loadGreeting(name);
+
   } catch (err) {
     console.error('init error:', err);
     loaderLbl.textContent = 'Could not connect. Refresh to retry.';
   }
 }
 
+async function loadGreeting(name) {
+  const first = (name || 'there').split(' ')[0];
+  try {
+    const greeting = await callChat([{
+      role: 'user',
+      content: `My name is ${first}. Please greet me briefly and start the lesson.`,
+    }]);
+
+    history = [{ role: 'assistant', content: greeting }];
+    addMsg('teacher', greeting);
+    await playTTS(greeting);
+  } catch (err) {
+    console.error('loadGreeting error:', err);
+    setState('idle');
+    showToast("Emma couldn't start just now. Tap the mic to begin, or refresh to retry.");
+  }
+}
+
 // ─── API helpers ──────────────────────────────────────────────────────────────
-async function callChat(messages, silent = false) {
-  if (!silent) setState('thinking');
+async function callChat(messages) {
+  setState('thinking');
   typingEl.classList.add('visible');
   scrollDown();
 
