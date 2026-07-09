@@ -15,7 +15,7 @@ const LEMONFOX_KEY  = process.env.LEMONFOX_API_KEY;
 
 // Lemonfox voice for Emma. 'sarah' = warm American voice (closest to old 'nova').
 // Swap to 'emma' + language 'en-gb' if you want the persona/voice name to match.
-const TTS_VOICE = 'sarah';
+const TTS_VOICE = 'isabella';
 
 // Slower speech for beginners — gives ears time to catch up
 // (Lemonfox speed range is 0.5–4.0, same window we were already using)
