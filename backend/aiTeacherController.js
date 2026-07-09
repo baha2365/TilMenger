@@ -20,7 +20,7 @@ const TTS_VOICE = 'isabella';
 // Slower speech for beginners — gives ears time to catch up
 // (Lemonfox speed range is 0.5–4.0, same window we were already using)
 const TTS_SPEED = {
-  'Beginner A1-A2':     0.82,
+  'Beginner A1-A2':     0.60,
   'Intermediate B1-B2': 0.9,
   'Advanced C1-C2':     1.0,
 };
