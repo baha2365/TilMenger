@@ -10,15 +10,14 @@ const {
 
 const router = express.Router();
 
-// Memory storage — buffer goes straight to OpenAI, no disk touch needed.
-// 25 MB ceiling matches OpenAI's own upload limit.
+// Memory storage — buffer goes straight to Lemonfox, no disk touch needed.
+// Lemonfox allows uploads up to 100MB, but 25MB is plenty for short voice clips.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith('audio/')),
 });
 
-// Every route is protected
 router.use(authenticate);
 
 router.get('/session',                              getSession);
