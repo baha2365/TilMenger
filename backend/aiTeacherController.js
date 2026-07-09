@@ -1,10 +1,24 @@
-const OpenAI     = require('openai');
-const { toFile } = require('openai');
-const { pool }   = require('./Db');
+const OpenAI = require('openai');
+const { pool } = require('./Db');
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Lemonfox's chat endpoint is OpenAI-compatible, so we just repoint the client.
+const lemonfox = new OpenAI({
+  apiKey:  process.env.LEMONFOX_API_KEY,
+  baseURL: 'https://api.lemonfox.ai/v1',
+});
+
+// STT + TTS use plain fetch — Lemonfox's request shape differs slightly from
+// OpenAI's here (no `model` field for transcription; `voice`/`language` for TTS),
+// so routing them through the OpenAI SDK's stricter types isn't worth it.
+const LEMONFOX_BASE = 'https://api.lemonfox.ai/v1';
+const LEMONFOX_KEY  = process.env.LEMONFOX_API_KEY;
+
+// Lemonfox voice for Emma. 'sarah' = warm American voice (closest to old 'nova').
+// Swap to 'emma' + language 'en-gb' if you want the persona/voice name to match.
+const TTS_VOICE = 'sarah';
 
 // Slower speech for beginners — gives ears time to catch up
+// (Lemonfox speed range is 0.5–4.0, same window we were already using)
 const TTS_SPEED = {
   'Beginner A1-A2':    0.82,
   'Intermediate B1-B2': 0.9,
@@ -91,13 +105,25 @@ async function transcribeAudio(req, res) {
   try {
     const mime = req.file.mimetype || 'audio/webm';
     const ext  = mime.includes('ogg') ? 'ogg' : mime.includes('mp4') ? 'mp4' : 'webm';
-    const file = await toFile(req.file.buffer, `rec.${ext}`, { type: mime });
 
-    const result = await openai.audio.transcriptions.create({
-      file,
-      model: 'gpt-4o-mini-transcribe',
+    const form = new FormData();
+    form.append('file', new Blob([req.file.buffer], { type: mime }), `rec.${ext}`);
+    form.append('response_format', 'json');
+    // Lemonfox supports Kazakh natively if you ever want to let students
+    // speak Kazakh to Emma directly: form.append('language', 'kazakh');
+
+    const lfRes = await fetch(`${LEMONFOX_BASE}/audio/transcriptions`, {
+      method:  'POST',
+      headers: { Authorization: `Bearer ${LEMONFOX_KEY}` },
+      body:    form,
     });
 
+    if (!lfRes.ok) {
+      console.error('Lemonfox STT error:', lfRes.status, await lfRes.text());
+      throw new Error('Transcription request failed.');
+    }
+
+    const result = await lfRes.json();
     const text = (result.text || '').trim();
     return res.json({ success: true, text, empty: !text });
   } catch (err) {
@@ -121,10 +147,10 @@ async function chatWithTeacher(req, res) {
     const user   = rows[0] || {};
     const system = buildSystemPrompt(user.level, user.name);
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: system }, ...messages],
-      max_tokens: 380,
+    const completion = await lemonfox.chat.completions.create({
+      model:       'llama-8b-chat',
+      messages:    [{ role: 'system', content: system }, ...messages],
+      max_tokens:  380,
       temperature: 0.75,
     });
 
@@ -151,14 +177,27 @@ async function speakText(req, res) {
     const level = rows[0]?.level || 'Intermediate B1-B2';
     const speed = TTS_SPEED[level] ?? 0.9;
 
-    const speech = await openai.audio.speech.create({
-      model: 'tts-1',
-      voice: 'nova',              // warm, natural, clear — best for teaching
-      input: text.slice(0, 4096),
-      speed,
+    const lfRes = await fetch(`${LEMONFOX_BASE}/audio/speech`, {
+      method:  'POST',
+      headers: {
+        Authorization:  `Bearer ${LEMONFOX_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input:           text.slice(0, 4096),
+        voice:           TTS_VOICE,
+        language:        'en-us',
+        response_format: 'mp3',
+        speed,
+      }),
     });
 
-    const buffer = Buffer.from(await speech.arrayBuffer());
+    if (!lfRes.ok) {
+      console.error('Lemonfox TTS error:', lfRes.status, await lfRes.text());
+      throw new Error('TTS request failed.');
+    }
+
+    const buffer = Buffer.from(await lfRes.arrayBuffer());
     res.set({ 'Content-Type': 'audio/mpeg', 'Content-Length': buffer.length });
     return res.send(buffer);
   } catch (err) {
