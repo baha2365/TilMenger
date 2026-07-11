@@ -1,10 +1,7 @@
-const OpenAI     = require('openai');
-const { toFile } = require('openai');
 const { pool }   = require('./Db');
 const { awardPronunciationXp } = require('./xpService');
 
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const LEMONFOX_STT_URL = 'https://api.lemonfox.ai/v1/audio/transcriptions';
 
 // ─── Word-level similarity ────────────────────────────────────────────────────
 // Strips punctuation, lower-cases, then computes multiset word intersection
@@ -24,11 +21,9 @@ function wordSimilarity(expected, actual) {
 
   if (!expWords.length) return 0;
 
-  // Build a frequency map for the expected words
   const freq = new Map();
   expWords.forEach(w => freq.set(w, (freq.get(w) || 0) + 1));
 
-  // Count how many actual words appear in the expected set
   let matches = 0;
   actWords.forEach(w => {
     if (freq.has(w) && freq.get(w) > 0) {
@@ -99,17 +94,34 @@ async function checkPronunciation(req, res) {
 
     const expected = rows[0].correct_sentence.trim();
 
-    // Transcribe with gpt-4o-mini-transcribe only — no LLM, no TTS
+    // Transcribe with Lemonfox's Whisper large-v3 STT — plain multipart POST,
+    // no SDK needed since Node 18+ ships fetch/FormData/Blob natively.
     const mime = req.file.mimetype || 'audio/webm';
     const ext  = mime.includes('ogg') ? 'ogg' : mime.includes('mp4') ? 'mp4' : 'webm';
-    const file = await toFile(req.file.buffer, `rec.${ext}`, { type: mime });
 
-    const transcription = await openai.audio.transcriptions.create({
-      file,
-      model: 'gpt-4o-mini-transcribe',
-      language: "en",
+    const formData = new FormData();
+    formData.append('file', new Blob([req.file.buffer], { type: mime }), `rec.${ext}`);
+    formData.append('language', 'english');
+    formData.append('response_format', 'json');
+
+    const sttRes = await fetch(LEMONFOX_STT_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.LEMONFOX_API_KEY}`,
+      },
+      body: formData,
     });
 
+    if (!sttRes.ok) {
+      const errText = await sttRes.text();
+      console.error('Lemonfox STT error:', sttRes.status, errText);
+      return res.status(500).json({
+        success: false,
+        message: 'Transcription failed. Please try again.',
+      });
+    }
+
+    const transcription = await sttRes.json();
     const actual = (transcription.text || '').trim();
 
     if (!actual) {
@@ -123,19 +135,19 @@ async function checkPronunciation(req, res) {
       });
     }
 
-      const rawScore = wordSimilarity(expected, actual);
-      const score    = Math.round(rawScore * 100);
-      const passed   = rawScore >= 0.8;
+    const rawScore = wordSimilarity(expected, actual);
+    const score    = Math.round(rawScore * 100);
+    const passed   = rawScore >= 0.8;
 
-      let xpAwarded = false;
-      let xp;
-      if (passed && String(req.userRoleId) === '1') {
-        const result = await awardPronunciationXp(req.userId, sentenceId);
-        xpAwarded = result.awarded;
-        xp = result.xp;
-      }
+    let xpAwarded = false;
+    let xp;
+    if (passed && String(req.userRoleId) === '1') {
+      const result = await awardPronunciationXp(req.userId, sentenceId);
+      xpAwarded = result.awarded;
+      xp = result.xp;
+    }
 
-      return res.json({ success: true, expected, actual, score, passed, empty: false, xpAwarded, xp });
+    return res.json({ success: true, expected, actual, score, passed, empty: false, xpAwarded, xp });
   } catch (err) {
     console.error('checkPronunciation error:', err);
     return res.status(500).json({
