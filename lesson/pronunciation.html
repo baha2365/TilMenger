@@ -998,7 +998,9 @@ function showResult(data) {
   // Message
   const msgEl = $('resultMsg');
   if (data.empty) {
-    msgEl.innerHTML = `<div class="result-msg fail">Nothing detected — speak a bit louder next time</div>`;
+    msgEl.innerHTML = data.nonEnglish
+      ? `<div class="result-msg fail">That didn't sound like English — try again in English</div>`
+      : `<div class="result-msg fail">Nothing detected — speak a bit louder next time</div>`;
   } else if (data.passed) {
     msgEl.innerHTML = `<div class="result-msg pass">✓ Great pronunciation!</div>`;
   } else if (data.score >= 50) {
