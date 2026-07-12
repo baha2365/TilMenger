@@ -3,9 +3,11 @@ const multer  = require('multer');
 const { authenticate } = require('./authMiddleware');
 const {
   getSession,
+  greetTopic,
+  chatWithTopic,
   transcribeAudio,
-  chatWithTeacher,
   speakText,
+  getTopicsProgress,
 } = require('./aiTeacherController');
 
 const router = express.Router();
@@ -20,9 +22,16 @@ const upload = multer({
 
 router.use(authenticate);
 
-router.get('/session',                              getSession);
+// Topic-scoped conversation (replaces the old free-chat session/chat pair)
+router.get('/session',                             getSession);        // ?topic=<slug>&title=<name>
+router.post('/greet',                               greetTopic);        // { topic, title }
+router.post('/chat',                                chatWithTopic);     // { topic, title, text }
+
+// Unchanged — level-aware, topic-agnostic
 router.post('/transcribe', upload.single('audio'), transcribeAudio);
-router.post('/chat',                               chatWithTeacher);
-router.post('/speak',                              speakText);
+router.post('/speak',                               speakText);
+
+// Drives the lock/current/completed chain on the topic-select page
+router.get('/topics/progress',                      getTopicsProgress);
 
 module.exports = router;
