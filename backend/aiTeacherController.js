@@ -121,6 +121,15 @@ async function getSession(req, res) {
   }
 }
 
+// ─── Script guard ─────────────────────────────────────────────────────────
+// Even with language forced to English, a bad enough accent can still make
+// Whisper fall back to another script. If that happens, treat it as "didn't
+// catch that" rather than feeding Cyrillic/CJK/etc. into the chat model.
+const NON_LATIN_RE = /[\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]/;
+function isNonLatinScript(text) {
+  return NON_LATIN_RE.test(text);
+}
+
 // ─── POST /api/ai-teacher/transcribe ─────────────────────────────────────────
 async function transcribeAudio(req, res) {
   if (!req.file) {
@@ -133,9 +142,8 @@ async function transcribeAudio(req, res) {
 
     const form = new FormData();
     form.append('file', new Blob([req.file.buffer], { type: mime }), `rec.${ext}`);
+    form.append('language', 'english');   // ← force English decoding, don't auto-detect
     form.append('response_format', 'json');
-    // Lemonfox supports Kazakh natively if you ever want to let students
-    // speak Kazakh to Emma directly: form.append('language', 'kazakh');
 
     const lfRes = await fetch(`${LEMONFOX_BASE}/audio/transcriptions`, {
       method:  'POST',
@@ -149,8 +157,12 @@ async function transcribeAudio(req, res) {
     }
 
     const result = await lfRes.json();
-    const text = (result.text || '').trim();
-    return res.json({ success: true, text, empty: !text });
+    let text = (result.text || '').trim();
+
+    const nonEnglish = text && isNonLatinScript(text);
+    if (nonEnglish) text = '';
+
+    return res.json({ success: true, text, empty: !text, nonEnglish });
   } catch (err) {
     console.error('transcribeAudio error:', err);
     return res.status(500).json({ success: false, message: 'Transcription failed. Please try again.' });
