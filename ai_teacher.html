@@ -134,6 +134,20 @@
 
     .header-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
 
+    .topic-pill {
+      background: rgba(196,87,42,0.12);
+      border: 1px solid rgba(196,87,42,0.32);
+      color: var(--rust-lt);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.32rem 0.75rem;
+      border-radius: 20px;
+      white-space: nowrap;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .level-badge {
       background: rgba(212,168,83,0.1);
       border: 1px solid rgba(212,168,83,0.3);
@@ -269,33 +283,6 @@
     }
     .typing-label { font-size: 0.73rem; color: var(--muted); }
 
-    /* ── Topic chips ───────────────────────────────────────────────────────── */
-    .topics-row {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      padding: 0.7rem 1.5rem 0;
-      flex-shrink: 0;
-      justify-content: center;
-    }
-    .topic-chip {
-      background: var(--s2);
-      border: 1px solid rgba(255,255,255,0.09);
-      color: #C8BFB5;
-      font-size: 0.75rem;
-      font-family: 'DM Sans', sans-serif;
-      padding: 0.4rem 0.85rem;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-    .topic-chip:hover:not(:disabled) {
-      background: rgba(196,87,42,0.16);
-      border-color: rgba(196,87,42,0.4);
-      color: var(--gold);
-    }
-    .topic-chip:disabled { opacity: 0.35; cursor: default; }
-
     /* ── Stage: the living orb ────────────────────────────────────────────── */
     .stage {
       flex-shrink: 0;
@@ -395,12 +382,58 @@
     .stage-status.thinking  { color: var(--gold); }
     .stage-status.speaking  { color: var(--sage-lt); }
 
+    /* ── Turn tracker ──────────────────────────────────────────────────────── */
+    .turn-tracker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0 1.5rem;
+      margin-bottom: 0.65rem;
+    }
+    .turn-bar {
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      letter-spacing: 1px;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .turn-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── Completion banner ─────────────────────────────────────────────────── */
+    .completion-banner {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      background: rgba(74,103,65,0.14);
+      border: 1px solid rgba(74,103,65,0.35);
+      color: var(--cream);
+      padding: 0.65rem 1rem;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      margin: 0 1.5rem 0.7rem;
+      text-align: center;
+    }
+    .btn-new-topic {
+      color: var(--gold);
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-new-topic:hover { color: var(--gold-lt); }
+
     /* ── Control bar ───────────────────────────────────────────────────────── */
     .control-bar {
       flex-shrink: 0;
       background: var(--s1);
       border-top: 1px solid rgba(255,255,255,0.05);
-      padding: 0.85rem 1.5rem 1.25rem;
+      padding: 0.85rem 0 1.25rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -414,6 +447,7 @@
       width: 100%;
       max-width: 480px;
       gap: 0.6rem;
+      padding: 0 1.5rem;
     }
 
     .side-btn {
@@ -579,12 +613,15 @@
       .app-header { padding: 0.75rem 1rem; }
       .brand-name, .teacher-label { font-size: 0.85rem; }
       .chat-area { padding: 1rem 1rem 0.5rem; }
-      .topics-row { padding: 0.6rem 1rem 0; }
-      .control-bar { padding: 0.75rem 1rem 1.1rem; }
+      .control-bar { padding: 0.75rem 0 1.1rem; }
+      .input-row { padding: 0 1rem; }
+      .turn-tracker { padding: 0 1rem; }
+      .completion-banner { margin: 0 1rem 0.7rem; }
       .message { max-width: 92%; }
       .stage { height: 156px; }
       .orb-field { width: 128px; height: 128px; }
       .orb-core { width: 102px; height: 102px; }
+      .topic-pill { max-width: 110px; }
     }
   </style>
 </head>
@@ -604,13 +641,13 @@
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <header class="app-header">
     <div class="header-left">
-      <a href="dashboard.html" class="back-link">
+      <a href="conversation_topics_select.html" class="back-link">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.5"
              stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
-        Dashboard
+        Topics
       </a>
       <div class="divider"></div>
       <div class="brand-row">
@@ -625,6 +662,7 @@
       </div>
     </div>
     <div class="header-right">
+      <div class="topic-pill" id="topicPill">💬 Topic</div>
       <div class="level-badge" id="levelBadge">—</div>
     </div>
   </header>
@@ -644,16 +682,6 @@
     </div>
   </main>
 
-  <!-- ── Topic chips ──────────────────────────────────────────────────────── -->
-  <div class="topics-row" id="topicsRow">
-    <button class="topic-chip" onclick="pickTopic(this)">Daily conversation</button>
-    <button class="topic-chip" onclick="pickTopic(this)">Introduce myself</button>
-    <button class="topic-chip" onclick="pickTopic(this)">Pronunciation help</button>
-    <button class="topic-chip" onclick="pickTopic(this)">Vocabulary quiz</button>
-    <button class="topic-chip" onclick="pickTopic(this)">Tell me a story</button>
-    <button class="topic-chip" onclick="pickTopic(this)">Correct my grammar</button>
-  </div>
-
   <!-- ── Stage: living orb + status ──────────────────────────────────────── -->
   <section class="stage" id="stage" data-state="idle">
     <div class="orb-field">
@@ -665,6 +693,19 @@
 
   <!-- ── Controls ─────────────────────────────────────────────────────────── -->
   <footer class="control-bar">
+
+    <!-- Turn tracker: "██████░░░░░░  6 / 12 turns" -->
+    <div class="turn-tracker" id="turnTracker">
+      <span class="turn-bar" id="turnBar"></span>
+      <span class="turn-label" id="turnLabel">0 / 0 turns</span>
+    </div>
+
+    <!-- Shown once the topic's turn limit is reached -->
+    <div class="completion-banner" id="completionBanner">
+      <span>🎉 Topic complete — nice work!</span>
+      <a href="conversation_topics_select.html" class="btn-new-topic">Choose another topic →</a>
+    </div>
+
     <div class="input-row" id="inputRow">
 
       <!-- Left: switch between voice and text -->
@@ -720,6 +761,19 @@
 
 <script src="/config.js"></script>
 <script>
+// ─── Topic context (from the URL — set by conversation_topics_select.html) ──
+const params     = new URLSearchParams(location.search);
+const topicSlug   = params.get('topic');
+const topicTitle  = params.get('title') || 'Conversation';
+const topicIcon   = params.get('icon')  || '💬';
+
+if (!topicSlug) {
+  // Emma no longer does free-form chat — every session needs a topic.
+  window.location.href = 'conversation_topics_select.html';
+}
+
+document.title = `Talk about ${topicTitle} — TilMenger`;
+
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 const token = localStorage.getItem('token');
 if (!token) { window.location.href = 'index.html'; }
@@ -729,13 +783,10 @@ const BASE = (typeof LINGUA !== 'undefined' && LINGUA.aiTeacher)
   : `${location.origin}/api/ai-teacher`;
 
 // ─── State ────────────────────────────────────────────────────────────────────
-// appState: idle | recording | transcribing | thinking | speaking
-let appState   = 'idle';
+// appState: idle | recording | transcribing | thinking | speaking | completed
+let appState = 'idle';
 // mode: voice | text — which control the center slot shows
-let mode       = 'voice';
-
-let history    = [];   // [{ role: 'user'|'assistant', content }]
-let topicsGone = false;
+let mode     = 'voice';
 
 // Recording
 let recorder   = null;
@@ -754,24 +805,29 @@ let currentAudio = null;
 
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 const $  = id => document.getElementById(id);
-const chatArea      = $('chatArea');
-const messagesEl    = $('messages');
-const typingEl      = $('typingEl');
-const micBtn        = $('micBtn');
-const statusText    = $('statusText');
-const stage         = $('stage');
-const orbCore       = $('orbCore');
-const modeToggleBtn = $('modeToggleBtn');
-const voiceControls = $('voiceControls');
-const textControls  = $('textControls');
-const textInput     = $('textInput');
-const sendBtn       = $('sendBtn');
-const topicsRow     = $('topicsRow');
-const loader        = $('loader');
-const loaderLbl     = $('loaderLabel');
-const levelBadge    = $('levelBadge');
-const toast         = $('toast');
-const micHint       = $('micHint');
+const chatArea         = $('chatArea');
+const messagesEl       = $('messages');
+const typingEl         = $('typingEl');
+const micBtn           = $('micBtn');
+const statusText       = $('statusText');
+const stage            = $('stage');
+const orbCore          = $('orbCore');
+const modeToggleBtn    = $('modeToggleBtn');
+const voiceControls    = $('voiceControls');
+const textControls     = $('textControls');
+const textInput        = $('textInput');
+const sendBtn          = $('sendBtn');
+const loader           = $('loader');
+const loaderLbl        = $('loaderLabel');
+const levelBadge       = $('levelBadge');
+const topicPill        = $('topicPill');
+const turnBarEl        = $('turnBar');
+const turnLabelEl      = $('turnLabel');
+const completionBanner = $('completionBanner');
+const toast            = $('toast');
+const micHint          = $('micHint');
+
+topicPill.textContent = `${topicIcon} ${topicTitle}`;
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 let toastTimer;
@@ -782,16 +838,29 @@ function showToast(msg, ms = 3500) {
   toastTimer = setTimeout(() => toast.classList.remove('visible'), ms);
 }
 
+// ─── Turn tracker ─────────────────────────────────────────────────────────────
+function renderTurnBar(used, limit) {
+  const filled = Math.max(0, Math.min(used, limit));
+  const empty  = Math.max(0, limit - filled);
+  return '█'.repeat(filled) + '░'.repeat(empty);
+}
+function updateTurnTracker(used, limit) {
+  turnBarEl.textContent   = renderTurnBar(used, limit);
+  turnLabelEl.textContent = `${used} / ${limit} turns`;
+}
+
 // ─── State machine ────────────────────────────────────────────────────────────
 // micDisabled/inputDisabled are independent: while Emma speaks, the mic stays
 // tappable (barge-in interrupts her), but text entry is still locked, same as
-// every other non-idle state.
+// every other non-idle state. 'completed' locks everything — the topic's
+// turn limit has been reached and the conversation is over.
 const STATE_CFG = {
-  idle:         { status: 'Tap the mic to speak',              micDisabled: false, inputDisabled: false, hint: 'Tap to speak · Tap again to send', orb: 'idle' },
-  recording:    { status: '🔴 Listening…',                     micDisabled: false, inputDisabled: true,  hint: 'Tap again to stop and send',       orb: 'listening' },
-  transcribing: { status: 'Processing your voice…',            micDisabled: true,  inputDisabled: true,  hint: '',                                  orb: 'processing' },
-  thinking:     { status: 'Emma is thinking…',                 micDisabled: true,  inputDisabled: true,  hint: '',                                  orb: 'processing' },
-  speaking:     { status: 'Emma is speaking — tap mic to interrupt', micDisabled: false, inputDisabled: true, hint: '',                              orb: 'speaking' },
+  idle:         { status: 'Tap the mic to speak',                    micDisabled: false, inputDisabled: false, hint: 'Tap to speak · Tap again to send', orb: 'idle' },
+  recording:    { status: '🔴 Listening…',                           micDisabled: false, inputDisabled: true,  hint: 'Tap again to stop and send',       orb: 'listening' },
+  transcribing: { status: 'Processing your voice…',                  micDisabled: true,  inputDisabled: true,  hint: '',                                  orb: 'processing' },
+  thinking:     { status: 'Emma is thinking…',                       micDisabled: true,  inputDisabled: true,  hint: '',                                  orb: 'processing' },
+  speaking:     { status: 'Emma is speaking — tap mic to interrupt', micDisabled: false, inputDisabled: true, hint: '',                                  orb: 'speaking' },
+  completed:    { status: 'Topic complete! 🎉',                      micDisabled: true,  inputDisabled: true,  hint: '',                                  orb: 'idle' },
 };
 
 function setState(s) {
@@ -811,9 +880,10 @@ function setState(s) {
     s === 'speaking' ? ' speaking' : ''
   );
   statusText.textContent = c.status;
-  micHint.textContent    = mode === 'text' ? 'Type your message and press send' : c.hint;
+  micHint.textContent    = mode === 'text' && s !== 'completed' ? 'Type your message and press send' : c.hint;
 
   stage.dataset.state = c.orb;
+  completionBanner.style.display = s === 'completed' ? 'flex' : 'none';
 }
 
 // ─── Voice / text mode toggle ─────────────────────────────────────────────────
@@ -853,29 +923,36 @@ function applyMode() {
 }
 
 // ─── Session init ─────────────────────────────────────────────────────────────
-// The ONLY thing the loader waits on is the /session lookup (a fast DB read
-// for name + level). As soon as that's back, the app is revealed and Emma's
-// opening line streams in afterwards via loadGreeting(), same as any other
-// reply — the person is never stuck staring at a blank loading screen.
+// The ONLY thing the loader waits on is the /session lookup (a fast DB read).
+// As soon as that's back, the app is revealed — Emma's opening line (or the
+// restored transcript, for a topic already in progress) streams in after.
 async function init() {
   try {
-    const res = await fetch(`${BASE}/session`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(
+      `${BASE}/session?topic=${encodeURIComponent(topicSlug)}&title=${encodeURIComponent(topicTitle)}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     if (res.status === 401) { localStorage.clear(); location.href = 'index.html'; return; }
 
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
 
-    const { name, level } = data;
-    levelBadge.textContent = level;
+    levelBadge.textContent = data.level;
+    topicPill.textContent  = `${topicIcon} ${data.topicTitle || topicTitle}`;
+    updateTurnTracker(data.turnsUsed, data.turnLimit);
 
-    // Reveal the app right away — don't hold the UI hostage to Emma's first reply.
     loader.classList.add('gone');
     setTimeout(() => loader.remove(), 500);
 
-    // Kick off Emma's opening line in the background; UI is already interactive.
-    loadGreeting(name);
+    if (data.history && data.history.length) {
+      // Resuming a topic already in progress — restore the transcript
+      // without replaying TTS for each past line.
+      data.history.forEach(m => addMsg(m.role === 'assistant' ? 'teacher' : 'user', m.content));
+      setState(data.completed ? 'completed' : 'idle');
+    } else {
+      // Brand new topic — Emma opens with a topic-specific greeting.
+      loadGreeting();
+    }
 
   } catch (err) {
     console.error('init error:', err);
@@ -883,26 +960,33 @@ async function init() {
   }
 }
 
-async function loadGreeting(name) {
-  const first = (name || 'there').split(' ')[0];
+async function loadGreeting() {
+  setState('thinking');
+  typingEl.classList.add('visible');
+  scrollDown();
   try {
-    const greeting = await callChat([{
-      role: 'user',
-      content: `My name is ${first}. Please greet me briefly and start the lesson.`,
-    }]);
+    const res = await fetch(`${BASE}/greet`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body:    JSON.stringify({ topic: topicSlug, title: topicTitle }),
+    });
+    typingEl.classList.remove('visible');
 
-    history = [{ role: 'assistant', content: greeting }];
-    addMsg('teacher', greeting);
-    await playTTS(greeting);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message);
+
+    addMsg('teacher', data.reply);
+    await playTTS(data.reply);
   } catch (err) {
     console.error('loadGreeting error:', err);
+    typingEl.classList.remove('visible');
     setState('idle');
     showToast("Emma couldn't start just now. Tap the mic to begin, or refresh to retry.");
   }
 }
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
-async function callChat(messages) {
+async function callChat(text) {
   setState('thinking');
   typingEl.classList.add('visible');
   scrollDown();
@@ -910,14 +994,14 @@ async function callChat(messages) {
   const res = await fetch(`${BASE}/chat`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body:    JSON.stringify({ messages }),
+    body:    JSON.stringify({ topic: topicSlug, title: topicTitle, text }),
   });
 
   typingEl.classList.remove('visible');
 
   const data = await res.json();
   if (!data.success) throw new Error(data.message || 'Chat error');
-  return data.reply;
+  return data; // { reply, turnsUsed, turnLimit, completed }
 }
 
 async function playTTS(text) {
@@ -1083,19 +1167,20 @@ function driveOrb(analyserNode, isActiveFn) {
   step();
 }
 
-// ─── Sending messages (shared by voice, text, and topic chips) ────────────────
+// ─── Sending messages (shared by voice and text) ──────────────────────────────
 async function sendUserMessage(text) {
-  hideTopics();
   addMsg('user', text);
-  history.push({ role: 'user', content: text });
-  trimHistory();
 
   try {
-    const reply = await callChat(history);
-    addMsg('teacher', reply);
-    history.push({ role: 'assistant', content: reply });
-    trimHistory();
-    await playTTS(reply);
+    const data = await callChat(text);
+    addMsg('teacher', data.reply);
+    updateTurnTracker(data.turnsUsed, data.turnLimit);
+    await playTTS(data.reply);
+
+    if (data.completed) {
+      showToast("Nice work! You've completed this topic. 🎉", 5000);
+      setState('completed');
+    }
   } catch (err) {
     console.error('sendUserMessage error:', err);
     showToast('Something went wrong. Please try again.');
@@ -1115,17 +1200,6 @@ function handleSendText() {
 textInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); handleSendText(); }
 });
-
-// ─── Topic chips ──────────────────────────────────────────────────────────────
-async function pickTopic(btn) {
-  if (appState !== 'idle') return;
-  const topic = btn.textContent.trim();
-  await sendUserMessage(`I'd like to practise: ${topic}`);
-}
-
-function hideTopics() {
-  if (!topicsGone) { topicsRow.style.display = 'none'; topicsGone = true; }
-}
 
 // ─── Message helpers ──────────────────────────────────────────────────────────
 function addMsg(role, text) {
@@ -1158,10 +1232,6 @@ function safe(t) {
   return t
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/\n/g, '<br>');
-}
-
-function trimHistory() {
-  if (history.length > 16) history = history.slice(history.length - 16);
 }
 
 // ─── Keyboard shortcut: Space to toggle record ────────────────────────────────
