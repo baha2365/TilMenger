@@ -156,7 +156,7 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
-    .shuffle-btn {
+    .jump-current {
       flex-shrink: 0;
       background: var(--green);
       color: white;
@@ -173,8 +173,8 @@
       transition: transform 0.1s, border-bottom-width 0.1s;
       line-height: 1.4;
     }
-    .shuffle-btn:hover { opacity: 0.9; }
-    .shuffle-btn:active { transform: translateY(2px); border-bottom-width: 1px; }
+    .jump-current:hover { opacity: 0.9; }
+    .jump-current:active { transform: translateY(2px); border-bottom-width: 1px; }
 
     /* ── Status screen ── */
     .status-screen {
@@ -205,7 +205,8 @@
 
     /* ══════════════════════════════════════════
        TOPIC SECTIONS — each one is a colored card
-       carrying its own --sec-color / --sec-dark / --sec-pale
+       carrying its own --sec-color / --sec-dark / --sec-pale.
+       Locked nodes ignore these and fall back to plain gray.
     ══════════════════════════════════════════ */
     .topic-section {
       background: var(--sec-pale);
@@ -214,7 +215,9 @@
       padding: 1.5rem 1.3rem 1.9rem;
       margin-bottom: 2.2rem;
       animation: fadeUp 0.35s ease both;
+      transition: opacity 0.3s;
     }
+    .topic-section.all-locked { opacity: 0.55; }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -263,7 +266,7 @@
       display: flex;
       align-items: center;
       gap: 1.1rem;
-      cursor: pointer;
+      position: relative;
     }
     .part-node:nth-child(odd) {
       flex-direction: row;
@@ -313,6 +316,19 @@
 
     .part-node.is-completed .node-btn { filter: saturate(0.85); }
 
+    /* Locked overrides the section color with plain gray — deliberately
+       ignores --sec-color so a locked node never looks "available". */
+    .part-node.is-locked .node-btn {
+      background: var(--gray);
+      box-shadow: 0 6px 0 var(--gray-dark), 0 9px 14px rgba(0,0,0,0.06);
+      color: var(--gray-dark);
+      cursor: not-allowed;
+      font-size: 1.3rem;
+    }
+    .part-node.is-locked .node-btn:hover { transform: none; box-shadow: 0 6px 0 var(--gray-dark), 0 9px 14px rgba(0,0,0,0.06); }
+    .part-node.is-locked .node-btn:active { transform: none; }
+    .part-node.is-locked { cursor: not-allowed; }
+
     .done-badge {
       position: absolute;
       top: -3px; right: -3px;
@@ -328,6 +344,38 @@
       z-index: 2;
     }
 
+    /* Bouncing START badge above the one current node on the whole page */
+    .start-badge {
+      position: absolute;
+      bottom: calc(100% + 11px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--sec-color);
+      color: white;
+      font-weight: 900;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      padding: 0.24rem 0.68rem;
+      border-radius: 20px;
+      border-bottom: 2px solid var(--sec-dark);
+      white-space: nowrap;
+      animation: badgeBounce 1.6s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .start-badge::after {
+      content: '';
+      position: absolute;
+      top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--sec-dark);
+    }
+    @keyframes badgeBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(-5px); }
+    }
+
     .node-info { flex: 1; min-width: 0; }
     .node-eyebrow {
       font-size: 0.65rem;
@@ -337,12 +385,14 @@
       color: var(--sec-dark);
       margin-bottom: 0.18rem;
     }
+    .part-node.is-locked .node-eyebrow { color: var(--gray-dark); }
     .node-title {
       font-weight: 900;
       font-size: 1rem;
       color: var(--ink);
       line-height: 1.2;
     }
+    .part-node.is-locked .node-title { color: var(--muted); }
     .node-tags {
       display: flex;
       align-items: center;
@@ -361,6 +411,7 @@
       background: white;
       color: var(--sec-dark);
     }
+    .part-node.is-locked .tag { color: var(--gray-dark); }
 
     /* ── Empty state ── */
     .empty-state {
@@ -382,7 +433,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .topic-section { animation: none; }
+      .topic-section, .start-badge { animation: none; }
     }
   </style>
 </head>
@@ -404,7 +455,7 @@
 <main class="main" id="mainContent" style="display:none;">
   <div class="page-header">
     <h1>Let's <em>Talk</em> About It</h1>
-    <p>Pick a topic and start chatting with Emma.</p>
+    <p>Finish a topic to unlock the next one.</p>
   </div>
 
   <div class="progress-wrap">
@@ -415,7 +466,7 @@
       </div>
     </div>
     <div class="progress-count" id="progressCount">0<span>/ 0 topics</span></div>
-    <button class="shuffle-btn" id="shuffleBtn">Surprise<br>me!</button>
+    <button class="jump-current" id="jumpCurrentBtn">Jump to<br>current</button>
   </div>
 
   <div id="sectionsContainer"></div>
@@ -423,13 +474,18 @@
 
 <script src="../config.js"></script>
 <script>
-  const API   = (typeof LINGUA !== 'undefined') ? LINGUA.auth : '';
+  const API       = (typeof LINGUA !== 'undefined') ? LINGUA.auth      : '';
+  const AITEACHER = (typeof LINGUA !== 'undefined') ? LINGUA.aiTeacher : '';
   const token = localStorage.getItem('token');
   if (!token) { window.location.href = 'index.html'; }
 
+  let currentNodeEl = null;
+
   // ─── Conversation topic data ────────────────────────────────────────────
-  // Each section carries its own color trio (color / dark / pale) so the
-  // whole card — header chip, node buttons, tags — reads as one color block.
+  // Order matters: topics unlock strictly in this sequence, section by
+  // section — exactly like the vocabulary parts path. Each section keeps
+  // its own color trio (color / dark / pale) purely for presentation;
+  // locked nodes ignore it and render in plain gray regardless of section.
   const TOPIC_SECTIONS = [
     {
       key: 'everyday', title: 'Everyday Life', emoji: '🌱',
@@ -487,6 +543,33 @@
     return name.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   }
 
+  // Flatten every topic, across every section, in display order — this is
+  // the single global chain that locking is computed against.
+  function flattenTopics() {
+    const list = [];
+    TOPIC_SECTIONS.forEach((section) => {
+      section.topics.forEach(([name, icon]) => {
+        list.push({ slug: slugify(name), name, icon, sectionKey: section.key });
+      });
+    });
+    return list;
+  }
+
+  // Same locking rule as the vocabulary parts path: walk the chain in
+  // order, everything before the first incomplete topic is "completed",
+  // the first incomplete one is "current", everything after is "locked".
+  function computeStatuses(flatList, completedSet) {
+    let chainOpen = true;
+    return flatList.map((t) => {
+      const isComplete = completedSet.has(t.slug);
+      let status;
+      if (!chainOpen)      { status = 'locked'; }
+      else if (isComplete) { status = 'completed'; }
+      else                 { status = 'current'; chainOpen = false; }
+      return { ...t, status };
+    });
+  }
+
   function showError(message) {
     document.getElementById('statusScreen').innerHTML = `
       <span style="font-size:2.5rem">⚠️</span>
@@ -498,9 +581,10 @@
   }
 
   // ─── Render every section card + its zigzag node track ─────────────────
-  function renderSections(doneSet) {
+  function renderSections(statusMap) {
     const container = document.getElementById('sectionsContainer');
     container.innerHTML = '';
+    currentNodeEl = null;
 
     if (!TOPIC_SECTIONS.length) {
       container.innerHTML = `
@@ -513,7 +597,9 @@
 
     TOPIC_SECTIONS.forEach((section) => {
       const card = document.createElement('section');
-      card.className = 'topic-section';
+      const slugs = section.topics.map(([name]) => slugify(name));
+      const allLocked = slugs.every((slug) => statusMap.get(slug)?.status === 'locked');
+      card.className = 'topic-section' + (allLocked ? ' all-locked' : '');
       card.style.setProperty('--sec-color', section.color);
       card.style.setProperty('--sec-dark',  section.dark);
       card.style.setProperty('--sec-pale',  section.pale);
@@ -523,31 +609,49 @@
 
       section.topics.forEach(([name, icon]) => {
         const slug   = slugify(name);
-        const isDone = doneSet.has(slug);
+        const t      = statusMap.get(slug);
+        const status = t ? t.status : 'locked';
 
         const node = document.createElement('div');
-        node.className = `part-node ${isDone ? 'is-completed' : 'is-available'}`;
+        node.className = `part-node is-${status}`;
+
+        const displayIcon = status === 'locked' ? '🔒' : icon;
+        const eyebrow     = status === 'completed' ? 'Practiced'
+                          : status === 'locked'    ? 'Locked' : 'Up next';
+        const tag         = status === 'completed' ? '✓ Done before'
+                          : status === 'locked'    ? '🔒 Locked' : '⚡ +5 XP';
+        const doneBadge   = status === 'completed' ? `<span class="done-badge">✓</span>` : '';
+        const startBadge  = status === 'current'   ? `<div class="start-badge">START</div>` : '';
+
         node.innerHTML = `
           <div class="node-btn-wrap">
-            <button class="node-btn" aria-label="Talk about ${name}">
-              ${isDone ? `<span class="done-badge">✓</span>` : ''}
-              <span>${icon}</span>
+            ${startBadge}
+            <button class="node-btn" ${status === 'locked' ? 'disabled title="Finish the previous topic first"' : ''} aria-label="Talk about ${name}">
+              ${doneBadge}
+              <span>${displayIcon}</span>
             </button>
           </div>
           <div class="node-info">
-            <div class="node-eyebrow">${isDone ? 'Practiced' : 'Talk about'}</div>
+            <div class="node-eyebrow">${eyebrow}</div>
             <div class="node-title">${name}</div>
             <div class="node-tags">
-              <span class="tag">${isDone ? '✓ Done before' : '⚡ +5 XP'}</span>
+              <span class="tag">${tag}</span>
             </div>
           </div>
         `;
-        node.addEventListener('click', () => {
-          window.location.href =
-            `conversation_chat.html?topic=${encodeURIComponent(slug)}` +
-            `&title=${encodeURIComponent(name)}` +
-            `&section=${encodeURIComponent(section.key)}`;
-        });
+
+        if (status !== 'locked') {
+          node.style.cursor = 'pointer';
+          node.addEventListener('click', () => {
+            window.location.href =
+              `ai_teacher.html?topic=${encodeURIComponent(slug)}` +
+              `&title=${encodeURIComponent(name)}` +
+              `&icon=${encodeURIComponent(icon)}` +
+              `&section=${encodeURIComponent(section.key)}`;
+          });
+        }
+
+        if (status === 'current') currentNodeEl = node;
         track.appendChild(node);
       });
 
@@ -565,12 +669,10 @@
     });
   }
 
-  function updateProgress(doneSet) {
-    const total = TOPIC_SECTIONS.reduce((sum, s) => sum + s.topics.length, 0);
-    const done  = doneSet.size;
-    const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+  function updateProgress(completedCount, total) {
+    const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
     document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressCount').innerHTML  = `${done}<span>/ ${total} topics</span>`;
+    document.getElementById('progressCount').innerHTML  = `${completedCount}<span>/ ${total} topics</span>`;
   }
 
   async function init() {
@@ -585,29 +687,32 @@
       if (!res.ok || !data.success) { window.location.href = 'index.html'; return; }
       document.getElementById('navAvatar').textContent = data.user.name[0].toUpperCase();
 
-      // Conversation topics practiced so far — saved by conversation_chat.html
-      // as: lingua_conv_done = JSON array of topic slugs.
-      const doneSet = new Set(
-        JSON.parse(localStorage.getItem('lingua_conv_done') || '[]')
-      );
+      // Progress now comes from the backend — same source of truth Emma
+      // uses to decide when a topic conversation is finished.
+      const progRes  = await fetch(`${AITEACHER}/topics/progress`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const progData = await progRes.json();
+      if (!progData.success) throw new Error(progData.message || 'Could not load progress.');
 
-      updateProgress(doneSet);
-      renderSections(doneSet);
+      const completedSet = new Set(progData.completed);
+      const flat          = flattenTopics();
+      const statuses       = computeStatuses(flat, completedSet);
+      const statusMap      = new Map(statuses.map((t) => [t.slug, t]));
+
+      updateProgress(completedSet.size, flat.length);
+      renderSections(statusMap);
 
       document.getElementById('statusScreen').style.display = 'none';
       document.getElementById('mainContent').style.display  = 'block';
 
-      document.getElementById('shuffleBtn').onclick = () => {
-        const all = TOPIC_SECTIONS.flatMap((s) =>
-          s.topics.map(([name]) => ({ name, key: s.key }))
-        );
-        const pick = all[Math.floor(Math.random() * all.length)];
-        const slug = slugify(pick.name);
-        window.location.href =
-          `conversation_chat.html?topic=${encodeURIComponent(slug)}` +
-          `&title=${encodeURIComponent(pick.name)}` +
-          `&section=${encodeURIComponent(pick.key)}`;
+      document.getElementById('jumpCurrentBtn').onclick = () => {
+        if (currentNodeEl) currentNodeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
+
+      if (currentNodeEl) {
+        setTimeout(() => currentNodeEl.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+      }
     } catch (err) {
       console.error(err);
       showError(err.message || 'Could not load topics. Is the server running?');
