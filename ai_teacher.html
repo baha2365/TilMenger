@@ -1048,7 +1048,9 @@ async function onRecordStop() {
     const userText = (tData.text || '').trim();
     if (!userText || tData.empty) {
       setState('idle');
-      showToast("I couldn't hear that clearly. Please try again.");
+      showToast(tData.nonEnglish
+        ? "Let's keep it in English! Try that again."
+        : "I couldn't hear that clearly. Please try again.");
       return;
     }
 
