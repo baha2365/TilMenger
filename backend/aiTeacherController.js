@@ -25,47 +25,80 @@ const TTS_SPEED = {
   'Advanced C1-C2':     1.0,
 };
 
+// ─── Turn limits (per product decision, July 2026) ───────────────────────────
+// Emma is no longer a free-roaming chat — every conversation is scoped to ONE
+// selected topic and ends automatically after a level-appropriate number of
+// USER turns (the assistant's opening greeting doesn't count). This keeps
+// conversations short and finishable, and gives the "X / Y turns" tracker on
+// the frontend a real limit to count down against.
+const TURN_LIMITS = {
+  'Beginner A1-A2':     10,
+  'Intermediate B1-B2': 12,
+  'Advanced C1-C2':     15,
+};
+function turnLimitFor(level) {
+  return TURN_LIMITS[level] ?? TURN_LIMITS['Intermediate B1-B2'];
+}
+
 // ─── System prompt factory ────────────────────────────────────────────────────
 //
 // Design goals (per product decision, July 2026):
 //   1. Emma is a friendly conversation partner (LangAI-style), not a drill
-//      sergeant. She chats about everyday topics — daily routine, favorite
-//      food/movies/games, hobbies, weekend plans — and teaches AS she goes,
-//      instead of stopping to force repetition or "make a sentence with X."
-//   2. Replies stay short. No long self-introductions, no menus of topics.
-//   3. English only, at every level. No Kazakh, no other languages.
+//      sergeant — she teaches AS she chats instead of stopping to force
+//      repetition or "make a sentence with X."
+//   2. Every conversation is locked to ONE topic, chosen before the chat
+//      starts. Emma never offers a menu of topics and never wanders off
+//      the one she was given — she steers back to it if the student drifts.
+//   3. Replies stay short. English only, at every level.
 //   4. Vocabulary/sentence complexity scales with level.
 //   5. Topics stay light and appropriate — no violent, adult, dangerous,
 //      or otherwise unsuitable subject matter, even if the student raises it.
+//   6. The conversation has a hard end: on the final allowed turn, Emma
+//      wraps up warmly instead of asking another follow-up question.
 
 const TOPIC_SAFETY = `
 TOPIC BOUNDARIES (always apply):
-- Stick to everyday, positive topics: daily routine, hobbies, favorite food, movies, games, music, sports, travel, weather, family, pets, school or work, weekends, seasons, dreams/goals, etc.
-- Never engage with violent, sexual, adult, drug-related, self-harm, or otherwise dangerous or inappropriate topics, even if the student brings them up. If they do, respond briefly and kindly, then steer the conversation back to a safe, everyday topic.
+- Never engage with violent, sexual, adult, drug-related, self-harm, or otherwise dangerous or inappropriate content, even if the student brings it up. If they do, respond briefly and kindly, then steer back to the conversation topic below.
 - Keep the mood light, positive, and encouraging at all times.
 `;
 
-const CONVERSATION_STYLE = `
-CONVERSATION STYLE — you are a friendly conversation partner, not a drill instructor:
-- Talk the way a friendly tutor on a language app would: ask about the student's day, hobbies, favorite food, movies, games, weekend plans, and have a natural back-and-forth — like chatting with a friend who happens to speak great English.
-- Teach naturally AS you chat, don't stop the conversation to run drills:
-  - If the student makes a mistake, gently fold the correct form into your reply and keep going — don't dwell on it or ask them to repeat it.
-  - When a good moment comes up, you can introduce ONE new word or phrase in context with a quick, casual one-line meaning — but don't demand they repeat it or build a sentence with it. If they use it later, great; if not, that's fine too.
-- Never say "try again," never force repetition, never insist on a specific answer. Accept what the student says and keep the conversation moving forward naturally.
-- Ask ONE natural follow-up question per turn to keep the chat flowing — the kind a curious friend would ask, not a test question.
-- Let topics evolve naturally over the conversation (e.g., from breakfast, to cooking, to favorite restaurants) rather than sticking rigidly to one subject.
-${TOPIC_SAFETY}`;
+function topicFocusBlock(topicTitle) {
+  return `
+TOPIC FOCUS — this entire conversation is about ONE topic: "${topicTitle}".
+- Every question you ask and every reply you give should stay on this topic, or a very close, natural extension of it.
+- If the student wanders far off-topic, gently and warmly bring the conversation back to "${topicTitle}" within your reply — don't lecture them about it, just steer naturally.
+- Never offer a menu of other topics or ask "what would you like to talk about" — the topic is already chosen.
+`;
+}
 
-const OPENING_RULES = `
+function openingRules(topicTitle) {
+  return `
 OPENING TURN (this is the very first message of the session):
-- Do NOT give a self-introduction, a life story, or ask "what would you like to practice today?"
-- Greet the student by name in a few words, then ask one warm, casual question about an everyday topic (their day, a hobby, favorite food, weekend plans, etc.) to kick off the chat.
+- Do NOT give a self-introduction or a long lead-in.
+- Greet the student by name in a few words, then ask one warm, casual opening question about "${topicTitle}" to kick off the chat.
 - Keep the whole opening within your normal reply length limit for this level — no exceptions for the first message.
 `;
+}
 
-function buildSystemPrompt(level, name, isFirstTurn) {
+function closingRules(topicTitle) {
+  return `
+CLOSING TURN (this is the LAST message you will send in this conversation — there will be no more replies after this one):
+- Do NOT ask a new follow-up question.
+- Give a short, warm wrap-up: acknowledge something specific the student said about "${topicTitle}", and end on an encouraging note.
+- Keep it within your normal reply length limit for this level.
+`;
+}
+
+function buildSystemPrompt(level, name, topicTitle, { isFirstTurn = false, isFinalTurn = false } = {}) {
   const first = (name || 'friend').split(' ')[0];
-  const opening = isFirstTurn ? OPENING_RULES : '';
+  const extra = isFirstTurn ? openingRules(topicTitle) : isFinalTurn ? closingRules(topicTitle) : '';
+
+  const CONVERSATION_STYLE = `
+CONVERSATION STYLE — you are a friendly conversation partner, not a drill instructor:
+- Talk the way a friendly tutor on a language app would — a natural back-and-forth, like chatting with a friend.
+- Teach naturally AS you chat: if the student makes a mistake, gently fold the correct form into your reply and keep going — don't dwell on it or ask them to repeat it.
+- Ask at most ONE natural follow-up question per turn to keep the chat flowing (skip this on the closing turn — see below).
+${topicFocusBlock(topicTitle)}${TOPIC_SAFETY}`;
 
   if (level === 'Beginner A1-A2') {
     return `You are Emma, a warm, patient AI English conversation partner at TilMenger.
@@ -74,10 +107,9 @@ ${CONVERSATION_STYLE}
 BEGINNER STYLE:
 - Use only the simplest, most common English words — talk like you're chatting with a young child.
 - Sentences must be short: max 6-8 words each.
-- If you introduce a new word, explain it with a simpler word or by describing it, in passing — not as a formal lesson.
 - Be warm and encouraging: "Nice!" "That's fun!" "Me too!"
 - Reply length: 2-3 short sentences total, max.
-${opening}`;
+${extra}`;
   }
 
   if (level === 'Advanced C1-C2') {
@@ -86,10 +118,9 @@ Your student is ${first}, an advanced (C1-C2) English learner.
 ${CONVERSATION_STYLE}
 ADVANCED STYLE:
 - Use rich vocabulary, idioms, collocations, and varied sentence structures, the way an articulate friend would.
-- Feel free to go a little deeper on everyday topics — opinions on movies, travel stories, hobbies, goals — without turning it into a debate drill.
 - Correct only significant errors, and weave the correction naturally into your reply rather than flagging it separately.
 - Reply length: 3-5 sentences total, max.
-${opening}`;
+${extra}`;
   }
 
   // Default: Intermediate B1-B2
@@ -98,14 +129,42 @@ Your student is ${first}, an intermediate (B1-B2) English learner.
 ${CONVERSATION_STYLE}
 INTERMEDIATE STYLE:
 - Use natural, clear conversational English.
-- If you introduce a new word or phrase, give a quick plain-English meaning in passing, not a formal definition.
 - Weave corrections in naturally: "Ah, we'd usually say '...' — but I got what you meant!"
 - Reply length: 3-4 sentences total, max.
-${opening}`;
+${extra}`;
 }
 
-// ─── GET /api/ai-teacher/session ─────────────────────────────────────────────
+// ─── Topic conversation row helper ───────────────────────────────────────────
+// One row per (user, topic). Created lazily on first visit to a topic.
+// Requires the `topic_conversations` table — see migration note at bottom
+// of this file.
+async function getOrCreateTopicRow(userId, slug, title) {
+  const { rows } = await pool.query(
+    'SELECT * FROM topic_conversations WHERE user_id = $1 AND topic_slug = $2',
+    [userId, slug]
+  );
+  if (rows.length) return rows[0];
+
+  const { rows: created } = await pool.query(
+    `INSERT INTO topic_conversations (user_id, topic_slug, topic_title, history, turn_count, completed)
+     VALUES ($1, $2, $3, '[]'::jsonb, 0, false)
+     RETURNING *`,
+    [userId, slug, title || slug]
+  );
+  return created[0];
+}
+
+// ─── GET /api/ai-teacher/session?topic=<slug>&title=<name> ──────────────────
+// Fast metadata lookup — level, turn limit/progress, and any existing
+// transcript for this topic. No LLM call here; the opening line (if the
+// topic is brand new) is fetched separately via /greet so the UI can render
+// immediately, same pattern as before.
 async function getSession(req, res) {
+  const { topic, title } = req.query;
+  if (!topic) {
+    return res.status(400).json({ success: false, message: 'topic is required.' });
+  }
+
   try {
     const { rows } = await pool.query(
       'SELECT name, level FROM users WHERE id = $1',
@@ -114,10 +173,76 @@ async function getSession(req, res) {
     if (!rows.length) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
-    return res.json({ success: true, name: rows[0].name, level: rows[0].level });
+    const { name, level } = rows[0];
+    const row = await getOrCreateTopicRow(req.userId, topic, title);
+
+    return res.json({
+      success:    true,
+      name,
+      level,
+      topicTitle: row.topic_title,
+      turnLimit:  turnLimitFor(level),
+      turnsUsed:  row.turn_count,
+      completed:  row.completed,
+      history:    row.history || [],
+    });
   } catch (err) {
     console.error('getSession error:', err);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+// ─── POST /api/ai-teacher/greet ───────────────────────────────────────────────
+// Generates Emma's topic-opening line for a brand-new conversation. Idempotent:
+// if the conversation already has history, just hands back the first message
+// instead of generating a new one.
+async function greetTopic(req, res) {
+  const { topic, title } = req.body;
+  if (!topic) {
+    return res.status(400).json({ success: false, message: 'topic is required.' });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT name, level FROM users WHERE id = $1',
+      [req.userId]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+    const { name, level } = rows[0];
+    const row = await getOrCreateTopicRow(req.userId, topic, title);
+
+    if (row.history && row.history.length) {
+      return res.json({ success: true, reply: row.history[0].content });
+    }
+
+    const first  = (name || 'friend').split(' ')[0];
+    const system = buildSystemPrompt(level, name, row.topic_title, { isFirstTurn: true });
+
+    const completion = await lemonfox.chat.completions.create({
+      model:    'llama-8b-chat',
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: `My name is ${first}. Greet me and start our chat about ${row.topic_title}.` },
+      ],
+      max_tokens:  220,
+      temperature: 0.8,
+    });
+
+    const reply   = completion.choices[0].message.content.trim();
+    const history = [{ role: 'assistant', content: reply }];
+
+    await pool.query(
+      `UPDATE topic_conversations SET history = $1::jsonb, updated_at = NOW()
+       WHERE user_id = $2 AND topic_slug = $3`,
+      [JSON.stringify(history), req.userId, topic]
+    );
+
+    return res.json({ success: true, reply });
+  } catch (err) {
+    console.error('greetTopic error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to start conversation.' });
   }
 }
 
@@ -170,10 +295,12 @@ async function transcribeAudio(req, res) {
 }
 
 // ─── POST /api/ai-teacher/chat ────────────────────────────────────────────────
-async function chatWithTeacher(req, res) {
-  const { messages } = req.body;
-  if (!Array.isArray(messages) || !messages.length) {
-    return res.status(400).json({ success: false, message: 'messages[] is required.' });
+// Body: { topic, title, text }. The backend owns the conversation history and
+// the turn count now — the frontend only ever sends the newest user message.
+async function chatWithTopic(req, res) {
+  const { topic, title, text } = req.body;
+  if (!topic || !text || !text.trim()) {
+    return res.status(400).json({ success: false, message: 'topic and text are required.' });
   }
 
   try {
@@ -181,12 +308,23 @@ async function chatWithTeacher(req, res) {
       'SELECT name, level FROM users WHERE id = $1',
       [req.userId]
     );
-    const user = rows[0] || {};
+    if (!rows.length) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+    const { name, level } = rows[0];
+    const row = await getOrCreateTopicRow(req.userId, topic, title);
 
-    // First turn = no assistant message has appeared yet in this session.
-    // Drives the short, straight-into-conversation opening instead of a long intro.
-    const isFirstTurn = !messages.some(m => m.role === 'assistant');
-    const system = buildSystemPrompt(user.level, user.name, isFirstTurn);
+    if (row.completed) {
+      return res.status(403).json({ success: false, message: 'This topic conversation has already finished.' });
+    }
+
+    const turnLimit    = turnLimitFor(level);
+    const newTurnCount = row.turn_count + 1;
+    const isFinalTurn  = newTurnCount >= turnLimit;
+
+    const system        = buildSystemPrompt(level, name, row.topic_title, { isFinalTurn });
+    const priorHistory  = row.history || [];
+    const messages      = [...priorHistory, { role: 'user', content: text.trim() }];
 
     const completion = await lemonfox.chat.completions.create({
       model:       'llama-8b-chat',
@@ -195,10 +333,27 @@ async function chatWithTeacher(req, res) {
       temperature: 0.8,
     });
 
-    const reply = completion.choices[0].message.content.trim();
-    return res.json({ success: true, reply });
+    const reply      = completion.choices[0].message.content.trim();
+    // Keep a generous cap so a long-running topic can never grow unbounded —
+    // turn limits already keep this well under the cap in normal use.
+    const newHistory = [...messages, { role: 'assistant', content: reply }].slice(-40);
+
+    await pool.query(
+      `UPDATE topic_conversations
+          SET history = $1::jsonb, turn_count = $2, completed = $3, updated_at = NOW()
+        WHERE user_id = $4 AND topic_slug = $5`,
+      [JSON.stringify(newHistory), newTurnCount, isFinalTurn, req.userId, topic]
+    );
+
+    return res.json({
+      success:   true,
+      reply,
+      turnsUsed: newTurnCount,
+      turnLimit,
+      completed: isFinalTurn,
+    });
   } catch (err) {
-    console.error('chatWithTeacher error:', err);
+    console.error('chatWithTopic error:', err);
     return res.status(500).json({ success: false, message: 'Failed to generate response.' });
   }
 }
@@ -247,4 +402,47 @@ async function speakText(req, res) {
   }
 }
 
-module.exports = { getSession, transcribeAudio, chatWithTeacher, speakText };
+// ─── GET /api/ai-teacher/topics/progress ─────────────────────────────────────
+// Slugs of every topic the user has completed — this is the single source
+// of truth the topic-select page uses to compute the lock/current/completed
+// chain (mirrors how /vocab/progress drives the vocabulary parts path).
+async function getTopicsProgress(req, res) {
+  try {
+    const { rows } = await pool.query(
+      'SELECT topic_slug FROM topic_conversations WHERE user_id = $1 AND completed = true',
+      [req.userId]
+    );
+    return res.json({ success: true, completed: rows.map((r) => r.topic_slug) });
+  } catch (err) {
+    console.error('getTopicsProgress error:', err);
+    return res.status(500).json({ success: false, message: 'Could not fetch topic progress.' });
+  }
+}
+
+module.exports = {
+  getSession,
+  greetTopic,
+  chatWithTopic,
+  transcribeAudio,
+  speakText,
+  getTopicsProgress,
+};
+
+// ─── Migration note ───────────────────────────────────────────────────────────
+// This controller expects a `topic_conversations` table. Run once in Neon:
+//
+// CREATE TABLE IF NOT EXISTS topic_conversations (
+//   id           SERIAL PRIMARY KEY,
+//   user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+//   topic_slug   VARCHAR(100) NOT NULL,
+//   topic_title  VARCHAR(150) NOT NULL,
+//   history      JSONB NOT NULL DEFAULT '[]'::jsonb,
+//   turn_count   INTEGER NOT NULL DEFAULT 0,
+//   completed    BOOLEAN NOT NULL DEFAULT false,
+//   created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+//   updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+//   UNIQUE (user_id, topic_slug)
+// );
+//
+// CREATE INDEX IF NOT EXISTS idx_topic_conversations_user_completed
+//   ON topic_conversations (user_id, completed);
