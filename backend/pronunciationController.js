@@ -3,6 +3,11 @@ const { awardPronunciationXp } = require('./xpService');
 
 const LEMONFOX_STT_URL = 'https://api.lemonfox.ai/v1/audio/transcriptions';
 
+const NON_LATIN_RE = /[\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF]/;
+function isNonLatinScript(text) {
+  return NON_LATIN_RE.test(text);
+}
+
 // ─── Word-level similarity ────────────────────────────────────────────────────
 // Strips punctuation, lower-cases, then computes multiset word intersection
 // divided by the max of the two lengths.  Handles repeated words correctly.
@@ -122,7 +127,10 @@ async function checkPronunciation(req, res) {
     }
 
     const transcription = await sttRes.json();
-    const actual = (transcription.text || '').trim();
+    let actual = (transcription.text || '').trim();
+
+    const nonEnglish = actual && isNonLatinScript(actual);
+    if (nonEnglish) actual = '';
 
     if (!actual) {
       return res.json({
@@ -132,6 +140,7 @@ async function checkPronunciation(req, res) {
         score: 0,
         passed: false,
         empty: true,
+        nonEnglish,
       });
     }
 
