@@ -658,7 +658,7 @@
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <header class="app-header">
     <div class="header-left">
-      <a href="conversation_topics_select.html" class="back-link">
+      <a href="conversation_select.html" class="back-link">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.5"
              stroke-linecap="round" stroke-linejoin="round">
@@ -722,7 +722,7 @@
     <!-- Shown once the topic's turn limit is reached -->
     <div class="completion-banner" id="completionBanner">
       <span>🎉 Topic complete — nice work!</span>
-      <a href="conversation_topics_select.html" class="btn-new-topic">Choose another topic →</a>
+      <a href="conversation_select.html" class="btn-new-topic">Choose another topic →</a>
     </div>
 
     <div class="input-row" id="inputRow">
@@ -788,7 +788,7 @@ const topicIcon   = params.get('icon')  || '💬';
 
 if (!topicSlug) {
   // Emma no longer does free-form chat — every session needs a topic.
-  window.location.href = 'conversation_topics_select.html';
+  window.location.href = 'conversation_select.html';
 }
 
 document.title = `Talk about ${topicTitle} — TilMenger`;
