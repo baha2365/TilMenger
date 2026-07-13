@@ -403,19 +403,58 @@ async function speakText(req, res) {
 }
 
 // ─── GET /api/ai-teacher/topics/progress ─────────────────────────────────────
-// Slugs of every topic the user has completed — this is the single source
-// of truth the topic-select page uses to compute the lock/current/completed
-// chain (mirrors how /vocab/progress drives the vocabulary parts path).
+// Drives the topic-select page: which topics are done (unlocks the next one),
+// and which are merely started-but-abandoned (has a transcript, hasn't hit
+// the turn limit) — that second set is what shows the Continue/Restart
+// buttons instead of a plain circle.
 async function getTopicsProgress(req, res) {
   try {
     const { rows } = await pool.query(
-      'SELECT topic_slug FROM topic_conversations WHERE user_id = $1 AND completed = true',
+      `SELECT topic_slug, completed, jsonb_array_length(history) AS history_len
+         FROM topic_conversations
+        WHERE user_id = $1`,
       [req.userId]
     );
-    return res.json({ success: true, completed: rows.map((r) => r.topic_slug) });
+
+    const completed  = rows.filter((r) => r.completed).map((r) => r.topic_slug);
+    const inProgress = rows
+      .filter((r) => !r.completed && r.history_len > 0)
+      .map((r) => r.topic_slug);
+
+    return res.json({ success: true, completed, inProgress });
   } catch (err) {
     console.error('getTopicsProgress error:', err);
     return res.status(500).json({ success: false, message: 'Could not fetch topic progress.' });
+  }
+}
+
+// ─── POST /api/ai-teacher/restart ────────────────────────────────────────────
+// Body: { topic }. Wipes the stored conversation for this topic IN PLACE —
+// same row (the user_id + topic_slug unique constraint means there's only
+// ever one row per topic per user), history reset to empty, turn_count back
+// to 0, completed back to false. The old transcript is gone, not archived;
+// the next /session call for this topic will look exactly like a first visit.
+async function restartTopic(req, res) {
+  const { topic } = req.body;
+  if (!topic) {
+    return res.status(400).json({ success: false, message: 'topic is required.' });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `UPDATE topic_conversations
+          SET history = '[]'::jsonb, turn_count = 0, completed = false, updated_at = NOW()
+        WHERE user_id = $1 AND topic_slug = $2
+        RETURNING id`,
+      [req.userId, topic]
+    );
+
+    // No row yet means the topic was never actually started — nothing to
+    // wipe, and the next /session call will create a fresh row anyway.
+    return res.json({ success: true, restarted: rows.length > 0 });
+  } catch (err) {
+    console.error('restartTopic error:', err);
+    return res.status(500).json({ success: false, message: 'Could not restart this topic.' });
   }
 }
 
@@ -426,6 +465,7 @@ module.exports = {
   transcribeAudio,
   speakText,
   getTopicsProgress,
+  restartTopic,
 };
 
 // ─── Migration note ───────────────────────────────────────────────────────────
