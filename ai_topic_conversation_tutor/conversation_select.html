@@ -693,31 +693,48 @@
       track.className = 'part-track';
 
       section.topics.forEach(([name, icon]) => {
-        const slug       = slugify(name);
-        const t          = statusMap.get(slug);
-        const status     = t ? t.status : 'locked';
-        // Only the single "current" node in the whole chain can ever be
-        // started-but-unfinished — completed topics are done, locked
-        // topics were never reachable.
-        const inProgress = status === 'current' && inProgressSet.has(slug);
+        const slug   = slugify(name);
+        const t      = statusMap.get(slug);
+        const status = t ? t.status : 'locked';
+
+        // inProgress reflects the CURRENT live session, separate from the
+        // permanent unlock chain (`status`). A topic finished long ago can
+        // be restarted and will show up here as "in progress" again while
+        // the redo is underway — even though it already unlocked whatever
+        // comes after it.
+        const inProgress   = status !== 'locked' && inProgressSet.has(slug);
+        // Sitting fully finished right now, not mid-redo — this is the
+        // "already done, but let me try it again" case.
+        const justFinished = status === 'completed' && !inProgress;
 
         const node = document.createElement('div');
         node.className = `part-node is-${status}`;
 
         const displayIcon = status === 'locked' ? '🔒' : icon;
-        const eyebrow      = status === 'completed' ? 'Practiced'
-                           : status === 'locked'    ? 'Locked'
-                           : inProgress               ? 'In progress' : 'Up next';
-        const tag           = status === 'completed' ? '✓ Done before'
-                           : status === 'locked'    ? '🔒 Locked'
-                           : inProgress               ? '↻ Resume' : '⚡ +5 XP';
-        const doneBadge   = status === 'completed' ? `<span class="done-badge">✓</span>` : '';
-        const startBadge  = status === 'current' && !inProgress ? `<div class="start-badge">START</div>` : '';
-        const actions     = inProgress ? `
+        const eyebrow = status === 'locked'    ? 'Locked'
+                      : inProgress              ? 'In progress'
+                      : status === 'completed'  ? 'Practiced' : 'Up next';
+        const tag     = status === 'locked'    ? '🔒 Locked'
+                      : inProgress              ? '↻ Resume'
+                      : status === 'completed'  ? '✓ Done' : '⚡ +5 XP';
+        const doneBadge  = justFinished ? `<span class="done-badge">✓</span>` : '';
+        const startBadge = status === 'current' && !inProgress ? `<div class="start-badge">START</div>` : '';
+
+        let actions = '';
+        if (inProgress) {
+          actions = `
           <div class="node-actions">
             <button type="button" class="btn-continue">Continue</button>
             <button type="button" class="btn-restart">Restart</button>
-          </div>` : '';
+          </div>`;
+        } else if (justFinished) {
+          // Already finished — nothing to "continue", but still offer a
+          // fresh attempt.
+          actions = `
+          <div class="node-actions">
+            <button type="button" class="btn-restart">Restart</button>
+          </div>`;
+        }
 
         node.innerHTML = `
           <div class="node-btn-wrap">
@@ -747,6 +764,10 @@
             e.stopPropagation();
             navigateToChat(slug, name, icon, section.key);
           });
+          node.querySelector('.btn-restart').addEventListener('click', (e) =>
+            handleRestart(e, slug, name, icon, section.key)
+          );
+        } else if (justFinished) {
           node.querySelector('.btn-restart').addEventListener('click', (e) =>
             handleRestart(e, slug, name, icon, section.key)
           );
