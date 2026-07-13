@@ -25,6 +25,10 @@
       --ink:         #3C3C3C;
       --muted:       #ABABAB;
       --border:      #E5E5E5;
+      --blue:        #1CB0F6;
+      --blue-dark:   #0B8FCB;
+      --red:         #FF4B4B;
+      --red-dark:    #D93030;
     }
 
     html, body {
@@ -265,7 +269,7 @@
     .part-node {
       display: flex;
       align-items: center;
-      gap: 1.1rem;
+      gap: 0.85rem;
       position: relative;
     }
     .part-node:nth-child(odd) {
@@ -344,7 +348,8 @@
       z-index: 2;
     }
 
-    /* Bouncing START badge above the one current node on the whole page */
+    /* Bouncing START badge above the one current node on the whole page —
+       only shown before the student has ever opened that topic. */
     .start-badge {
       position: absolute;
       bottom: calc(100% + 11px);
@@ -375,6 +380,46 @@
       0%, 100% { transform: translateX(-50%) translateY(0); }
       50%       { transform: translateX(-50%) translateY(-5px); }
     }
+
+    /* ── Continue / Restart — shown beside the circle only for a topic the
+       student opened but didn't finish. Stacked vertically, Continue on
+       top (blue, pill-shaped), Restart below (red, pill-shaped). ── */
+    .node-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+    .btn-continue,
+    .btn-restart {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.64rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.36rem 0.85rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.1s, box-shadow 0.1s, opacity 0.15s;
+    }
+    .btn-continue {
+      background: var(--blue);
+      color: white;
+      box-shadow: 0 3px 0 var(--blue-dark);
+    }
+    .btn-continue:hover { opacity: 0.92; }
+    .btn-continue:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--blue-dark); }
+
+    .btn-restart {
+      background: var(--red);
+      color: white;
+      box-shadow: 0 3px 0 var(--red-dark);
+    }
+    .btn-restart:hover { opacity: 0.92; }
+    .btn-restart:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--red-dark); }
+    .btn-restart:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .node-info { flex: 1; min-width: 0; }
     .node-eyebrow {
@@ -430,6 +475,7 @@
       .part-node:nth-child(odd)  { padding-left: 3%; }
       .part-node:nth-child(even) { padding-right: 3%; }
       .section-emoji { width: 42px; height: 42px; font-size: 1.25rem; }
+      .btn-continue, .btn-restart { font-size: 0.58rem; padding: 0.32rem 0.65rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -580,8 +626,47 @@
     document.getElementById('mainContent').style.display  = 'none';
   }
 
+  function navigateToChat(slug, name, icon, sectionKey) {
+    window.location.href =
+      `ai_teacher.html?topic=${encodeURIComponent(slug)}` +
+      `&title=${encodeURIComponent(name)}` +
+      `&icon=${encodeURIComponent(icon)}` +
+      `&section=${encodeURIComponent(sectionKey)}`;
+  }
+
+  // Wipes the stored conversation for this topic on the backend, then
+  // navigates in — ai_teacher.html will see empty history and start fresh.
+  async function handleRestart(e, slug, name, icon, sectionKey) {
+    e.stopPropagation();
+
+    const confirmed = confirm(`Restart "${name}"? Your current conversation for this topic will be deleted.`);
+    if (!confirmed) return;
+
+    const btn = e.currentTarget;
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '…';
+
+    try {
+      const res  = await fetch(`${AITEACHER}/restart`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body:    JSON.stringify({ topic: slug }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'Could not restart.');
+
+      navigateToChat(slug, name, icon, sectionKey);
+    } catch (err) {
+      console.error('restart error:', err);
+      alert('Could not restart this topic. Please try again.');
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
   // ─── Render every section card + its zigzag node track ─────────────────
-  function renderSections(statusMap) {
+  function renderSections(statusMap, inProgressSet) {
     const container = document.getElementById('sectionsContainer');
     container.innerHTML = '';
     currentNodeEl = null;
@@ -608,20 +693,31 @@
       track.className = 'part-track';
 
       section.topics.forEach(([name, icon]) => {
-        const slug   = slugify(name);
-        const t      = statusMap.get(slug);
-        const status = t ? t.status : 'locked';
+        const slug       = slugify(name);
+        const t          = statusMap.get(slug);
+        const status     = t ? t.status : 'locked';
+        // Only the single "current" node in the whole chain can ever be
+        // started-but-unfinished — completed topics are done, locked
+        // topics were never reachable.
+        const inProgress = status === 'current' && inProgressSet.has(slug);
 
         const node = document.createElement('div');
         node.className = `part-node is-${status}`;
 
         const displayIcon = status === 'locked' ? '🔒' : icon;
-        const eyebrow     = status === 'completed' ? 'Practiced'
-                          : status === 'locked'    ? 'Locked' : 'Up next';
-        const tag         = status === 'completed' ? '✓ Done before'
-                          : status === 'locked'    ? '🔒 Locked' : '⚡ +5 XP';
+        const eyebrow      = status === 'completed' ? 'Practiced'
+                           : status === 'locked'    ? 'Locked'
+                           : inProgress               ? 'In progress' : 'Up next';
+        const tag           = status === 'completed' ? '✓ Done before'
+                           : status === 'locked'    ? '🔒 Locked'
+                           : inProgress               ? '↻ Resume' : '⚡ +5 XP';
         const doneBadge   = status === 'completed' ? `<span class="done-badge">✓</span>` : '';
-        const startBadge  = status === 'current'   ? `<div class="start-badge">START</div>` : '';
+        const startBadge  = status === 'current' && !inProgress ? `<div class="start-badge">START</div>` : '';
+        const actions     = inProgress ? `
+          <div class="node-actions">
+            <button type="button" class="btn-continue">Continue</button>
+            <button type="button" class="btn-restart">Restart</button>
+          </div>` : '';
 
         node.innerHTML = `
           <div class="node-btn-wrap">
@@ -631,6 +727,7 @@
               <span>${displayIcon}</span>
             </button>
           </div>
+          ${actions}
           <div class="node-info">
             <div class="node-eyebrow">${eyebrow}</div>
             <div class="node-title">${name}</div>
@@ -642,13 +739,17 @@
 
         if (status !== 'locked') {
           node.style.cursor = 'pointer';
-          node.addEventListener('click', () => {
-            window.location.href =
-              `ai_teacher.html?topic=${encodeURIComponent(slug)}` +
-              `&title=${encodeURIComponent(name)}` +
-              `&icon=${encodeURIComponent(icon)}` +
-              `&section=${encodeURIComponent(section.key)}`;
+          node.addEventListener('click', () => navigateToChat(slug, name, icon, section.key));
+        }
+
+        if (inProgress) {
+          node.querySelector('.btn-continue').addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigateToChat(slug, name, icon, section.key);
           });
+          node.querySelector('.btn-restart').addEventListener('click', (e) =>
+            handleRestart(e, slug, name, icon, section.key)
+          );
         }
 
         if (status === 'current') currentNodeEl = node;
@@ -688,20 +789,22 @@
       document.getElementById('navAvatar').textContent = data.user.name[0].toUpperCase();
 
       // Progress now comes from the backend — same source of truth Emma
-      // uses to decide when a topic conversation is finished.
+      // uses to decide when a topic conversation is finished. inProgress
+      // covers topics that were opened but never finished.
       const progRes  = await fetch(`${AITEACHER}/topics/progress`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const progData = await progRes.json();
       if (!progData.success) throw new Error(progData.message || 'Could not load progress.');
 
-      const completedSet = new Set(progData.completed);
-      const flat          = flattenTopics();
-      const statuses       = computeStatuses(flat, completedSet);
-      const statusMap      = new Map(statuses.map((t) => [t.slug, t]));
+      const completedSet  = new Set(progData.completed);
+      const inProgressSet = new Set(progData.inProgress || []);
+      const flat           = flattenTopics();
+      const statuses        = computeStatuses(flat, completedSet);
+      const statusMap        = new Map(statuses.map((t) => [t.slug, t]));
 
       updateProgress(completedSet.size, flat.length);
-      renderSections(statusMap);
+      renderSections(statusMap, inProgressSet);
 
       document.getElementById('statusScreen').style.display = 'none';
       document.getElementById('mainContent').style.display  = 'block';
