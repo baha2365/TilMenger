@@ -8,6 +8,7 @@ const {
   transcribeAudio,
   speakText,
   getTopicsProgress,
+  restartTopic,
 } = require('./aiTeacherController');
 
 const router = express.Router();
@@ -33,5 +34,8 @@ router.post('/speak',                               speakText);
 
 // Drives the lock/current/completed chain on the topic-select page
 router.get('/topics/progress',                      getTopicsProgress);
+
+// Wipes a topic's stored conversation in place so the student can redo it
+router.post('/restart',                             restartTopic);
 
 module.exports = router;
