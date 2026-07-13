@@ -338,9 +338,13 @@ async function chatWithTopic(req, res) {
     // turn limits already keep this well under the cap in normal use.
     const newHistory = [...messages, { role: 'assistant', content: reply }].slice(-40);
 
+    // ever_completed is a one-way flag — it's what the chain-unlock logic
+    // reads, so restarting a finished topic later (which resets `completed`
+    // back to false) never re-locks whatever came after it.
     await pool.query(
       `UPDATE topic_conversations
-          SET history = $1::jsonb, turn_count = $2, completed = $3, updated_at = NOW()
+          SET history = $1::jsonb, turn_count = $2, completed = $3,
+              ever_completed = ever_completed OR $3, updated_at = NOW()
         WHERE user_id = $4 AND topic_slug = $5`,
       [JSON.stringify(newHistory), newTurnCount, isFinalTurn, req.userId, topic]
     );
@@ -410,13 +414,20 @@ async function speakText(req, res) {
 async function getTopicsProgress(req, res) {
   try {
     const { rows } = await pool.query(
-      `SELECT topic_slug, completed, jsonb_array_length(history) AS history_len
+      `SELECT topic_slug, completed, ever_completed, jsonb_array_length(history) AS history_len
          FROM topic_conversations
         WHERE user_id = $1`,
       [req.userId]
     );
 
-    const completed  = rows.filter((r) => r.completed).map((r) => r.topic_slug);
+    // `completed` here is the PERMANENT unlock record (ever_completed) — a
+    // topic that was finished once and later restarted still counts, so
+    // redoing it never re-locks anything after it in the chain.
+    const completed  = rows.filter((r) => r.ever_completed).map((r) => r.topic_slug);
+    // `inProgress` is the CURRENT live session — true both for a topic
+    // that's never been finished yet and for one that's mid-redo after a
+    // restart. The frontend tells these apart using `completed` (chain
+    // status), not this flag.
     const inProgress = rows
       .filter((r) => !r.completed && r.history_len > 0)
       .map((r) => r.topic_slug);
@@ -472,17 +483,25 @@ module.exports = {
 // This controller expects a `topic_conversations` table. Run once in Neon:
 //
 // CREATE TABLE IF NOT EXISTS topic_conversations (
-//   id           SERIAL PRIMARY KEY,
-//   user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-//   topic_slug   VARCHAR(100) NOT NULL,
-//   topic_title  VARCHAR(150) NOT NULL,
-//   history      JSONB NOT NULL DEFAULT '[]'::jsonb,
-//   turn_count   INTEGER NOT NULL DEFAULT 0,
-//   completed    BOOLEAN NOT NULL DEFAULT false,
-//   created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
-//   updated_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+//   id             SERIAL PRIMARY KEY,
+//   user_id        INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+//   topic_slug     VARCHAR(100) NOT NULL,
+//   topic_title    VARCHAR(150) NOT NULL,
+//   history        JSONB NOT NULL DEFAULT '[]'::jsonb,
+//   turn_count     INTEGER NOT NULL DEFAULT 0,
+//   completed      BOOLEAN NOT NULL DEFAULT false,  -- current session finished
+//   ever_completed BOOLEAN NOT NULL DEFAULT false,  -- permanent unlock record, never reset by /restart
+//   created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
+//   updated_at     TIMESTAMP NOT NULL DEFAULT NOW(),
 //   UNIQUE (user_id, topic_slug)
 // );
 //
 // CREATE INDEX IF NOT EXISTS idx_topic_conversations_user_completed
 //   ON topic_conversations (user_id, completed);
+//
+// If topic_conversations already exists from before this change, run this
+// too — it adds the new column and backfills it from the old single flag:
+//
+// ALTER TABLE topic_conversations
+//   ADD COLUMN IF NOT EXISTS ever_completed BOOLEAN NOT NULL DEFAULT false;
+// UPDATE topic_conversations SET ever_completed = true WHERE completed = true;
