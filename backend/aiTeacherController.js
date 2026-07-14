@@ -134,6 +134,73 @@ INTERMEDIATE STYLE:
 ${extra}`;
 }
 
+// ─── Post-conversation analysis ──────────────────────────────────────────────
+// Runs once, right when a topic hits its final turn. Sends every message the
+// STUDENT sent (not Emma's side of the chat) to Lemonfox and asks for a
+// segment-level diff per message plus one overall score. The segment format
+// is designed to render directly as the "bold correction, red strikethrough
+// mistake" style used on the results page:
+//   {type:"text", text}              — unchanged, correct span
+//   {type:"correction", wrong,right} — wrong word/phrase → its right form
+//   {type:"delete", wrong}           — extra/wrong word that should be removed
+//   {type:"insert", right}           — a word that's missing and should be added
+// Non-fatal by design: if this fails or returns something unparseable, the
+// conversation still completes normally — the topic just won't have a score
+// until the student tries it again.
+async function analyzeConversation(level, topicTitle, userMessages) {
+  if (!userMessages.length) return null;
+
+  const numbered = userMessages
+    .map((m, i) => `${i + 1}: "${m.replace(/"/g, "'")}"`)
+    .join('\n');
+
+  const system = `You are a strict but fair English grammar and word-choice evaluator for a language-learning app.
+You will be given a numbered list of a student's messages from an English conversation, and the student's level.
+
+For EACH message, break it into segments that reconstruct the message exactly when concatenated, marking any grammar or word-choice mistakes inline:
+- {"type":"text","text":"..."} — unchanged, correct text (include its own spacing/punctuation exactly as written)
+- {"type":"correction","wrong":"...","right":"..."} — the student wrote "wrong"; it should be "right"
+- {"type":"delete","wrong":"..."} — the student wrote an unnecessary or wrong word/phrase that should simply be removed
+- {"type":"insert","right":"..."} — a word is missing here and should be added (e.g. a missing article)
+
+Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency across the whole conversation, calibrated to the student's level — the same small mistake should count for less against a beginner than against an advanced student.
+
+Respond with STRICT JSON ONLY — no markdown code fences, no commentary before or after — in exactly this shape:
+{"scorePercent": <integer 0-100>, "corrections": [ [ ...segments for message 1... ], [ ...segments for message 2... ], ... ]}
+
+Rules:
+- corrections[i] is for message i+1 above, in the same order, one array per message.
+- Concatenating the "text" and "wrong" values of a message's segments, in order, MUST reproduce that message EXACTLY — same words, spacing, punctuation. Never paraphrase, reorder, or drop words.
+- If a message has no mistakes, its array is just [{"type":"text","text":"<the whole message>"}].
+- Only flag genuine grammar/vocabulary mistakes — do not touch style or word choices that are merely different from what you'd personally say.
+- Keep segments at word or short-phrase level so corrections are precise, not whole-sentence rewrites.`;
+
+  const userPrompt = `Student level: ${level}\nTopic: ${topicTitle}\n\nMessages:\n${numbered}`;
+
+  try {
+    const completion = await lemonfox.chat.completions.create({
+      model:       'llama-8b-chat',
+      messages:    [{ role: 'system', content: system }, { role: 'user', content: userPrompt }],
+      max_tokens:  2200,
+      temperature: 0.2,
+    });
+
+    let raw = completion.choices[0].message.content.trim();
+    raw = raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+
+    const parsed = JSON.parse(raw);
+    if (typeof parsed.scorePercent !== 'number' || !Array.isArray(parsed.corrections)) {
+      throw new Error('Malformed analysis response');
+    }
+
+    const scorePercent = Math.max(0, Math.min(100, Math.round(parsed.scorePercent)));
+    return { scorePercent, corrections: parsed.corrections };
+  } catch (err) {
+    console.error('analyzeConversation error:', err);
+    return null;
+  }
+}
+
 // ─── Topic conversation row helper ───────────────────────────────────────────
 // One row per (user, topic). Created lazily on first visit to a topic.
 // Requires the `topic_conversations` table — see migration note at bottom
@@ -338,15 +405,34 @@ async function chatWithTopic(req, res) {
     // turn limits already keep this well under the cap in normal use.
     const newHistory = [...messages, { role: 'assistant', content: reply }].slice(-40);
 
+    // On the turn that finishes the topic, grade every message the student
+    // sent and store the result. This is the only place scorePercent/analysis
+    // ever get written — a later /restart deliberately leaves them alone (see
+    // restartTopic) so the OLD score stays visible while a redo is underway,
+    // right up until the redo itself finishes and overwrites it here again.
+    let scorePercent = null;
+    let analysisJson = null;
+    if (isFinalTurn) {
+      const userMessages = newHistory.filter((m) => m.role === 'user').map((m) => m.content);
+      const result = await analyzeConversation(level, row.topic_title, userMessages);
+      if (result) {
+        scorePercent = result.scorePercent;
+        analysisJson = JSON.stringify({ corrections: result.corrections });
+      }
+    }
+
     // ever_completed is a one-way flag — it's what the chain-unlock logic
     // reads, so restarting a finished topic later (which resets `completed`
     // back to false) never re-locks whatever came after it.
     await pool.query(
       `UPDATE topic_conversations
           SET history = $1::jsonb, turn_count = $2, completed = $3,
-              ever_completed = ever_completed OR $3, updated_at = NOW()
+              ever_completed = ever_completed OR $3,
+              score_percent = COALESCE($6, score_percent),
+              analysis = COALESCE($7::jsonb, analysis),
+              updated_at = NOW()
         WHERE user_id = $4 AND topic_slug = $5`,
-      [JSON.stringify(newHistory), newTurnCount, isFinalTurn, req.userId, topic]
+      [JSON.stringify(newHistory), newTurnCount, isFinalTurn, req.userId, topic, scorePercent, analysisJson]
     );
 
     return res.json({
@@ -414,7 +500,7 @@ async function speakText(req, res) {
 async function getTopicsProgress(req, res) {
   try {
     const { rows } = await pool.query(
-      `SELECT topic_slug, completed, ever_completed, jsonb_array_length(history) AS history_len
+      `SELECT topic_slug, completed, ever_completed, score_percent, jsonb_array_length(history) AS history_len
          FROM topic_conversations
         WHERE user_id = $1`,
       [req.userId]
@@ -431,8 +517,17 @@ async function getTopicsProgress(req, res) {
     const inProgress = rows
       .filter((r) => !r.completed && r.history_len > 0)
       .map((r) => r.topic_slug);
+    // Score from the most recently FINISHED attempt — stays visible through
+    // a redo-in-progress (restart never clears it) so the student has
+    // something to compare their new attempt against.
+    const scores = {};
+    rows.forEach((r) => {
+      if (r.score_percent !== null && r.score_percent !== undefined) {
+        scores[r.topic_slug] = r.score_percent;
+      }
+    });
 
-    return res.json({ success: true, completed, inProgress });
+    return res.json({ success: true, completed, inProgress, scores });
   } catch (err) {
     console.error('getTopicsProgress error:', err);
     return res.status(500).json({ success: false, message: 'Could not fetch topic progress.' });
@@ -469,6 +564,58 @@ async function restartTopic(req, res) {
   }
 }
 
+// ─── GET /api/ai-teacher/results?topic=<slug> ────────────────────────────────
+// Gated on `completed === true` — the CURRENT live session, not the
+// permanent ever_completed record. If the student restarted and is mid-redo,
+// results aren't available again until they finish that redo, per product
+// requirement: no results page until the conversation is actually finished.
+async function getResults(req, res) {
+  const { topic } = req.query;
+  if (!topic) {
+    return res.status(400).json({ success: false, message: 'topic is required.' });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM topic_conversations WHERE user_id = $1 AND topic_slug = $2',
+      [req.userId, topic]
+    );
+
+    if (!rows.length || !rows[0].completed) {
+      return res.status(403).json({
+        success: false,
+        message: 'Finish this topic to see your results.',
+      });
+    }
+
+    const row         = rows[0];
+    const history      = row.history || [];
+    const corrections = row.analysis?.corrections || [];
+
+    // Zip the raw history with the stored per-message correction segments —
+    // history stays clean/unannotated on disk, this view is built on demand.
+    let userIdx = 0;
+    const turns = history.map((m) => {
+      if (m.role === 'user') {
+        const segments = corrections[userIdx] || [{ type: 'text', text: m.content }];
+        userIdx += 1;
+        return { role: 'user', segments };
+      }
+      return { role: 'assistant', text: m.content };
+    });
+
+    return res.json({
+      success:      true,
+      topicTitle:   row.topic_title,
+      scorePercent: row.score_percent,
+      turns,
+    });
+  } catch (err) {
+    console.error('getResults error:', err);
+    return res.status(500).json({ success: false, message: 'Could not load results.' });
+  }
+}
+
 module.exports = {
   getSession,
   greetTopic,
@@ -477,6 +624,7 @@ module.exports = {
   speakText,
   getTopicsProgress,
   restartTopic,
+  getResults,
 };
 
 // ─── Migration note ───────────────────────────────────────────────────────────
@@ -491,6 +639,8 @@ module.exports = {
 //   turn_count     INTEGER NOT NULL DEFAULT 0,
 //   completed      BOOLEAN NOT NULL DEFAULT false,  -- current session finished
 //   ever_completed BOOLEAN NOT NULL DEFAULT false,  -- permanent unlock record, never reset by /restart
+//   score_percent  INTEGER,                         -- 0-100, set once per completed attempt
+//   analysis       JSONB,                            -- { corrections: [ [segments], [segments], ... ] }
 //   created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
 //   updated_at     TIMESTAMP NOT NULL DEFAULT NOW(),
 //   UNIQUE (user_id, topic_slug)
@@ -500,8 +650,10 @@ module.exports = {
 //   ON topic_conversations (user_id, completed);
 //
 // If topic_conversations already exists from before this change, run this
-// too — it adds the new column and backfills it from the old single flag:
+// too — it adds the new columns (both nullable, no backfill needed):
 //
 // ALTER TABLE topic_conversations
-//   ADD COLUMN IF NOT EXISTS ever_completed BOOLEAN NOT NULL DEFAULT false;
+//   ADD COLUMN IF NOT EXISTS ever_completed BOOLEAN NOT NULL DEFAULT false,
+//   ADD COLUMN IF NOT EXISTS score_percent INTEGER,
+//   ADD COLUMN IF NOT EXISTS analysis JSONB;
 // UPDATE topic_conversations SET ever_completed = true WHERE completed = true;
