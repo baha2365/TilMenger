@@ -421,6 +421,24 @@
     .btn-restart:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--red-dark); }
     .btn-restart:disabled { opacity: 0.6; cursor: not-allowed; }
 
+    /* ── Score badge — last attempt's percentage, shown right after the
+       topic name once it's been completed at least once. Clickable, links
+       to the results page. Color tiers mirror conversation_results.html. ── */
+    .score-badge {
+      display: inline-block;
+      font-size: 0.66rem;
+      font-weight: 900;
+      padding: 0.08rem 0.45rem;
+      border-radius: 20px;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .score-badge.score-good { background: #E3F2FF; color: #0B79D0; }
+    .score-badge.score-mid  { background: #FFF6E0; color: #B57A00; }
+    .score-badge.score-low  { background: #FFE5E5; color: #D93030; }
+
     .node-info { flex: 1; min-width: 0; }
     .node-eyebrow {
       font-size: 0.65rem;
@@ -665,8 +683,14 @@
     }
   }
 
+  function scoreClass(pct) {
+    if (pct >= 80) return 'score-good';
+    if (pct >= 60) return 'score-mid';
+    return 'score-low';
+  }
+
   // ─── Render every section card + its zigzag node track ─────────────────
-  function renderSections(statusMap, inProgressSet) {
+  function renderSections(statusMap, inProgressSet, scores) {
     const container = document.getElementById('sectionsContainer');
     container.innerHTML = '';
     currentNodeEl = null;
@@ -706,6 +730,9 @@
         // Sitting fully finished right now, not mid-redo — this is the
         // "already done, but let me try it again" case.
         const justFinished = status === 'completed' && !inProgress;
+        // Score from the last FINISHED attempt — stays visible through a
+        // redo-in-progress so the student has something to compare against.
+        const score = scores[slug];
 
         const node = document.createElement('div');
         node.className = `part-node is-${status}`;
@@ -719,6 +746,10 @@
                       : status === 'completed'  ? '✓ Done' : '⚡ +5 XP';
         const doneBadge  = justFinished ? `<span class="done-badge">✓</span>` : '';
         const startBadge = status === 'current' && !inProgress ? `<div class="start-badge">START</div>` : '';
+        const scoreBadge = score != null
+          ? `<a href="conversation_results.html?topic=${encodeURIComponent(slug)}&title=${encodeURIComponent(name)}"
+                class="score-badge ${scoreClass(score)}" title="View results">${score}%</a>`
+          : '';
 
         let actions = '';
         if (inProgress) {
@@ -747,7 +778,7 @@
           ${actions}
           <div class="node-info">
             <div class="node-eyebrow">${eyebrow}</div>
-            <div class="node-title">${name}</div>
+            <div class="node-title">${name}${scoreBadge}</div>
             <div class="node-tags">
               <span class="tag">${tag}</span>
             </div>
@@ -771,6 +802,11 @@
           node.querySelector('.btn-restart').addEventListener('click', (e) =>
             handleRestart(e, slug, name, icon, section.key)
           );
+        }
+
+        const scoreBadgeEl = node.querySelector('.score-badge');
+        if (scoreBadgeEl) {
+          scoreBadgeEl.addEventListener('click', (e) => e.stopPropagation());
         }
 
         if (status === 'current') currentNodeEl = node;
@@ -820,12 +856,13 @@
 
       const completedSet  = new Set(progData.completed);
       const inProgressSet = new Set(progData.inProgress || []);
-      const flat           = flattenTopics();
-      const statuses        = computeStatuses(flat, completedSet);
-      const statusMap        = new Map(statuses.map((t) => [t.slug, t]));
+      const scores          = progData.scores || {};
+      const flat            = flattenTopics();
+      const statuses         = computeStatuses(flat, completedSet);
+      const statusMap         = new Map(statuses.map((t) => [t.slug, t]));
 
       updateProgress(completedSet.size, flat.length);
-      renderSections(statusMap, inProgressSet);
+      renderSections(statusMap, inProgressSet, scores);
 
       document.getElementById('statusScreen').style.display = 'none';
       document.getElementById('mainContent').style.display  = 'block';
