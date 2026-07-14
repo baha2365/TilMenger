@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Results — TilMenger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #F5F0E8;
+      --ink:     #1A1612;
+      --rust:    #C4572A;
+      --rust-lt: #E0763A;
+      --sage:    #4A6741;
+      --sage-lt: #6F9463;
+      --gold:    #D4A853;
+      --gold-lt: #E8C274;
+      --muted:   #8A7E73;
+      --border:  #DDD5C8;
+      --s0:      #121010;
+      --s1:      #1B1815;
+      --s2:      #241F1B;
+      --s3:      #2D2723;
+      --blue:    #4E9EF0;
+      --red:     #E0524A;
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--s0);
+      color: var(--cream);
+    }
+
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    /* ── Header ── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.95rem 1.5rem;
+      background: rgba(27,24,21,0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .header-left { display: flex; align-items: center; gap: 0.9rem; min-width: 0; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      color: var(--muted); text-decoration: none; font-size: 0.78rem;
+      white-space: nowrap; transition: color 0.2s; padding: 0.3rem 0.1rem;
+    }
+    .back-link:hover { color: var(--cream); }
+    .divider { width: 1px; height: 16px; background: rgba(255,255,255,0.09); }
+    .brand-row { display: flex; align-items: center; gap: 0.55rem; min-width: 0; }
+    .brand-icon {
+      font-size: 1rem; width: 26px; height: 26px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--rust), var(--gold));
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .brand-name { font-family: 'Playfair Display', serif; font-size: 0.98rem; color: var(--cream); white-space: nowrap; }
+    .topic-pill {
+      background: rgba(196,87,42,0.12);
+      border: 1px solid rgba(196,87,42,0.32);
+      color: var(--rust-lt);
+      font-size: 0.72rem; font-weight: 600;
+      padding: 0.32rem 0.75rem; border-radius: 20px;
+      white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── Loader ── */
+    .loader {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1rem; min-height: 60vh;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid rgba(255,255,255,0.07);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-label { font-size: 0.82rem; color: var(--muted); }
+
+    /* ── Not ready state ── */
+    .not-ready {
+      display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.1rem; min-height: 60vh; padding: 2rem; text-align: center;
+    }
+    .not-ready .icon { font-size: 2.6rem; }
+    .not-ready p { color: var(--muted); font-size: 0.92rem; max-width: 320px; line-height: 1.6; }
+    .not-ready a {
+      color: var(--gold); text-decoration: none; font-weight: 600; font-size: 0.88rem;
+      border: 1px solid rgba(212,168,83,0.35); padding: 0.55rem 1.3rem; border-radius: 20px;
+      transition: background 0.2s;
+    }
+    .not-ready a:hover { background: rgba(212,168,83,0.1); }
+
+    /* ── Main ── */
+    .main { display: none; max-width: 640px; margin: 0 auto; padding: 1.8rem 1.3rem 4rem; }
+
+    /* ── Score card ── */
+    .score-card {
+      background: var(--s2);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      padding: 1.4rem 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .score-eyebrow {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.5rem;
+    }
+    .score-value { font-size: 2.6rem; font-weight: 800; line-height: 1; }
+    .score-value.score-good { color: var(--blue); }
+    .score-value.score-mid  { color: var(--gold); }
+    .score-value.score-low  { color: var(--red); }
+    .score-sub { margin-top: 0.5rem; font-size: 0.8rem; color: var(--muted); }
+
+    /* ── Transcript ── */
+    .transcript { display: flex; flex-direction: column; gap: 1rem; }
+    .turn { display: flex; }
+    .turn.assistant { justify-content: flex-start; }
+    .turn.user      { justify-content: flex-end; }
+
+    .bubble-assistant {
+      background: transparent;
+      color: var(--muted);
+      border-left: 2px solid rgba(255,255,255,0.1);
+      padding: 0.3rem 0 0.3rem 0.9rem;
+      max-width: 82%;
+      font-size: 0.84rem;
+      line-height: 1.65;
+    }
+
+    .bubble-user {
+      background: var(--cream);
+      color: var(--ink);
+      border-radius: 14px;
+      border-bottom-right-radius: 4px;
+      padding: 1rem 1.2rem;
+      max-width: 88%;
+      font-size: 0.92rem;
+      line-height: 1.85;
+    }
+
+    .corr-right {
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .corr-wrong {
+      color: var(--red);
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: var(--red);
+      margin-left: 0.15rem;
+    }
+
+    .legend {
+      display: flex; align-items: center; justify-content: center; gap: 1.2rem;
+      margin-top: 1.6rem; padding-top: 1.2rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 0.72rem; color: var(--muted);
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+    .legend .sw-right { font-weight: 800; color: var(--cream); }
+    .legend .sw-wrong { color: var(--red); text-decoration: line-through; }
+
+    @media (max-width: 600px) {
+      .app-header { padding: 0.75rem 1rem; }
+      .main { padding: 1.4rem 1rem 3rem; }
+      .score-value { font-size: 2.2rem; }
+      .bubble-user, .bubble-assistant { max-width: 94%; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <a href="conversation_select.html" class="back-link">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Topics
+    </a>
+    <div class="divider"></div>
+    <div class="brand-row">
+      <span class="brand-icon">🎓</span>
+      <span class="brand-name">TilMenger</span>
+    </div>
+  </div>
+  <div class="topic-pill" id="topicPill">💬 Results</div>
+</header>
+
+<div class="loader" id="loader">
+  <div class="spinner"></div>
+  <div class="loader-label">Loading your results…</div>
+</div>
+
+<div class="not-ready" id="notReady">
+  <div class="icon">🔒</div>
+  <p>Results show up once you've finished this topic — finish the conversation first, or continue where you left off.</p>
+  <a href="conversation_select.html">← Back to topics</a>
+</div>
+
+<main class="main" id="mainContent">
+  <div class="score-card">
+    <div class="score-eyebrow">Overall Score</div>
+    <div class="score-value" id="scoreValue">—</div>
+    <div class="score-sub" id="scoreSub"></div>
+  </div>
+
+  <div class="transcript" id="transcript"></div>
+
+  <div class="legend">
+    <span><span class="sw-right">word</span> = correction</span>
+    <span><span class="sw-wrong">word</span> = mistake</span>
+  </div>
+</main>
+
+<script src="../config.js"></script>
+<script>
+  const params     = new URLSearchParams(location.search);
+  const topicSlug  = params.get('topic');
+  const topicTitle = params.get('title') || 'Conversation';
+
+  if (!topicSlug) { window.location.href = 'conversation_select.html'; }
+
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = 'index.html'; }
+
+  const BASE = (typeof LINGUA !== 'undefined' && LINGUA.aiTeacher)
+    ? LINGUA.aiTeacher
+    : `${location.origin}/api/ai-teacher`;
+
+  document.getElementById('topicPill').textContent = `💬 ${topicTitle}`;
+  document.title = `Results — ${topicTitle} — TilMenger`;
+
+  function escapeHtml(t) {
+    return (t || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function scoreClass(pct) {
+    if (pct >= 80) return 'score-good';
+    if (pct >= 60) return 'score-mid';
+    return 'score-low';
+  }
+
+  // Renders one user message's segment array into the bold-correction /
+  // red-strikethrough-mistake markup shown in the reference design.
+  function renderSegments(segments) {
+    if (!Array.isArray(segments)) return '';
+    return segments.map((seg) => {
+      switch (seg.type) {
+        case 'correction':
+          return `<span class="corr-right">${escapeHtml(seg.right)}</span> <span class="corr-wrong">${escapeHtml(seg.wrong)}</span>`;
+        case 'delete':
+          return `<span class="corr-wrong">${escapeHtml(seg.wrong)}</span>`;
+        case 'insert':
+          return `<span class="corr-right">${escapeHtml(seg.right)}</span>`;
+        case 'text':
+        default:
+          return escapeHtml(seg.text || '');
+      }
+    }).join('');
+  }
+
+  async function init() {
+    try {
+      const res = await fetch(`${BASE}/results?topic=${encodeURIComponent(topicSlug)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) { localStorage.clear(); location.href = 'index.html'; return; }
+
+      const data = await res.json();
+      document.getElementById('loader').style.display = 'none';
+
+      if (!data.success) {
+        document.getElementById('notReady').style.display = 'flex';
+        return;
+      }
+
+      document.getElementById('topicPill').textContent = `💬 ${data.topicTitle || topicTitle}`;
+
+      const scoreEl = document.getElementById('scoreValue');
+      const subEl   = document.getElementById('scoreSub');
+      if (typeof data.scorePercent === 'number') {
+        scoreEl.textContent = `${data.scorePercent}%`;
+        scoreEl.className   = `score-value ${scoreClass(data.scorePercent)}`;
+        subEl.textContent   = data.topicTitle || topicTitle;
+      } else {
+        scoreEl.textContent = '—';
+        subEl.textContent   = 'Score unavailable for this attempt.';
+      }
+
+      const transcript = document.getElementById('transcript');
+      transcript.innerHTML = '';
+      (data.turns || []).forEach((turn) => {
+        const el = document.createElement('div');
+        if (turn.role === 'assistant') {
+          el.className = 'turn assistant';
+          el.innerHTML = `<div class="bubble-assistant">${escapeHtml(turn.text)}</div>`;
+        } else {
+          el.className = 'turn user';
+          el.innerHTML = `<div class="bubble-user">${renderSegments(turn.segments)}</div>`;
+        }
+        transcript.appendChild(el);
+      });
+
+      document.getElementById('mainContent').style.display = 'block';
+    } catch (err) {
+      console.error('results init error:', err);
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('notReady').style.display = 'flex';
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
