@@ -133,6 +133,24 @@
       gap: 0.5rem;
     }
 
+    /* Hamburger menu button (mobile only) */
+    .menu-btn {
+      display: none;
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--cream-dim);
+      font-size: 1.1rem;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      margin-right: 0.5rem;
+    }
+    .menu-btn:hover { background: var(--surface-2); border-color: var(--border-mid); color: var(--cream); }
+    .menu-btn.active { background: var(--surface-3); border-color: var(--gold); color: var(--gold); }
+
     /* Notification bell */
     .notif-btn {
       position: relative;
@@ -887,6 +905,16 @@
     .empty-state .es-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; }
     .empty-state .es-text { font-size: 0.82rem; line-height: 1.6; }
 
+    /* ── Sidebar overlay backdrop (mobile) ── */
+    .sidebar-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 99;
+      display: none;
+    }
+    .sidebar-backdrop.open { display: block; }
+
     /* ── Responsive ── */
     @media (max-width: 880px) {
       :root { --sidebar-w: 220px; }
@@ -896,10 +924,27 @@
     }
     @media (max-width: 600px) {
       .shell { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
+
+      .menu-btn { display: flex; }
       .topbar-brand { display: none; }
       .content-inner { padding: 1.2rem; }
       .actions-grid { grid-template-columns: 1fr; }
+
+      /* Sidebar becomes an off-canvas drawer */
+      .sidebar {
+        position: fixed;
+        top: var(--header-h);
+        left: 0;
+        bottom: 0;
+        width: min(78vw, 300px);
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: 8px 0 30px rgba(0,0,0,0.4);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
     }
   </style>
 </head>
@@ -913,6 +958,7 @@
       <div class="brand-logo">✦</div>
       <span class="brand-name">Til<span>Menger</span></span>
     </div>
+    <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" title="Menu" aria-label="Toggle menu">☰</button>
     <div class="topbar-center">
       <span class="topbar-eyebrow">Teacher Portal</span>
       <div class="topbar-divider"></div>
@@ -930,7 +976,7 @@
   </header>
 
   <!-- ══════════ SIDEBAR ══════════ -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
 
     
 
@@ -984,6 +1030,9 @@
     </div>
 
   </aside>
+
+  <!-- Sidebar backdrop (mobile only) -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 
   <!-- ══════════ MAIN ══════════ -->
   <main class="main-content">
@@ -1122,6 +1171,31 @@
     if (el.classList.contains('nav-item')) el.classList.add('active');
   }
 
+  /* ─── Mobile sidebar drawer ─── */
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const btn = document.getElementById('menuBtn');
+    const isOpen = sidebar.classList.contains('open');
+    if (isOpen) {
+      closeSidebar();
+    } else {
+      sidebar.classList.add('open');
+      backdrop.classList.add('open');
+      btn.classList.add('active');
+    }
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+    document.getElementById('menuBtn').classList.remove('active');
+  }
+
+  /* Close the drawer automatically if the viewport grows past mobile size */
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 600) closeSidebar();
+  });
+
 
   /* ─── Notification panel ─── */
   function toggleNotif() {
@@ -1209,6 +1283,7 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       closePanels();
+      closeSidebar();
       document.querySelectorAll('.modal-overlay.open').forEach(m => {
         m.classList.remove('open');
         document.body.style.overflow = '';
