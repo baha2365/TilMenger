@@ -9,6 +9,7 @@ const {
   speakText,
   getTopicsProgress,
   restartTopic,
+  getResults,
 } = require('./aiTeacherController');
 
 const router = express.Router();
@@ -37,5 +38,9 @@ router.get('/topics/progress',                      getTopicsProgress);
 
 // Wipes a topic's stored conversation in place so the student can redo it
 router.post('/restart',                             restartTopic);
+
+// Full transcript + per-message corrections + score — only returns data once
+// the topic's current session is actually completed
+router.get('/results',                               getResults);
 
 module.exports = router;
