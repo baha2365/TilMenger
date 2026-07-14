@@ -722,7 +722,7 @@
     <!-- Shown once the topic's turn limit is reached -->
     <div class="completion-banner" id="completionBanner">
       <span>🎉 Topic complete — nice work!</span>
-      <a href="#" id="viewResultsLink" class="btn-new-topic">See results →</a>
+      <a href="conversation_result.html" id="viewResultsLink" class="btn-new-topic">See results →</a>
       <a href="conversation_select.html" class="btn-new-topic">Choose another topic →</a>
     </div>
 
@@ -850,7 +850,7 @@ const micHint          = $('micHint');
 
 topicPill.textContent = `${topicIcon} ${topicTitle}`;
 viewResultsLink.href =
-  `conversation_results.html?topic=${encodeURIComponent(topicSlug)}&title=${encodeURIComponent(topicTitle)}`;
+  `conversation_result.html?topic=${encodeURIComponent(topicSlug)}&title=${encodeURIComponent(topicTitle)}`;
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 let toastTimer;

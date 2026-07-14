@@ -747,7 +747,7 @@
         const doneBadge  = justFinished ? `<span class="done-badge">✓</span>` : '';
         const startBadge = status === 'current' && !inProgress ? `<div class="start-badge">START</div>` : '';
         const scoreBadge = score != null
-          ? `<a href="conversation_results.html?topic=${encodeURIComponent(slug)}&title=${encodeURIComponent(name)}"
+          ? `<a href="conversation_result.html?topic=${encodeURIComponent(slug)}&title=${encodeURIComponent(name)}"
                 class="score-badge ${scoreClass(score)}" title="View results">${score}%</a>`
           : '';
 
