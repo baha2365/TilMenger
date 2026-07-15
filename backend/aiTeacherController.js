@@ -243,21 +243,22 @@ The response must exactly follow this schema:
 {
   "scorePercent": <integer>,
   "corrections": [
-    [...segments for message 1...],
-    [...segments for message 2...]
+    {"messageIndex": 1, "segments": [...segments for message 1...]},
+    {"messageIndex": 2, "segments": [...segments for message 2...]}
   ]
 }
 
 Rules
 
-- corrections[i] corresponds to student message i.
-- Concatenating every "text" and "wrong" value in order MUST reproduce the student's original message EXACTLY.
+- messageIndex matches the numbered message above (1, 2, 3, ...) — include exactly one entry per message, in any order.
+- "segments" is always an array, even for a message with no mistakes.
+- Concatenating every "text" and "wrong" value in a message's "segments", in order, MUST reproduce that student's original message EXACTLY.
 - Never reorder words.
 - Never paraphrase.
 - Never delete punctuation.
 - Never add punctuation unless it is an actual required correction.
 - Keep corrections as small as possible (individual words or short phrases).
-- If a message contains no objective mistakes, return exactly:
+- If a message contains no objective mistakes, its "segments" should be exactly:
 
 [
   {
@@ -272,7 +273,7 @@ Rules
     const completion = await lemonfox.chat.completions.create({
       model:       'llama-8b-chat',
       messages:    [{ role: 'system', content: system }, { role: 'user', content: userPrompt }],
-      max_tokens:  2200,
+      max_tokens:  2600,
       temperature: 0.2,
     });
 
@@ -284,12 +285,80 @@ Rules
       throw new Error('Malformed analysis response');
     }
 
+    // The model doesn't always nest strictly per the schema above — smaller
+    // models especially can flatten "segments for message i" down to a
+    // single segment object instead of an array. That's exactly what caused
+    // messages to render as blank before: the top-level shape check passed,
+    // but each entry wasn't actually an array, so the frontend's
+    // Array.isArray(segments) guard silently produced nothing. Here we
+    // tolerate a few shapes and then validate every message independently,
+    // so one malformed entry can never blank out the rest.
+    const bySlot = {};
+    parsed.corrections.forEach((entry, i) => {
+      if (entry && typeof entry === 'object' && !Array.isArray(entry) && Array.isArray(entry.segments)) {
+        // Preferred shape: {messageIndex, segments}
+        const idx = Number.isInteger(entry.messageIndex) ? entry.messageIndex - 1 : i;
+        bySlot[idx] = entry.segments;
+      } else if (Array.isArray(entry)) {
+        // Old positional shape: corrections[i] = [segments...]
+        bySlot[i] = entry;
+      } else if (entry && typeof entry === 'object') {
+        // Flattened shape: corrections[i] = a single segment object
+        bySlot[i] = [entry];
+      }
+    });
+
+    const corrections = userMessages.map((msg, i) => sanitizeSegments(bySlot[i], msg));
+
     const scorePercent = Math.max(0, Math.min(100, Math.round(parsed.scorePercent)));
-    return { scorePercent, corrections: parsed.corrections };
+    return { scorePercent, corrections };
   } catch (err) {
     console.error('analyzeConversation error:', err);
     return null;
   }
+}
+
+// Verifies one message's segment array is actually usable — every segment
+// has the fields its type requires, AND concatenating the "text"/"wrong"
+// values reproduces the original message. If either check fails, fall back
+// to a single plain-text segment so the message still renders (just without
+// corrections) instead of rendering as nothing.
+function isValidSegment(seg) {
+  if (!seg || typeof seg !== 'object') return false;
+  switch (seg.type) {
+    case 'text':       return typeof seg.text === 'string';
+    case 'correction': return typeof seg.wrong === 'string' && typeof seg.right === 'string';
+    case 'delete':     return typeof seg.wrong === 'string';
+    case 'insert':     return typeof seg.right === 'string';
+    default:           return false;
+  }
+}
+
+function normalizeForCompare(s) {
+  return (s || '').replace(/\s+/g, ' ').trim();
+}
+
+function sanitizeSegments(rawSegments, originalText) {
+  const fallback = [{ type: 'text', text: originalText }];
+
+  let arr = rawSegments;
+  if (!Array.isArray(arr)) {
+    // Recover the exact broken shape this fix targets: a bare single
+    // segment object instead of an array of segments.
+    if (arr && typeof arr === 'object' && typeof arr.type === 'string') {
+      arr = [arr];
+    } else {
+      return fallback;
+    }
+  }
+
+  const cleaned = arr.filter(isValidSegment);
+  if (!cleaned.length) return fallback;
+
+  const rebuilt = cleaned.map((s) => (s.type === 'insert' ? '' : (s.text ?? s.wrong ?? ''))).join('');
+  if (normalizeForCompare(rebuilt) !== normalizeForCompare(originalText)) return fallback;
+
+  return cleaned;
 }
 
 // ─── Topic conversation row helper ───────────────────────────────────────────
@@ -683,12 +752,13 @@ async function getResults(req, res) {
     const history      = row.history || [];
     const corrections = row.analysis?.corrections || [];
 
-    // Zip the raw history with the stored per-message correction segments —
-    // history stays clean/unannotated on disk, this view is built on demand.
+    // Sanitize on the way out too, not just on the way in — this makes
+    // already-stored results self-heal even if they were saved back when
+    // the analysis parser was more permissive, without needing a restart.
     let userIdx = 0;
     const turns = history.map((m) => {
       if (m.role === 'user') {
-        const segments = corrections[userIdx] || [{ type: 'text', text: m.content }];
+        const segments = sanitizeSegments(corrections[userIdx], m.content);
         userIdx += 1;
         return { role: 'user', segments };
       }
