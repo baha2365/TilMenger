@@ -154,26 +154,49 @@ async function analyzeConversation(level, topicTitle, userMessages) {
     .map((m, i) => `${i + 1}: "${m.replace(/"/g, "'")}"`)
     .join('\n');
 
-  const system = `You are a strict but fair English grammar and word-choice evaluator for a language-learning app.
-You will be given a numbered list of a student's messages from an English conversation, and the student's level.
+  // IMPROVEMENT 1: Changed persona to be lenient and conversational.
+  // IMPROVEMENT 2: Added explicit rules against pedantic textbook corrections.
+  // IMPROVEMENT 3: Added a few-shot JSON example to anchor the 8B model's output formatting.
+  const system = `You are a lenient and encouraging English evaluator for a conversational language-learning app.
+You will be given a numbered list of a student's messages and their CEFR level.
 
-For EACH message, break it into segments that reconstruct the message exactly when concatenated, marking any grammar or word-choice mistakes inline:
+Your goal is to flag ONLY genuine grammar errors, spelling mistakes, or completely incomprehensible phrasing.
+CRITICAL: Do NOT correct informal, natural, or conversational English. For example, "me and my parents", ending a sentence with a preposition, or using "gonna" are perfectly fine. Do not change them to strict textbook grammar.
+
+For EACH message, break it into segments that reconstruct the message EXACTLY when concatenated together.
 - {"type":"text","text":"..."} — unchanged, correct text (include its own spacing/punctuation exactly as written)
 - {"type":"correction","wrong":"...","right":"..."} — the student wrote "wrong"; it should be "right"
 - {"type":"delete","wrong":"..."} — the student wrote an unnecessary or wrong word/phrase that should simply be removed
-- {"type":"insert","right":"..."} — a word is missing here and should be added (e.g. a missing article)
+- {"type":"insert","right":"..."} — a word is missing here and should be added
 
-Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency across the whole conversation, calibrated to the student's level — the same small mistake should count for less against a beginner than against an advanced student.
+Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency across the whole conversation, calibrated to the student's level.
 
-Respond with STRICT JSON ONLY — no markdown code fences, no commentary before or after — in exactly this shape:
-{"scorePercent": <integer 0-100>, "corrections": [ [ ...segments for message 1... ], [ ...segments for message 2... ], ... ]}
+Respond with STRICT JSON ONLY. No markdown, no commentary.
+Format:
+{"scorePercent": <integer>, "corrections": [ [segments for msg 1], [segments for msg 2] ]}
+
+EXAMPLE INPUT:
+1: "Me and my parents is going to the store."
+2: "I like it"
+
+EXAMPLE OUTPUT:
+{
+  "scorePercent": 85,
+  "corrections": [
+    [
+      {"type":"text", "text":"Me and my parents "},
+      {"type":"correction", "wrong":"is", "right":"are"},
+      {"type":"text", "text":" going to the store."}
+    ],
+    [
+      {"type":"text", "text":"I like it"}
+    ]
+  ]
+}
 
 Rules:
-- corrections[i] is for message i+1 above, in the same order, one array per message.
-- Concatenating the "text" and "wrong" values of a message's segments, in order, MUST reproduce that message EXACTLY — same words, spacing, punctuation. Never paraphrase, reorder, or drop words.
-- If a message has no mistakes, its array is just [{"type":"text","text":"<the whole message>"}].
-- Only flag genuine grammar/vocabulary mistakes — do not touch style or word choices that are merely different from what you'd personally say.
-- Keep segments at word or short-phrase level so corrections are precise, not whole-sentence rewrites.`;
+- Concatenating the "text" and "wrong" values in order MUST reproduce the original message EXACTLY (including spaces).
+- If a message has no errors, output a single "text" segment with the whole message.`;
 
   const userPrompt = `Student level: ${level}\nTopic: ${topicTitle}\n\nMessages:\n${numbered}`;
 
