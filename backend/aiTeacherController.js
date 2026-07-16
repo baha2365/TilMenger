@@ -135,18 +135,6 @@ ${extra}`;
 }
 
 // ─── Post-conversation analysis ──────────────────────────────────────────────
-// Runs once, right when a topic hits its final turn. Sends every message the
-// STUDENT sent (not Emma's side of the chat) to Lemonfox and asks for a
-// segment-level diff per message plus one overall score. The segment format
-// is designed to render directly as the "bold correction, red strikethrough
-// mistake" style used on the results page:
-//   {type:"text", text}              — unchanged, correct span
-//   {type:"correction", wrong,right} — wrong word/phrase → its right form
-//   {type:"delete", wrong}           — extra/wrong word that should be removed
-//   {type:"insert", right}           — a word that's missing and should be added
-// Non-fatal by design: if this fails or returns something unparseable, the
-// conversation still completes normally — the topic just won't have a score
-// until the student tries it again.
 async function analyzeConversation(level, topicTitle, userMessages) {
   if (!userMessages.length) return null;
 
@@ -154,30 +142,30 @@ async function analyzeConversation(level, topicTitle, userMessages) {
     .map((m, i) => `${i + 1}: "${m.replace(/"/g, "'")}"`)
     .join('\n');
 
-  // IMPROVEMENT 1: Changed persona to be lenient and conversational.
-  // IMPROVEMENT 2: Added explicit rules against pedantic textbook corrections.
-  // IMPROVEMENT 3: Added a few-shot JSON example to anchor the 8B model's output formatting.
+  // IMPROVEMENTS ADDED HERE: Rules protecting emojis, and emojis included in the example.
   const system = `You are a lenient and encouraging English evaluator for a conversational language-learning app.
 You will be given a numbered list of a student's messages and their CEFR level.
 
 Your goal is to flag ONLY genuine grammar errors, spelling mistakes, or completely incomprehensible phrasing.
-CRITICAL: Do NOT correct informal, natural, or conversational English. For example, "me and my parents", ending a sentence with a preposition, or using "gonna" are perfectly fine. Do not change them to strict textbook grammar.
+CRITICAL RULES:
+1. Do NOT correct informal, natural, or conversational English (e.g., "me and my parents", "gonna").
+2. Do NOT remove, alter, or penalize emojis (e.g., 😊, 🎉, 🥲). Emojis are completely fine! Treat them as normal correct text.
 
 For EACH message, break it into segments that reconstruct the message EXACTLY when concatenated together.
-- {"type":"text","text":"..."} — unchanged, correct text (include its own spacing/punctuation exactly as written)
+- {"type":"text","text":"..."} — unchanged, correct text (include emojis, spacing, and punctuation exactly as written)
 - {"type":"correction","wrong":"...","right":"..."} — the student wrote "wrong"; it should be "right"
-- {"type":"delete","wrong":"..."} — the student wrote an unnecessary or wrong word/phrase that should simply be removed
-- {"type":"insert","right":"..."} — a word is missing here and should be added
+- {"type":"delete","wrong":"..."} — unnecessary or wrong word/phrase to remove
+- {"type":"insert","right":"..."} — missing word to add
 
-Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency across the whole conversation, calibrated to the student's level.
+Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency, calibrated to the student's level.
 
 Respond with STRICT JSON ONLY. No markdown, no commentary.
 Format:
 {"scorePercent": <integer>, "corrections": [ [segments for msg 1], [segments for msg 2] ]}
 
 EXAMPLE INPUT:
-1: "Me and my parents is going to the store."
-2: "I like it"
+1: "Me and my parents is going to the store 😊"
+2: "I like it 🎉"
 
 EXAMPLE OUTPUT:
 {
@@ -186,16 +174,16 @@ EXAMPLE OUTPUT:
     [
       {"type":"text", "text":"Me and my parents "},
       {"type":"correction", "wrong":"is", "right":"are"},
-      {"type":"text", "text":" going to the store."}
+      {"type":"text", "text":" going to the store 😊"}
     ],
     [
-      {"type":"text", "text":"I like it"}
+      {"type":"text", "text":"I like it 🎉"}
     ]
   ]
 }
 
 Rules:
-- Concatenating the "text" and "wrong" values in order MUST reproduce the original message EXACTLY (including spaces).
+- Concatenating the "text" and "wrong" values in order MUST reproduce the original message EXACTLY (including spaces and emojis).
 - If a message has no errors, output a single "text" segment with the whole message.`;
 
   const userPrompt = `Student level: ${level}\nTopic: ${topicTitle}\n\nMessages:\n${numbered}`;
