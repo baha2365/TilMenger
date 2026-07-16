@@ -94,9 +94,9 @@ function buildSystemPrompt(level, name, topicTitle, { isFirstTurn = false, isFin
   const extra = isFirstTurn ? openingRules(topicTitle) : isFinalTurn ? closingRules(topicTitle) : '';
 
   const CONVERSATION_STYLE = `
-CONVERSATION STYLE — you are a friendly conversation partner, not a drill instructor:
-- Talk the way a friendly tutor on a language app would — a natural back-and-forth, like chatting with a friend.
-- Teach naturally AS you chat: if the student makes a mistake, gently fold the correct form into your reply and keep going — don't dwell on it or ask them to repeat it.
+CONVERSATION STYLE — you are a friendly conversation partner, not a grammar teacher:
+- Talk the way a friendly person would — a natural back-and-forth, like chatting with a friend.
+- CRITICAL RULE: NEVER correct the student's grammar, spelling, or word choice. NEVER say things like "we'd usually say" or offer better ways to phrase things. Ignore all mistakes and just keep the conversation going naturally.
 - Ask at most ONE natural follow-up question per turn to keep the chat flowing (skip this on the closing turn — see below).
 ${topicFocusBlock(topicTitle)}${TOPIC_SAFETY}`;
 
@@ -118,7 +118,6 @@ Your student is ${first}, an advanced (C1-C2) English learner.
 ${CONVERSATION_STYLE}
 ADVANCED STYLE:
 - Use rich vocabulary, idioms, collocations, and varied sentence structures, the way an articulate friend would.
-- Correct only significant errors, and weave the correction naturally into your reply rather than flagging it separately.
 - Reply length: 3-5 sentences total, max.
 ${extra}`;
   }
@@ -129,7 +128,6 @@ Your student is ${first}, an intermediate (B1-B2) English learner.
 ${CONVERSATION_STYLE}
 INTERMEDIATE STYLE:
 - Use natural, clear conversational English.
-- Weave corrections in naturally: "Ah, we'd usually say '...' — but I got what you meant!"
 - Reply length: 3-4 sentences total, max.
 ${extra}`;
 }
@@ -154,8 +152,8 @@ CRITICAL RULES:
 For EACH message, break it into segments that reconstruct the message EXACTLY when concatenated together.
 - {"type":"text","text":"..."} — unchanged, correct text (include emojis, spacing, and punctuation exactly as written)
 - {"type":"correction","wrong":"...","right":"..."} — the student wrote "wrong"; it should be "right"
-- {"type":"delete","wrong":"..."} — the student wrote an unnecessary or wrong word/phrase that should simply be removed
-- {"type":"insert","right":"..."} — a word is missing here and should be added
+- {"type":"delete","wrong":"..."} — unnecessary or wrong word/phrase to remove
+- {"type":"insert","right":"..."} — missing word to add
 
 Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency, calibrated to the student's level.
 
@@ -651,7 +649,7 @@ module.exports = {
 //   completed      BOOLEAN NOT NULL DEFAULT false,  -- current session finished
 //   ever_completed BOOLEAN NOT NULL DEFAULT false,  -- permanent unlock record, never reset by /restart
 //   score_percent  INTEGER,                         -- 0-100, set once per completed attempt
-//   analysis       JSONB,                            -- { corrections: [ [segments], [segments], ... ] }
+//   analysis       JSONB,                           -- { corrections: [ [segments], [segments], ... ] }
 //   created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
 //   updated_at     TIMESTAMP NOT NULL DEFAULT NOW(),
 //   UNIQUE (user_id, topic_slug)
