@@ -154,8 +154,8 @@ CRITICAL RULES:
 For EACH message, break it into segments that reconstruct the message EXACTLY when concatenated together.
 - {"type":"text","text":"..."} — unchanged, correct text (include emojis, spacing, and punctuation exactly as written)
 - {"type":"correction","wrong":"...","right":"..."} — the student wrote "wrong"; it should be "right"
-- {"type":"delete","wrong":"..."} — unnecessary or wrong word/phrase to remove
-- {"type":"insert","right":"..."} — missing word to add
+- {"type":"delete","wrong":"..."} — the student wrote an unnecessary or wrong word/phrase that should simply be removed
+- {"type":"insert","right":"..."} — a word is missing here and should be added
 
 Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency, calibrated to the student's level.
 
