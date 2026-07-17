@@ -143,39 +143,54 @@
       line-height: 1.65;
     }
 
-    .bubble-user {
-      background: var(--cream);
-      color: var(--ink);
+    /* ── User turn: two stacked comparison cards ── */
+    .user-turn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      max-width: 88%;
+      margin-left: auto;
+    }
+    .card-original,
+    .card-corrected {
       border-radius: 14px;
       border-bottom-right-radius: 4px;
-      padding: 1rem 1.2rem;
-      max-width: 88%;
-      font-size: 0.92rem;
-      line-height: 1.85;
+      padding: 0.85rem 1.1rem;
+      font-size: 0.9rem;
+      line-height: 1.75;
     }
-
-    .corr-right {
+    .card-original {
+      background: #FFF3C4;
+      color: #3D3210;
+      border: 1px solid #EAD48F;
+    }
+    .card-corrected {
+      background: #DCEEFF;
+      color: #123A5E;
+      border: 1px solid #AFD8F5;
+    }
+    .card-label {
+      font-size: 0.62rem;
       font-weight: 800;
-      color: var(--ink);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+      opacity: 0.7;
     }
-    .corr-wrong {
-      color: var(--red);
-      text-decoration: line-through;
-      text-decoration-thickness: 2px;
-      text-decoration-color: var(--red);
-      margin-left: 0.15rem;
-    }
+    .card-original .card-label { color: #8A6D12; }
+    .card-corrected .card-label { color: #1C6FAE; }
+
+    .seg-wrong     { color: #B23327; font-weight: 600; }
+    .seg-highlight { color: #0B4E82; font-weight: 800; }
 
     .legend {
-      display: flex; align-items: center; justify-content: center; gap: 1.2rem;
+      display: flex; align-items: center; justify-content: center; gap: 1.4rem;
+      flex-wrap: wrap;
       margin-top: 1.6rem; padding-top: 1.2rem;
       border-top: 1px solid rgba(255,255,255,0.06);
       font-size: 0.72rem; color: var(--muted);
     }
     .legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
-    .legend .sw-right { font-weight: 800; color: var(--cream); }
-    .legend .sw-wrong { color: var(--red); text-decoration: line-through; }
-
     @media (max-width: 600px) {
       .app-header { padding: 0.75rem 1rem; }
       .main { padding: 1.4rem 1rem 3rem; }
