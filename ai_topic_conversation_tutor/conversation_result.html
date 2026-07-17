@@ -330,7 +330,17 @@
           el.innerHTML = `<div class="bubble-assistant">${escapeHtml(turn.text)}</div>`;
         } else {
           el.className = 'turn user';
-          el.innerHTML = `<div class="bubble-user">${renderSegments(turn.segments)}</div>`;
+          el.innerHTML = `
+            <div class="user-turn-group">
+              <div class="card-original">
+                <div class="card-label">🟨 Original</div>
+                <div>${renderOriginalSegments(turn.originalSegments)}</div>
+              </div>
+              <div class="card-corrected">
+                <div class="card-label">🟦 Corrected</div>
+                <div>${renderCorrectedSegments(turn.correctedSegments)}</div>
+              </div>
+            </div>`;
         }
         transcript.appendChild(el);
       });
