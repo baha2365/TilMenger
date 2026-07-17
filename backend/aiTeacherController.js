@@ -140,49 +140,60 @@ async function analyzeConversation(level, topicTitle, userMessages) {
     .map((m, i) => `${i + 1}: "${m.replace(/"/g, "'")}"`)
     .join('\n');
 
-  // IMPROVEMENTS ADDED HERE: Rules protecting emojis, and emojis included in the example.
   const system = `You are a lenient and encouraging English evaluator for a conversational language-learning app.
 You will be given a numbered list of a student's messages and their CEFR level.
 
-Your goal is to flag ONLY genuine grammar errors, spelling mistakes, or completely incomprehensible phrasing.
-CRITICAL RULES:
-1. Do NOT correct informal, natural, or conversational English (e.g., "me and my parents", "gonna").
-2. Do NOT remove, alter, or penalize emojis (e.g., 😊, 🎉, 🥲). Emojis are completely fine! Treat them as normal correct text.
+For EACH message, produce TWO segment arrays:
 
-For EACH message, break it into segments that reconstruct the message EXACTLY when concatenated together.
-- {"type":"text","text":"..."} — unchanged, correct text (include emojis, spacing, and punctuation exactly as written)
-- {"type":"correction","wrong":"...","right":"..."} — the student wrote "wrong"; it should be "right"
-- {"type":"delete","wrong":"..."} — unnecessary or wrong word/phrase to remove
-- {"type":"insert","right":"..."} — missing word to add
+1. "originalSegments" — the student's message, split into segments that reconstruct it EXACTLY when concatenated (same spacing, punctuation, emojis, everything). Mark ONLY the specific words/phrases that are genuine grammar or spelling mistakes with "wrong": true. Everything else is a plain segment with no "wrong" key.
+   - {"text":"..."} — unchanged, correct text
+   - {"text":"...", "wrong": true} — a mistake, written exactly as the student wrote it (do NOT correct it here)
+
+2. "correctedSegments" — a fully rewritten, fluent, natural version of the same sentence, preserving the student's intended meaning and emojis wherever possible. Mark ONLY the specific word(s) that changed from the original with "highlight": true. Everything else is a plain segment with no "highlight" key.
+   - {"text":"..."} — unchanged text
+   - {"text":"...", "highlight": true} — a corrected word/phrase
+
+CRITICAL RULES:
+1. Do NOT flag informal, natural, conversational English as wrong (e.g., "me and my parents", "gonna").
+2. Do NOT remove or alter emojis in originalSegments — reproduce them exactly. Preserve them in correctedSegments whenever possible.
+3. originalSegments text, concatenated in order, MUST equal the original message EXACTLY, character for character.
+4. Only flag genuine grammar errors, spelling mistakes, or completely incomprehensible phrasing — nothing else.
+5. If a message has no errors: originalSegments is a single {"text": "<full message>"} segment, and correctedSegments is also a single {"text": "<same message>"} segment (no highlights).
+6. Keep highlighted spans in correctedSegments as short as possible — highlight only the word(s) that actually changed, not the whole surrounding clause.
 
 Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency, calibrated to the student's level.
 
 Respond with STRICT JSON ONLY. No markdown, no commentary.
 Format:
-{"scorePercent": <integer>, "corrections": [ [segments for msg 1], [segments for msg 2] ]}
+{"scorePercent": <integer>, "corrections": [ {"originalSegments":[...], "correctedSegments":[...]}, ... ]}
 
 EXAMPLE INPUT:
-1: "Me and my parents is going to the store 😊"
-2: "I like it 🎉"
+1: "Them memories is make me feel happy every times 😊"
 
 EXAMPLE OUTPUT:
 {
-  "scorePercent": 85,
+  "scorePercent": 78,
   "corrections": [
-    [
-      {"type":"text", "text":"Me and my parents "},
-      {"type":"correction", "wrong":"is", "right":"are"},
-      {"type":"text", "text":" going to the store 😊"}
-    ],
-    [
-      {"type":"text", "text":"I like it 🎉"}
-    ]
+    {
+      "originalSegments": [
+        {"text":"Them", "wrong":true},
+        {"text":" memories "},
+        {"text":"is make", "wrong":true},
+        {"text":" me feel happy every "},
+        {"text":"times", "wrong":true},
+        {"text":" 😊"}
+      ],
+      "correctedSegments": [
+        {"text":"Those", "highlight":true},
+        {"text":" memories "},
+        {"text":"make", "highlight":true},
+        {"text":" me feel happy every "},
+        {"text":"time", "highlight":true},
+        {"text":" 😊"}
+      ]
+    }
   ]
-}
-
-Rules:
-- Concatenating the "text" and "wrong" values in order MUST reproduce the original message EXACTLY (including spaces and emojis).
-- If a message has no errors, output a single "text" segment with the whole message.`;
+}`;
 
   const userPrompt = `Student level: ${level}\nTopic: ${topicTitle}\n\nMessages:\n${numbered}`;
 
@@ -190,7 +201,7 @@ Rules:
     const completion = await lemonfox.chat.completions.create({
       model:       'llama-8b-chat',
       messages:    [{ role: 'system', content: system }, { role: 'user', content: userPrompt }],
-      max_tokens:  2200,
+      max_tokens:  2600,
       temperature: 0.2,
     });
 
@@ -203,7 +214,31 @@ Rules:
     }
 
     const scorePercent = Math.max(0, Math.min(100, Math.round(parsed.scorePercent)));
-    return { scorePercent, corrections: parsed.corrections };
+
+    // Defensive pass, per message: originalSegments must reconstruct the
+    // student's text EXACTLY, or we fall back to a plain, unhighlighted
+    // original. The yellow card can never show anything other than what
+    // the student actually wrote — this is the backstop for that, since a
+    // bad model reconstruction would otherwise silently rewrite it.
+    const corrections = parsed.corrections.map((entry, i) => {
+      const sourceText = userMessages[i] ?? '';
+
+      let originalSegments = Array.isArray(entry?.originalSegments) ? entry.originalSegments : [];
+      const rebuilt = originalSegments.map((s) => s?.text ?? '').join('');
+
+      originalSegments = rebuilt === sourceText
+        ? originalSegments.map((s) => ({ text: s.text ?? '', ...(s.wrong ? { wrong: true } : {}) }))
+        : [{ text: sourceText }];
+
+      let correctedSegments = Array.isArray(entry?.correctedSegments) ? entry.correctedSegments : [];
+      correctedSegments = correctedSegments.length
+        ? correctedSegments.map((s) => ({ text: s.text ?? '', ...(s.highlight ? { highlight: true } : {}) }))
+        : [{ text: sourceText }];
+
+      return { originalSegments, correctedSegments };
+    });
+
+    return { scorePercent, corrections };
   } catch (err) {
     console.error('analyzeConversation error:', err);
     return null;
