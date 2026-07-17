@@ -679,17 +679,36 @@ async function getResults(req, res) {
     const turns = history.map((m) => {
       if (m.role === 'user') {
         const raw = corrections[userIdx];
-        // Handles both "no analysis for this message" and rows completed
-        // before this format existed (old entries were plain arrays, so
-        // raw.originalSegments is undefined and we fall through cleanly).
-        const c = raw && Array.isArray(raw.originalSegments) && Array.isArray(raw.correctedSegments)
-          ? raw
-          : { originalSegments: [{ text: m.content }], correctedSegments: [{ text: m.content }] };
         userIdx += 1;
+
+        if (raw && typeof raw.hasErrors === 'boolean') {
+          // Current format
+          return {
+            role: 'user',
+            hasErrors: raw.hasErrors,
+            originalSegments:  raw.originalSegments  || [{ text: m.content }],
+            correctedSegments: raw.correctedSegments || [],
+          };
+        }
+
+        if (raw && Array.isArray(raw.originalSegments) && Array.isArray(raw.correctedSegments)) {
+          // Previous format (before this change) — infer hasErrors from
+          // whether anything was actually highlighted.
+          const hasErrors = raw.correctedSegments.some((s) => s.highlight);
+          return {
+            role: 'user',
+            hasErrors,
+            originalSegments: raw.originalSegments,
+            correctedSegments: hasErrors ? raw.correctedSegments : [],
+          };
+        }
+
+        // Oldest format or missing analysis — show plain text, no comparison.
         return {
           role: 'user',
-          originalSegments:  c.originalSegments,
-          correctedSegments: c.correctedSegments,
+          hasErrors: false,
+          originalSegments: [{ text: m.content }],
+          correctedSegments: [],
         };
       }
       return { role: 'assistant', text: m.content };
