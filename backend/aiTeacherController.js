@@ -182,54 +182,52 @@ async function analyzeConversation(level, topicTitle, userMessages) {
   const system = `You are a lenient and encouraging English evaluator for a conversational language-learning app.
 You will be given a numbered list of a student's messages and their CEFR level.
 
-For EACH message, produce TWO segment arrays:
+For EACH message, decide if it has any genuine grammar, spelling, or word-choice mistakes.
 
-1. "originalSegments" — the student's message, split into segments that reconstruct it EXACTLY when concatenated (same spacing, punctuation, emojis, everything). Mark ONLY the specific words/phrases that are genuine grammar or spelling mistakes with "wrong": true. Everything else is a plain segment with no "wrong" key.
-   - {"text":"..."} — unchanged, correct text
-   - {"text":"...", "wrong": true} — a mistake, written exactly as the student wrote it (do NOT correct it here)
+If it has NO mistakes:
+- "hasErrors": false
+- "correctedText": "" (leave empty)
+- "wrongPhrases": []
+- "changedPhrases": []
 
-2. "correctedSegments" — a fully rewritten, fluent, natural version of the same sentence, preserving the student's intended meaning and emojis wherever possible. Mark ONLY the specific word(s) that changed from the original with "highlight": true. Everything else is a plain segment with no "highlight" key.
-   - {"text":"..."} — unchanged text
-   - {"text":"...", "highlight": true} — a corrected word/phrase
+If it HAS mistakes:
+- "hasErrors": true
+- "correctedText": a fully rewritten, fluent, natural version of the sentence, preserving the student's meaning and emojis wherever possible
+- "wrongPhrases": a list of the exact short word(s)/phrase(s) that are mistakes, COPIED VERBATIM AND EXACTLY from the original message (matching case, spacing, spelling — do not fix them here)
+- "changedPhrases": a list of the exact short word(s)/phrase(s) in correctedText that differ from the original, COPIED VERBATIM AND EXACTLY from correctedText
 
 CRITICAL RULES:
-1. Do NOT flag informal, natural, conversational English as wrong (e.g., "me and my parents", "gonna").
-2. Do NOT remove or alter emojis in originalSegments — reproduce them exactly. Preserve them in correctedSegments whenever possible.
-3. originalSegments text, concatenated in order, MUST equal the original message EXACTLY, character for character.
-4. Only flag genuine grammar errors, spelling mistakes, or completely incomprehensible phrasing — nothing else.
-5. If a message has no errors: originalSegments is a single {"text": "<full message>"} segment, and correctedSegments is also a single {"text": "<same message>"} segment (no highlights).
-6. Keep highlighted spans in correctedSegments as short as possible — highlight only the word(s) that actually changed, not the whole surrounding clause.
+1. Do NOT flag informal, natural, conversational English as a mistake (e.g., "me and my parents", "gonna").
+2. Never flag emojis.
+3. Keep wrongPhrases/changedPhrases as SHORT as possible — individual words or tiny phrases, not whole clauses. Only include the part(s) that actually changed.
+4. Every string in wrongPhrases must appear character-for-character somewhere in the original message. Every string in changedPhrases must appear character-for-character somewhere in correctedText.
+5. Only flag genuine grammar errors, spelling mistakes, or incomprehensible phrasing — nothing else.
 
 Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency, calibrated to the student's level.
 
 Respond with STRICT JSON ONLY. No markdown, no commentary.
 Format:
-{"scorePercent": <integer>, "corrections": [ {"originalSegments":[...], "correctedSegments":[...]}, ... ]}
+{"scorePercent": <integer>, "corrections": [ {"hasErrors":bool, "correctedText":"...", "wrongPhrases":[...], "changedPhrases":[...]}, ... ]}
 
 EXAMPLE INPUT:
-1: "Them memories is make me feel happy every times 😊"
+1: "Yes, I think so too. 😊 Them memories is make me feel happy every times."
+2: "Thanks! It was really nice talking with you too."
 
 EXAMPLE OUTPUT:
 {
   "scorePercent": 78,
   "corrections": [
     {
-      "originalSegments": [
-        {"text":"Them", "wrong":true},
-        {"text":" memories "},
-        {"text":"is make", "wrong":true},
-        {"text":" me feel happy every "},
-        {"text":"times", "wrong":true},
-        {"text":" 😊"}
-      ],
-      "correctedSegments": [
-        {"text":"Those", "highlight":true},
-        {"text":" memories "},
-        {"text":"make", "highlight":true},
-        {"text":" me feel happy every "},
-        {"text":"time", "highlight":true},
-        {"text":" 😊"}
-      ]
+      "hasErrors": true,
+      "correctedText": "Yes, I think so too. 😊 Those memories make me feel happy every time.",
+      "wrongPhrases": ["Them", "is make", "times"],
+      "changedPhrases": ["Those", "make", "time"]
+    },
+    {
+      "hasErrors": false,
+      "correctedText": "",
+      "wrongPhrases": [],
+      "changedPhrases": []
     }
   ]
 }`;
@@ -240,7 +238,7 @@ EXAMPLE OUTPUT:
     const completion = await lemonfox.chat.completions.create({
       model:       'llama-8b-chat',
       messages:    [{ role: 'system', content: system }, { role: 'user', content: userPrompt }],
-      max_tokens:  2600,
+      max_tokens:  2200,
       temperature: 0.2,
     });
 
@@ -254,27 +252,33 @@ EXAMPLE OUTPUT:
 
     const scorePercent = Math.max(0, Math.min(100, Math.round(parsed.scorePercent)));
 
-    // Defensive pass, per message: originalSegments must reconstruct the
-    // student's text EXACTLY, or we fall back to a plain, unhighlighted
-    // original. The yellow card can never show anything other than what
-    // the student actually wrote — this is the backstop for that, since a
-    // bad model reconstruction would otherwise silently rewrite it.
     const corrections = parsed.corrections.map((entry, i) => {
       const sourceText = userMessages[i] ?? '';
+      const wrongPhrases   = Array.isArray(entry?.wrongPhrases)   ? entry.wrongPhrases   : [];
+      const changedPhrases = Array.isArray(entry?.changedPhrases) ? entry.changedPhrases : [];
+      const correctedText  = typeof entry?.correctedText === 'string' ? entry.correctedText : '';
 
-      let originalSegments = Array.isArray(entry?.originalSegments) ? entry.originalSegments : [];
-      const rebuilt = originalSegments.map((s) => s?.text ?? '').join('');
+      // hasErrors is trusted from the model UNLESS the supporting data
+      // contradicts it (no correctedText, or no phrases actually matched in
+      // the source) — in that case treat it as a clean sentence rather than
+      // showing a blue card with nothing highlighted.
+      const originalSegments = buildSegments(sourceText, wrongPhrases, 'wrong');
+      const hasRealErrors = !!entry?.hasErrors
+        && correctedText.trim().length > 0
+        && correctedText.trim() !== sourceText.trim()
+        && originalSegments.some((s) => s.wrong);
 
-      originalSegments = rebuilt === sourceText
-        ? originalSegments.map((s) => ({ text: s.text ?? '', ...(s.wrong ? { wrong: true } : {}) }))
-        : [{ text: sourceText }];
+      if (!hasRealErrors) {
+        return {
+          hasErrors: false,
+          originalSegments: [{ text: sourceText }],
+          correctedSegments: [],
+        };
+      }
 
-      let correctedSegments = Array.isArray(entry?.correctedSegments) ? entry.correctedSegments : [];
-      correctedSegments = correctedSegments.length
-        ? correctedSegments.map((s) => ({ text: s.text ?? '', ...(s.highlight ? { highlight: true } : {}) }))
-        : [{ text: sourceText }];
+      const correctedSegments = buildSegments(correctedText, changedPhrases, 'highlight');
 
-      return { originalSegments, correctedSegments };
+      return { hasErrors: true, originalSegments, correctedSegments };
     });
 
     return { scorePercent, corrections };
