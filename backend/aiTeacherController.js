@@ -609,10 +609,6 @@ async function restartTopic(req, res) {
 }
 
 // ─── GET /api/ai-teacher/results?topic=<slug> ────────────────────────────────
-// Gated on `completed === true` — the CURRENT live session, not the
-// permanent ever_completed record. If the student restarted and is mid-redo,
-// results aren't available again until they finish that redo, per product
-// requirement: no results page until the conversation is actually finished.
 async function getResults(req, res) {
   const { topic } = req.query;
   if (!topic) {
@@ -636,14 +632,22 @@ async function getResults(req, res) {
     const history      = row.history || [];
     const corrections = row.analysis?.corrections || [];
 
-    // Zip the raw history with the stored per-message correction segments —
-    // history stays clean/unannotated on disk, this view is built on demand.
     let userIdx = 0;
     const turns = history.map((m) => {
       if (m.role === 'user') {
-        const segments = corrections[userIdx] || [{ type: 'text', text: m.content }];
+        const raw = corrections[userIdx];
+        // Handles both "no analysis for this message" and rows completed
+        // before this format existed (old entries were plain arrays, so
+        // raw.originalSegments is undefined and we fall through cleanly).
+        const c = raw && Array.isArray(raw.originalSegments) && Array.isArray(raw.correctedSegments)
+          ? raw
+          : { originalSegments: [{ text: m.content }], correctedSegments: [{ text: m.content }] };
         userIdx += 1;
-        return { role: 'user', segments };
+        return {
+          role: 'user',
+          originalSegments:  c.originalSegments,
+          correctedSegments: c.correctedSegments,
+        };
       }
       return { role: 'assistant', text: m.content };
     });
