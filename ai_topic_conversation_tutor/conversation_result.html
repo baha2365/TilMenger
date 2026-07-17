@@ -273,23 +273,24 @@
     return 'score-low';
   }
 
-  // Renders one user message's segment array into the bold-correction /
-  // red-strikethrough-mistake markup shown in the reference design.
-  function renderSegments(segments) {
+  function renderOriginalSegments(segments) {
     if (!Array.isArray(segments)) return '';
-    return segments.map((seg) => {
-      switch (seg.type) {
-        case 'correction':
-          return `<span class="corr-right">${escapeHtml(seg.right)}</span> <span class="corr-wrong">${escapeHtml(seg.wrong)}</span>`;
-        case 'delete':
-          return `<span class="corr-wrong">${escapeHtml(seg.wrong)}</span>`;
-        case 'insert':
-          return `<span class="corr-right">${escapeHtml(seg.right)}</span>`;
-        case 'text':
-        default:
-          return escapeHtml(seg.text || '');
-      }
-    }).join('');
+    return segments
+      .map((seg) => {
+        const text = escapeHtml(seg.text || '');
+        return seg.wrong ? `<span class="seg-wrong">${text}</span>` : text;
+      })
+      .join('');
+  }
+
+  function renderCorrectedSegments(segments) {
+    if (!Array.isArray(segments)) return '';
+    return segments
+      .map((seg) => {
+        const text = escapeHtml(seg.text || '');
+        return seg.highlight ? `<span class="seg-highlight">${text}</span>` : text;
+      })
+      .join('');
   }
 
   async function init() {
