@@ -132,6 +132,45 @@ INTERMEDIATE STYLE:
 ${extra}`;
 }
 
+// Splits sourceText into segments around each phrase found verbatim inside
+// it, flagging matched phrases with `flagKey: true`. Segments always
+// concatenate back to sourceText EXACTLY — this is structural, not something
+// the model has to get right, which is what the old segmented-array
+// approach relied on (and why highlighting was silently failing).
+function buildSegments(sourceText, phrases, flagKey) {
+  if (!sourceText) return [{ text: '' }];
+  if (!Array.isArray(phrases) || !phrases.length) return [{ text: sourceText }];
+
+  const lowerSource = sourceText.toLowerCase();
+  const matches = [];
+
+  phrases.forEach((phrase) => {
+    if (!phrase || typeof phrase !== 'string') return;
+    let idx = sourceText.indexOf(phrase);
+    if (idx === -1) idx = lowerSource.indexOf(phrase.toLowerCase()); // case-insensitive fallback
+    if (idx === -1) return; // model hallucinated a phrase not actually in the text — just skip it
+
+    const end = idx + phrase.length;
+    const overlaps = matches.some((m) => idx < m.end && end > m.start);
+    if (!overlaps) matches.push({ start: idx, end });
+  });
+
+  if (!matches.length) return [{ text: sourceText }];
+
+  matches.sort((a, b) => a.start - b.start);
+
+  const segments = [];
+  let cursor = 0;
+  matches.forEach((m) => {
+    if (m.start > cursor) segments.push({ text: sourceText.slice(cursor, m.start) });
+    segments.push({ text: sourceText.slice(m.start, m.end), [flagKey]: true });
+    cursor = m.end;
+  });
+  if (cursor < sourceText.length) segments.push({ text: sourceText.slice(cursor) });
+
+  return segments;
+}
+
 // ─── Post-conversation analysis ──────────────────────────────────────────────
 async function analyzeConversation(level, topicTitle, userMessages) {
   if (!userMessages.length) return null;
