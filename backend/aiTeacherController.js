@@ -548,8 +548,7 @@ async function chatWithTopic(req, res) {
     let scorePercent = null;
     let analysisJson = null;
     if (isFinalTurn) {
-      const userMessages = newHistory.filter((m) => m.role === 'user').map((m) => m.content);
-      const result = await analyzeConversation(level, row.topic_title, userMessages);
+      const result = await analyzeConversation(level, row.topic_title, newHistory);
       if (result) {
         scorePercent = result.scorePercent;
         analysisJson = JSON.stringify({ corrections: result.corrections });
