@@ -171,6 +171,24 @@ function buildSegments(sourceText, phrases, flagKey) {
   return segments;
 }
 
+// Builds a labeled dialogue transcript ("[Emma]: ..." / "[Student #n]: ...")
+// so the evaluator can see what each student reply was actually responding
+// to. Student turns are numbered in order — that numbering is what lets us
+// map `corrections[i]` back to the right original message afterward, the
+// same way the old userMessages-array approach did.
+function buildDialogueTranscript(history) {
+  let studentTurn = 0;
+  return history
+    .map((m) => {
+      if (m.role === 'user') {
+        studentTurn += 1;
+        return `[Student #${studentTurn}]: "${m.content.replace(/"/g, "'")}"`;
+      }
+      return `[Emma]: "${m.content.replace(/"/g, "'")}"`;
+    })
+    .join('\n');
+}
+
 // ─── Post-conversation analysis ──────────────────────────────────────────────
 async function analyzeConversation(level, topicTitle, userMessages) {
   if (!userMessages.length) return null;
