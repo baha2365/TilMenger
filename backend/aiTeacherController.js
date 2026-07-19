@@ -190,17 +190,35 @@ function buildDialogueTranscript(history) {
 }
 
 // ─── Post-conversation analysis ──────────────────────────────────────────────
-async function analyzeConversation(level, topicTitle, userMessages) {
+// ─── Post-conversation analysis ──────────────────────────────────────────────
+// Takes the FULL conversation (assistant + user, chronological) so each
+// student turn can be graded against what it was actually responding to —
+// not just checked in isolation. Corrections are still only ever produced
+// for student turns; Emma's lines are context only and are never modified
+// or scored.
+async function analyzeConversation(level, topicTitle, history) {
+  const userMessages = history.filter((m) => m.role === 'user').map((m) => m.content);
   if (!userMessages.length) return null;
 
-  const numbered = userMessages
-    .map((m, i) => `${i + 1}: "${m.replace(/"/g, "'")}"`)
-    .join('\n');
+  const transcript = buildDialogueTranscript(history);
 
   const system = `You are a lenient and encouraging English evaluator for a conversational language-learning app.
-You will be given a numbered list of a student's messages and their CEFR level.
+You will be given the FULL conversation transcript (Emma's lines and the student's replies, in order) and the student's CEFR level.
 
-For EACH message, decide if it has any genuine grammar, spelling, or word-choice mistakes.
+CONTEXT-AWARE EVALUATION — this is the most important rule:
+For each student turn, don't just ask "is this sentence grammatical on its own?" Ask "is this a natural, appropriate, grammatically correct response to Emma's line right before it?"
+The same words can be correct or incorrect depending on what Emma just said. Use the tense, meaning, and intent of Emma's preceding line to judge the student's tense, meaning, and word choice.
+
+Examples of context changing the verdict:
+- Emma: "Have a great day!" / Student: "Had a great day too you." → wrong: this is a present-tense wish being exchanged, not a report of the past. Should be "Have a great day too" (or similar).
+- Emma: "Do you have any pets?" / Student: "Yes, I had three." → wrong: the question is about now, so the answer should use "have," not "had."
+- Emma: "What are you doing now?" / Student: "I watched TV." → wrong: the question is about the present moment, so it should be present continuous ("I am watching TV").
+- Emma: "Where did you go yesterday?" / Student: "I go to the park." → wrong: the question is about the past, so it should be past tense ("I went to the park").
+
+DO NOT force a single "correct" answer or invent corrections just because the student phrased things differently than Emma did. Many different replies can all be equally natural and correct. For example, if Emma says "Have a great day!", ALL of the following are correct and must NOT be flagged: "You too!", "Thanks, you too!", "Have a great day too!", "You have a great day too!", "Same to you!", "Thanks! Take care!"
+Only flag a response that is genuinely ungrammatical, contextually inappropriate (wrong tense/meaning given what was asked or said), or doesn't logically answer what came before.
+
+For EACH student turn (in order, numbered "Student #1", "Student #2", ...), decide if it has any genuine grammar, spelling, tense, or contextual-appropriateness mistakes.
 
 If it has NO mistakes:
 - "hasErrors": false
@@ -210,53 +228,58 @@ If it has NO mistakes:
 
 If it HAS mistakes:
 - "hasErrors": true
-- "correctedText": a fully rewritten, fluent, natural version of the sentence, preserving the student's meaning and emojis wherever possible
-- "wrongPhrases": a list of the exact short word(s)/phrase(s) that are mistakes, COPIED VERBATIM AND EXACTLY from the original message (matching case, spacing, spelling — do not fix them here)
+- "correctedText": a fully rewritten, fluent, natural version of the student's turn, preserving their intended meaning and emojis wherever possible, and fitting naturally as a reply to Emma's preceding line
+- "wrongPhrases": a list of the exact short word(s)/phrase(s) that are mistakes, COPIED VERBATIM AND EXACTLY from the student's original turn (matching case, spacing, spelling — do not fix them here)
 - "changedPhrases": a list of the exact short word(s)/phrase(s) in correctedText that differ from the original, COPIED VERBATIM AND EXACTLY from correctedText
 
 CRITICAL RULES:
 1. Do NOT flag informal, natural, conversational English as a mistake (e.g., "me and my parents", "gonna").
 2. Never flag emojis.
 3. Keep wrongPhrases/changedPhrases as SHORT as possible — individual words or tiny phrases, not whole clauses. Only include the part(s) that actually changed.
-4. Every string in wrongPhrases must appear character-for-character somewhere in the original message. Every string in changedPhrases must appear character-for-character somewhere in correctedText.
-5. Only flag genuine grammar errors, spelling mistakes, or incomprehensible phrasing — nothing else.
+4. Every string in wrongPhrases must appear character-for-character somewhere in that student turn's original text. Every string in changedPhrases must appear character-for-character somewhere in that turn's correctedText.
+5. Only flag genuine grammar errors, spelling mistakes, tense mismatches, or contextually inappropriate/incomprehensible responses — nothing else. When in doubt, don't flag it.
+6. Judge grammar, spelling, punctuation, tense consistency, pronoun usage, vocabulary, and whether the reply logically answers what Emma said — always using Emma's preceding line as context.
+7. Never evaluate or output anything for Emma's lines — they are context only.
 
-Then give ONE overall score from 0 to 100 for grammatical accuracy and fluency, calibrated to the student's level.
+Then give ONE overall score from 0 to 100 for the student's grammatical accuracy, fluency, and contextual appropriateness, calibrated to their level.
 
 Respond with STRICT JSON ONLY. No markdown, no commentary.
 Format:
 {"scorePercent": <integer>, "corrections": [ {"hasErrors":bool, "correctedText":"...", "wrongPhrases":[...], "changedPhrases":[...]}, ... ]}
+The "corrections" array MUST have exactly one entry per Student turn, in the same order they appear in the transcript.
 
-EXAMPLE INPUT:
-1: "Yes, I think so too. 😊 Them memories is make me feel happy every times."
-2: "Thanks! It was really nice talking with you too."
+EXAMPLE INPUT TRANSCRIPT:
+[Emma]: "Have a great day!"
+[Student #1]: "Had a great day too you."
+[Emma]: "Do you have any pets?"
+[Student #2]: "Yes, I had three."
 
 EXAMPLE OUTPUT:
 {
-  "scorePercent": 78,
+  "scorePercent": 65,
   "corrections": [
     {
       "hasErrors": true,
-      "correctedText": "Yes, I think so too. 😊 Those memories make me feel happy every time.",
-      "wrongPhrases": ["Them", "is make", "times"],
-      "changedPhrases": ["Those", "make", "time"]
+      "correctedText": "Have a great day too!",
+      "wrongPhrases": ["Had", "too you"],
+      "changedPhrases": ["Have", "too!"]
     },
     {
-      "hasErrors": false,
-      "correctedText": "",
-      "wrongPhrases": [],
-      "changedPhrases": []
+      "hasErrors": true,
+      "correctedText": "Yes, I have three.",
+      "wrongPhrases": ["had"],
+      "changedPhrases": ["have"]
     }
   ]
 }`;
 
-  const userPrompt = `Student level: ${level}\nTopic: ${topicTitle}\n\nMessages:\n${numbered}`;
+  const userPrompt = `Student level: ${level}\nTopic: ${topicTitle}\n\nConversation:\n${transcript}`;
 
   try {
     const completion = await lemonfox.chat.completions.create({
       model:       'llama-8b-chat',
       messages:    [{ role: 'system', content: system }, { role: 'user', content: userPrompt }],
-      max_tokens:  2200,
+      max_tokens:  2600,
       temperature: 0.2,
     });
 
@@ -268,18 +291,25 @@ EXAMPLE OUTPUT:
       throw new Error('Malformed analysis response');
     }
 
+    // If the model returns the wrong number of entries, alignment between
+    // corrections[i] and userMessages[i] can't be trusted for the tail of
+    // the array — safer to drop the mismatched extras / pad the shortfall
+    // with "no errors" than to risk pairing a correction with the wrong
+    // student message.
+    if (parsed.corrections.length !== userMessages.length) {
+      console.warn(
+        `analyzeConversation: expected ${userMessages.length} corrections, got ${parsed.corrections.length}`
+      );
+    }
+
     const scorePercent = Math.max(0, Math.min(100, Math.round(parsed.scorePercent)));
 
-    const corrections = parsed.corrections.map((entry, i) => {
-      const sourceText = userMessages[i] ?? '';
+    const corrections = userMessages.map((sourceText, i) => {
+      const entry = parsed.corrections[i]; // undefined if the model under-returned — falls through to "no errors"
       const wrongPhrases   = Array.isArray(entry?.wrongPhrases)   ? entry.wrongPhrases   : [];
       const changedPhrases = Array.isArray(entry?.changedPhrases) ? entry.changedPhrases : [];
       const correctedText  = typeof entry?.correctedText === 'string' ? entry.correctedText : '';
 
-      // hasErrors is trusted from the model UNLESS the supporting data
-      // contradicts it (no correctedText, or no phrases actually matched in
-      // the source) — in that case treat it as a clean sentence rather than
-      // showing a blue card with nothing highlighted.
       const originalSegments = buildSegments(sourceText, wrongPhrases, 'wrong');
       const hasRealErrors = !!entry?.hasErrors
         && correctedText.trim().length > 0
