@@ -662,7 +662,7 @@
       <div class="speaking-progress-ring" id="speakingRing" style="--pct: 0%">
         <span class="speaking-progress-num" id="speakingPct">0%</span>
       </div>
-      <div class="speaking-progress-label">Progress</div>
+      <div class="speaking-progress-label">Average Score</div>
     </div>
   </a>
 
@@ -737,6 +737,9 @@
   const API          = LINGUA.auth;
   const VOCAB        = LINGUA.vocab;
   const STUDENT_API  = LINGUA.student;
+  const AITEACHER    = (typeof LINGUA !== 'undefined' && LINGUA.aiTeacher)
+  ? LINGUA.aiTeacher
+  : `${location.origin}/api/ai-teacher`;
 
   function logout() {
     localStorage.removeItem('token');
@@ -857,27 +860,30 @@
     } catch (e) { /* progress is cosmetic, fail silently */ }
   }
 
-  /* NOTE: no speaking/conversation progress endpoint existed in this file yet, so this
-     points at a placeholder path — swap in your real endpoint + response shape.
-     Expected shape: { success: true, total: <number of topics>, completed: <number done> }.
-     Until it's wired up this fails silently and the ring just shows 0%, same as the
-     other cosmetic progress calls above. */
-  async function loadSpeakingProgress() {
-    const token = localStorage.getItem('token');
-    try {
-      const res  = await fetch(`${STUDENT_API}/speaking-progress`, { headers: { Authorization: `Bearer ${token}` } });
-      const data = await res.json();
+/* Speaking progress ≠ "how many topics done" like the vocab ring — it's the
+   student's average score across every topic they've completed at least
+   once. `scores` from /topics/progress is keyed by topic slug and only
+   ever contains topics that have been graded (i.e. finished at least once),
+   so its values are exactly "the learned topics" the user means. */
+async function loadSpeakingProgress() {
+  const token = localStorage.getItem('token');
+  try {
+    const res  = await fetch(`${AITEACHER}/topics/progress`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
 
-      if (data.success) {
-        const total = data.total     || 0;
-        const done  = data.completed || 0;
-        const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+    if (data.success) {
+      const scoreValues = Object.values(data.scores || {});
+      const pct = scoreValues.length
+        ? Math.round(scoreValues.reduce((sum, v) => sum + v, 0) / scoreValues.length)
+        : 0;
 
-        document.getElementById('speakingPct').textContent = pct + '%';
-        document.getElementById('speakingRing').style.setProperty('--pct', pct + '%');
-      }
-    } catch (e) { /* progress is cosmetic, fail silently */ }
-  }
+      document.getElementById('speakingPct').textContent = pct + '%';
+      document.getElementById('speakingRing').style.setProperty('--pct', pct + '%');
+    }
+  } catch (e) { /* progress is cosmetic, fail silently */ }
+}
 
   async function initDashboard() {
     document.getElementById('statusScreen').innerHTML = `
