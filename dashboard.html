@@ -369,6 +369,63 @@
     .vocab-progress-num { font-size: 1rem; font-weight: 700; color: white; position: relative; z-index: 1; }
     .vocab-progress-label { font-size: .68rem; color: rgba(255,255,255,.45); margin-top: .35rem; text-transform: uppercase; letter-spacing: .06em; }
 
+    /* ── Speaking feature card (same anatomy as the vocab card, blue/cyan accent) ── */
+    .speaking-feature-card {
+      background: linear-gradient(135deg, #071427 0%, #0d2138 45%, #0a2e3f 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--r-lg);
+      padding: 2.1rem 2.3rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+      text-decoration: none; cursor: pointer;
+      transition: transform .28s var(--ease), box-shadow .28s var(--ease);
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-md);
+      margin-top: 1.4rem;
+      animation: fadeUp .55s var(--ease) .24s both;
+    }
+    .speaking-feature-card::before {
+      content: ''; position: absolute; bottom: -70px; right: -50px;
+      width: 260px; height: 260px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(50,173,230,.32), transparent 70%);
+      pointer-events: none;
+    }
+    .speaking-feature-card::after {
+      content: ''; position: absolute; top: -40px; left: 10%;
+      width: 160px; height: 160px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,122,255,.26), transparent 70%);
+      pointer-events: none;
+    }
+    .speaking-feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
+    .speaking-feature-card:active { transform: scale(.99); }
+
+    .speaking-text { position: relative; z-index: 1; }
+    .speaking-eyebrow { display: flex; align-items: center; gap: .4rem; font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: #6fd8f5; margin-bottom: .55rem; font-weight: 600; }
+    .speaking-eyebrow svg { width: 13px; height: 13px; }
+    .speaking-text h3 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; color: white; margin-bottom: .4rem; }
+    .speaking-text p { font-size: .84rem; color: rgba(255,255,255,.55); line-height: 1.6; }
+    .speaking-cta {
+      display: inline-flex; align-items: center; gap: .4rem;
+      margin-top: 1.1rem; padding: .55rem 1.2rem;
+      background: linear-gradient(135deg, var(--ring-blue), var(--accent));
+      border-radius: var(--r-pill);
+      font-size: .8rem; font-weight: 600; color: white;
+      box-shadow: 0 6px 18px rgba(50,173,230,.35);
+    }
+    .speaking-cta svg { width: 14px; height: 14px; }
+
+    .speaking-progress-wrap { position: relative; z-index: 1; flex-shrink: 0; text-align: center; }
+    .speaking-progress-ring {
+      width: 78px; height: 78px; border-radius: 50%;
+      background: conic-gradient(var(--ring-blue) var(--pct, 0%), rgba(255,255,255,.12) 0%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      box-shadow: 0 0 22px rgba(50,173,230,.28);
+      transition: background 1s var(--ease);
+    }
+    .speaking-progress-ring::after { content: ''; position: absolute; inset: 8px; border-radius: 50%; background: #0b1c2b; }
+    .speaking-progress-num { font-size: 1rem; font-weight: 700; color: white; position: relative; z-index: 1; }
+    .speaking-progress-label { font-size: .68rem; color: rgba(255,255,255,.45); margin-top: .35rem; text-transform: uppercase; letter-spacing: .06em; }
+
     /* ── Card ── */
     .card {
       background: var(--glass);
@@ -587,6 +644,28 @@
     </div>
   </a>
 
+  <!-- ── Speaking Practice Feature Card ── -->
+  <a href="ai_topic_conversation_tutor/conversation_select.html" class="speaking-feature-card" id="speakingCard">
+    <div class="speaking-text">
+      <div class="speaking-eyebrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Speaking Practice
+      </div>
+      <h3>Practice speaking today</h3>
+      <p>Have real conversations with AI characters on topics you choose.<br>Instant feedback · every level.</p>
+      <div class="speaking-cta">
+        Start a conversation
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </div>
+    </div>
+    <div class="speaking-progress-wrap">
+      <div class="speaking-progress-ring" id="speakingRing" style="--pct: 0%">
+        <span class="speaking-progress-num" id="speakingPct">0%</span>
+      </div>
+      <div class="speaking-progress-label">Progress</div>
+    </div>
+  </a>
+
   <!-- ── My Classes Card (students only, shown if enrolled in 1+ classes) ── -->
   <div class="card" id="my-classes-card" style="margin-top: 1.4rem;">
     <div class="card-title">
@@ -778,6 +857,28 @@
     } catch (e) { /* progress is cosmetic, fail silently */ }
   }
 
+  /* NOTE: no speaking/conversation progress endpoint existed in this file yet, so this
+     points at a placeholder path — swap in your real endpoint + response shape.
+     Expected shape: { success: true, total: <number of topics>, completed: <number done> }.
+     Until it's wired up this fails silently and the ring just shows 0%, same as the
+     other cosmetic progress calls above. */
+  async function loadSpeakingProgress() {
+    const token = localStorage.getItem('token');
+    try {
+      const res  = await fetch(`${STUDENT_API}/speaking-progress`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+
+      if (data.success) {
+        const total = data.total     || 0;
+        const done  = data.completed || 0;
+        const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+
+        document.getElementById('speakingPct').textContent = pct + '%';
+        document.getElementById('speakingRing').style.setProperty('--pct', pct + '%');
+      }
+    } catch (e) { /* progress is cosmetic, fail silently */ }
+  }
+
   async function initDashboard() {
     document.getElementById('statusScreen').innerHTML = `
       <div class="spinner"></div>
@@ -798,7 +899,8 @@
         return;
       }
       renderUser(data.user);
-      loadVocabProgress(); // load progress after rendering (non-blocking)
+      loadVocabProgress();    // load progress after rendering (non-blocking)
+      loadSpeakingProgress(); // same, for the speaking practice card
     } catch {
       showError('Could not reach the server. Check your connection and try again.');
     }
