@@ -5,500 +5,468 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TilMenger — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cream:    #F5F0E8;
-      --ink:      #1A1612;
-      --rust:     #C4572A;
-      --sage:     #4A6741;
-      --gold:     #D4A853;
-      --muted:    #7A6E65;
-      --border:   #DDD5C8;
-      --card-bg:  #FDFAF5;
-      --input-bg: #F9F5EE;
+      --white:        #ffffff;
+      --bg-base:      #f5f5f7;
+      --ink:          #1d1d1f;
+      --ink-soft:     #6e6e73;
+      --ink-faint:    #86868b;
+      --accent:       #007aff;
+      --accent-2:     #5e5ce6;
+      --ring-red:     #ff375f;
+      --ring-green:   #34c759;
+      --ring-blue:    #32ade6;
+      --gold:         #c9a24d;
+      --glass:        rgba(255,255,255,0.6);
+      --glass-strong: rgba(255,255,255,0.78);
+      --glass-soft:   rgba(255,255,255,0.42);
+      --glass-border: rgba(255,255,255,0.55);
+      --dark-glass:   rgba(24,22,18,0.74);
+      --r-lg:   28px;
+      --r-md:   22px;
+      --r-sm:   16px;
+      --r-pill: 980px;
+      --shadow-sm:   0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.05);
+      --shadow-md:   0 4px 16px rgba(0,0,0,.06), 0 16px 40px rgba(31,38,90,.08);
+      --shadow-lift: 0 10px 30px rgba(31,38,90,.14), 0 2px 8px rgba(0,0,0,.06);
+      --ease: cubic-bezier(.22,1,.36,1);
     }
+
+    html { scroll-behavior: smooth; }
 
     html, body {
       height: 100%;
-      font-family: 'DM Sans', sans-serif;
-      background-color: var(--cream);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif;
       color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
+
+    body {
+      position: relative;
+      min-height: 100%;
+      padding-top: 96px;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 15% 8%,  rgba(0,122,255,.10), transparent 45%),
+        radial-gradient(circle at 85% 0%,  rgba(94,92,230,.09), transparent 50%),
+        radial-gradient(circle at 90% 75%, rgba(50,173,230,.10), transparent 45%),
+        radial-gradient(circle at 8% 88%,  rgba(175,130,220,.08), transparent 45%),
+        linear-gradient(180deg, #fbfbfd 0%, #f2f2f5 100%);
+      background-attachment: fixed;
+    }
+
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .55;
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::before {
+      top: -140px; left: -120px;
+      background: radial-gradient(circle, rgba(0,122,255,.22), transparent 70%);
+      animation: driftA 22s ease-in-out infinite alternate;
+    }
+    body::after {
+      bottom: -160px; right: -140px;
+      background: radial-gradient(circle, rgba(94,92,230,.18), transparent 70%);
+      animation: driftB 26s ease-in-out infinite alternate;
+    }
+    @keyframes driftA { from { transform: translate(0,0) scale(1); } to { transform: translate(60px,40px) scale(1.08); } }
+    @keyframes driftB { from { transform: translate(0,0) scale(1); } to { transform: translate(-50px,-30px) scale(1.06); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    a { color: inherit; }
+    button { font: inherit; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
     /* ── Navbar ── */
     .navbar {
-      background: var(--ink);
-      padding: 1rem 2.5rem;
+      position: fixed;
+      top: 18px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: min(calc(100% - 32px), 760px);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      padding: .65rem .7rem .65rem 1.4rem;
+      background: var(--glass);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-pill);
+      box-shadow: var(--shadow-md);
     }
-    .nav-brand {
-      font-family: 'Playfair Display', serif;
-      color: var(--cream);
-      font-size: 1.3rem;
-      letter-spacing: -0.02em;
-    }
-    .nav-brand span { color: var(--gold); }
-    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-brand { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+    .nav-brand span { color: var(--accent); }
+    .nav-right { display: flex; align-items: center; gap: .85rem; }
     .nav-avatar {
-      width: 38px; height: 38px;
-      background: var(--rust);
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: 600; font-size: 0.95rem;
+      color: white; font-weight: 600; font-size: .85rem;
+      box-shadow: 0 2px 8px rgba(0,122,255,.35);
     }
-    .nav-name { color: #C8BFB5; font-size: 0.88rem; }
+    .nav-name { color: var(--ink-soft); font-size: .82rem; font-weight: 500; }
     .btn-logout {
-      background: none;
-      border: 1px solid rgba(255,255,255,0.2);
-      color: #9A9089;
-      padding: 0.4rem 1rem;
-      border-radius: 7px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.82rem;
+      background: rgba(0,0,0,.04);
+      border: 1px solid rgba(0,0,0,.06);
+      color: var(--ink-soft);
+      padding: .45rem 1rem;
+      border-radius: var(--r-pill);
+      font-size: .78rem; font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background .2s var(--ease), color .2s var(--ease);
     }
-    .btn-logout:hover { border-color: rgba(255,255,255,0.5); color: var(--cream); }
+    .btn-logout:hover { background: rgba(0,0,0,.08); color: var(--ink); }
 
     /* ── Loading / error states ── */
     .status-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      gap: 1rem;
-      color: var(--muted);
-      font-size: 0.9rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 60vh; gap: 1.1rem; color: var(--ink-soft); font-size: .9rem;
+      position: relative; z-index: 1;
     }
     .spinner {
-      width: 28px; height: 28px;
-      border: 2.5px solid var(--border);
-      border-top-color: var(--rust);
+      width: 26px; height: 26px;
+      border: 2.5px solid rgba(0,122,255,.15);
+      border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      animation: spin .8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .status-screen .error-icon { font-size: 2rem; }
+    .status-screen .error-icon { color: #ff9500; display: flex; }
     .btn-retry {
-      margin-top: 0.5rem;
-      padding: 0.5rem 1.4rem;
-      background: var(--ink); color: var(--cream);
-      border: none; border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+      margin-top: .3rem;
+      padding: .6rem 1.6rem;
+      background: var(--ink); color: white;
+      border: none; border-radius: var(--r-pill);
+      font-size: .85rem; font-weight: 500;
       cursor: pointer;
+      transition: transform .2s var(--ease), opacity .2s var(--ease);
     }
+    .btn-retry:hover { transform: translateY(-1px); opacity: .9; }
 
     /* ── Main layout ── */
-    .main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 3rem 2rem;
-    }
+    .main { max-width: 1100px; margin: 0 auto; padding: 1rem 2rem 4rem; position: relative; z-index: 1; }
 
     /* ── Welcome banner ── */
     .welcome-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--ink);
-      border-radius: 20px;
-      padding: 2.5rem 3rem;
-      margin-bottom: 2.5rem;
-      position: relative;
-      overflow: hidden;
+      display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+      background: var(--glass-soft);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-lg);
+      padding: 2.6rem 3rem;
+      margin: 1.5rem 0 2rem;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-md);
+      animation: fadeUp .6s var(--ease) both;
     }
     .welcome-banner::before {
-      content: '';
-      position: absolute;
-      top: -80px; right: -80px;
-      width: 300px; height: 300px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(196,87,42,0.3) 0%, transparent 70%);
+      content: ''; position: absolute; top: -100px; right: -80px;
+      width: 340px; height: 340px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,122,255,.16) 0%, rgba(94,92,230,.10) 45%, transparent 70%);
+      filter: blur(10px);
+      animation: glow 8s ease-in-out infinite alternate;
       pointer-events: none;
     }
+    .welcome-banner::after {
+      content: ''; position: absolute; bottom: -60px; left: 10%;
+      width: 160px; height: 160px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(50,173,230,.14), transparent 70%);
+      filter: blur(6px);
+      animation: glow 10s ease-in-out infinite alternate-reverse;
+      pointer-events: none;
+    }
+    @keyframes glow { from { opacity: .6; transform: scale(1); } to { opacity: 1; transform: scale(1.12); } }
+
     .welcome-text { position: relative; z-index: 1; }
-    .welcome-text h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      color: var(--cream);
-      margin-bottom: 0.5rem;
+    .welcome-text h1 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--ink); margin-bottom: .5rem; }
+    .welcome-text h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
     }
-    .welcome-text h1 em { color: var(--gold); font-style: italic; }
-    .welcome-text p { color: #9A9089; font-size: 0.92rem; }
+    .welcome-text p { color: var(--ink-soft); font-size: .95rem; line-height: 1.6; }
+
     .level-badge {
-      position: relative; z-index: 1;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 12px;
-      padding: 1rem 1.5rem;
+      position: relative; z-index: 1; flex-shrink: 0;
+      background: var(--glass-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-md);
+      padding: 1.1rem 1.7rem;
       text-align: center;
-      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
     }
-    .level-badge .badge-label {
-      font-size: 0.72rem; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem;
-    }
+    .level-badge .badge-label { font-size: .68rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .4rem; font-weight: 600; }
     .level-badge .badge-value {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem; color: var(--gold);
+      font-size: 1.2rem; font-weight: 700; letter-spacing: -0.01em;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
     }
 
     /* ── Stats row ── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.2rem;
-      margin-bottom: 2.5rem;
-    }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; margin-bottom: 1.75rem; }
     .stat-card {
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 14px; padding: 1.5rem;
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-md);
+      padding: 1.5rem 1.4rem;
       display: flex; align-items: center; gap: 1rem;
-      animation: fadeUp 0.4s ease both;
+      box-shadow: var(--shadow-sm);
+      animation: fadeUp .5s var(--ease) both;
+      transition: transform .28s var(--ease), box-shadow .28s var(--ease);
     }
-    .stat-card:nth-child(2) { animation-delay: 0.08s; }
-    .stat-card:nth-child(3) { animation-delay: 0.16s; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+    .stat-card:nth-child(2) { animation-delay: .08s; }
+    .stat-card:nth-child(3) { animation-delay: .16s; }
     .stat-icon {
-      width: 48px; height: 48px; border-radius: 12px;
+      width: 46px; height: 46px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem; flex-shrink: 0;
+      flex-shrink: 0; color: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12);
     }
-    .icon-rust { background: rgba(196,87,42,0.12); }
-    .icon-sage { background: rgba(74,103,65,0.12); }
-    .icon-gold { background: rgba(212,168,83,0.12); }
-    .stat-info .stat-value {
-      font-family: 'Playfair Display', serif; font-size: 1.6rem;
-      color: var(--ink); line-height: 1;
-    }
-    .stat-info .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+    .stat-icon svg { width: 21px; height: 21px; }
+    .icon-rust { background: linear-gradient(135deg, #ff5f7a, var(--ring-red)); }
+    .icon-sage { background: linear-gradient(135deg, #6fe08a, var(--ring-green)); }
+    .icon-gold { background: linear-gradient(135deg, #6fd8f5, var(--ring-blue)); }
+    .stat-info .stat-value { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); line-height: 1; font-variant-numeric: tabular-nums; }
+    .stat-info .stat-label { font-size: .76rem; color: var(--ink-soft); margin-top: .3rem; font-weight: 500; }
 
     /* ══════════════════════════════════════════
        ── Teacher Dashboard Banner ──
        Only rendered for role_id === '2'.
        Hidden by default; JS unhides it.
     ══════════════════════════════════════════ */
-    #teacher-dashboard-link {
-      display: none; /* hidden until JS confirms teacher role */
-      margin-bottom: 2rem;
-      animation: fadeUp 0.45s ease both;
-    }
+    #teacher-dashboard-link { display: none; margin-bottom: 1.75rem; animation: fadeUp .55s var(--ease) both; }
 
     .teacher-banner {
-      position: relative;
-      overflow: hidden;
-      border-radius: 18px;
-      padding: 1.6rem 2rem;
-      background: linear-gradient(125deg, #1f1a14 0%, #2c1f0e 50%, #1a160e 100%);
-      border: 1px solid rgba(212,168,83,0.25);
-      box-shadow:
-        0 0 0 1px rgba(212,168,83,0.08) inset,
-        0 8px 32px rgba(0,0,0,0.28),
-        0 2px 8px rgba(196,87,42,0.12);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
+      position: relative; overflow: hidden;
+      border-radius: var(--r-md);
+      padding: 1.5rem 2rem;
+      background: var(--dark-glass);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid rgba(201,162,77,.28);
+      box-shadow: 0 0 0 1px rgba(201,162,77,.06) inset, 0 14px 36px rgba(0,0,0,.22);
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
       cursor: pointer;
-      transition: transform 0.22s ease, box-shadow 0.22s ease;
+      transition: transform .25s var(--ease), box-shadow .25s var(--ease);
     }
-
-    /* Decorative shimmer line at the top */
     .teacher-banner::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg,
-        transparent 0%,
-        rgba(212,168,83,0.6) 35%,
-        rgba(196,87,42,0.5) 65%,
-        transparent 100%);
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,162,77,.55) 40%, rgba(0,122,255,.35) 65%, transparent);
     }
-
-    /* Radial glow in the background */
     .teacher-banner::after {
-      content: '';
-      position: absolute;
-      top: -60px; right: -40px;
-      width: 260px; height: 260px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(212,168,83,0.14) 0%, transparent 65%);
+      content: ''; position: absolute; top: -60px; right: -40px;
+      width: 260px; height: 260px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,162,77,.14), transparent 65%);
       pointer-events: none;
     }
-
-    .teacher-banner:hover {
-      transform: translateY(-2px);
-      box-shadow:
-        0 0 0 1px rgba(212,168,83,0.18) inset,
-        0 12px 40px rgba(0,0,0,0.35),
-        0 4px 16px rgba(212,168,83,0.12);
-    }
-    .teacher-banner:active { transform: scale(0.995); }
-
-    /* Left icon badge */
+    .teacher-banner:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(201,162,77,.14) inset, 0 20px 48px rgba(0,0,0,.28); }
+    .teacher-banner:active { transform: scale(.99); }
     .teacher-icon-wrap {
-      flex-shrink: 0;
-      position: relative;
-      z-index: 1;
-      width: 52px; height: 52px;
-      border-radius: 14px;
-      background: linear-gradient(145deg, rgba(212,168,83,0.18), rgba(196,87,42,0.12));
-      border: 1px solid rgba(212,168,83,0.22);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem;
+      flex-shrink: 0; position: relative; z-index: 1;
+      width: 50px; height: 50px; border-radius: 14px;
+      background: linear-gradient(145deg, rgba(201,162,77,.2), rgba(201,162,77,.08));
+      border: 1px solid rgba(201,162,77,.25);
+      display: flex; align-items: center; justify-content: center; color: var(--gold);
     }
-
-    /* Text block */
-    .teacher-text {
-      flex: 1;
-      min-width: 0;
-      position: relative;
-      z-index: 1;
-    }
-    .teacher-eyebrow {
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--gold);
-      opacity: 0.75;
-      margin-bottom: 0.3rem;
-    }
-    .teacher-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.15rem;
-      color: var(--cream);
-      line-height: 1.25;
-      margin-bottom: 0.3rem;
-    }
-    .teacher-sub {
-      font-size: 0.78rem;
-      color: #8a7e72;
-      line-height: 1.5;
-    }
-
-    /* Pill badge */
-    .teacher-pill {
-      flex-shrink: 0;
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
+    .teacher-icon-wrap svg { width: 22px; height: 22px; }
+    .teacher-text { flex: 1; min-width: 0; position: relative; z-index: 1; }
+    .teacher-eyebrow { font-size: .66rem; text-transform: uppercase; letter-spacing: .14em; color: var(--gold); opacity: .8; margin-bottom: .3rem; font-weight: 600; }
+    .teacher-title { font-size: 1.12rem; font-weight: 700; color: white; letter-spacing: -0.01em; margin-bottom: .3rem; }
+    .teacher-sub { font-size: .78rem; color: rgba(255,255,255,.5); line-height: 1.5; }
+    .teacher-pill { flex-shrink: 0; position: relative; z-index: 1; display: flex; align-items: center; gap: .6rem; }
     .teacher-role-pill {
-      padding: 0.35rem 0.9rem;
-      border-radius: 20px;
-      background: rgba(212,168,83,0.12);
-      border: 1px solid rgba(212,168,83,0.28);
-      font-size: 0.73rem;
-      font-weight: 500;
-      color: var(--gold);
-      letter-spacing: 0.04em;
-      white-space: nowrap;
+      padding: .35rem .9rem; border-radius: var(--r-pill);
+      background: rgba(201,162,77,.12); border: 1px solid rgba(201,162,77,.3);
+      font-size: .72rem; font-weight: 600; color: var(--gold); letter-spacing: .03em; white-space: nowrap;
     }
-    .teacher-arrow {
-      font-size: 1.2rem;
-      color: rgba(212,168,83,0.4);
-      transition: transform 0.2s, color 0.2s;
-    }
-    .teacher-banner:hover .teacher-arrow {
-      transform: translateX(4px);
-      color: var(--gold);
-    }
+    .teacher-arrow { color: rgba(201,162,77,.5); display: flex; transition: transform .2s var(--ease), color .2s var(--ease); }
+    .teacher-arrow svg { width: 18px; height: 18px; }
+    .teacher-banner:hover .teacher-arrow { transform: translateX(4px); color: var(--gold); }
 
     /* ── Sections row ── */
-    .sections-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .sections-row { display: grid; grid-template-columns: 2fr 1fr; gap: 1.4rem; margin-bottom: 1.4rem; }
 
     /* ── Vocab feature card ── */
     .vocab-feature-card {
-      background: var(--ink);
-      border: none;
-      border-radius: 16px;
-      padding: 2rem 2.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-      overflow: hidden;
-      animation: fadeUp 0.4s ease 0.24s both;
+      background: linear-gradient(135deg, #0c1220 0%, #161b33 45%, #1c1440 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--r-lg);
+      padding: 2.1rem 2.3rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+      text-decoration: none; cursor: pointer;
+      transition: transform .28s var(--ease), box-shadow .28s var(--ease);
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-md);
+      animation: fadeUp .55s var(--ease) .18s both;
     }
     .vocab-feature-card::before {
-      content: '';
-      position: absolute;
-      bottom: -60px; right: -60px;
-      width: 220px; height: 220px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(127,119,221,0.3) 0%, transparent 70%);
+      content: ''; position: absolute; bottom: -70px; right: -50px;
+      width: 260px; height: 260px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,122,255,.32), transparent 70%);
       pointer-events: none;
     }
-    .vocab-feature-card:hover  { transform: translateY(-2px); }
-    .vocab-feature-card:active { transform: scale(0.99); }
+    .vocab-feature-card::after {
+      content: ''; position: absolute; top: -40px; left: 10%;
+      width: 160px; height: 160px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(94,92,230,.28), transparent 70%);
+      pointer-events: none;
+    }
+    .vocab-feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
+    .vocab-feature-card:active { transform: scale(.99); }
 
     .vocab-text { position: relative; z-index: 1; }
-    .vocab-text .vocab-eyebrow {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #7F77DD;
-      margin-bottom: 0.4rem;
+    .vocab-eyebrow { display: flex; align-items: center; gap: .4rem; font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: #7ab8ff; margin-bottom: .55rem; font-weight: 600; }
+    .vocab-eyebrow svg { width: 13px; height: 13px; }
+    .vocab-text h3 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; color: white; margin-bottom: .4rem; }
+    .vocab-text p { font-size: .84rem; color: rgba(255,255,255,.55); line-height: 1.6; }
+    .vocab-cta {
+      display: inline-flex; align-items: center; gap: .4rem;
+      margin-top: 1.1rem; padding: .55rem 1.2rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: var(--r-pill);
+      font-size: .8rem; font-weight: 600; color: white;
+      box-shadow: 0 6px 18px rgba(0,122,255,.35);
     }
-    .vocab-text h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      color: var(--cream);
-      margin-bottom: 0.35rem;
-    }
-    .vocab-text p {
-      font-size: 0.82rem;
-      color: #9A9089;
-      line-height: 1.5;
-    }
+    .vocab-cta svg { width: 14px; height: 14px; }
 
-    .vocab-progress-wrap {
-      position: relative; z-index: 1;
-      flex-shrink: 0;
-      text-align: center;
-    }
+    .vocab-progress-wrap { position: relative; z-index: 1; flex-shrink: 0; text-align: center; }
     .vocab-progress-ring {
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      background: conic-gradient(#7F77DD var(--pct, 0%), rgba(255,255,255,0.08) 0%);
+      width: 78px; height: 78px; border-radius: 50%;
+      background: conic-gradient(var(--accent) var(--pct, 0%), rgba(255,255,255,.12) 0%);
       display: flex; align-items: center; justify-content: center;
       position: relative;
+      box-shadow: 0 0 22px rgba(0,122,255,.28);
+      transition: background 1s var(--ease);
     }
-    .vocab-progress-ring::after {
-      content: '';
-      position: absolute;
-      inset: 8px;
-      border-radius: 50%;
-      background: var(--ink);
-    }
-    .vocab-progress-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 1rem;
-      color: var(--cream);
-      position: relative; z-index: 1;
-    }
-    .vocab-progress-label {
-      font-size: 0.7rem;
-      color: #9A9089;
-      margin-top: 0.3rem;
-    }
-    .vocab-arrow {
-      font-size: 1.4rem;
-      color: rgba(255,255,255,0.3);
-      position: relative; z-index: 1;
-      transition: transform 0.2s, color 0.2s;
-    }
-    .vocab-feature-card:hover .vocab-arrow {
-      transform: translateX(4px);
-      color: #7F77DD;
-    }
+    .vocab-progress-ring::after { content: ''; position: absolute; inset: 8px; border-radius: 50%; background: #12162a; }
+    .vocab-progress-num { font-size: 1rem; font-weight: 700; color: white; position: relative; z-index: 1; }
+    .vocab-progress-label { font-size: .68rem; color: rgba(255,255,255,.45); margin-top: .35rem; text-transform: uppercase; letter-spacing: .06em; }
 
     /* ── Card ── */
     .card {
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.8rem;
-      animation: fadeUp 0.4s ease both;
+      background: var(--glass);
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-lg);
+      padding: 1.9rem;
+      box-shadow: var(--shadow-sm);
+      animation: fadeUp .5s var(--ease) both;
+      transition: box-shadow .25s var(--ease);
     }
-    .card-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 1.2rem; color: var(--ink); }
-
+    .card:hover { box-shadow: var(--shadow-md); }
+    .card-title { font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 1.2rem; color: var(--ink); display: flex; align-items: center; gap: .5rem; }
+    .card-title svg { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
 
     /* ── XP Showcase Card ── */
-    .xp-showcase {
-      background: linear-gradient(135deg, var(--ink) 0%, #241d16 100%);
-      border: 1px solid rgba(212,168,83,0.28);
-      position: relative;
-      overflow: hidden;
-    }
+    .xp-showcase { background: linear-gradient(135deg, #1a1610 0%, #241d16 100%); border: 1px solid rgba(201,162,77,.25); position: relative; overflow: hidden; }
     .xp-showcase::before {
-      content: '';
-      position: absolute; top: -60px; right: -60px;
+      content: ''; position: absolute; top: -60px; right: -60px;
       width: 220px; height: 220px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(212,168,83,0.25) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(201,162,77,.22), transparent 70%);
       pointer-events: none;
     }
     .xp-showcase-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 1.3rem; }
     .xp-icon {
-      width: 56px; height: 56px; flex-shrink: 0;
-      background: rgba(212,168,83,0.14);
-      border: 1px solid rgba(212,168,83,0.3);
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.7rem;
+      width: 54px; height: 54px; flex-shrink: 0; border-radius: 15px;
+      background: rgba(201,162,77,.14); border: 1px solid rgba(201,162,77,.3);
+      display: flex; align-items: center; justify-content: center; color: var(--gold);
     }
+    .xp-icon svg { width: 24px; height: 24px; }
     .xp-info { flex: 1; min-width: 0; }
-    .xp-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); opacity: 0.9; margin-bottom: 0.3rem; }
-    .xp-value { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--cream); line-height: 1; margin-bottom: 0.4rem; }
-    .xp-sub { font-size: 0.78rem; color: #9A9089; line-height: 1.5; }
+    .xp-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--gold); opacity: .9; margin-bottom: .3rem; font-weight: 600; }
+    .xp-value { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; color: white; line-height: 1; margin-bottom: .4rem; font-variant-numeric: tabular-nums; }
+    .xp-sub { font-size: .78rem; color: rgba(255,255,255,.45); line-height: 1.55; }
+
     /* ══════════════════════════════════════════
        ── My Classes Card ──
        Students only, shown if enrolled in 1+ classes.
        Hidden by default; JS unhides it once data loads.
     ══════════════════════════════════════════ */
-    #my-classes-card {
-      display: none; /* hidden until JS confirms the student has classes */
-      margin-bottom: 1.5rem;
-    }
+    #my-classes-card { display: none; margin-bottom: 1.4rem; }
 
     /* ── Lesson items ── */
-    .lesson-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .lesson-list { display: flex; flex-direction: column; gap: .65rem; }
     .lesson-item {
-      display: flex; align-items: center; gap: 1rem;
-      padding: 0.9rem 1rem;
-      background: var(--input-bg); border: 1px solid var(--border);
-      border-radius: 10px; cursor: pointer;
-      transition: border-color 0.2s, transform 0.15s;
+      display: flex; align-items: center; gap: .95rem;
+      padding: .85rem .95rem;
+      background: rgba(255,255,255,.5);
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: transform .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease);
     }
-    .lesson-item:hover { border-color: var(--rust); transform: translateX(4px); }
-    .lesson-item.lesson-vocab { border-color: rgba(127,119,221,0.3); }
-    .lesson-item.lesson-vocab:hover { border-color: #7F77DD; }
-    .lesson-item.lesson-class { border-color: rgba(74,103,65,0.3); }
-    .lesson-item.lesson-class:hover { border-color: var(--sage); }
-    .lesson-emoji { font-size: 1.3rem; flex-shrink: 0; }
-    .lesson-info  { flex: 1; min-width: 0; }
-    .lesson-name  { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
-    .lesson-meta  { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
-    .lesson-arrow { color: var(--muted); font-size: 0.9rem; }
+    .lesson-item:hover { transform: translateX(4px); background: rgba(255,255,255,.75); box-shadow: var(--shadow-sm); }
+    .lesson-emoji { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .lesson-emoji svg { width: 17px; height: 17px; }
+    .lesson-vocab .lesson-emoji    { background: rgba(94,92,230,.12); color: var(--accent-2); }
+    .lesson-speaking .lesson-emoji { background: rgba(0,122,255,.12); color: var(--accent); }
+    .lesson-class .lesson-emoji    { background: rgba(52,199,89,.12); color: var(--ring-green); }
+    .lesson-info { flex: 1; min-width: 0; }
+    .lesson-name { font-size: .87rem; font-weight: 600; color: var(--ink); }
+    .lesson-meta { font-size: .75rem; color: var(--ink-soft); margin-top: .18rem; }
+    .lesson-arrow { color: var(--ink-faint); display: flex; }
+    .lesson-arrow svg { width: 16px; height: 16px; }
 
     /* ── Tips ── */
-    .tips-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .tips-list { display: flex; flex-direction: column; gap: .7rem; }
     .tip-item {
-      padding: 0.85rem 1rem;
-      background: var(--input-bg);
-      border-left: 3px solid var(--rust);
-      border-radius: 0 8px 8px 0;
-      font-size: 0.82rem; color: var(--muted); line-height: 1.5;
+      display: flex; gap: .7rem; align-items: flex-start;
+      padding: .9rem 1rem;
+      background: rgba(255,255,255,.5);
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: var(--r-sm);
+      font-size: .82rem; color: var(--ink-soft); line-height: 1.55;
+      transition: transform .2s var(--ease), background .2s var(--ease);
     }
+    .tip-item:hover { transform: translateX(3px); background: rgba(255,255,255,.7); }
+    .tip-icon { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px; background: rgba(0,122,255,.1); color: var(--accent); display: flex; align-items: center; justify-content: center; margin-top: .05rem; }
+    .tip-icon svg { width: 13px; height: 13px; }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
     @media (max-width: 700px) {
-      .welcome-banner  { flex-direction: column; gap: 1.5rem; padding: 1.8rem; }
-      .stats-row       { grid-template-columns: 1fr; }
-      .sections-row    { grid-template-columns: 1fr; }
-      .navbar          { padding: 1rem; }
-      .nav-name        { display: none; }
+      body { padding-top: 84px; }
+      .navbar { width: calc(100% - 24px); padding: .55rem .6rem .55rem 1.1rem; }
+      .nav-name { display: none; }
+      .main { padding: 0 1.1rem 3rem; }
+      .welcome-banner { flex-direction: column; align-items: flex-start; gap: 1.4rem; padding: 1.8rem; }
+      .level-badge { align-self: stretch; text-align: left; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .sections-row { grid-template-columns: 1fr; }
       .vocab-feature-card { flex-wrap: wrap; }
-      .teacher-banner  { flex-wrap: wrap; gap: 1rem; }
-      .teacher-pill    { width: 100%; justify-content: flex-end; }
+      .teacher-banner { flex-wrap: wrap; gap: 1rem; }
+      .teacher-pill { width: 100%; justify-content: flex-end; }
+    }
+    @media (max-width: 420px) {
+      .stats-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -526,7 +494,9 @@
   <!-- ── Teacher Dashboard Banner (hidden for students, shown for teachers) ── -->
   <div id="teacher-dashboard-link">
     <div class="teacher-banner" onclick="teacherDashboard()">
-      <div class="teacher-icon-wrap">🎓</div>
+      <div class="teacher-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 4 2 10l10 6 10-6Z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/></svg>
+      </div>
       <div class="teacher-text">
         <div class="teacher-eyebrow">Instructor Portal</div>
         <div class="teacher-title">Teacher's Dashboard</div>
@@ -534,14 +504,14 @@
       </div>
       <div class="teacher-pill">
         <span class="teacher-role-pill">Teacher</span>
-        <span class="teacher-arrow">→</span>
+        <span class="teacher-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </div>
     </div>
   </div>
 
   <div class="welcome-banner">
     <div class="welcome-text">
-      <h1>Hello, <em id="greetName"></em>! 👋</h1>
+      <h1>Hello, <em id="greetName"></em>!</h1>
       <p>Welcome to your personal AI English learning space.<br>Ready to continue your journey today?</p>
     </div>
     <div class="level-badge">
@@ -551,9 +521,11 @@
   </div>
 
   <!-- ── XP Showcase (students only) ── -->
-  <div class="card xp-showcase" id="xpCard" style="display:none; margin-bottom: 1.5rem;">
+  <div class="card xp-showcase" id="xpCard" style="display:none; margin-bottom: 1.4rem;">
     <div class="xp-showcase-inner">
-      <div class="xp-icon">⭐</div>
+      <div class="xp-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.6 6.6L21 10l-5 4.4 1.4 6.6L12 17.8 6.6 21 8 14.4 3 10l6.4-1.4Z"/></svg>
+      </div>
       <div class="xp-info">
         <div class="xp-label">Total XP Earned</div>
         <div class="xp-value" id="xpValue">0</div>
@@ -565,21 +537,27 @@
   <!-- Stats -->
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-icon icon-rust">🔥</div>
+      <div class="stat-icon icon-rust">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5a2.5 2.5 0 0 0 2.5-2.5c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      </div>
       <div class="stat-info">
         <div class="stat-value">0</div>
         <div class="stat-label">Day streak</div>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon icon-sage">📚</div>
+      <div class="stat-icon icon-sage">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+      </div>
       <div class="stat-info">
         <div class="stat-value" id="partsCompleted">0</div>
         <div class="stat-label">Parts completed</div>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon icon-gold">⭐</div>
+      <div class="stat-icon icon-gold">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.6 6.6L21 10l-5 4.4 1.4 6.6L12 17.8 6.6 21 8 14.4 3 10l6.4-1.4Z"/></svg>
+      </div>
       <div class="stat-info">
         <div class="stat-value" id="wordsLearned">0</div>
         <div class="stat-label">Words learned</div>
@@ -590,59 +568,86 @@
   <!-- ── Vocabulary Feature Card ── -->
   <a href="./lesson/parts_select.html" class="vocab-feature-card" id="vocabCard">
     <div class="vocab-text">
-      <div class="vocab-eyebrow">✦ Vocabulary Builder</div>
+      <div class="vocab-eyebrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+        Vocabulary Builder
+      </div>
       <h3>Learn new words today</h3>
       <p>Flashcard-style practice matched to your level.<br>3 words per part · 33 parts total.</p>
+      <div class="vocab-cta">
+        Continue learning
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </div>
     </div>
     <div class="vocab-progress-wrap">
       <div class="vocab-progress-ring" id="vocabRing" style="--pct: 0%">
         <span class="vocab-progress-num" id="vocabPct">0%</span>
       </div>
-      <div class="vocab-progress-label">progress</div>
+      <div class="vocab-progress-label">Progress</div>
     </div>
-    <div class="vocab-arrow">→</div>
   </a>
 
   <!-- ── My Classes Card (students only, shown if enrolled in 1+ classes) ── -->
-  <div class="card" id="my-classes-card" style="margin-top: 1.5rem;">
-    <div class="card-title">🏫 My Classes</div>
+  <div class="card" id="my-classes-card" style="margin-top: 1.4rem;">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="13" rx="1.5"/><path d="M9 21v-4h6v4"/><path d="M9 4h6v4H9z"/></svg>
+      My Classes
+    </div>
     <div class="lesson-list" id="myClassesList">
       <!-- populated by JS -->
     </div>
   </div>
 
   <!-- Sections -->
-  <div class="sections-row" style="margin-top: 1.5rem;">
+  <div class="sections-row" style="margin-top: 1.4rem;">
     <div class="card">
-      <div class="card-title">📖 Your Learning Path</div>
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+        Your Learning Path
+      </div>
       <div class="lesson-list">
         <a href="./lesson/parts_select.html" class="lesson-item lesson-vocab" style="text-decoration:none;">
-          <span class="lesson-emoji">📝</span>
+          <span class="lesson-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
           <div class="lesson-info">
             <div class="lesson-name">Vocabulary Builder</div>
             <div class="lesson-meta">Flashcards · your level</div>
           </div>
-          <span class="lesson-arrow">→</span>
+          <span class="lesson-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </a>
         <a href="ai_topic_conversation_tutor/conversation_select.html" class="lesson-item lesson-speaking" style="text-decoration:none;">
-          <span class="lesson-emoji">💬</span>
+          <span class="lesson-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
           <div class="lesson-info">
             <div class="lesson-name">Speaking Practice</div>
             <div class="lesson-meta">Improve your speaking with interesting AI characters!</div>
           </div>
-          <span class="lesson-arrow">→</span>
+          <span class="lesson-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </a>
-        
+
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">💡 Daily Tips</div>
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.55 1-2.05A7 7 0 0 0 12 2z"/></svg>
+        Daily Tips
+      </div>
       <div class="tips-list">
-        <div class="tip-item">Practice speaking out loud — even just 5 minutes a day makes a huge difference.</div>
-        <div class="tip-item">Read English content you enjoy, like news, blogs, or books.</div>
-        <div class="tip-item">Don't fear mistakes — every error is a step forward.</div>
-        <div class="tip-item">Consistency beats intensity. Short daily sessions beat long weekly ones.</div>
+        <div class="tip-item">
+          <span class="tip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.55 1-2.05A7 7 0 0 0 12 2z"/></svg></span>
+          <span>Practice speaking out loud — even just 5 minutes a day makes a huge difference.</span>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.55 1-2.05A7 7 0 0 0 12 2z"/></svg></span>
+          <span>Read English content you enjoy, like news, blogs, or books.</span>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.55 1-2.05A7 7 0 0 0 12 2z"/></svg></span>
+          <span>Don't fear mistakes — every error is a step forward.</span>
+        </div>
+        <div class="tip-item">
+          <span class="tip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.55 1-2.05A7 7 0 0 0 12 2z"/></svg></span>
+          <span>Consistency beats intensity. Short daily sessions beat long weekly ones.</span>
+        </div>
       </div>
     </div>
   </div>
@@ -663,7 +668,7 @@
   function showError(message) {
     const screen = document.getElementById('statusScreen');
     screen.innerHTML = `
-      <span class="error-icon">⚠️</span>
+      <span class="error-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" width="30" height="30"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>
       <span>${message}</span>
       <button class="btn-retry" onclick="initDashboard()">Try again</button>
     `;
@@ -735,12 +740,12 @@
         const scheduleText = cls.schedule ? ` · ${escHtml(cls.schedule)}` : '';
 
         a.innerHTML = `
-          <span class="lesson-emoji">🏫</span>
+          <span class="lesson-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="13" rx="1.5"/><path d="M9 21v-4h6v4"/><path d="M9 4h6v4H9z"/></svg></span>
           <div class="lesson-info">
             <div class="lesson-name">${escHtml(cls.name)}</div>
             <div class="lesson-meta">${escHtml(cls.course_name)} · ${statusText}${scheduleText}</div>
           </div>
-          <span class="lesson-arrow">→</span>
+          <span class="lesson-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         `;
         list.appendChild(a);
       });
