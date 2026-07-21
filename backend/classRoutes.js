@@ -10,6 +10,10 @@
  *   DELETE /api/courses/:courseId/classes/:id      – delete a class
  *
  * Auth: teacher must own the parent course.
+ *
+ * NOTE: student_id (and every other user id in this file) is a UUID
+ * string as of the users-to-uuid migration — validated with UUID_RE,
+ * never coerced with Number()/Number.isInteger().
  */
 
 'use strict';
@@ -24,6 +28,8 @@ const { endActiveRaceForClassQuiz } = require('./raceRoutes');
 const router = express.Router({ mergeParams: true });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Returns true only if the teacher owns the course. */
 async function ownsCourse(courseId, teacherId) {
@@ -223,7 +229,7 @@ router.get('/:id/lookup-student', authenticate, requireTeacher, async (req, res)
       return res.status(404).json({ success: false, message: 'No student account found with that email.' });
     }
 
-    const student = users[0];
+    const student = users[0]; // student.id is a UUID string
 
     // Check if already enrolled in this class
     const { rows: existing } = await pool.query(
@@ -249,8 +255,8 @@ router.post('/:id/enroll', authenticate, requireTeacher, async (req, res) => {
   const { courseId, id } = req.params;
   const { student_id } = req.body;
 
-  if (!student_id || !Number.isInteger(Number(student_id))) {
-    return res.status(400).json({ success: false, message: 'student_id (integer) is required.' });
+  if (!student_id || !UUID_RE.test(student_id)) {
+    return res.status(400).json({ success: false, message: 'A valid student_id (UUID) is required.' });
   }
 
   try {
@@ -261,7 +267,7 @@ router.post('/:id/enroll', authenticate, requireTeacher, async (req, res) => {
     // Confirm target user exists and is a student (role_id = 1)
     const { rows: userRows } = await pool.query(
       `SELECT id FROM users WHERE id = $1 AND role_id = 1`,
-      [Number(student_id)]
+      [student_id]
     );
     if (!userRows.length) {
       return res.status(404).json({ success: false, message: 'Student not found.' });
@@ -280,7 +286,7 @@ router.post('/:id/enroll', authenticate, requireTeacher, async (req, res) => {
       `INSERT INTO class_enrollments (class_id, student_id)
        VALUES ($1, $2)
        ON CONFLICT (class_id, student_id) DO NOTHING`,
-      [id, Number(student_id)]
+      [id, student_id]
     );
     return res.status(201).json({ success: true, message: 'Student enrolled.' });
   } catch (err) {
@@ -293,6 +299,11 @@ router.post('/:id/enroll', authenticate, requireTeacher, async (req, res) => {
 // Remove a student from this class.
 router.delete('/:id/enroll/:studentId', authenticate, requireTeacher, async (req, res) => {
   const { courseId, id, studentId } = req.params;
+
+  if (!UUID_RE.test(studentId)) {
+    return res.status(400).json({ success: false, message: 'Invalid student id.' });
+  }
+
   try {
     if (!(await ownsCourse(courseId, req.userId))) {
       return res.status(404).json({ success: false, message: 'Course not found.' });
@@ -300,7 +311,7 @@ router.delete('/:id/enroll/:studentId', authenticate, requireTeacher, async (req
 
     const { rowCount } = await pool.query(
       `DELETE FROM class_enrollments WHERE class_id = $1 AND student_id = $2`,
-      [id, Number(studentId)]
+      [id, studentId]
     );
     if (!rowCount) {
       return res.status(404).json({ success: false, message: 'Enrollment not found.' });
