@@ -32,6 +32,11 @@
  *     race_participant_finished{ studentId, name, rank, score }
  *     race_ended                { leaderboard, podium }
  *     error                     { message }
+ *
+ * IMPORTANT — user ids:
+ *   studentId / teacherId are UUID strings (users.id is a uuid column as of
+ *   the users-to-uuid migration). They are NEVER passed through Number()
+ *   — always compare them as plain strings.
  */
 
 'use strict';
@@ -66,12 +71,12 @@ const activeByClassQuiz = new Map();
  * RaceSession shape (server-side only fields are prefixed with an underscore
  * and are never sent to clients):
  * {
- *   id, classId, quizId, teacherId, quizTitle,
+ *   id, classId, quizId, teacherId (UUID string), quizTitle,
  *   status: 'waiting' | 'active' | 'ended',
  *   startedAtMs: number | null,
  *   questionOrder: number[],              // quiz_question ids, in order
  *   _answerKey: Map<questionId, correctAnswerId>,
- *   participants: Map<studentId, {
+ *   participants: Map<studentId (UUID string), {
  *     dbId, studentId, name, score, correctCount, totalAnswered,
  *     answeredQuestionIds: Set<number>,
  *     finishedAt: number|null, totalTimeMs: number|null,
@@ -89,7 +94,7 @@ function verifyToken(token) {
 
 async function getClassTeacher(classId) {
   const { rows } = await pool.query('SELECT teacher_id FROM classes WHERE id = $1', [classId]);
-  return rows.length ? rows[0].teacher_id : null;
+  return rows.length ? rows[0].teacher_id : null; // UUID string
 }
 
 async function isEnrolled(classId, studentId) {
@@ -202,7 +207,7 @@ router.post('/classes/:classId/quizzes/:quizId/start', authenticate, requireTeac
   try {
     const teacherId = await getClassTeacher(classId);
     if (!teacherId) return res.status(404).json({ success: false, message: 'Class not found.' });
-    if (Number(teacherId) !== Number(req.userId)) {
+    if (teacherId !== req.userId) {
       return res.status(403).json({ success: false, message: 'You do not own this class.' });
     }
 
@@ -255,7 +260,7 @@ router.post('/classes/:classId/quizzes/:quizId/start', authenticate, requireTeac
       id: sessionId,
       classId,
       quizId: quizIdNum,
-      teacherId: Number(req.userId),
+      teacherId: req.userId,
       quizTitle: quizRows[0].title,
       status: 'waiting',
       startedAtMs: null,
@@ -289,7 +294,7 @@ router.get('/classes/:classId/quizzes/:quizId/session', authenticate, async (req
   try {
     if (String(req.userRoleId) === '2') {
       const teacherId = await getClassTeacher(classId);
-      if (!teacherId || Number(teacherId) !== Number(req.userId)) {
+      if (!teacherId || teacherId !== req.userId) {
         return res.status(403).json({ success: false, message: 'You do not own this class.' });
       }
     } else {
@@ -356,7 +361,7 @@ router.delete('/classes/:classId/quizzes/:quizId/session', authenticate, require
   const sessionId = activeByClassQuiz.get(keyOf(classId, quizIdNum));
   const session = sessionId ? raceSessions.get(sessionId) : null;
   if (!session) return res.status(404).json({ success: false, message: 'No active race session.' });
-  if (Number(session.teacherId) !== Number(req.userId)) {
+  if (session.teacherId !== req.userId) {
     return res.status(403).json({ success: false, message: 'You do not own this session.' });
   }
 
@@ -381,7 +386,7 @@ router.get('/sessions/:sessionId/results', authenticate, async (req, res) => {
     const dbSession = sessRows[0];
 
     if (String(req.userRoleId) === '2') {
-      if (Number(dbSession.teacher_id) !== Number(req.userId)) {
+      if (dbSession.teacher_id !== req.userId) {
         return res.status(403).json({ success: false, message: 'Not your session.' });
       }
     } else {
@@ -452,7 +457,7 @@ router.get('/classes/:classId/quizzes/:quizId/questions', authenticate, async (r
   try {
     if (String(req.userRoleId) === '2') {
       const teacherId = await getClassTeacher(classId);
-      if (!teacherId || Number(teacherId) !== Number(req.userId)) {
+      if (!teacherId || teacherId !== req.userId) {
         return res.status(403).json({ success: false, message: 'You do not own this class.' });
       }
     } else {
@@ -506,12 +511,12 @@ function registerRaceSocketHandlers(io) {
       const session = raceSessions.get(sessionId);
       if (!session) return socket.emit('error', { message: 'Race session not found or has ended.' });
 
-      const userId = Number(payload.sub);
+      const userId = payload.sub; // UUID string
       const roleId = Number(payload.roleId);
 
       try {
         if (roleId === 2) {
-          if (Number(session.teacherId) !== userId) {
+          if (session.teacherId !== userId) {
             return socket.emit('error', { message: 'Not your session.' });
           }
         } else {
@@ -586,7 +591,7 @@ function registerRaceSocketHandlers(io) {
       const session = raceSessions.get(sessionId);
       if (!session) return socket.emit('error', { message: 'Race session not found.' });
 
-      if (Number(payload.roleId) !== 2 || Number(session.teacherId) !== Number(payload.sub)) {
+      if (Number(payload.roleId) !== 2 || session.teacherId !== payload.sub) {
         return socket.emit('error', { message: 'Only the teacher can start the race.' });
       }
       if (session.status !== 'waiting') return; // already started/ended — ignore
@@ -617,7 +622,7 @@ function registerRaceSocketHandlers(io) {
         return socket.emit('error', { message: 'Race is not active.' });
       }
 
-      const userId = Number(payload.sub);
+      const userId = payload.sub; // UUID string
       const participant = session.participants.get(userId);
       if (!participant) return socket.emit('error', { message: 'You are not in this race.' });
       if (participant.finishedAt) return; // ignore stray answers after finishing
@@ -664,7 +669,7 @@ function registerRaceSocketHandlers(io) {
       const session = raceSessions.get(sessionId);
       if (!session) return;
 
-      const userId = Number(payload.sub);
+      const userId = payload.sub; // UUID string
       const participant = session.participants.get(userId);
       if (!participant || participant.finishedAt) return;
 
@@ -703,7 +708,7 @@ function registerRaceSocketHandlers(io) {
 
       const session = raceSessions.get(sessionId);
       if (!session) return;
-      if (Number(payload.roleId) !== 2 || Number(session.teacherId) !== Number(payload.sub)) {
+      if (Number(payload.roleId) !== 2 || session.teacherId !== payload.sub) {
         return socket.emit('error', { message: 'Only the teacher can end the race.' });
       }
       await endSession(io, session);
