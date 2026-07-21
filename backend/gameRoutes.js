@@ -40,6 +40,11 @@
  *   purely from score — highest score wins, and players with an equal
  *   score share the same place. That result set is what powers the
  *   post-game "stage" (podium) shown in game_room.html.
+ *
+ * IMPORTANT — user ids:
+ *   userId / teacherId are UUID strings (users.id is a uuid column as of
+ *   the users-to-uuid migration). They are NEVER passed through Number()
+ *   — always compare them as plain strings.
  */
 
 'use strict';
@@ -60,7 +65,7 @@ const gameSessions = new Map();
  * {
  *   id:            string (uuid-like),
  *   classId:       string,
- *   teacherId:     number,
+ *   teacherId:     string (UUID),
  *   players:       Player[],    // ordered; ONLY students who have joined the
  *                                // game room via join_game. Teacher is never
  *                                // a player.
@@ -74,7 +79,7 @@ const gameSessions = new Map();
  *
  * Player shape:
  * {
- *   userId:   number,
+ *   userId:   string (UUID),
  *   name:     string,
  *   pos:      number,   // board square index 0..BOARD_LENGTH-1
  *   score:    number,
@@ -105,7 +110,7 @@ async function getClassTeacher(classId) {
     'SELECT teacher_id FROM classes WHERE id = $1',
     [classId]
   );
-  return rows.length ? rows[0].teacher_id : null;
+  return rows.length ? rows[0].teacher_id : null; // UUID string
 }
 
 // ─── Helper: look up an enrolled student's name (used when they join a room) ──
@@ -192,7 +197,7 @@ router.post('/classes/:classId/start', authenticate, requireTeacher, async (req,
     if (!teacherId) {
       return res.status(404).json({ success: false, message: 'Class not found.' });
     }
-    if (Number(teacherId) !== Number(req.userId)) {
+    if (teacherId !== req.userId) {
       return res.status(403).json({ success: false, message: 'You do not own this class.' });
     }
 
@@ -207,7 +212,7 @@ router.post('/classes/:classId/start', authenticate, requireTeacher, async (req,
     const session = {
       id:          makeId(),
       classId,
-      teacherId:   Number(teacherId),
+      teacherId,
       players:     [],
       currentIdx:  0,
       round:       1,
@@ -253,7 +258,7 @@ router.delete('/classes/:classId/session', authenticate, requireTeacher, async (
   if (!session) {
     return res.status(404).json({ success: false, message: 'No active session.' });
   }
-  if (Number(session.teacherId) !== Number(req.userId)) {
+  if (session.teacherId !== req.userId) {
     return res.status(403).json({ success: false, message: 'You do not own this session.' });
   }
 
@@ -281,7 +286,7 @@ function registerSocketHandlers(io) {
       const payload = verifyToken(token);
       if (!payload) return socket.emit('error', { message: 'Invalid token.' });
 
-      const userId = Number(payload.sub);
+      const userId = payload.sub; // UUID string
       const roleId = Number(payload.roleId);
 
       // Verify the user belongs to this class (student enrolled or teacher owns it)
@@ -290,7 +295,7 @@ function registerSocketHandlers(io) {
         if (roleId === 2) {
           // teacher
           const teacherId = await getClassTeacher(classId);
-          if (Number(teacherId) !== userId) {
+          if (teacherId !== userId) {
             return socket.emit('error', { message: 'Not your class.' });
           }
         } else {
@@ -351,7 +356,7 @@ function registerSocketHandlers(io) {
       const payload = verifyToken(token);
       if (!payload) return socket.emit('error', { message: 'Invalid token.' });
 
-      const userId = Number(payload.sub);
+      const userId = payload.sub; // UUID string
       const session = gameSessions.get(classId);
       if (!session || session.status !== 'playing') {
         return socket.emit('error', { message: 'No active game.' });
@@ -367,7 +372,7 @@ function registerSocketHandlers(io) {
       }
 
       // Only the current player (or teacher) can roll
-      const isTeacher = Number(payload.roleId) === 2 && Number(session.teacherId) === userId;
+      const isTeacher = Number(payload.roleId) === 2 && session.teacherId === userId;
       const isCurrentPlayer = currentPlayer.userId === userId;
 
       if (!isTeacher && !isCurrentPlayer) {
@@ -418,12 +423,12 @@ function registerSocketHandlers(io) {
       const payload = verifyToken(token);
       if (!payload) return socket.emit('error', { message: 'Invalid token.' });
 
-      const userId  = Number(payload.sub);
+      const userId  = payload.sub; // UUID string
       const session = gameSessions.get(classId);
       if (!session) return;
 
       const currentPlayer = session.players[session.currentIdx];
-      const isTeacher     = Number(payload.roleId) === 2 && Number(session.teacherId) === userId;
+      const isTeacher     = Number(payload.roleId) === 2 && session.teacherId === userId;
       const isCurrentPlayer = currentPlayer && currentPlayer.userId === userId;
 
       if (!isTeacher && !isCurrentPlayer) return;
@@ -442,12 +447,12 @@ function registerSocketHandlers(io) {
       const payload = verifyToken(token);
       if (!payload) return socket.emit('error', { message: 'Invalid token.' });
 
-      const userId  = Number(payload.sub);
+      const userId  = payload.sub; // UUID string
       const session = gameSessions.get(classId);
       if (!session) return;
 
       const currentPlayer = session.players[session.currentIdx];
-      const isTeacher     = Number(payload.roleId) === 2 && Number(session.teacherId) === userId;
+      const isTeacher     = Number(payload.roleId) === 2 && session.teacherId === userId;
       const isCurrentPlayer = currentPlayer && currentPlayer.userId === userId;
 
       if (!isTeacher && !isCurrentPlayer) return;
@@ -465,12 +470,12 @@ function registerSocketHandlers(io) {
       const payload = verifyToken(token);
       if (!payload) return socket.emit('error', { message: 'Invalid token.' });
 
-      const userId  = Number(payload.sub);
+      const userId  = payload.sub; // UUID string
       const roleId  = Number(payload.roleId);
       const session = gameSessions.get(classId);
       if (!session) return;
 
-      if (roleId !== 2 || Number(session.teacherId) !== userId) {
+      if (roleId !== 2 || session.teacherId !== userId) {
         return socket.emit('error', { message: 'Only the teacher can end the game.' });
       }
 
