@@ -144,7 +144,7 @@
     .dock-brand { display:flex; align-items:center; gap:.6rem; padding:.35rem .5rem .9rem; border-bottom:1px solid var(--hairline); }
     .dock-brand .brand { font-size:1.02rem; }
 
-    .dock-nav { position:relative; display:flex; flex-direction:column; gap:.25rem; flex:1; overflow-y:auto; padding-top:.2rem; }
+    .dock-nav { position:relative; display:flex; flex-direction:column; gap:.25rem; flex:1; overflow-y:auto; overflow-x:visible; padding-top:.2rem; }
     .dock-indicator {
       position:absolute; left:0; top:0; width:100%; height:52px;
       background: linear-gradient(135deg, rgba(10,132,255,0.14), rgba(94,92,230,0.10));
@@ -176,6 +176,34 @@
     .dock-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .dock-item .dock-label { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .dock-item .dock-dot { width:6px; height:6px; border-radius:50%; background:var(--error); flex-shrink:0; box-shadow:0 0 0 3px var(--error-bg); }
+
+    /* ── Quizzes flyout (Casual / Racing picker) ──
+         Rendered as a top-level, position:fixed element (see markup: it lives
+         outside .dock-nav / .dock entirely) so it is never clipped by the
+         sidebar's scrollable nav — this is what was breaking on short/mobile
+         viewports. Position + width are set inline via JS at open time. */
+    .dock-item-wrap { position:relative; }
+    .dock-caret { flex-shrink:0; width:12px; height:12px; opacity:.55; transition: transform .25s var(--ease); }
+    .dock-item-wrap.open .dock-caret { transform: rotate(90deg); }
+    .dock-flyout {
+      position: fixed; z-index: 500;
+      background: var(--glass-strong); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
+      border:1px solid var(--glass-border); border-radius: var(--r-md);
+      box-shadow: var(--sh-float);
+      padding:.4rem; display:flex; flex-direction:column; gap:.2rem;
+      opacity:0; transform: translateY(-6px) scale(.97); pointer-events:none;
+      transition: opacity .22s var(--ease), transform .22s var(--spring);
+    }
+    .dock-flyout.open { opacity:1; transform:translateY(0) scale(1); pointer-events:all; }
+    .dock-flyout-btn {
+      display:flex; align-items:center; gap:.6rem; width:100%; text-align:left;
+      padding:.62rem .7rem; border-radius: var(--r-sm); border:none; cursor:pointer;
+      background:none; font-family:inherit; font-size:.82rem; font-weight:700; color:var(--ink-2);
+      transition: background .15s ease, color .15s ease;
+    }
+    .dock-flyout-btn:hover { background: var(--quiz-bg); color:#0A6BD4; }
+    .dock-flyout-btn.racing:hover { background: var(--race-bg); color:#D8294B; }
+    .dock-flyout-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
     .dock-footer { border-top:1px solid var(--hairline); padding-top:.85rem; display:flex; flex-direction:column; gap:.4rem; }
     .dock-back {
@@ -550,17 +578,20 @@
       <span class="dock-dot" id="dockGameDot" style="display:none;"></span>
     </button>
 
-    <button class="dock-item" data-target="section-reading" type="button">
+    <button class="dock-item" id="openExposeBtn" data-target="section-reading" type="button">
       <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.2c2-1 4.6-1 7 0v13.6c-2.4-1-5-1-7 0z"/><path d="M20 5.2c-2-1-4.6-1-7 0v13.6c2.4-1 5-1 7 0z"/></svg></span>
       <span class="dock-label">Reading Tasks</span>
     </button>
 
-    <button class="dock-item" data-target="section-quizzes" type="button">
-      <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 10.3 7 13 4.3"/><path d="M9 13.5 10.3 15 13 12.3"/><path d="M16 6h4M16 14h4"/><rect x="3.5" y="18" width="17" height="2" rx="1" fill="currentColor" stroke="none" opacity=".0"/></svg></span>
-      <span class="dock-label">Quizzes</span>
-    </button>
+    <div class="dock-item-wrap" id="quizzesDockWrap">
+      <button class="dock-item" id="quizzesDockToggle" data-target="section-quizzes" type="button">
+        <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 10.3 7 13 4.3"/><path d="M9 13.5 10.3 15 13 12.3"/><path d="M16 6h4M16 14h4"/></svg></span>
+        <span class="dock-label">Quizzes</span>
+        <svg class="dock-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
 
-    <button class="dock-item" data-target="section-topics" type="button">
+    <button class="dock-item" id="openExposeTopicBtn" data-target="section-topics" type="button">
       <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="16" height="10" rx="2.2"/><path d="M10.3 7.7 13.6 9.5l-3.3 1.8z" fill="currentColor" stroke="none"/><path d="M7 18.5h10"/></svg></span>
       <span class="dock-label">Topics & Homework</span>
     </button>
@@ -578,6 +609,16 @@
     </a>
   </div>
 </aside>
+
+<!-- Quizzes flyout — deliberately a TOP-LEVEL element (not nested inside
+     .dock-nav / .dock), positioned with `position:fixed` and placed via JS
+     using the toggle button's bounding rect. This is what makes it show up
+     correctly on mobile: it can never be clipped by the sidebar's scrollable
+     nav container, regardless of viewport height. -->
+<div class="dock-flyout" id="quizzesFlyout" role="menu">
+  <button class="dock-flyout-btn" id="openExposeQuizBtn" type="button" role="menuitem"><span>📝</span> Casual Quiz</button>
+  <button class="dock-flyout-btn racing" id="openExposeRaceBtn" type="button" role="menuitem"><span>🏁</span> Racing Quiz</button>
+</div>
 
 <main class="content" id="mainContent">
   <div class="content-inner">
@@ -616,10 +657,10 @@
       <div id="feedback"><div class="fb-inner" id="fb-inner"></div></div>
     </section>
 
-    <!-- ═══════ ENGLISHPOLY GAME ═══════ -->
-    <section class="page-section" id="section-game">
+    <!-- ═══════ ENGLISHPOLY GAME — only shown while a session is live ═══════ -->
+    <section class="page-section" id="section-game" style="display:none;">
       <div id="gameBanner" class="game-banner">
-        <div id="gameBannerIdle" style="display:contents;">
+        <div id="gameBannerIdle" style="display:none;">
           <div class="game-banner-icon">🎲</div>
           <div class="game-banner-body">
             <div class="game-banner-title">ENGLISHPOLY — Multiplayer Board Game</div>
@@ -630,7 +671,7 @@
           </div>
         </div>
 
-        <div id="gameBannerActive" style="display:contents;">
+        <div id="gameBannerActive" style="display:none;">
           <div class="game-banner-icon">🟢</div>
           <div class="game-banner-body">
             <div class="game-banner-title" style="display:flex;align-items:center;gap:.6rem;">
@@ -647,76 +688,40 @@
       </div>
     </section>
 
-    <!-- ═══════ READING TASKS ═══════ -->
-    <section class="page-section" id="section-reading">
+    <!-- ═══════ READING TASKS — only shown when tasks are exposed ═══════ -->
+    <section class="page-section" id="section-reading" style="display:none;">
       <div class="section-bar">
         <span class="section-label">📖 Reading Tasks</span>
-        <button class="btn-create" id="openExposeBtn"
-          style="background:linear-gradient(135deg,var(--reading),#00776F);box-shadow:0 4px 16px var(--reading-glow),inset 0 1px 0 rgba(255,255,255,0.3);">
-          <span class="ic">+</span>Expose Reading Task
-        </button>
       </div>
 
-      <div id="readingLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--ink-3);font-size:.84rem;">
-        <div class="spinner dark"></div>Loading reading tasks…
-      </div>
-      <div id="readingEmptyState" class="glass-panel" style="display:none;text-align:center;padding:2.5rem 1.5rem;">
-        <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.8;">📖</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--ink-1);margin-bottom:.25rem;">No reading tasks exposed</div>
-        <div style="font-size:.78rem;color:var(--ink-3);">Expose a reading task so students can see and complete it.</div>
-      </div>
+      <div id="readingLoadingState" style="display:none;"></div>
+      <div id="readingEmptyState" style="display:none;"></div>
       <div id="readingListWrap" style="display:none;">
         <div class="roster-panel glass-panel" id="readingPanel"></div>
       </div>
     </section>
 
-    <!-- ═══════ QUIZZES ═══════ -->
-    <section class="page-section" id="section-quizzes">
+    <!-- ═══════ QUIZZES — only shown when quizzes are exposed ═══════ -->
+    <section class="page-section" id="section-quizzes" style="display:none;">
       <div class="section-bar">
         <span class="section-label">📝 Quizzes</span>
-        <div class="section-bar-actions">
-          <button class="btn-create" id="openExposeQuizBtn"
-            style="background:linear-gradient(135deg,var(--quiz),#0A5FC7);box-shadow:0 4px 16px var(--quiz-glow),inset 0 1px 0 rgba(255,255,255,0.3);">
-            <span class="ic">+</span>Expose Casual Quiz
-          </button>
-          <button class="btn-create" id="openExposeRaceBtn"
-            style="background:linear-gradient(135deg,var(--race),#D8294B);box-shadow:0 4px 16px var(--race-glow),inset 0 1px 0 rgba(255,255,255,0.3);">
-            <span class="ic">🏁</span>Expose Racing Quiz
-          </button>
-        </div>
       </div>
 
-      <div id="quizLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--ink-3);font-size:.84rem;">
-        <div class="spinner dark"></div>Loading quizzes…
-      </div>
-      <div id="quizEmptyState" class="glass-panel" style="display:none;text-align:center;padding:2.5rem 1.5rem;">
-        <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.8;">📝</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--ink-1);margin-bottom:.25rem;">No quizzes exposed</div>
-        <div style="font-size:.78rem;color:var(--ink-3);">Expose a casual quiz for untimed practice, or a racing quiz for a live graded round.</div>
-      </div>
+      <div id="quizLoadingState" style="display:none;"></div>
+      <div id="quizEmptyState" style="display:none;"></div>
       <div id="quizListWrap" style="display:none;">
         <div class="roster-panel glass-panel" id="quizPanel"></div>
       </div>
     </section>
 
-    <!-- ═══════ TOPICS & HOMEWORKS ═══════ -->
-    <section class="page-section" id="section-topics">
+    <!-- ═══════ TOPICS & HOMEWORKS — only shown when topics are exposed ═══════ -->
+    <section class="page-section" id="section-topics" style="display:none;">
       <div class="section-bar">
         <span class="section-label">📋 Topics & Homeworks</span>
-        <button class="btn-create" id="openExposeTopicBtn"
-          style="background:linear-gradient(135deg,var(--topic),#4340B0);box-shadow:0 4px 16px var(--topic-glow),inset 0 1px 0 rgba(255,255,255,0.3);">
-          <span class="ic">+</span>Expose Topic
-        </button>
       </div>
 
-      <div id="topicLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--ink-3);font-size:.84rem;">
-        <div class="spinner dark"></div>Loading topics…
-      </div>
-      <div id="topicEmptyState" class="glass-panel" style="display:none;text-align:center;padding:2.5rem 1.5rem;">
-        <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.8;">📋</div>
-        <div style="font-size:.92rem;font-weight:700;color:var(--ink-1);margin-bottom:.25rem;">No topics exposed</div>
-        <div style="font-size:.78rem;color:var(--ink-3);">Expose a topic/homework so students can watch the video and answer the questions.</div>
-      </div>
+      <div id="topicLoadingState" style="display:none;"></div>
+      <div id="topicEmptyState" style="display:none;"></div>
       <div id="topicListWrap" style="display:none;">
         <div class="roster-panel glass-panel" id="topicPanel"></div>
       </div>
@@ -1876,9 +1881,8 @@ document.getElementById('exposeTopicModal').addEventListener('click', function(e
 </script>
 
 <!-- ══════════════════════════════════════
-     SIDEBAR NAVIGATION — additive UI-only script
-     (scroll-spy, active "liquid glass" indicator,
-      mobile drawer open/close). No business logic here.
+     SIDEBAR NAVIGATION + LIVE-CONTENT VISIBILITY
+     — additive UI-only script. No business logic here.
 ══════════════════════════════════════ -->
 <script>
 (function () {
@@ -1887,9 +1891,6 @@ document.getElementById('exposeTopicModal').addEventListener('click', function(e
   const menuBtn    = document.getElementById('mobileMenuBtn');
   const navItems   = Array.from(document.querySelectorAll('.dock-item'));
   const indicator  = document.getElementById('dockIndicator');
-  const sections   = navItems
-    .map(btn => document.getElementById(btn.dataset.target))
-    .filter(Boolean);
 
   function moveIndicatorTo(item) {
     if (!item || !indicator) return;
@@ -1904,55 +1905,157 @@ document.getElementById('exposeTopicModal').addEventListener('click', function(e
     moveIndicatorTo(item);
   }
 
+  function visibleSections() {
+    return navItems
+      .map(btn => document.getElementById(btn.dataset.target))
+      .filter(sec => sec && sec.offsetParent !== null);
+  }
+
   navItems.forEach(btn => {
+    // The Quizzes item toggles its own flyout — handled separately below —
+    // so it should not also try to scroll/start-game on click.
+    if (btn.id === 'quizzesDockToggle') return;
+
     btn.addEventListener('click', () => {
-      const target = document.getElementById(btn.dataset.target);
       setActive(btn);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // ENGLISHPOLY: no game running yet → start one directly, same as the old button did
+      if (btn.dataset.target === 'section-game') {
+        const section = document.getElementById('section-game');
+        const isLive  = section && section.style.display !== 'none';
+        if (!isLive) { document.getElementById('startGameBtn')?.click(); closeDrawer(); return; }
+      }
+
+      const target = document.getElementById(btn.dataset.target);
+      if (target && target.style.display !== 'none') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       closeDrawer();
     });
   });
 
-  // Initial indicator position once layout has settled
   window.addEventListener('load', () => moveIndicatorTo(navItems[0]));
   setTimeout(() => moveIndicatorTo(document.querySelector('.dock-item.active')), 60);
 
-  // Scroll-spy: highlight the nav item for the section currently in view
   let spyTicking = false;
   function spy() {
     spyTicking = false;
+    const sections = visibleSections();
+    if (!sections.length) return;
     let current = sections[0];
     const y = window.scrollY + 140;
-    for (const sec of sections) {
-      if (sec.offsetTop <= y) current = sec;
-    }
-    if (current) {
-      const match = navItems.find(b => b.dataset.target === current.id);
-      if (match && !match.classList.contains('active')) setActive(match);
-    }
+    for (const sec of sections) { if (sec.offsetTop <= y) current = sec; }
+    const match = navItems.find(b => b.dataset.target === current.id);
+    if (match && !match.classList.contains('active')) setActive(match);
   }
   window.addEventListener('scroll', () => {
     if (!spyTicking) { requestAnimationFrame(spy); spyTicking = true; }
   }, { passive: true });
 
   // Mobile drawer
-  function openDrawer() {
-    dock.classList.add('open');
-    scrim.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
+  function openDrawer() { dock.classList.add('open'); scrim.classList.add('open'); document.body.style.overflow = 'hidden'; }
   function closeDrawer() {
+    closeQuizFlyout();
     if (window.innerWidth > 980) return;
-    dock.classList.remove('open');
-    scrim.classList.remove('open');
-    document.body.style.overflow = '';
+    dock.classList.remove('open'); scrim.classList.remove('open'); document.body.style.overflow = '';
   }
-  menuBtn?.addEventListener('click', () => {
-    dock.classList.contains('open') ? closeDrawer() : openDrawer();
-  });
+  menuBtn?.addEventListener('click', () => { dock.classList.contains('open') ? closeDrawer() : openDrawer(); });
   scrim?.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-  window.addEventListener('resize', () => { if (window.innerWidth > 980) { dock.classList.remove('open'); scrim.classList.remove('open'); document.body.style.overflow=''; } });
+  window.addEventListener('resize', () => {
+    closeQuizFlyout();
+    if (window.innerWidth > 980) { dock.classList.remove('open'); scrim.classList.remove('open'); document.body.style.overflow=''; }
+  });
+
+  // ── Quizzes flyout (Casual / Racing picker) ──
+  // Rendered at the top level (see markup — it's a sibling of <aside class="dock">,
+  // not nested inside .dock-nav) and positioned with `position:fixed`, so it can
+  // never be clipped by the sidebar's scrollable nav — this is what fixes the
+  // "buttons don't appear on mobile" issue: on short viewports .dock-nav can
+  // become a scroll container, and anything absolutely-positioned *inside* a
+  // scrolling ancestor gets clipped to that ancestor's box. A fixed-position
+  // element outside that ancestor has no such restriction.
+  const quizToggle = document.getElementById('quizzesDockToggle');
+  const quizWrap    = document.getElementById('quizzesDockWrap');
+  const quizFlyout  = document.getElementById('quizzesFlyout');
+
+  function positionQuizFlyout() {
+    if (!quizToggle || !quizFlyout) return;
+    const rect = quizToggle.getBoundingClientRect();
+    const margin = 8;
+    let top  = rect.bottom + 6;
+    let left = rect.left;
+    let width = rect.width;
+
+    // Keep it on-screen even if the sidebar sits near a viewport edge
+    const maxLeft = window.innerWidth - width - margin;
+    if (left > maxLeft) left = Math.max(margin, maxLeft);
+    if (left < margin) left = margin;
+
+    const flyoutHeight = 108; // approx height of two menu rows + padding
+    if (top + flyoutHeight > window.innerHeight - margin) {
+      top = rect.top - flyoutHeight - 6; // flip above the button if there's no room below
+    }
+
+    quizFlyout.style.top    = `${Math.max(margin, top)}px`;
+    quizFlyout.style.left   = `${left}px`;
+    quizFlyout.style.width  = `${width}px`;
+  }
+
+  function openQuizFlyout() {
+    positionQuizFlyout();
+    quizFlyout.classList.add('open');
+    quizWrap?.classList.add('open');
+  }
+  function closeQuizFlyout() {
+    quizFlyout?.classList.remove('open');
+    quizWrap?.classList.remove('open');
+  }
+
+  quizToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = !quizFlyout.classList.contains('open');
+    closeQuizFlyout();
+    if (willOpen) openQuizFlyout();
+  });
+  ['openExposeQuizBtn', 'openExposeRaceBtn'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', closeQuizFlyout);
+  });
+  document.addEventListener('click', (e) => {
+    if (quizFlyout && quizFlyout.contains(e.target)) return;
+    if (quizWrap && quizWrap.contains(e.target)) return;
+    closeQuizFlyout();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeQuizFlyout(); });
+  // Reposition (or just close) if the layout shifts while the flyout is open
+  document.getElementById('dockNav')?.addEventListener('scroll', closeQuizFlyout, { passive:true });
+  window.addEventListener('scroll', () => { if (quizFlyout?.classList.contains('open')) closeQuizFlyout(); }, { passive:true });
+
+  // ── Middle-of-page sections only exist while there's live/exposed content ──
+  function bindSectionVisibility(triggerEl, sectionEl, isVisibleFn) {
+    if (!triggerEl || !sectionEl) return;
+    const sync = () => { sectionEl.style.display = isVisibleFn() ? 'block' : 'none'; };
+    new MutationObserver(sync).observe(triggerEl, { attributes: true, attributeFilter: ['style'] });
+    // safety re-checks in case a same-value style write doesn't fire a mutation record
+    setTimeout(sync, 300);
+    setTimeout(sync, 1200);
+  }
+  bindSectionVisibility(
+    document.getElementById('readingListWrap'), document.getElementById('section-reading'),
+    () => document.getElementById('readingListWrap').style.display === 'block'
+  );
+  bindSectionVisibility(
+    document.getElementById('quizListWrap'), document.getElementById('section-quizzes'),
+    () => document.getElementById('quizListWrap').style.display === 'block'
+  );
+  bindSectionVisibility(
+    document.getElementById('topicListWrap'), document.getElementById('section-topics'),
+    () => document.getElementById('topicListWrap').style.display === 'block'
+  );
+  bindSectionVisibility(
+    document.getElementById('gameBannerActive'), document.getElementById('section-game'),
+    () => document.getElementById('gameBannerActive').style.display === 'contents'
+  );
 })();
 </script>
 </body>
