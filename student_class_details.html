@@ -5,757 +5,684 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TilMenger — My Class</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:           #0C0A08;
-      --surface:      #181410;
-      --surface-2:    #211D17;
-      --surface-3:    #2A2520;
-      --border:       rgba(212, 168, 83, 0.1);
-      --border-2:     rgba(212, 168, 83, 0.18);
-      --rust:         #D4622E;
-      --rust-dark:    #B8501F;
-      --rust-glow:    rgba(212, 98, 46, 0.35);
-      --gold:         #E8B84A;
-      --gold-dim:     rgba(232, 184, 74, 0.15);
-      --text:         #F0EAE0;
-      --text-2:       #A89D92;
-      --text-3:       #6B6058;
-      --success:      #5DBF8A;
-      --success-bg:   rgba(93, 191, 138, 0.1);
-      --success-bd:   rgba(93, 191, 138, 0.22);
-      --error:        #E85252;
-      --error-bg:     rgba(232, 82, 82, 0.1);
-      --error-bd:     rgba(232, 82, 82, 0.25);
-      --radius:       14px;
-      --radius-sm:    9px;
-      /* game colours */
-      --game:         #8B35B0;
-      --game-bg:      rgba(139, 53, 176, 0.12);
-      --game-bd:      rgba(139, 53, 176, 0.28);
-      --game-glow:    rgba(139, 53, 176, 0.4);
-      --reading:      #2E9E8F;
-      --reading-bg:   rgba(46,158,143,0.12);
-      --reading-bd:   rgba(46,158,143,0.28);
-      --reading-glow: rgba(46,158,143,0.4);
+      /* ── canvas ── */
+      --canvas-blue:  #E7F0FA;
+      --canvas-white: #F8FAFC;
+      --canvas-cyan:  #E9F7F6;
+      --canvas-violet:#EFEDFB;
 
-      --quiz:      #4F6DF5;
-      --quiz-bg:   rgba(79,109,245,0.12);
-      --quiz-bd:   rgba(79,109,245,0.28);
-      --quiz-glow: rgba(79,109,245,0.4);
+      /* ── ink ── */
+      --ink-1:#1D1D1F;
+      --ink-2:#6E6E76;
+      --ink-3:#9C9CA5;
+      --ink-inv:#FFFFFF;
 
-      --race:      #E85252;
-      --race-bg:   rgba(232,82,82,0.12);
-      --race-bd:   rgba(232,82,82,0.28);
-      --race-glow: rgba(232,82,82,0.4);
+      /* ── glass ── */
+      --glass:        rgba(255,255,255,0.58);
+      --glass-strong: rgba(255,255,255,0.80);
+      --glass-soft:   rgba(255,255,255,0.38);
+      --glass-border: rgba(255,255,255,0.70);
+      --hairline:     rgba(28,28,36,0.08);
+      --hairline-2:   rgba(28,28,36,0.13);
+
+      /* ── brand accent ── */
+      --accent:      #0A84FF;
+      --accent-2:    #5E5CE6;
+      --accent-glow: rgba(10,132,255,0.30);
+
+      /* ── feature accents ── */
+      --reading:#009C93; --reading-bg:rgba(0,156,147,0.10); --reading-bd:rgba(0,156,147,0.24); --reading-glow:rgba(0,156,147,0.32);
+      --quiz:#0A84FF;    --quiz-bg:rgba(10,132,255,0.10);    --quiz-bd:rgba(10,132,255,0.24);    --quiz-glow:rgba(10,132,255,0.32);
+      --race:#FF375F;    --race-bg:rgba(255,55,95,0.10);     --race-bd:rgba(255,55,95,0.24);      --race-glow:rgba(255,55,95,0.32);
+      --game:#BF5AF2;    --game-bg:rgba(191,90,242,0.10);    --game-bd:rgba(191,90,242,0.24);     --game-glow:rgba(191,90,242,0.32);
+      --topic:#5E5CE6;   --topic-bg:rgba(94,92,230,0.10);    --topic-bd:rgba(94,92,230,0.24);     --topic-glow:rgba(94,92,230,0.32);
+
+      --success:#2FB350; --success-bg:rgba(47,179,80,0.10); --success-bd:rgba(47,179,80,0.26);
+      --error:#FF3B30;   --error-bg:rgba(255,59,48,0.09);   --error-bd:rgba(255,59,48,0.24);
+      --amber:#FF9F0A;   --amber-bg:rgba(255,159,10,0.12);  --amber-bd:rgba(255,159,10,0.26);
+
+      /* ── shape / elevation ── */
+      --r-xl:28px; --r-lg:22px; --r-md:16px; --r-sm:11px;
+      --sh-1: 0 1px 1px rgba(28,28,36,0.03), 0 6px 18px rgba(28,28,36,0.05);
+      --sh-2: 0 2px 6px rgba(28,28,36,0.05), 0 14px 34px rgba(28,28,36,0.08);
+      --sh-float: 0 22px 60px rgba(28,28,36,0.16);
+      --ease: cubic-bezier(.22,1,.36,1);
+      --spring: cubic-bezier(.34,1.56,.64,1);
     }
 
     html { scroll-behavior: smooth; }
-
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;
+      color: var(--ink-1);
+      min-height:100vh; line-height:1.5; -webkit-font-smoothing:antialiased;
+      background: var(--canvas-white);
+      overflow-x:hidden;
     }
+    h1,h2,h3,.display { font-family:'Inter Tight','Inter',-apple-system,'SF Pro Display',sans-serif; }
+    .mono { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-variant-numeric:tabular-nums; }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: radial-gradient(circle, rgba(212,168,83,0.045) 1px, transparent 1px);
-      background-size: 44px 44px;
-      pointer-events: none;
-      z-index: 0;
+    /* ═══════════════════════════════════════════
+       AMBIENT BACKGROUND
+    ═══════════════════════════════════════════ */
+    .bg-blobs { position:fixed; inset:0; z-index:-1; overflow:hidden; background:
+        radial-gradient(ellipse 60% 50% at 18% 8%,  var(--canvas-blue) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 45% at 88% 18%, var(--canvas-violet) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 55% at 30% 92%, var(--canvas-cyan) 0%, transparent 62%),
+        var(--canvas-white);
     }
+    .blob { position:absolute; border-radius:50%; filter:blur(70px); opacity:.55; }
+    .blob-1 { width:520px; height:420px; top:-160px; left:-120px; background:radial-gradient(circle,rgba(10,132,255,.30),transparent 70%); }
+    .blob-2 { width:460px; height:460px; top:-80px; right:-140px; background:radial-gradient(circle,rgba(191,90,242,.22),transparent 70%); animation: driftSlow 26s ease-in-out infinite; }
+    .blob-3 { width:560px; height:460px; bottom:-200px; left:20%; background:radial-gradient(circle,rgba(0,190,190,.20),transparent 70%); animation: driftSlow 32s ease-in-out infinite reverse; }
+    @keyframes driftSlow { 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-24px,26px); } }
+    @media (prefers-reduced-motion: reduce) { .blob-2,.blob-3 { animation:none; } }
 
-    /* ─── NAV ─── */
-    nav {
-      position: sticky; top: 0; z-index: 50; height: 62px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2rem;
-      background: rgba(12, 10, 8, 0.82);
-      backdrop-filter: blur(22px);
-      border-bottom: 1px solid var(--border);
+    /* ═══════════════════════════════════════════
+       MOBILE TOP BAR
+    ═══════════════════════════════════════════ */
+    .mobile-topbar {
+      display:none; position:sticky; top:0; z-index:80;
+      align-items:center; gap:.75rem; padding:.7rem 1rem;
+      background: var(--glass-strong); backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom:1px solid var(--hairline);
     }
-    .brand {
-      text-decoration: none; display: flex; align-items: center; gap: .55rem;
-      color: var(--text); font-size: 1.05rem; font-weight: 700; letter-spacing: -.025em;
+    .hamburger {
+      width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+      background: var(--glass); border:1px solid var(--glass-border); box-shadow: var(--sh-1);
+      cursor:pointer; transition: transform .18s var(--ease), background .18s;
+      -webkit-tap-highlight-color: transparent;
     }
+    .hamburger:hover { background: var(--glass-strong); }
+    .hamburger:active { transform: scale(.92); }
+    .hamburger svg { width:19px; height:19px; }
+    .mobile-topbar .brand { font-size:.98rem; }
+
+    /* ═══════════════════════════════════════════
+       BRAND
+    ═══════════════════════════════════════════ */
+    .brand { display:flex; align-items:center; gap:.55rem; text-decoration:none; color:var(--ink-1); font-weight:800; letter-spacing:-0.025em; }
     .brand-mark {
-      width: 28px; height: 28px; border-radius: 7px;
-      background: linear-gradient(135deg, var(--rust) 0%, var(--gold) 100%);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .9rem; box-shadow: 0 2px 12px var(--rust-glow);
+      width:32px; height:32px; border-radius:9px; flex-shrink:0;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      display:flex; align-items:center; justify-content:center; color:#fff; font-size:1rem;
+      box-shadow: 0 3px 14px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.35);
     }
-    .brand em { font-style: normal; color: var(--gold); }
-    .nav-back {
-      font-size: .78rem; font-weight: 500; color: var(--text-3);
-      text-decoration: none; border: 1px solid var(--border);
-      padding: .38rem .95rem; border-radius: 7px; transition: all .18s;
-    }
-    .nav-back:hover { color: var(--text); border-color: var(--border-2); background: var(--surface-2); }
+    .brand em { font-style:normal; background:linear-gradient(135deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 
-    /* ─── PAGE ─── */
-    .page {
-      position: relative; z-index: 1;
-      max-width: 860px; margin: 0 auto;
-      padding: 2.8rem 1.5rem 6rem;
+    /* ═══════════════════════════════════════════
+       SIDEBAR DOCK
+    ═══════════════════════════════════════════ */
+    .dock-scrim {
+      display:none; position:fixed; inset:0; z-index:90;
+      background: rgba(20,20,30,0.28); backdrop-filter: blur(3px);
+      opacity:0; pointer-events:none; transition: opacity .32s var(--ease);
     }
+    .dock-scrim.open { opacity:1; pointer-events:all; }
+
+    .dock {
+      position:fixed; top:18px; left:18px; bottom:18px; z-index:95;
+      width:250px; display:flex; flex-direction:column; gap:1.1rem;
+      padding:1.2rem 1rem 1rem;
+      background: var(--glass);
+      backdrop-filter: blur(28px) saturate(1.6);
+      -webkit-backdrop-filter: blur(28px) saturate(1.6);
+      border:1px solid var(--glass-border);
+      border-radius: var(--r-xl);
+      box-shadow: var(--sh-float), inset 0 1px 0 rgba(255,255,255,0.6);
+      transition: transform .42s var(--spring), opacity .3s ease;
+    }
+    .dock::before {
+      content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+      background: linear-gradient(160deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 35%);
+    }
+    .dock-brand { display:flex; align-items:center; gap:.6rem; padding:.35rem .5rem .9rem; border-bottom:1px solid var(--hairline); }
+    .dock-brand .brand { font-size:1.02rem; }
+
+    .dock-nav { position:relative; display:flex; flex-direction:column; gap:.25rem; flex:1; overflow-y:auto; overflow-x:visible; padding-top:.2rem; }
+    .dock-indicator {
+      position:absolute; left:0; top:0; width:100%; height:52px;
+      background: linear-gradient(135deg, rgba(10,132,255,0.14), rgba(94,92,230,0.10));
+      border:1px solid rgba(10,132,255,0.20);
+      border-radius: var(--r-md);
+      box-shadow: 0 4px 16px rgba(10,132,255,0.14), inset 0 1px 0 rgba(255,255,255,0.5);
+      transition: transform .48s var(--spring), height .3s var(--ease);
+      pointer-events:none; z-index:0;
+      opacity:0;
+    }
+    .dock-item {
+      position:relative; z-index:1; display:flex; align-items:center; gap:.75rem;
+      width:100%; padding:.72rem .8rem; border:none; background:none; cursor:pointer;
+      border-radius: var(--r-md); font-family:inherit; text-align:left;
+      color: var(--ink-2); font-size:.86rem; font-weight:600; letter-spacing:-0.01em;
+      transition: color .2s ease, transform .18s var(--ease);
+    }
+    .dock-item .dock-ic {
+      width:32px; height:32px; border-radius:9px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(28,28,36,0.045); color:var(--ink-2);
+      transition: background .2s ease, color .2s ease, transform .3s var(--spring);
+    }
+    .dock-item .dock-ic svg { width:17px; height:17px; }
+    .dock-item:hover { color: var(--ink-1); }
+    .dock-item:hover .dock-ic { transform: translateY(-1px) scale(1.05); }
+    .dock-item.active { color: var(--accent); }
+    .dock-item.active .dock-ic { background: linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; box-shadow:0 3px 10px var(--accent-glow); }
+    .dock-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .dock-item .dock-label { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .dock-item .dock-dot { width:6px; height:6px; border-radius:50%; background:var(--success); flex-shrink:0; box-shadow:0 0 0 3px var(--success-bg); animation: dotPulse 1.4s ease-in-out infinite; }
+    @keyframes dotPulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+
+    .dock-footer { border-top:1px solid var(--hairline); padding-top:.85rem; display:flex; flex-direction:column; gap:.4rem; }
+    .dock-back {
+      display:flex; align-items:center; gap:.5rem; text-decoration:none; color:var(--ink-2);
+      font-size:.78rem; font-weight:600; padding:.6rem .7rem; border-radius: var(--r-sm);
+      transition: background .18s ease, color .18s ease;
+    }
+    .dock-back:hover { background: rgba(28,28,36,0.05); color:var(--ink-1); }
+    .dock-back svg { width:14px; height:14px; flex-shrink:0; }
+
+    /* ═══════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════ */
+    .content { position:relative; z-index:1; margin-left: 290px; min-height:100vh; padding: 2.2rem 2rem 6rem; }
+    .content-inner { max-width: 880px; margin: 0 auto; }
 
     /* ─── BREADCRUMB ─── */
-    .breadcrumb {
-      display: flex; align-items: center; gap: .45rem;
-      font-size: .76rem; color: var(--text-3);
-      margin-bottom: 1.8rem; flex-wrap: wrap;
+    .breadcrumb { display:flex; align-items:center; gap:.4rem; font-size:.76rem; color:var(--ink-3); margin-bottom:1.4rem; flex-wrap:wrap; font-weight:500; }
+    .breadcrumb a { color:var(--ink-3); text-decoration:none; transition:color .18s; white-space:nowrap; }
+    .breadcrumb a:hover { color:var(--ink-1); }
+    .breadcrumb-sep { opacity:.5; flex-shrink:0; }
+    .breadcrumb-current { color:var(--ink-2); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:280px; }
+
+    /* ─── GLASS PANEL BASE ─── */
+    .glass-panel {
+      background: var(--glass); backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
+      border:1px solid var(--glass-border); border-radius: var(--r-lg);
+      box-shadow: var(--sh-2), inset 0 1px 0 rgba(255,255,255,0.55);
     }
-    .breadcrumb a { color: var(--text-3); text-decoration: none; transition: color .18s; white-space: nowrap; }
-    .breadcrumb a:hover { color: var(--text-2); }
-    .breadcrumb-sep { opacity: .35; flex-shrink: 0; }
-    .breadcrumb-current { color: var(--text-2); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
 
     /* ─── SKELETON ─── */
-    .hero-skeleton {
-      height: 200px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 18px; margin-bottom: 2rem;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .hero-skeleton { height:200px; margin-bottom:1.6rem; display:flex; align-items:center; justify-content:center; }
 
     /* ─── CLASS HERO ─── */
     .class-hero {
-      position: relative; overflow: hidden;
-      background: linear-gradient(148deg, #15120C 0%, var(--surface) 50%, #0F0D09 100%);
-      border: 1px solid var(--border-2); border-radius: 18px;
-      padding: 2rem 2rem 1.8rem; margin-bottom: 2rem; display: none;
-    }
-    .class-hero::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent 0%, rgba(212,98,46,0.5) 15%, var(--gold) 45%, rgba(232,184,74,0.5) 70%, transparent 100%);
+      position:relative; overflow:hidden;
+      background: linear-gradient(150deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.42) 100%);
+      padding:2.1rem 2.2rem; margin-bottom:1.6rem; display:none;
     }
     .class-hero::after {
-      content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 180px;
-      background: radial-gradient(ellipse at top right, rgba(232,184,74,0.1) 0%, rgba(212,98,46,0.05) 50%, transparent 70%);
-      pointer-events: none;
+      content:''; position:absolute; top:-60px; right:-60px; width:280px; height:220px;
+      background: radial-gradient(ellipse at top right, rgba(94,92,230,0.16) 0%, rgba(10,132,255,0.08) 50%, transparent 72%);
+      pointer-events:none;
     }
-    .hero-layout { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
-    .hero-main { flex: 1; min-width: 0; }
-    .hero-eyebrow {
-      display: flex; align-items: center; gap: .45rem;
-      font-size: .65rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .16em; color: var(--gold); margin-bottom: .5rem; opacity: .9;
-    }
-    .hero-eyebrow-line { display: block; width: 16px; height: 2px; border-radius: 2px; background: var(--gold); }
-    .hero-title {
-      font-size: clamp(1.45rem, 3.5vw, 2rem); font-weight: 700;
-      letter-spacing: -.035em; line-height: 1.1;
-      background: linear-gradient(135deg, var(--text) 30%, var(--text-2) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      margin-bottom: .6rem;
-    }
-    .hero-badges { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
-    .badge {
-      display: inline-flex; align-items: center; gap: .25rem;
-      padding: .18rem .6rem; border-radius: 20px;
-      font-size: .68rem; font-weight: 700; letter-spacing: .02em;
-    }
-    .badge-active   { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-bd); }
-    .badge-inactive { background: var(--surface-3);  color: var(--text-3);  border: 1px solid var(--border); }
-    .badge-schedule { background: rgba(212,98,46,0.1); color: var(--rust); border: 1px solid rgba(212,98,46,0.22); }
-    .hero-desc { font-size: .83rem; color: var(--text-2); margin-top: .6rem; line-height: 1.65; max-width: 480px; display: none; }
-    .hero-context {
-      display: flex; flex-wrap: wrap; align-items: center; gap: .4rem;
-      margin-top: .65rem; font-size: .73rem; color: var(--text-3);
-    }
-    .hero-context strong { color: var(--gold); font-weight: 600; }
-    .hero-context .ctx-sep { opacity: .35; }
-    .hero-meta { font-size: .72rem; color: var(--text-3); margin-top: .4rem; }
-    .hero-stats { display: flex; gap: .6rem; flex-shrink: 0; align-self: flex-start; }
+    .hero-layout { position:relative; z-index:1; display:flex; align-items:flex-start; justify-content:space-between; gap:1.6rem; flex-wrap:wrap; }
+    .hero-main { flex:1; min-width:0; }
+    .hero-eyebrow { display:flex; align-items:center; gap:.5rem; font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.14em; color:var(--accent); margin-bottom:.6rem; }
+    .hero-eyebrow-line { display:block; width:18px; height:2.5px; border-radius:2px; background: linear-gradient(90deg,var(--accent),var(--accent-2)); }
+    .hero-title { font-size:clamp(1.5rem,3.4vw,2.1rem); font-weight:800; letter-spacing:-0.035em; line-height:1.1; color:var(--ink-1); margin-bottom:.7rem; }
+    .hero-badges { display:flex; align-items:center; gap:.45rem; flex-wrap:wrap; }
+    .badge { display:inline-flex; align-items:center; gap:.3rem; padding:.24rem .68rem; border-radius:20px; font-size:.68rem; font-weight:700; letter-spacing:.01em; }
+    .badge-active { background: var(--success-bg); color:#1F8A3B; border:1px solid var(--success-bd); }
+    .badge-inactive { background: rgba(28,28,36,0.06); color:var(--ink-3); border:1px solid var(--hairline-2); }
+    .badge-schedule { background: var(--quiz-bg); color:#0A6BD4; border:1px solid var(--quiz-bd); }
+    .hero-desc { font-size:.85rem; color:var(--ink-2); margin-top:.7rem; line-height:1.65; max-width:480px; display:none; }
+    .hero-context-line { display:flex; flex-wrap:wrap; align-items:center; gap:.45rem; margin-top:.7rem; font-size:.76rem; color:var(--ink-3); }
+    .hero-context-line strong { color: var(--ink-1); font-weight:700; }
+    .hero-context-line .ctx-sep { opacity:.5; }
+    .hero-meta { font-size:.73rem; color:var(--ink-3); margin-top:.4rem; }
+    .hero-stats { display:flex; gap:.7rem; flex-shrink:0; align-self:flex-start; position:relative; z-index:1; }
     .hero-stat {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-width: 76px; padding: .75rem 1rem;
-      background: rgba(0,0,0,0.22); border: 1px solid var(--border); border-radius: 10px; text-align: center;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:76px;
+      padding:.85rem 1.1rem; background: rgba(255,255,255,0.55); border:1px solid var(--glass-border);
+      border-radius: var(--r-md); text-align:center; box-shadow: var(--sh-1);
     }
-    .hero-stat-val { font-size: 1.45rem; font-weight: 700; color: var(--text); line-height: 1; font-variant-numeric: tabular-nums; }
-    .hero-stat-lbl { font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-3); margin-top: .28rem; }
+    .hero-stat-val { font-size:1.55rem; font-weight:800; color:var(--ink-1); line-height:1; font-variant-numeric:tabular-nums; }
+    .hero-stat-lbl { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-3); margin-top:.32rem; }
 
     /* ─── FEEDBACK ─── */
-    #feedback { overflow: hidden; max-height: 0; margin-bottom: 0; transition: max-height .35s ease, margin-bottom .35s ease; }
-    #feedback.show { max-height: 80px; margin-bottom: 1.2rem; }
-    .fb-inner { display: flex; align-items: center; gap: .6rem; padding: .8rem 1.1rem; border-radius: var(--radius-sm); font-size: .82rem; font-weight: 500; }
-    #feedback.err .fb-inner { background: var(--error-bg); border: 1px solid var(--error-bd); color: var(--error); }
+    #feedback { overflow:hidden; max-height:0; margin-bottom:0; transition:max-height .35s var(--ease), margin-bottom .35s var(--ease); }
+    #feedback.show { max-height:80px; margin-bottom:1.2rem; }
+    .fb-inner { display:flex; align-items:center; gap:.6rem; padding:.85rem 1.15rem; border-radius: var(--r-md); font-size:.83rem; font-weight:600; backdrop-filter: blur(14px); }
+    #feedback.ok  .fb-inner { background: var(--success-bg); border:1px solid var(--success-bd); color:#1F8A3B; }
+    #feedback.err .fb-inner { background: var(--error-bg); border:1px solid var(--error-bd); color:#D8291E; }
 
-    /* ═══════════════════════════════════════
-       GAME NOTIFICATION BANNER
-       Shown when teacher starts a live game
-    ═══════════════════════════════════════ */
-    #gameBanner {
-      display: none;                      /* hidden until game_started event */
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(130deg, rgba(139,53,176,0.18) 0%, rgba(90,33,120,0.1) 100%);
-      border: 1px solid var(--game-bd);
-      border-radius: var(--radius);
-      padding: 1.4rem 1.6rem;
-      margin-bottom: 2rem;
-      animation: bannerSlideIn .45s cubic-bezier(.34, 1.56, .64, 1) both;
-    }
-    #gameBanner.show { display: block; }
-
-    /* Glow top border */
-    #gameBanner::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--game), var(--gold), var(--game), transparent);
-    }
-
-    /* Subtle ambient glow behind banner */
-    #gameBanner::after {
-      content: '';
-      position: absolute; top: -60px; right: -60px;
-      width: 240px; height: 200px;
-      background: radial-gradient(ellipse at top right, rgba(139,53,176,0.25) 0%, transparent 65%);
-      pointer-events: none;
-    }
-
-    @keyframes bannerSlideIn {
-      from { opacity: 0; transform: translateY(-14px) scale(.97); }
-      to   { opacity: 1; transform: none; }
-    }
-
-    .game-banner-inner {
-      position: relative; z-index: 1;
-      display: flex; align-items: center; gap: 1.4rem; flex-wrap: wrap;
-    }
-
-    .game-banner-emoji {
-      font-size: 2.6rem; flex-shrink: 0; line-height: 1;
-      animation: diceWiggle 2s ease-in-out infinite;
-    }
-    @keyframes diceWiggle {
-      0%, 100% { transform: rotate(0deg); }
-      25%       { transform: rotate(-12deg); }
-      75%       { transform: rotate(12deg); }
-    }
-
-    .game-banner-body { flex: 1; min-width: 0; }
-
-    .game-banner-eyebrow {
-      display: flex; align-items: center; gap: .45rem;
-      font-size: .62rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .16em; color: var(--game); margin-bottom: .3rem;
-    }
-    .live-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 0 0 rgba(93,191,138,0.6);
-      animation: livePulse 1.4s ease-in-out infinite;
-      flex-shrink: 0;
-    }
-    @keyframes livePulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(93,191,138,0.6); }
-      50%       { box-shadow: 0 0 0 6px rgba(93,191,138,0); }
-    }
-
-    .game-banner-title {
-      font-size: 1.05rem; font-weight: 700; color: var(--text);
-      letter-spacing: -.02em; margin-bottom: .2rem;
-    }
-    .game-banner-sub { font-size: .76rem; color: var(--text-2); line-height: 1.55; }
-
-    .btn-join-game {
-      display: inline-flex; align-items: center; gap: .5rem;
-      padding: .72rem 1.5rem; border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 700;
-      background: linear-gradient(135deg, var(--game), #6b1f8a);
-      color: #fff; border: none; cursor: pointer; text-decoration: none;
-      box-shadow: 0 4px 20px var(--game-glow), inset 0 1px 0 rgba(255,255,255,0.12);
-      transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s ease;
-      white-space: nowrap; flex-shrink: 0;
-      position: relative; overflow: hidden;
-    }
-    .btn-join-game:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px var(--game-glow), inset 0 1px 0 rgba(255,255,255,0.15);
-    }
-    .btn-join-game:active { transform: translateY(0); }
-    .btn-join-game::after {
-      content: '';
-      position: absolute; top: 0; bottom: 0; left: -75%; width: 50%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transform: skewX(-15deg);
-      animation: shimmer 2.4s ease-in-out infinite;
-    }
-    @keyframes shimmer { 0% { left: -75%; } 40%, 100% { left: 130%; } }
-
-    /* Dismiss button */
-    .game-banner-dismiss {
-      position: absolute; top: .8rem; right: .8rem;
-      width: 26px; height: 26px; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-      color: var(--text-3); font-size: .8rem; cursor: pointer;
-      transition: all .18s; z-index: 2;
-    }
-    .game-banner-dismiss:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+    /* ─── PAGE SECTION WRAPPER ─── */
+    .page-section { scroll-margin-top: 1.4rem; margin-bottom: 2.1rem; }
+    .page-section:last-child { margin-bottom:0; }
 
     /* ─── SECTION BAR ─── */
-    .section-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: .9rem; }
-    .section-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .15em; color: var(--text-3); }
-    .section-hint  { font-size: .7rem; color: var(--text-3); }
+    .section-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:.9rem; gap:.6rem; flex-wrap:wrap; }
+    .section-label { display:flex; align-items:center; gap:.5rem; font-size:.98rem; font-weight:800; letter-spacing:-0.015em; color:var(--ink-1); }
+    .section-hint { font-size:.75rem; color:var(--ink-3); font-weight:500; }
+
+    /* ─── NOTICE BANNER (live game / newly-assigned task) ─── */
+    .notice-banner {
+      position: relative; overflow: hidden;
+      border-radius: var(--r-lg);
+      padding: 1.5rem 3.2rem 1.5rem 1.7rem;
+      display: none; align-items: center; gap: 1.4rem; flex-wrap: wrap;
+      backdrop-filter: blur(20px); box-shadow: var(--sh-2);
+      margin-bottom: 1.2rem;
+      animation: bannerIn .45s var(--spring) both;
+    }
+    .notice-banner.show { display: flex; }
+    @keyframes bannerIn { from { opacity:0; transform: translateY(-10px) scale(.98); } to { opacity:1; transform:none; } }
+    .notice-icon {
+      width:52px; height:52px; border-radius:15px; flex-shrink:0; font-size:1.5rem;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,0.6); border:1px solid var(--glass-border); box-shadow: var(--sh-1);
+    }
+    .notice-body { flex: 1; min-width: 0; }
+    .notice-eyebrow { display:flex; align-items:center; gap:.4rem; font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.13em; margin-bottom:.28rem; }
+    .notice-title { font-size:.96rem; font-weight:800; color: var(--ink-1); letter-spacing:-.015em; margin-bottom:.22rem; }
+    .notice-sub { font-size:.78rem; color: var(--ink-2); line-height:1.55; }
+    .live-pulse { display:inline-flex; align-items:center; gap:.35rem; }
+    .live-dot { width:7px; height:7px; border-radius:50%; background: var(--success); box-shadow:0 0 0 0 rgba(47,179,80,.55); animation: livePulse 1.4s ease-in-out infinite; }
+    @keyframes livePulse { 0%,100% { box-shadow:0 0 0 0 rgba(47,179,80,.55); } 50% { box-shadow:0 0 0 6px rgba(47,179,80,0); } }
+
+    .notice-dismiss {
+      position:absolute; top:.9rem; right:.9rem; width:28px; height:28px; border-radius:9px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(28,28,36,0.05); border:1px solid var(--hairline-2); color:var(--ink-3);
+      cursor:pointer; transition:all .18s; z-index:2;
+    }
+    .notice-dismiss svg { width:13px; height:13px; }
+    .notice-dismiss:hover { background: rgba(28,28,36,0.09); color:var(--ink-1); transform: rotate(90deg); }
+
+    /* ─── BUTTONS ─── */
+    .btn-cta {
+      position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:.45rem;
+      padding:.62rem 1.25rem; border-radius:999px; font-family:inherit;
+      font-size:.8rem; font-weight:700; color:#fff; border:none; cursor:pointer; text-decoration:none;
+      white-space:nowrap; flex-shrink:0;
+      transition: transform .22s var(--ease), box-shadow .22s ease;
+    }
+    .btn-cta:hover { transform:translateY(-2px); }
+    .btn-cta:active { transform:translateY(0); }
+
+    .btn-ghost-cta {
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.4rem .85rem; border-radius:999px; font-family:inherit;
+      font-size:.72rem; font-weight:700; text-decoration:none; white-space:nowrap;
+      transition: all .18s ease;
+    }
 
     /* ─── STATES ─── */
-    #loadingState { display: flex; align-items: center; justify-content: center; gap: .75rem; padding: 4rem 2rem; color: var(--text-3); font-size: .84rem; }
-    #emptyState { display: none; text-align: center; padding: 4rem 2rem; border: 1px dashed var(--border-2); border-radius: var(--radius); background: var(--surface); }
-    .empty-emoji { font-size: 2.2rem; margin-bottom: .9rem; opacity: .7; }
-    .empty-h     { font-size: 1rem; font-weight: 600; color: var(--text-2); margin-bottom: .3rem; }
-    .empty-p     { font-size: .82rem; color: var(--text-3); }
+    #loadingState, .section-loading { display:flex; align-items:center; gap:.75rem; padding:2.2rem; color:var(--ink-3); font-size:.84rem; }
+    #emptyState, .section-empty {
+      display:none; text-align:center; padding:3.6rem 2rem;
+      border:1.5px dashed var(--hairline-2); border-radius: var(--r-lg); background: var(--glass-soft);
+    }
+    .empty-emoji { font-size:2.1rem; margin-bottom:.9rem; opacity:.8; }
+    .empty-h { font-size:1rem; font-weight:700; color:var(--ink-1); margin-bottom:.3rem; }
+    .empty-p { font-size:.82rem; color:var(--ink-3); }
 
     /* ─── ROSTER PANEL ─── */
-    .roster-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    .roster-header {
-      display: grid; grid-template-columns: 36px 1fr 100px 130px 70px;
-      align-items: center; gap: 1rem; padding: .6rem 1.3rem .6rem 1.5rem;
-      background: rgba(0,0,0,0.18); border-bottom: 1px solid var(--border);
-    }
-    .roster-col-label { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--text-3); }
-    .roster-col-label.align-right { text-align: right; }
-    .student-row {
-      display: grid; grid-template-columns: 36px 1fr 100px 130px 70px;
-      align-items: center; gap: 1rem; padding: .85rem 1.3rem .85rem 1.5rem;
-      border-bottom: 1px solid var(--border); position: relative;
-      transition: background .15s; animation: rowIn .35s cubic-bezier(.22,1,.36,1) both;
-    }
-    .student-row:last-child { border-bottom: none; }
-    .student-row:hover      { background: rgba(212,168,83,0.028); }
-    .student-row.is-you     { background: rgba(232,184,74,0.035); }
-    @keyframes rowIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:none; } }
-    .student-row::before {
-      content: ''; position: absolute; left: 0; top: 10px; bottom: 10px;
-      width: 2px; border-radius: 0 2px 2px 0; background: var(--gold);
-      opacity: 0; transition: opacity .15s;
-    }
-    .student-row:hover::before,
-    .student-row.is-you::before { opacity: .6; }
-
-    /* Avatars */
-    .student-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; flex-shrink: 0; }
-    .av-0 { background: rgba(212,98,46,0.16);  color: var(--rust);    border: 1px solid rgba(212,98,46,0.28); }
-    .av-1 { background: var(--gold-dim);        color: var(--gold);    border: 1px solid rgba(232,184,74,0.28); }
-    .av-2 { background: var(--success-bg);      color: var(--success); border: 1px solid var(--success-bd); }
-    .av-3 { background: rgba(90,130,200,0.12);  color: #8BAED6;        border: 1px solid rgba(90,130,200,0.22); }
-    .av-4 { background: rgba(180,90,200,0.1);   color: #C49ED8;        border: 1px solid rgba(180,90,200,0.2); }
-
-    .student-info { min-width: 0; }
-    .student-name {
-      font-size: .88rem; font-weight: 600; color: var(--text);
-      letter-spacing: -.015em; display: flex; align-items: center; gap: .45rem; min-width: 0;
-    }
-    .student-name .name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-    .you-pill {
-      flex-shrink: 0; font-size: .6rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .1em; color: var(--gold); background: var(--gold-dim);
-      border: 1px solid rgba(232,184,74,0.28); padding: .16rem .55rem;
-      border-radius: 20px; white-space: nowrap;
-    }
-    .student-level { font-size: .68rem; font-weight: 600; color: var(--text-3); }
-    .student-date  { font-size: .68rem; color: var(--text-3); font-variant-numeric: tabular-nums; }
-    .student-flag  { display: flex; justify-content: flex-end; }
-    .roster-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .6rem 1.3rem .6rem 1.5rem; background: rgba(0,0,0,0.1);
-      border-top: 1px solid var(--border); font-size: .68rem; color: var(--text-3);
-    }
+    .roster-panel { overflow:hidden; }
+    .roster-header { display:grid; grid-template-columns:36px 1fr 100px 130px; align-items:center; gap:1rem; padding:.7rem 1.3rem .7rem 1.5rem; background: rgba(28,28,36,0.03); border-bottom:1px solid var(--hairline); }
+    .roster-col-label { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.11em; color:var(--ink-3); }
+    .student-row { display:grid; grid-template-columns:36px 1fr 100px 130px; align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem; border-bottom:1px solid var(--hairline); position:relative; transition:background .15s; animation:rowIn .4s var(--ease) both; }
+    .student-row:last-child { border-bottom:none; }
+    .student-row:hover { background: rgba(10,132,255,0.035); }
+    .student-row.is-you { background: rgba(10,132,255,0.05); }
+    @keyframes rowIn { from{opacity:0;transform:translateX(-8px);} to{opacity:1;transform:none;} }
+    .student-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:800; letter-spacing:.02em; text-transform:uppercase; flex-shrink:0; }
+    .av-0{background:rgba(255,55,95,0.13);color:#D8294B;border:1px solid rgba(255,55,95,0.22);}
+    .av-1{background:rgba(255,159,10,0.14);color:#B5720A;border:1px solid rgba(255,159,10,0.24);}
+    .av-2{background:rgba(47,179,80,0.13);color:#1F8A3B;border:1px solid rgba(47,179,80,0.22);}
+    .av-3{background:rgba(10,132,255,0.13);color:#0A6BD4;border:1px solid rgba(10,132,255,0.22);}
+    .av-4{background:rgba(191,90,242,0.13);color:#9B3FCB;border:1px solid rgba(191,90,242,0.22);}
+    .student-info { min-width:0; display:flex; align-items:center; gap:.5rem; }
+    .student-name { font-size:.88rem; font-weight:700; color:var(--ink-1); letter-spacing:-.015em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .you-pill { flex-shrink:0; font-size:.6rem; font-weight:800; text-transform:uppercase; letter-spacing:.09em; color: var(--accent); background: var(--accent-glow); border:1px solid rgba(10,132,255,0.3); padding:.16rem .55rem; border-radius:20px; white-space:nowrap; }
+    .student-level { font-size:.68rem; font-weight:700; color:var(--ink-2); }
+    .student-date { font-size:.68rem; color:var(--ink-3); font-variant-numeric:tabular-nums; }
+    .roster-footer { display:flex; align-items:center; justify-content:space-between; padding:.65rem 1.3rem .65rem 1.5rem; background: rgba(28,28,36,0.02); border-top:1px solid var(--hairline); font-size:.68rem; color:var(--ink-3); font-weight:600; }
 
     /* ─── SPINNER ─── */
-    .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.18); border-top-color: currentColor; border-radius: 50%; animation: spin .55s linear infinite; }
-    .spinner.dark { border-color: rgba(0,0,0,0.1); border-top-color: var(--text-3); }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { display:inline-block; width:13px; height:13px; border:2px solid rgba(10,132,255,0.2); border-top-color:currentColor; border-radius:50%; animation:spin .55s linear infinite; }
+    .spinner.dark { border-color:rgba(28,28,36,0.14); border-top-color:var(--ink-3); }
+    @keyframes spin{to{transform:rotate(360deg);}}
 
     /* ─── TOAST ─── */
     .toast {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #1a1a2e; color: white; padding: 12px 24px;
-      border-radius: 30px; font-weight: 700; font-size: .88rem;
-      z-index: 200; transition: transform .4s cubic-bezier(.34,1.56,.64,1);
-      box-shadow: 0 8px 24px rgba(0,0,0,.5); pointer-events: none;
-      border: 1px solid rgba(139,53,176,0.4);
+      position: fixed; bottom: 26px; left: 50%;
+      transform: translateX(-50%) translateY(90px);
+      background: rgba(29,29,31,0.92); color: #fff; padding: .78rem 1.4rem;
+      border-radius: 999px; font-weight: 700; font-size: .84rem;
+      z-index: 400; transition: transform .4s var(--spring);
+      box-shadow: var(--sh-float); pointer-events: none;
+      backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1);
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* ─── SCROLLBAR ─── */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+    ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(28,28,36,0.14);border-radius:3px;}
 
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 640px) {
-      .roster-header { display: none; }
-      .student-row   { grid-template-columns: 34px 1fr auto; }
-      .student-level,
-      .student-date  { display: none; }
-      .hero-stats    { width: 100%; }
-      .hero-layout   { flex-direction: column; }
-      .game-banner-inner { flex-direction: column; align-items: flex-start; }
-      .btn-join-game { width: 100%; justify-content: center; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-    }
-
-    #readingBanner {
-      display: none;
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(130deg, rgba(46,158,143,0.18) 0%, rgba(31,122,110,0.1) 100%);
-      border: 1px solid var(--reading-bd);
-      border-radius: var(--radius);
-      padding: 1.4rem 1.6rem;
-      margin-bottom: 2rem;
-      animation: bannerSlideIn .45s cubic-bezier(.34, 1.56, .64, 1) both;
-    }
-    #readingBanner.show { display: block; }
-    #readingBanner::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--reading), var(--gold), var(--reading), transparent);
-    }
-    #readingBanner::after {
-      content: '';
-      position: absolute; top: -60px; right: -60px;
-      width: 240px; height: 200px;
-      background: radial-gradient(ellipse at top right, rgba(46,158,143,0.25) 0%, transparent 65%);
-      pointer-events: none;
-    }
-
-    .reading-row {
-      display:grid; grid-template-columns: 1fr 100px 130px 110px;
-      align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem;
-      border-bottom:1px solid var(--border); animation: rowIn .35s cubic-bezier(.22,1,.36,1) both;
-    }
+    /* ─── READING ROW ─── */
+    .reading-row { display:grid; grid-template-columns: 1fr 100px 130px 120px; align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem; border-bottom:1px solid var(--hairline); animation: rowIn .4s var(--ease) both; }
     .reading-row:last-child { border-bottom:none; }
-    .reading-row:hover { background:rgba(212,168,83,0.028); }
-    .reading-title { font-size:.88rem; font-weight:600; color:var(--text); }
+    .reading-row:hover { background: rgba(0,156,147,0.04); }
+    .reading-title { font-size:.88rem; font-weight:700; color:var(--ink-1); }
     .reading-level { font-size:.68rem; font-weight:700; text-transform:capitalize; }
-    .reading-level.beginner     { color:var(--success); }
-    .reading-level.intermediate { color:var(--gold); }
-    .reading-level.advanced     { color:var(--error); }
-    .reading-qcount { font-size:.7rem; color:var(--text-3); }
+    .reading-level.beginner     { color:#1F8A3B; }
+    .reading-level.intermediate { color:#B5720A; }
+    .reading-level.advanced     { color:#D8291E; }
+    .reading-qcount, .reading-date { font-size:.7rem; color:var(--ink-3); }
+    .row-action { display:flex; justify-content:flex-end; }
+    .row-done-tag { font-size:.68rem; font-weight:700; color:#1F8A3B; display:inline-flex; align-items:center; gap:.3rem; white-space:nowrap; }
 
-    @media (max-width: 640px) {
-      .reading-row { grid-template-columns: 1fr auto; }
-      .reading-level, .reading-qcount { display:none; }
-    }
-
-    #quizBanner {
-      display: none;
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(130deg, rgba(79,109,245,0.18) 0%, rgba(52,80,194,0.1) 100%);
-      border: 1px solid var(--quiz-bd);
-      border-radius: var(--radius);
-      padding: 1.4rem 1.6rem;
-      margin-bottom: 2rem;
-      animation: bannerSlideIn .45s cubic-bezier(.34, 1.56, .64, 1) both;
-    }
-    #quizBanner.show { display: block; }
-    #quizBanner::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--quiz), var(--gold), var(--quiz), transparent);
-    }
-    #quizBanner::after {
-      content: '';
-      position: absolute; top: -60px; right: -60px;
-      width: 240px; height: 200px;
-      background: radial-gradient(ellipse at top right, rgba(79,109,245,0.25) 0%, transparent 65%);
-      pointer-events: none;
-    }
-
-    .quiz-row {
-      display:grid; grid-template-columns: 1fr 88px 110px 100px;
-      align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem;
-      border-bottom:1px solid var(--border); animation: rowIn .35s cubic-bezier(.22,1,.36,1) both;
-    }
+    /* ─── QUIZ ROW ─── */
+    .quiz-row { display:grid; grid-template-columns: 1fr 92px 120px 130px; align-items:center; gap:1rem; padding:.85rem 1.3rem .85rem 1.5rem; border-bottom:1px solid var(--hairline); animation: rowIn .4s var(--ease) both; }
     .quiz-row:last-child { border-bottom:none; }
-    .quiz-row:hover { background:rgba(212,168,83,0.028); }
-    .quiz-title { font-size:.88rem; font-weight:600; color:var(--text); }
-    .quiz-qcount { font-size:.7rem; color:var(--text-3); }
-    .quiz-mode-tag {
-      font-size:.6rem; font-weight:800; text-transform:uppercase; letter-spacing:.07em;
-      padding:.2rem .5rem; border-radius:20px; text-align:center; white-space:nowrap;
-    }
-    .quiz-mode-tag.casual { color:var(--quiz); background:var(--quiz-bg); border:1px solid var(--quiz-bd); }
-    .quiz-mode-tag.racing { color:var(--race); background:var(--race-bg); border:1px solid var(--race-bd); }
+    .quiz-row:hover { background: rgba(10,132,255,0.035); }
+    .quiz-title { font-size:.88rem; font-weight:700; color:var(--ink-1); }
+    .quiz-qcount { font-size:.7rem; color:var(--ink-3); }
+    .quiz-mode-tag { font-size:.6rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; padding:.22rem .55rem; border-radius:20px; text-align:center; white-space:nowrap; }
+    .quiz-mode-tag.casual { color:#0A6BD4; background:var(--quiz-bg); border:1px solid var(--quiz-bd); }
+    .quiz-mode-tag.racing { color:#D8294B; background:var(--race-bg); border:1px solid var(--race-bd); }
     .btn-race-cta {
-      display:inline-flex; align-items:center; gap:.35rem; padding:.5rem 1.1rem; border-radius:20px;
-      font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:700; text-decoration:none; white-space:nowrap;
-      transition:transform .15s;
+      display:inline-flex; align-items:center; gap:.35rem; padding:.42rem 1rem; border-radius:999px;
+      font-family:inherit; font-size:.72rem; font-weight:800; text-decoration:none; white-space:nowrap;
+      transition:transform .18s var(--ease);
     }
     .btn-race-cta:hover { transform:scale(1.05); }
     .btn-race-cta.live {
-      background:linear-gradient(135deg,var(--race),#B83636); color:#fff;
-      box-shadow:0 3px 14px var(--race-glow);
+      background: linear-gradient(135deg,var(--race),#D8294B); color:#fff;
+      box-shadow: 0 3px 14px var(--race-glow);
       animation: raceCtaPulse 1.6s ease-in-out infinite;
     }
     @keyframes raceCtaPulse { 0%,100%{box-shadow:0 3px 14px var(--race-glow);} 50%{box-shadow:0 3px 22px var(--race-glow);} }
-    .btn-race-cta.idle { background:rgba(232,82,82,.12); color:var(--race); border:1px solid var(--race-bd); }
-    .btn-race-cta.done { background:var(--success-bg); color:var(--success); border:1px solid var(--success-bd); }
+    .btn-race-cta.idle { background: var(--race-bg); color:#D8294B; border:1px solid var(--race-bd); }
+    .btn-race-cta.done { background: var(--success-bg); color:#1F8A3B; border:1px solid var(--success-bd); }
 
-    @media (max-width: 640px) {
-      .quiz-row { grid-template-columns: 1fr auto; }
-      .quiz-qcount, .quiz-mode-tag { display:none; }
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 980px) {
+      .dock { transform: translateX(-120%); opacity:0; pointer-events:none; }
+      .dock.open { transform: translateX(0); opacity:1; pointer-events:all; }
+      .mobile-topbar { display:flex; }
+      .content { margin-left:0; padding: 1.4rem 1.1rem 5rem; }
+      .dock-scrim { display:block; }
     }
+    @media(max-width:640px){
+      .roster-header{display:none;}
+      .student-row{grid-template-columns:34px 1fr auto;}
+      .student-level,.student-date{display:none;}
+      .reading-row{grid-template-columns:1fr auto;}
+      .reading-level,.reading-qcount,.reading-date{display:none;}
+      .quiz-row{grid-template-columns:1fr auto;}
+      .quiz-mode-tag,.quiz-qcount{display:none;}
+      .hero-stats{width:100%;}
+      .hero-layout{flex-direction:column;}
+      .class-hero{padding:1.6rem 1.4rem;}
+      .notice-banner{padding:1.3rem 2.8rem 1.3rem 1.3rem;}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
   </style>
 </head>
 <body>
 
-<!-- ── NAV ── -->
-<nav>
-  <a class="brand" href="dashboard.html">
-    <div class="brand-mark">✦</div>
-    Til<em>Menger</em>
-  </a>
-  <a class="nav-back" href="dashboard.html">← Dashboard</a>
-</nav>
+<div class="bg-blobs" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
 
-<!-- ── PAGE ── -->
-<div class="page">
+<!-- Mobile top bar -->
+<header class="mobile-topbar">
+  <button class="hamburger" id="mobileMenuBtn" aria-label="Open navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <a class="brand" href="dashboard.html"><div class="brand-mark">✦</div>Til<em>Menger</em></a>
+</header>
 
-  <!-- Breadcrumb -->
-  <div class="breadcrumb">
-    <a href="dashboard.html">Dashboard</a>
-    <span class="breadcrumb-sep">/</span>
-    <span class="breadcrumb-current" id="bcClass">Loading…</span>
+<!-- Sidebar scrim (mobile) -->
+<div class="dock-scrim" id="dockScrim"></div>
+
+<!-- Sidebar dock -->
+<aside class="dock" id="dock">
+  <div class="dock-brand">
+    <a class="brand" href="dashboard.html"><div class="brand-mark">✦</div>Til<em>Menger</em></a>
   </div>
 
-  <!-- Hero Skeleton -->
-  <div class="hero-skeleton" id="heroSkeleton">
-    <div class="spinner dark"></div>
-  </div>
+  <nav class="dock-nav" id="dockNav">
+    <div class="dock-indicator" id="dockIndicator"></div>
 
-  <!-- Class Hero -->
-  <div class="class-hero" id="classHero">
-    <div class="hero-layout">
-      <div class="hero-main">
-        <div class="hero-eyebrow"><span class="hero-eyebrow-line"></span> My Class</div>
-        <div class="hero-title"  id="heroTitle">—</div>
-        <div class="hero-badges" id="heroBadges"></div>
-        <div class="hero-desc"   id="heroDesc"></div>
-        <div class="hero-context" id="heroContext"></div>
-        <div class="hero-meta" id="heroMeta"></div>
-      </div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-val" id="statTotal">—</div>
-          <div class="hero-stat-lbl">Classmates</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-val" id="statJoined">—</div>
-          <div class="hero-stat-lbl">You joined</div>
-        </div>
-      </div>
-    </div>
-  </div>
+    <button class="dock-item active" data-target="section-overview" type="button">
+      <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg></span>
+      <span class="dock-label">Overview</span>
+    </button>
 
-  <!-- Feedback -->
-  <div id="feedback"><div class="fb-inner" id="fb-inner"></div></div>
+    <button class="dock-item" data-target="section-game" type="button">
+      <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 12h.01M8 12h-2m2 0v2m2-2v-2"/><circle cx="16" cy="10.5" r=".9" fill="currentColor" stroke="none"/><circle cx="18" cy="13" r=".9" fill="currentColor" stroke="none"/></svg></span>
+      <span class="dock-label">ENGLISHPOLY</span>
+      <span class="dock-dot" id="dockGameDot" style="display:none;"></span>
+    </button>
 
-  <!-- ════════════════════════════════
-       LIVE GAME NOTIFICATION BANNER
-       Hidden by default; shown when
-       teacher starts a game session.
-  ════════════════════════════════ -->
-  <div id="gameBanner">
-    <button class="game-banner-dismiss" id="dismissBanner" title="Dismiss">✕</button>
-    <div class="game-banner-inner">
-      <div class="game-banner-emoji">🎲</div>
-      <div class="game-banner-body">
-        <div class="game-banner-eyebrow">
-          <span class="live-dot"></span>
-          Live Game
-        </div>
-        <div class="game-banner-title">ENGLISHPOLY is starting!</div>
-        <div class="game-banner-sub" id="gameBannerSub">
-          Your teacher has started a live board game for this class. Join now to play!
-        </div>
-      </div>
-      <a class="btn-join-game" id="joinGameBtn" href="#">
-        🎮 Join Game
-      </a>
-    </div>
-  </div>
+    <button class="dock-item" data-target="section-reading" type="button">
+      <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.2c2-1 4.6-1 7 0v13.6c-2.4-1-5-1-7 0z"/><path d="M20 5.2c-2-1-4.6-1-7 0v13.6c2.4-1 5-1 7 0z"/></svg></span>
+      <span class="dock-label">Reading Tasks</span>
+    </button>
 
-  <!-- ════════════════════════════════
-     READING TASK NOTIFICATION BANNER
-════════════════════════════════ -->
-<div id="readingBanner">
-  <button class="game-banner-dismiss" id="dismissReadingBanner" title="Dismiss">✕</button>
-  <div class="game-banner-inner">
-    <div class="game-banner-emoji">📖</div>
-    <div class="game-banner-body">
-      <div class="game-banner-eyebrow" style="color:var(--reading);">
-        <span class="live-dot" style="background:var(--reading);"></span>
-        New Reading Task
-      </div>
-      <div class="game-banner-title" id="readingBannerTitle">A new reading task is available!</div>
-      <div class="game-banner-sub" id="readingBannerSub">Your teacher just assigned a reading task — give it a go!</div>
-    </div>
-    <a class="btn-join-game" id="readingBannerBtn" href="#"
-      style="background:linear-gradient(135deg,var(--reading),#1F7A6E);box-shadow:0 4px 20px var(--reading-glow),inset 0 1px 0 rgba(255,255,255,0.12);">
-      📖 Start Reading
+    <button class="dock-item" data-target="section-quizzes" type="button">
+      <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 10.3 7 13 4.3"/><path d="M9 13.5 10.3 15 13 12.3"/><path d="M16 6h4M16 14h4"/></svg></span>
+      <span class="dock-label">Quizzes</span>
+    </button>
+
+    <button class="dock-item" data-target="section-topics" type="button">
+      <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="16" height="10" rx="2.2"/><path d="M10.3 7.7 13.6 9.5l-3.3 1.8z" fill="currentColor" stroke="none"/><path d="M7 18.5h10"/></svg></span>
+      <span class="dock-label">Topics & Homework</span>
+    </button>
+
+    <button class="dock-item" data-target="section-roster" type="button">
+      <span class="dock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="2.6"/><path d="M4 19c.6-3.2 2.8-5 5-5s4.4 1.8 5 5"/><circle cx="17" cy="9" r="2" opacity=".7"/><path d="M15.5 19c.4-2.3 1.7-3.7 2.9-4" opacity=".7"/></svg></span>
+      <span class="dock-label">Classmates</span>
+    </button>
+  </nav>
+
+  <div class="dock-footer">
+    <a class="dock-back" id="navBack" href="dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <span>Dashboard</span>
     </a>
   </div>
-</div>
+</aside>
 
-<!-- Section bar -->
-<div class="section-bar">
-  <span class="section-label">📖 Reading Tasks</span>
-  <span class="section-hint">Assigned by your teacher</span>
-</div>
+<main class="content" id="mainContent">
+  <div class="content-inner">
 
-<div id="readingLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--text-3);font-size:.84rem;">
-  <div class="spinner dark"></div>Loading reading tasks…
-</div>
-<div id="readingEmptyState" style="display:none;text-align:center;padding:2.5rem 1.5rem;border:1px dashed var(--border-2);border-radius:var(--radius);background:var(--surface);margin-bottom:2rem;">
-  <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.7;">📖</div>
-  <div style="font-size:.95rem;font-weight:600;color:var(--text-2);margin-bottom:.25rem;">No reading tasks yet</div>
-  <div style="font-size:.8rem;color:var(--text-3);">Your teacher hasn't assigned any reading tasks to this class.</div>
-</div>
-
-<div id="readingListWrap" style="display:none;margin-bottom:2rem;">
-  <div class="roster-panel" id="readingPanel"></div>
-</div>
-
-<!-- ════════════════════════════════
-     QUIZ NOTIFICATION BANNER
-════════════════════════════════ -->
-<div id="quizBanner">
-  <button class="game-banner-dismiss" id="dismissQuizBanner" title="Dismiss">✕</button>
-  <div class="game-banner-inner">
-    <div class="game-banner-emoji">📝</div>
-    <div class="game-banner-body">
-      <div class="game-banner-eyebrow" style="color:var(--quiz);">
-        <span class="live-dot" style="background:var(--quiz);"></span>
-        New Quiz
-      </div>
-      <div class="game-banner-title" id="quizBannerTitle">A new quiz is available!</div>
-      <div class="game-banner-sub" id="quizBannerSub">Your teacher just assigned a quiz — give it a go!</div>
+    <div class="breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current" id="bcClass">Loading…</span>
     </div>
-    <a class="btn-join-game" id="quizBannerBtn" href="#"
-      style="background:linear-gradient(135deg,var(--quiz),#3450C2);box-shadow:0 4px 20px var(--quiz-glow),inset 0 1px 0 rgba(255,255,255,0.12);">
-      📝 Take Quiz
-    </a>
-  </div>
-</div>
 
-<!-- Section bar -->
-<div class="section-bar">
-  <span class="section-label">📝 Quizzes</span>
-  <span class="section-hint">Assigned by your teacher</span>
-</div>
+    <!-- ═══════ OVERVIEW ═══════ -->
+    <section class="page-section" id="section-overview">
+      <div class="glass-panel hero-skeleton" id="heroSkeleton"><div class="spinner dark"></div></div>
 
-<div id="quizLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--text-3);font-size:.84rem;">
-  <div class="spinner dark"></div>Loading quizzes…
-</div>
-<div id="quizEmptyState" style="display:none;text-align:center;padding:2.5rem 1.5rem;border:1px dashed var(--border-2);border-radius:var(--radius);background:var(--surface);margin-bottom:2rem;">
-  <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.7;">📝</div>
-  <div style="font-size:.95rem;font-weight:600;color:var(--text-2);margin-bottom:.25rem;">No quizzes yet</div>
-  <div style="font-size:.8rem;color:var(--text-3);">Your teacher hasn't assigned any quizzes to this class.</div>
-</div>
-<div id="quizListWrap" style="display:none;margin-bottom:2rem;">
-  <div class="roster-panel" id="quizPanel"></div>
-</div>
-
-
-<!-- ════════════════════════════════
-     TOPIC / HOMEWORK NOTIFICATION BANNER
-════════════════════════════════ -->
-<div id="topicBanner" style="display:none;position:relative;overflow:hidden;background:linear-gradient(130deg, rgba(127,119,221,0.18) 0%, rgba(91,82,199,0.1) 100%);border:1px solid rgba(127,119,221,0.28);border-radius:var(--radius);padding:1.4rem 1.6rem;margin-bottom:2rem;">
-  <button class="game-banner-dismiss" id="dismissTopicBanner" title="Dismiss">✕</button>
-  <div class="game-banner-inner">
-    <div class="game-banner-emoji">📋</div>
-    <div class="game-banner-body">
-      <div class="game-banner-eyebrow" style="color:#7F77DD;"><span class="live-dot" style="background:#7F77DD;"></span>New Topic</div>
-      <div class="game-banner-title" id="topicBannerTitle">A new topic is available!</div>
-      <div class="game-banner-sub" id="topicBannerSub">Your teacher just assigned a topic — watch the video and answer the questions.</div>
-    </div>
-    <a class="btn-join-game" id="topicBannerBtn" href="#"
-       style="background:linear-gradient(135deg,#7F77DD,#5B52C7);box-shadow:0 4px 20px rgba(127,119,221,0.4),inset 0 1px 0 rgba(255,255,255,0.12);">📋 Start Topic</a>
-  </div>
-</div>
-
-<!-- Section bar -->
-<div class="section-bar">
-  <span class="section-label">📋 Topics & Homeworks</span>
-  <span class="section-hint">Assigned by your teacher</span>
-</div>
-
-<div id="topicLoadingState" style="display:flex;align-items:center;gap:.75rem;padding:2rem;color:var(--text-3);font-size:.84rem;">
-  <div class="spinner dark"></div>Loading topics…
-</div>
-<div id="topicEmptyState" style="display:none;text-align:center;padding:2.5rem 1.5rem;border:1px dashed var(--border-2);border-radius:var(--radius);background:var(--surface);margin-bottom:2rem;">
-  <div style="font-size:1.8rem;margin-bottom:.6rem;opacity:.7;">📋</div>
-  <div style="font-size:.95rem;font-weight:600;color:var(--text-2);margin-bottom:.25rem;">No topics yet</div>
-  <div style="font-size:.8rem;color:var(--text-3);">Your teacher hasn't assigned any topics to this class.</div>
-</div>
-<div id="topicListWrap" style="display:none;margin-bottom:2rem;">
-  <div class="roster-panel" id="topicPanel"></div>
-</div>
-
-  <!-- Section bar -->
-  <div class="section-bar">
-    <span class="section-label">Classmates</span>
-    <span class="section-hint">Everyone learning alongside you</span>
-  </div>
-
-  <!-- Loading -->
-  <div id="loadingState">
-    <div class="spinner dark"></div>
-    Loading classmates…
-  </div>
-
-  <!-- Empty -->
-  <div id="emptyState">
-    <div class="empty-emoji">👤</div>
-    <div class="empty-h">No classmates yet</div>
-    <div class="empty-p">You're the first one here — more students may join soon.</div>
-  </div>
-
-  <!-- Roster panel -->
-  <div id="rosterWrap" style="display:none;">
-    <div class="roster-panel">
-      <div class="roster-header">
-        <div></div>
-        <div class="roster-col-label">Student</div>
-        <div class="roster-col-label">Level</div>
-        <div class="roster-col-label">Enrolled</div>
-        <div class="roster-col-label align-right"></div>
+      <div class="glass-panel class-hero" id="classHero">
+        <div class="hero-layout">
+          <div class="hero-main">
+            <div class="hero-eyebrow"><span class="hero-eyebrow-line"></span> My Class</div>
+            <div class="hero-title"  id="heroTitle">—</div>
+            <div class="hero-badges" id="heroBadges"></div>
+            <div class="hero-desc"   id="heroDesc"></div>
+            <div class="hero-context-line" id="heroContextLine"></div>
+            <div class="hero-meta" id="heroMeta"></div>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><div class="hero-stat-val" id="statTotal">—</div><div class="hero-stat-lbl">Classmates</div></div>
+            <div class="hero-stat"><div class="hero-stat-val" id="statJoined">—</div><div class="hero-stat-lbl">You joined</div></div>
+          </div>
+        </div>
       </div>
-      <div id="studentList"></div>
-      <div class="roster-footer">
-        <span id="rosterCount">0 students</span>
-      </div>
-    </div>
-  </div>
 
-</div><!-- /page -->
+      <div id="feedback"><div class="fb-inner" id="fb-inner"></div></div>
+    </section>
+
+    <!-- ═══════ ENGLISHPOLY — only shown while a session is live ═══════ -->
+    <section class="page-section" id="section-game" style="display:none;">
+      <div class="notice-banner" id="gameBanner" style="border:1px solid var(--game-bd); background:linear-gradient(130deg, rgba(191,90,242,0.10) 0%, rgba(94,92,230,0.06) 100%);">
+        <button class="notice-dismiss" id="dismissGameBanner" aria-label="Dismiss">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="notice-icon">🎲</div>
+        <div class="notice-body">
+          <div class="notice-eyebrow" style="color:var(--game);"><span class="live-pulse"><span class="live-dot"></span></span>Live Game</div>
+          <div class="notice-title">ENGLISHPOLY is live</div>
+          <div class="notice-sub" id="gameBannerSub">Your teacher has started a live board game for this class. Join now to play!</div>
+        </div>
+        <a class="btn-cta" id="joinGameBtn" href="#" style="background:linear-gradient(135deg,var(--game),#8E3FC7); box-shadow:0 4px 18px var(--game-glow);">🎮 Join Game</a>
+      </div>
+    </section>
+
+    <!-- ═══════ READING TASKS ═══════ -->
+    <section class="page-section" id="section-reading" style="display:none;">
+      <div class="notice-banner" id="readingBanner" style="border:1px solid var(--reading-bd); background:linear-gradient(130deg, rgba(0,156,147,0.10) 0%, rgba(0,156,147,0.04) 100%);">
+        <button class="notice-dismiss" id="dismissReadingBanner" aria-label="Dismiss">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="notice-icon">📖</div>
+        <div class="notice-body">
+          <div class="notice-eyebrow" style="color:var(--reading);">New Reading Task</div>
+          <div class="notice-title" id="readingBannerTitle">A new reading task is available!</div>
+          <div class="notice-sub" id="readingBannerSub">Your teacher just assigned a reading task — give it a go!</div>
+        </div>
+        <a class="btn-cta" id="readingBannerBtn" href="#" style="background:linear-gradient(135deg,var(--reading),#00776F); box-shadow:0 4px 18px var(--reading-glow);">📖 Start Reading</a>
+      </div>
+
+      <div class="section-bar">
+        <span class="section-label">📖 Reading Tasks</span>
+        <span class="section-hint">Assigned by your teacher</span>
+      </div>
+
+      <div class="section-loading" id="readingLoadingState"><div class="spinner dark"></div>Loading reading tasks…</div>
+      <div class="section-empty" id="readingEmptyState">
+        <div class="empty-emoji">📖</div>
+        <div class="empty-h">No reading tasks yet</div>
+        <div class="empty-p">Your teacher hasn't assigned any reading tasks to this class.</div>
+      </div>
+      <div id="readingListWrap" style="display:none;">
+        <div class="roster-panel glass-panel" id="readingPanel"></div>
+      </div>
+    </section>
+
+    <!-- ═══════ QUIZZES ═══════ -->
+    <section class="page-section" id="section-quizzes" style="display:none;">
+      <div class="notice-banner" id="quizBanner" style="border:1px solid var(--quiz-bd); background:linear-gradient(130deg, rgba(10,132,255,0.10) 0%, rgba(10,132,255,0.04) 100%);">
+        <button class="notice-dismiss" id="dismissQuizBanner" aria-label="Dismiss">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="notice-icon">📝</div>
+        <div class="notice-body">
+          <div class="notice-eyebrow" style="color:var(--quiz);">New Quiz</div>
+          <div class="notice-title" id="quizBannerTitle">A new quiz is available!</div>
+          <div class="notice-sub" id="quizBannerSub">Your teacher just assigned a quiz — give it a go!</div>
+        </div>
+        <a class="btn-cta" id="quizBannerBtn" href="#" style="background:linear-gradient(135deg,var(--quiz),#0A5FC7); box-shadow:0 4px 18px var(--quiz-glow);">📝 Take Quiz</a>
+      </div>
+
+      <div class="section-bar">
+        <span class="section-label">📝 Quizzes</span>
+        <span class="section-hint">Assigned by your teacher</span>
+      </div>
+
+      <div class="section-loading" id="quizLoadingState"><div class="spinner dark"></div>Loading quizzes…</div>
+      <div class="section-empty" id="quizEmptyState">
+        <div class="empty-emoji">📝</div>
+        <div class="empty-h">No quizzes yet</div>
+        <div class="empty-p">Your teacher hasn't assigned any quizzes to this class.</div>
+      </div>
+      <div id="quizListWrap" style="display:none;">
+        <div class="roster-panel glass-panel" id="quizPanel"></div>
+      </div>
+    </section>
+
+    <!-- ═══════ TOPICS & HOMEWORKS ═══════ -->
+    <section class="page-section" id="section-topics" style="display:none;">
+      <div class="notice-banner" id="topicBanner" style="border:1px solid var(--topic-bd); background:linear-gradient(130deg, rgba(94,92,230,0.10) 0%, rgba(94,92,230,0.04) 100%);">
+        <button class="notice-dismiss" id="dismissTopicBanner" aria-label="Dismiss">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="notice-icon">📋</div>
+        <div class="notice-body">
+          <div class="notice-eyebrow" style="color:var(--topic);">New Topic</div>
+          <div class="notice-title" id="topicBannerTitle">A new topic is available!</div>
+          <div class="notice-sub">Your teacher just assigned a topic — watch the video and answer the questions.</div>
+        </div>
+        <a class="btn-cta" id="topicBannerBtn" href="#" style="background:linear-gradient(135deg,var(--topic),#4340B0); box-shadow:0 4px 18px var(--topic-glow);">📋 Start Topic</a>
+      </div>
+
+      <div class="section-bar">
+        <span class="section-label">📋 Topics & Homeworks</span>
+        <span class="section-hint">Assigned by your teacher</span>
+      </div>
+
+      <div class="section-loading" id="topicLoadingState"><div class="spinner dark"></div>Loading topics…</div>
+      <div class="section-empty" id="topicEmptyState">
+        <div class="empty-emoji">📋</div>
+        <div class="empty-h">No topics yet</div>
+        <div class="empty-p">Your teacher hasn't assigned any topics to this class.</div>
+      </div>
+      <div id="topicListWrap" style="display:none;">
+        <div class="roster-panel glass-panel" id="topicPanel"></div>
+      </div>
+    </section>
+
+    <!-- ═══════ CLASSMATES ═══════ -->
+    <section class="page-section" id="section-roster">
+      <div class="section-bar">
+        <span class="section-label">Classmates</span>
+        <span class="section-hint">Everyone learning alongside you</span>
+      </div>
+
+      <div id="loadingState" class="section-loading"><div class="spinner dark"></div>Loading classmates…</div>
+      <div id="emptyState" class="glass-panel section-empty">
+        <div class="empty-emoji">👤</div>
+        <div class="empty-h">No classmates yet</div>
+        <div class="empty-p">You're the first one here — more students may join soon.</div>
+      </div>
+
+      <div id="rosterWrap" style="display:none;">
+        <div class="roster-panel glass-panel">
+          <div class="roster-header">
+            <div></div>
+            <div class="roster-col-label">Student</div>
+            <div class="roster-col-label">Level</div>
+            <div class="roster-col-label">Enrolled</div>
+          </div>
+          <div id="studentList"></div>
+          <div class="roster-footer">
+            <span id="rosterCount">0 students</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /content-inner -->
+</main>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- Socket.io client (served from the same Express server) -->
-<script src="http://localhost:3030/socket.io/socket.io.js"></script>
-
 <script src="./config.js"></script>
-
 <script>
+/* ══════════════════════════════════════
+   SOCKET — dynamic load so it respects config base URL
+══════════════════════════════════════ */
+const socketScript = document.createElement('script');
+socketScript.src = `${LINGUA.base}/socket.io/socket.io.js`;
+socketScript.onload = () => { try { initSocket(); } catch (e) { /* socket.io not available */ } };
+document.head.appendChild(socketScript);
+
 /* ══════════════════════════════════════
    CONFIG
 ══════════════════════════════════════ */
@@ -771,24 +698,26 @@ const authH    = () => ({ 'Content-Type':'application/json', 'Authorization':`Be
 const params  = new URLSearchParams(window.location.search);
 const classId = params.get('id');
 
-const CLASS_URL      = `${API}/classes/${classId}`;
-const CLASSMATES_URL = `${API}/classes/${classId}/classmates`;
+const CLASS_URL        = `${API}/classes/${classId}`;
+const CLASSMATES_URL   = `${API}/classes/${classId}/classmates`;
 const GAME_SESSION_URL = `${GAME_API}/classes/${classId}/session`;
 
 const READING_TASKS_URL = `${API}/classes/${classId}/reading-tasks`;
-// NOTE: adjust this if your reading pages live in a different folder
 const READING_PLAY_PATH = 'teachers_section/reading/reading_play.html';
 let exposedReadingTasks = [];
 
 const QUIZ_TASKS_URL = `${API}/classes/${classId}/quizzes`;
-// NOTE: adjust these if your quiz pages live in a different folder
 const QUIZ_PLAY_PATH = 'teachers_section/quiz/quiz_play.html';
 const QUIZ_RACE_PLAY_PATH = 'teachers_section/quiz/quiz_race_play.html';
 let exposedClassQuizzes = [];
-let liveRaceByQuiz = {}; // quizId -> true while a race is live for this class
+let liveRaceByQuiz = {};
+
+const TOPIC_TASKS_URL = `${API}/classes/${classId}/topics`;
+const TOPIC_PLAY_PATH = 'teachers_section/topics/topics_play.html';
+let exposedTopicTasks = [];
 
 let currentUserId = null;
-let gameRoomUrl   = null;
+let gameRoomUrl    = null;
 
 /* ══════════════════════════════════════
    TOAST
@@ -808,12 +737,12 @@ function showToast(msg) {
 function showFeedback(msg, type = 'err') {
   const wrap  = document.getElementById('feedback');
   const inner = document.getElementById('fb-inner');
-  inner.textContent = '✕ ' + msg;
-  wrap.className    = type + ' show';
+  inner.textContent = (type === 'ok' ? '✓ ' : '✕ ') + msg;
+  wrap.className = type + ' show';
 }
 
 /* ══════════════════════════════════════
-   AVATAR / FORMAT HELPERS
+   HELPERS
 ══════════════════════════════════════ */
 function avatarClass(name) {
   let h = 0;
@@ -823,15 +752,21 @@ function avatarClass(name) {
 function initials(name) {
   if (!name) return '?';
   const parts = name.trim().split(/\s+/);
-  return parts.length >= 2
-    ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase()
-    : parts[0].slice(0, 2).toUpperCase();
+  return parts.length >= 2 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : parts[0].slice(0,2).toUpperCase();
 }
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function fmtDate(d) {
-  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(d) { return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }); }
+
+/* ══════════════════════════════════════
+   SECTION VISIBILITY (mirrors class_details.html)
+   A section only appears once it has live/exposed content.
+══════════════════════════════════════ */
+function bindSectionVisibility(triggerEl, sectionEl, isVisibleFn) {
+  if (!triggerEl || !sectionEl) return;
+  const sync = () => { sectionEl.style.display = isVisibleFn() ? 'block' : 'none'; };
+  new MutationObserver(sync).observe(triggerEl, { attributes: true, attributeFilter: ['style'] });
+  setTimeout(sync, 300);
+  setTimeout(sync, 1200);
 }
 
 /* ══════════════════════════════════════
@@ -840,55 +775,65 @@ function fmtDate(d) {
 function buildGameRoomUrl() {
   return `teachers_section/games/game_room.html?classId=${classId}`;
 }
-
 function showGameBanner(subText) {
-  const banner = document.getElementById('gameBanner');
   if (subText) document.getElementById('gameBannerSub').textContent = subText;
   gameRoomUrl = buildGameRoomUrl();
   document.getElementById('joinGameBtn').href = gameRoomUrl;
-  banner.classList.add('show');
-  // Scroll the banner into view gently
-  setTimeout(() => banner.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+  document.getElementById('gameBanner').classList.add('show');
+  document.getElementById('section-game').style.display = 'block';
+  const dot = document.getElementById('dockGameDot'); if (dot) dot.style.display = 'inline-block';
+  setTimeout(() => document.getElementById('section-game').scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
 }
-
 function hideGameBanner() {
   document.getElementById('gameBanner').classList.remove('show');
+  document.getElementById('section-game').style.display = 'none';
+  const dot = document.getElementById('dockGameDot'); if (dot) dot.style.display = 'none';
 }
+document.getElementById('dismissGameBanner').addEventListener('click', hideGameBanner);
 
-document.getElementById('dismissBanner').addEventListener('click', hideGameBanner);
-
-/* ── Check on page load if a game is already running ── */
 async function checkExistingGame() {
   try {
     const res  = await fetch(GAME_SESSION_URL, { headers: authH() });
     const data = await res.json();
     if (data.success && data.session && data.session.status !== 'ended') {
       const count = data.session.players?.length || 0;
-      showGameBanner(
-        `Your teacher started ENGLISHPOLY for this class. ${count} player${count !== 1 ? 's' : ''} in the session — join now!`
-      );
+      showGameBanner(`Your teacher started ENGLISHPOLY for this class. ${count} player${count !== 1 ? 's' : ''} in the session — join now!`);
     }
   } catch { /* no game running or server unavailable */ }
 }
 
 /* ══════════════════════════════════════
-   SOCKET.IO — real-time game events
+   SOCKET.IO — real-time events
 ══════════════════════════════════════ */
 function initSocket() {
   const socket = io(API_BASE, { transports: ['websocket', 'polling'] });
 
-  socket.on('topic_assigned', ({ classId: gClassId, tasks } = {}) => {
-     if (gClassId !== classId) return;
-     loadTopicTasks();
-     if (tasks && tasks.length) {
-       showTopicBanner(tasks[0]);
-       if (tasks.length > 1) showToast(`📋 ${tasks.length} new topics assigned!`);
-     }
-   });
-   socket.on('topic_unassigned', ({ classId: gClassId } = {}) => {
-     if (gClassId !== classId) return;
-     loadTopicTasks();
-   });
+  socket.on('connect', () => { socket.emit('join_game', { classId, token: token() }); });
+
+  socket.on('game_started', ({ classId: gClassId }) => {
+    if (gClassId !== classId) return;
+    showGameBanner("Your teacher just started ENGLISHPOLY! Join now before the game begins.");
+    showToast('🎮 Game started — join now!');
+  });
+  socket.on('game_state', ({ session }) => {
+    if (!session || session.classId !== classId) return;
+    if (session.status === 'waiting' || session.status === 'playing') {
+      const count = session.players?.length || 0;
+      showGameBanner(`${count} player${count !== 1 ? 's' : ''} in the game room. Your teacher is waiting!`);
+    }
+    if (session.status === 'ended') hideGameBanner();
+  });
+  socket.on('game_ended', () => { hideGameBanner(); showToast('🎓 The game has ended.'); });
+
+  socket.on('reading_assigned', ({ classId: gClassId, tasks } = {}) => {
+    if (gClassId !== classId) return;
+    loadReadingTasks();
+    if (tasks && tasks.length) {
+      showReadingBanner(tasks[0]);
+      if (tasks.length > 1) showToast(`📖 ${tasks.length} new reading tasks assigned!`);
+    }
+  });
+  socket.on('reading_unassigned', ({ classId: gClassId } = {}) => { if (gClassId === classId) loadReadingTasks(); });
 
   socket.on('quiz_assigned', ({ classId: gClassId, quizzes } = {}) => {
     if (gClassId !== classId) return;
@@ -898,93 +843,45 @@ function initSocket() {
       if (quizzes.length > 1) showToast(`📝 ${quizzes.length} new quizzes assigned!`);
     }
   });
-  socket.on('quiz_unassigned', ({ classId: gClassId } = {}) => {
-    if (gClassId !== classId) return;
-    loadClassQuizzes();
-  });
+  socket.on('quiz_unassigned', ({ classId: gClassId } = {}) => { if (gClassId === classId) loadClassQuizzes(); });
 
-  socket.on('race_started', ({ classId: gClassId, quizId: gQuizId, quizTitle } = {}) => {
+  socket.on('race_started', ({ classId: gClassId, quizTitle } = {}) => {
     if (gClassId !== classId) return;
     showToast(`🏁 Race is live: "${quizTitle}" — join now!`);
-    // A fresh session means any previously-cached "already completed" status
-    // for this quiz is stale — re-fetch it rather than trusting liveRaceByQuiz
-    // combined with an old race_completed flag.
     loadClassQuizzes();
   });
   socket.on('race_session_ended', ({ classId: gClassId, quizId: gQuizId } = {}) => {
     if (gClassId !== classId) return;
     delete liveRaceByQuiz[gQuizId];
-    loadClassQuizzes(); // refresh race_completed flags too
+    loadClassQuizzes();
   });
 
-    socket.on('reading_assigned', ({ classId: gClassId, tasks } = {}) => {
-      if (gClassId !== classId) return;
-      loadReadingTasks();
-      if (tasks && tasks.length) {
-        showReadingBanner(tasks[0]);
-        if (tasks.length > 1) showToast(`📖 ${tasks.length} new reading tasks assigned!`);
-      }
-    });
-    socket.on('reading_unassigned', ({ classId: gClassId } = {}) => {
-      if (gClassId !== classId) return;
-      loadReadingTasks();
-    });
-
-  socket.on('connect', () => {
-    // Join the class room so we receive game broadcasts
-    socket.emit('join_game', { classId, token: token() });
-  });
-
-  /* Teacher started a new game — show the banner with animation */
-  socket.on('game_started', ({ classId: gClassId }) => {
+  socket.on('topic_assigned', ({ classId: gClassId, tasks } = {}) => {
     if (gClassId !== classId) return;
-    showGameBanner("Your teacher just started ENGLISHPOLY! Join now before the game begins.");
-    showToast('🎮 Game started — join now!');
-  });
-
-  /* Full game state pushed — use it to show/update the banner */
-  socket.on('game_state', ({ session }) => {
-    if (!session || session.classId !== classId) return;
-    if (session.status === 'waiting' || session.status === 'playing') {
-      const count = session.players?.length || 0;
-      showGameBanner(
-        `${count} player${count !== 1 ? 's' : ''} in the game room. Your teacher is waiting!`
-      );
-    }
-    if (session.status === 'ended') {
-      hideGameBanner();
+    loadTopicTasks();
+    if (tasks && tasks.length) {
+      showTopicBanner(tasks[0]);
+      if (tasks.length > 1) showToast(`📋 ${tasks.length} new topics assigned!`);
     }
   });
+  socket.on('topic_unassigned', ({ classId: gClassId } = {}) => { if (gClassId === classId) loadTopicTasks(); });
 
-  /* Teacher or server ended the game */
-  socket.on('game_ended', () => {
-    hideGameBanner();
-    showToast('🎓 The game has ended.');
-  });
-
-  socket.on('error', ({ message }) => {
-    // Auth/enrollment errors are silent here — banner just won't appear
-    console.warn('Socket error:', message);
-  });
-
-  socket.on('disconnect', () => {
-    // Reconnect is automatic via socket.io — no UI noise needed
-  });
+  socket.on('error', ({ message }) => { console.warn('Socket error:', message); });
 }
 
 /* ══════════════════════════════════════
-   FETCH MY USER ID
+   ME
 ══════════════════════════════════════ */
 async function loadMe() {
   try {
     const res  = await fetch(`${AUTH_API}/me`, { headers: authH() });
     const data = await res.json();
     if (data.success) currentUserId = Number(data.user.id);
-  } catch { /* not critical */ }
+  } catch {}
 }
 
 /* ══════════════════════════════════════
-   LOAD CLASS (hero)
+   CLASS HERO
 ══════════════════════════════════════ */
 async function loadClass() {
   try {
@@ -993,45 +890,32 @@ async function loadClass() {
     if (!res.ok || !data.success) { window.location.href = 'dashboard.html'; return; }
     renderHero(data.class);
   } catch {
-    document.getElementById('heroSkeleton').innerHTML =
-      '<span style="color:var(--error);font-size:.8rem;">Could not load class info.</span>';
+    document.getElementById('heroSkeleton').innerHTML = '<span style="color:var(--error);font-size:.8rem;">Could not load class info.</span>';
   }
 }
-
 function renderHero(cls) {
   document.getElementById('heroSkeleton').style.display = 'none';
   document.getElementById('classHero').style.display   = 'block';
-
   document.title = `TilMenger — ${cls.name}`;
   document.getElementById('heroTitle').textContent = cls.name;
   document.getElementById('bcClass').textContent   = cls.name;
 
-  const activeBadge   = cls.is_active
-    ? `<span class="badge badge-active">● Active</span>`
-    : `<span class="badge badge-inactive">● Inactive</span>`;
-  const scheduleBadge = cls.schedule
-    ? `<span class="badge badge-schedule">🕐 ${escHtml(cls.schedule)}</span>`
-    : '';
+  const activeBadge   = cls.is_active ? `<span class="badge badge-active">● Active</span>` : `<span class="badge badge-inactive">● Inactive</span>`;
+  const scheduleBadge = cls.schedule ? `<span class="badge badge-schedule">🕐 ${escHtml(cls.schedule)}</span>` : '';
   document.getElementById('heroBadges').innerHTML = activeBadge + scheduleBadge;
 
-  if (cls.description) {
-    const el = document.getElementById('heroDesc');
-    el.textContent   = cls.description;
-    el.style.display = 'block';
-  }
+  if (cls.description) { const el = document.getElementById('heroDesc'); el.textContent = cls.description; el.style.display = 'block'; }
 
-  document.getElementById('heroContext').innerHTML =
-    `Course: <strong>${escHtml(cls.course_name)}</strong>` +
-    `<span class="ctx-sep">·</span>Teacher: <strong>${escHtml(cls.teacher_name)}</strong>`;
+  document.getElementById('heroContextLine').innerHTML =
+    `Course: <strong>${escHtml(cls.course_name)}</strong><span class="ctx-sep">·</span>Teacher: <strong>${escHtml(cls.teacher_name)}</strong>`;
 
   document.getElementById('heroMeta').textContent = `Class created ${fmtDate(cls.created_at)}`;
-
   document.getElementById('statTotal').textContent  = cls.student_count;
   document.getElementById('statJoined').textContent = fmtDate(cls.enrolled_at);
 }
 
 /* ══════════════════════════════════════
-   LOAD CLASSMATES (roster)
+   CLASSMATES
 ══════════════════════════════════════ */
 async function loadClassmates() {
   const loading    = document.getElementById('loadingState');
@@ -1044,15 +928,8 @@ async function loadClassmates() {
     const data = await res.json();
     loading.style.display = 'none';
 
-    if (!res.ok || !data.success) {
-      showFeedback(data.message || 'Failed to load classmates.');
-      return;
-    }
-
-    if (!data.classmates.length) {
-      empty.style.display = 'block';
-      return;
-    }
+    if (!res.ok || !data.success) { showFeedback(data.message || 'Failed to load classmates.'); return; }
+    if (!data.classmates.length) { empty.style.display = 'block'; return; }
 
     rosterWrap.style.display = 'block';
     data.classmates.forEach((s, i) => {
@@ -1062,34 +939,24 @@ async function loadClassmates() {
     });
 
     const total = data.classmates.length;
-    document.getElementById('rosterCount').textContent =
-      `${total} student${total !== 1 ? 's' : ''}`;
-
+    document.getElementById('rosterCount').textContent = `${total} student${total !== 1 ? 's' : ''}`;
   } catch {
     loading.style.display = 'none';
     showFeedback('Could not reach the server.');
   }
 }
-
-/* ══════════════════════════════════════
-   BUILD STUDENT ROW
-══════════════════════════════════════ */
 function buildRow(student) {
   const el    = document.createElement('div');
   const isYou = currentUserId !== null && String(student.id) === String(currentUserId);
   el.className = 'student-row' + (isYou ? ' is-you' : '');
-
   el.innerHTML = `
     <div class="student-avatar ${avatarClass(student.name)}">${initials(student.name)}</div>
     <div class="student-info">
-      <div class="student-name">
-        <span class="name-text">${escHtml(student.name)}</span>
-        ${isYou ? '<span class="you-pill">You</span>' : ''}
-      </div>
+      <span class="student-name">${escHtml(student.name)}</span>
+      ${isYou ? '<span class="you-pill">You</span>' : ''}
     </div>
     <div class="student-level">${escHtml(student.level || '—')}</div>
     <div class="student-date">${fmtDate(student.enrolled_at)}</div>
-    <div class="student-flag"></div>
   `;
   return el;
 }
@@ -1114,7 +981,6 @@ async function loadReadingTasks() {
     showFeedback('Could not reach the server.');
   }
 }
-
 function renderReadingTasks() {
   const empty = document.getElementById('readingEmptyState');
   const wrap  = document.getElementById('readingListWrap');
@@ -1126,18 +992,17 @@ function renderReadingTasks() {
       <div class="reading-title">${escHtml(t.title)}</div>
       <div class="reading-level ${t.level}">${t.level}</div>
       <div class="reading-qcount">❓ ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
-      <a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,var(--reading),#1F7A6E);box-shadow:none;"
-         href="${READING_PLAY_PATH}?id=${t.id}">📖 Start</a>
+      <div class="row-action">
+        <a class="btn-cta" style="padding:.5rem 1.05rem;font-size:.75rem;background:linear-gradient(135deg,var(--reading),#00776F);box-shadow:none;" href="${READING_PLAY_PATH}?id=${t.id}">📖 Start</a>
+      </div>
     </div>`).join('');
 }
-
 function showReadingBanner(task) {
-  const banner = document.getElementById('readingBanner');
   document.getElementById('readingBannerTitle').textContent = `New task: "${task.title}"`;
   document.getElementById('readingBannerSub').textContent   = `Your teacher just assigned a ${task.level} reading task. Give it a go!`;
   document.getElementById('readingBannerBtn').href = `${READING_PLAY_PATH}?id=${task.id}`;
-  banner.classList.add('show');
-  setTimeout(() => banner.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+  document.getElementById('readingBanner').classList.add('show');
+  setTimeout(() => document.getElementById('readingBanner').scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
 }
 document.getElementById('dismissReadingBanner').addEventListener('click', () => {
   document.getElementById('readingBanner').classList.remove('show');
@@ -1164,7 +1029,6 @@ async function loadClassQuizzes() {
     showFeedback('Could not reach the server.');
   }
 }
-
 function renderClassQuizzes() {
   const empty = document.getElementById('quizEmptyState');
   const wrap  = document.getElementById('quizListWrap');
@@ -1178,7 +1042,7 @@ function renderClassQuizzes() {
         <div class="quiz-title">${escHtml(q.title)}</div>
         <span class="quiz-mode-tag racing">🏁 Racing</span>
         <div class="quiz-qcount">❓ ${q.question_count} question${q.question_count !== 1 ? 's' : ''}</div>
-        <div id="race-cta-${q.id}"></div>
+        <div class="row-action" id="race-cta-${q.id}"></div>
       </div>`;
     }
     return `
@@ -1186,14 +1050,14 @@ function renderClassQuizzes() {
       <div class="quiz-title">${escHtml(q.title)}</div>
       <span class="quiz-mode-tag casual">📝 Casual</span>
       <div class="quiz-qcount">❓ ${q.question_count} question${q.question_count !== 1 ? 's' : ''}</div>
-      <a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,var(--quiz),#3450C2);box-shadow:none;"
-         href="${QUIZ_PLAY_PATH}?id=${q.id}&classId=${classId}">📝 Play</a>
+      <div class="row-action">
+        <a class="btn-cta" style="padding:.5rem 1.05rem;font-size:.75rem;background:linear-gradient(135deg,var(--quiz),#0A5FC7);box-shadow:none;" href="${QUIZ_PLAY_PATH}?id=${q.id}&classId=${classId}">📝 Play</a>
+      </div>
     </div>`;
   }).join('');
 
   exposedClassQuizzes.filter(q => q.mode === 'racing').forEach(q => updateQuizRowRaceCta(q.id, q.race_completed));
 }
-
 async function checkAllRaceStatuses() {
   const racingQuizzes = exposedClassQuizzes.filter(q => q.mode === 'racing' && !q.race_completed);
   for (const q of racingQuizzes) {
@@ -1202,49 +1066,39 @@ async function checkAllRaceStatuses() {
       const data = await res.json();
       if (data.success && data.session) liveRaceByQuiz[q.id] = true;
       else delete liveRaceByQuiz[q.id];
-    } catch { /* leave unknown — CTA defaults to idle */ }
+    } catch {}
     updateQuizRowRaceCta(q.id, q.race_completed);
   }
 }
-
 function updateQuizRowRaceCta(quizId, completedHint) {
   const cell = document.getElementById(`race-cta-${quizId}`);
   if (!cell) return;
   const quizMeta = exposedClassQuizzes.find(q => q.id === quizId);
   const completed = completedHint !== undefined ? completedHint : (quizMeta ? quizMeta.race_completed : false);
   const href = `${QUIZ_RACE_PLAY_PATH}?classId=${classId}&quizId=${quizId}`;
-
-  if (completed) {
-    cell.innerHTML = `<a class="btn-race-cta done" href="${href}">✅ View Result</a>`;
-  } else if (liveRaceByQuiz[quizId]) {
-    cell.innerHTML = `<a class="btn-race-cta live" href="${href}">🔴 Join Race Now</a>`;
-  } else {
-    cell.innerHTML = `<a class="btn-race-cta idle" href="${href}">🏁 Waiting to Start</a>`;
-  }
+  if (completed) cell.innerHTML = `<a class="btn-race-cta done" href="${href}">✅ View Result</a>`;
+  else if (liveRaceByQuiz[quizId]) cell.innerHTML = `<a class="btn-race-cta live" href="${href}">🔴 Join Race Now</a>`;
+  else cell.innerHTML = `<a class="btn-race-cta idle" href="${href}">🏁 Waiting to Start</a>`;
 }
-
 function showQuizBanner(quiz) {
-  const banner = document.getElementById('quizBanner');
   const isRacing = quiz.mode === 'racing';
   document.getElementById('quizBannerTitle').textContent = `New ${isRacing ? 'racing ' : ''}quiz: "${quiz.title}"`;
   document.getElementById('quizBannerSub').textContent = isRacing
     ? `Your teacher assigned a live racing quiz with ${quiz.question_count} question${quiz.question_count !== 1 ? 's' : ''}. It'll begin once your teacher starts it — one attempt only!`
     : `Your teacher just assigned a quiz with ${quiz.question_count} question${quiz.question_count !== 1 ? 's' : ''}. Give it a go!`;
-  document.getElementById('quizBannerBtn').href = isRacing
-    ? `${QUIZ_RACE_PLAY_PATH}?classId=${classId}&quizId=${quiz.id}`
-    : `${QUIZ_PLAY_PATH}?id=${quiz.id}&classId=${classId}`;
-  document.getElementById('quizBannerBtn').textContent = isRacing ? '🏁 Get Ready' : '📝 Take Quiz';
-  banner.classList.add('show');
-  setTimeout(() => banner.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+  const btn = document.getElementById('quizBannerBtn');
+  btn.href = isRacing ? `${QUIZ_RACE_PLAY_PATH}?classId=${classId}&quizId=${quiz.id}` : `${QUIZ_PLAY_PATH}?id=${quiz.id}&classId=${classId}`;
+  btn.textContent = isRacing ? '🏁 Get Ready' : '📝 Take Quiz';
+  document.getElementById('quizBanner').classList.add('show');
+  setTimeout(() => document.getElementById('quizBanner').scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
 }
+document.getElementById('dismissQuizBanner').addEventListener('click', () => {
+  document.getElementById('quizBanner').classList.remove('show');
+});
 
 /* ══════════════════════════════════════
-   TOPICS & HOMEWORKS (student)
+   TOPICS & HOMEWORKS
 ══════════════════════════════════════ */
-const TOPIC_TASKS_URL = `${API}/classes/${classId}/topics`;
-const TOPIC_PLAY_PATH = 'teachers_section/topics/topics_play.html';
-let exposedTopicTasks = [];
-
 async function loadTopicTasks() {
   const loading = document.getElementById('topicLoadingState');
   const empty   = document.getElementById('topicEmptyState');
@@ -1262,7 +1116,6 @@ async function loadTopicTasks() {
     showFeedback('Could not reach the server.');
   }
 }
-
 function renderTopicTasks() {
   const empty = document.getElementById('topicEmptyState');
   const wrap  = document.getElementById('topicListWrap');
@@ -1270,24 +1123,24 @@ function renderTopicTasks() {
   if (!exposedTopicTasks.length) { empty.style.display = 'block'; wrap.style.display = 'none'; return; }
   empty.style.display = 'none'; wrap.style.display = 'block';
   panel.innerHTML = exposedTopicTasks.map(t => `
-    <div class="reading-row">
+    <div class="reading-row" style="grid-template-columns:1fr 130px 130px;">
       <div class="reading-title">🎬 ${escHtml(t.title)}</div>
       <div class="reading-qcount">❓ ${t.question_count} question${t.question_count !== 1 ? 's' : ''}</div>
-      ${t.submitted
-        ? `<span style="font-size:.68rem;font-weight:700;color:var(--success);">✅ Completed</span>`
-        : `<a class="btn-join-game" style="padding:.5rem 1.1rem;font-size:.78rem;background:linear-gradient(135deg,#7F77DD,#5B52C7);box-shadow:none;" href="${TOPIC_PLAY_PATH}?id=${t.id}">📋 Start</a>`}
+      <div class="row-action">
+        ${t.submitted
+          ? `<span class="row-done-tag">✅ Completed</span>`
+          : `<a class="btn-cta" style="padding:.5rem 1.05rem;font-size:.75rem;background:linear-gradient(135deg,var(--topic),#4340B0);box-shadow:none;" href="${TOPIC_PLAY_PATH}?id=${t.id}">📋 Start</a>`}
+      </div>
     </div>`).join('');
 }
-
 function showTopicBanner(task) {
-  const banner = document.getElementById('topicBanner');
   document.getElementById('topicBannerTitle').textContent = `New topic: "${task.title}"`;
   document.getElementById('topicBannerBtn').href = `${TOPIC_PLAY_PATH}?id=${task.id}`;
-  banner.style.display = 'block';
-  setTimeout(() => banner.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+  document.getElementById('topicBanner').classList.add('show');
+  setTimeout(() => document.getElementById('topicBanner').scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
 }
 document.getElementById('dismissTopicBanner').addEventListener('click', () => {
-  document.getElementById('topicBanner').style.display = 'none';
+  document.getElementById('topicBanner').classList.remove('show');
 });
 
 /* ══════════════════════════════════════
@@ -1300,17 +1153,86 @@ document.getElementById('dismissTopicBanner').addEventListener('click', () => {
   if (r !== '1') { window.location.href = 'dashboard.html'; return; }
   if (!classId)  { window.location.href = 'dashboard.html'; return; }
 
-  // 1. Get my user id (needed to mark "You" in roster + socket auth)
   await loadMe();
-
-  // 2. Load class info + roster in parallel
   await Promise.all([ loadClass(), loadClassmates(), loadReadingTasks(), loadClassQuizzes(), loadTopicTasks() ]);
-
-  // 3. Check if a game is already running (REST fallback — works even without socket)
   await checkExistingGame();
 
-  // 4. Connect socket for live game notifications
-  initSocket();
+  bindSectionVisibility(document.getElementById('readingListWrap'), document.getElementById('section-reading'),
+    () => document.getElementById('readingListWrap').style.display === 'block');
+  bindSectionVisibility(document.getElementById('quizListWrap'), document.getElementById('section-quizzes'),
+    () => document.getElementById('quizListWrap').style.display === 'block');
+  bindSectionVisibility(document.getElementById('topicListWrap'), document.getElementById('section-topics'),
+    () => document.getElementById('topicListWrap').style.display === 'block');
+})();
+</script>
+
+<!-- ══════════════════════════════════════
+     SIDEBAR NAVIGATION (scroll spy + mobile drawer)
+     — additive UI-only script, mirrors class_details.html
+══════════════════════════════════════ -->
+<script>
+(function () {
+  const dock       = document.getElementById('dock');
+  const scrim      = document.getElementById('dockScrim');
+  const menuBtn    = document.getElementById('mobileMenuBtn');
+  const navItems   = Array.from(document.querySelectorAll('.dock-item'));
+  const indicator  = document.getElementById('dockIndicator');
+
+  function moveIndicatorTo(item) {
+    if (!item || !indicator) return;
+    indicator.style.opacity = '1';
+    indicator.style.transform = `translateY(${item.offsetTop}px)`;
+    indicator.style.height = `${item.offsetHeight}px`;
+  }
+  function setActive(item) {
+    navItems.forEach(b => b.classList.remove('active'));
+    item.classList.add('active');
+    moveIndicatorTo(item);
+  }
+  function visibleSections() {
+    return navItems.map(btn => document.getElementById(btn.dataset.target)).filter(sec => sec && sec.offsetParent !== null);
+  }
+
+  navItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+      setActive(btn);
+      const target = document.getElementById(btn.dataset.target);
+      if (target && target.style.display !== 'none') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      closeDrawer();
+    });
+  });
+
+  window.addEventListener('load', () => moveIndicatorTo(navItems[0]));
+  setTimeout(() => moveIndicatorTo(document.querySelector('.dock-item.active')), 60);
+
+  let spyTicking = false;
+  function spy() {
+    spyTicking = false;
+    const sections = visibleSections();
+    if (!sections.length) return;
+    let current = sections[0];
+    const y = window.scrollY + 140;
+    for (const sec of sections) { if (sec.offsetTop <= y) current = sec; }
+    const match = navItems.find(b => b.dataset.target === current.id);
+    if (match && !match.classList.contains('active')) setActive(match);
+  }
+  window.addEventListener('scroll', () => {
+    if (!spyTicking) { requestAnimationFrame(spy); spyTicking = true; }
+  }, { passive: true });
+
+  function openDrawer() { dock.classList.add('open'); scrim.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeDrawer() {
+    if (window.innerWidth > 980) return;
+    dock.classList.remove('open'); scrim.classList.remove('open'); document.body.style.overflow = '';
+  }
+  menuBtn?.addEventListener('click', () => { dock.classList.contains('open') ? closeDrawer() : openDrawer(); });
+  scrim?.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 980) { dock.classList.remove('open'); scrim.classList.remove('open'); document.body.style.overflow=''; }
+  });
 })();
 </script>
 </body>
