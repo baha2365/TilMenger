@@ -1304,7 +1304,7 @@ document.getElementById('dismissTopicBanner').addEventListener('click', () => {
   await loadMe();
 
   // 2. Load class info + roster in parallel
-  await Promise.all([ loadClass(), loadClassmates(), loadReadingTasks(), loadClassQuizzes() ]);
+  await Promise.all([ loadClass(), loadClassmates(), loadReadingTasks(), loadClassQuizzes(), loadTopicTasks() ]);
 
   // 3. Check if a game is already running (REST fallback — works even without socket)
   await checkExistingGame();
