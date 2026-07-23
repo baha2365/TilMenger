@@ -812,6 +812,7 @@ function canAccessTopic(slug, access) {
         if (inProgress) {
           node.querySelector('.btn-continue').addEventListener('click', (e) => {
             e.stopPropagation();
+            if (locked_by_payment) { window.location.href = 'subscribe.html'; return; }
             navigateToChat(slug, name, icon, section.key);
           });
           node.querySelector('.btn-restart').addEventListener('click', (e) =>
