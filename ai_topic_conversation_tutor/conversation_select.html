@@ -701,7 +701,7 @@ function canAccessTopic(slug, access) {
   }
 
   // ─── Render every section card + its zigzag node track ─────────────────
-  function renderSections(statusMap, inProgressSet, scores) {
+  function renderSections(statusMap, inProgressSet, scores, access) {
     const container = document.getElementById('sectionsContainer');
     container.innerHTML = '';
     currentNodeEl = null;
