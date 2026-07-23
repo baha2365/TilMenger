@@ -752,9 +752,11 @@ function canAccessTopic(slug, access) {
 
         const displayIcon = status === 'locked' ? '🔒' : icon;
         const eyebrow = status === 'locked'    ? 'Locked'
+                      : locked_by_payment        ? 'Subscribe to unlock'
                       : inProgress              ? 'In progress'
                       : status === 'completed'  ? 'Practiced' : 'Up next';
         const tag     = status === 'locked'    ? '🔒 Locked'
+                      : locked_by_payment        ? '💳 Subscribe'
                       : inProgress              ? '↻ Resume'
                       : status === 'completed'  ? '✓ Done' : '⚡ +5 XP';
         const doneBadge  = justFinished ? `<span class="done-badge">✓</span>` : '';
