@@ -17,6 +17,8 @@ const pronunciationRoutes = require('./pronunciationRoutes');
 const { router: gameRouter, registerSocketHandlers } = require('./gameRoutes');
 const { router: raceRouter, registerRaceSocketHandlers } = require('./raceRoutes');
 const topicRoutes = require('./topicRoutes');
+const paddleWebhookRoute = require('./paddleWebhookRoute');
+const paddleRoutes       = require('./paddleRoutes');
 
 const app        = express();
 const httpServer = http.createServer(app);
@@ -52,6 +54,9 @@ app.set('io', io);
 registerSocketHandlers(io);
 registerRaceSocketHandlers(io);
 
+// ─── Paddle webhook — must come before express.json(), needs the raw body ────
+app.use('/api/paddle/webhook', paddleWebhookRoute);
+
 // ─── Body parsing ─────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -68,6 +73,7 @@ app.use('/api/reading',    readingRoutes);
 app.use('/api/ai-teacher', aiTeacherRoutes);
 app.use('/api/pronunciation', pronunciationRoutes);
 app.use('/api/topics', topicRoutes);
+app.use('/api/paddle', paddleRoutes);
 
 // ─── Static files ─────────────────────────────────────────────────────────────
 app.use(
@@ -178,6 +184,12 @@ app.use((err, _req, res, _next) => {
       console.log('   DELETE /api/topics/:id');
       console.log('   GET    /api/topics/:id/play');
       console.log('   POST   /api/topics/:id/submit');
+
+      console.log('\n── Paddle (Speaking Practice billing) ────────────');
+      console.log('   POST   /api/paddle/webhook   (Paddle -> you, not for browser use)');
+      console.log('   GET    /api/paddle/config      (protected)');
+      console.log('   GET    /api/paddle/status      (protected)');
+      console.log('   GET    /api/paddle/manage-link (protected)');
       console.log('');
     });
   } catch (err) {
