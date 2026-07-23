@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment received — TilMenger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #F5F0E8; --s0: #121010; --s2: #241F1B;
+      --rust: #C4572A; --gold: #D4A853; --sage-lt: #6F9463; --muted: #8A7E73;
+    }
+    html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--s0); color: var(--cream); }
+    .wrap {
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 2rem; gap: 1.4rem;
+    }
+    .icon-circle {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: rgba(74,103,65,0.15); border: 1px solid rgba(111,148,99,0.4);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--sage-lt);
+    }
+    .icon-circle svg { width: 30px; height: 30px; }
+    .spinner {
+      width: 26px; height: 26px; border: 3px solid rgba(255,255,255,0.08);
+      border-top-color: var(--gold); border-radius: 50%; animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; }
+    p { color: var(--muted); font-size: 0.9rem; max-width: 360px; line-height: 1.6; }
+    .btn {
+      margin-top: 0.6rem; padding: 0.75rem 1.6rem; background: var(--rust); color: #fff;
+      border: none; border-radius: 12px; font-weight: 700; font-size: 0.88rem;
+      text-decoration: none; display: inline-block; cursor: pointer;
+    }
+    .btn.secondary { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--cream); }
+  </style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="spinner"></div>
+  <h1>Confirming your payment…</h1>
+  <p id="statusMsg">This usually takes just a couple of seconds while Paddle lets us know it went through.</p>
+</div>
+
+<script src="../config.js"></script>
+<script>
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = 'index.html'; }
+
+  const PADDLE_API = (typeof LINGUA !== 'undefined' && LINGUA.paddle)
+    ? LINGUA.paddle
+    : `${location.origin}/api/paddle`;
+
+  const wrap = document.getElementById('wrap');
+
+  function showSuccess() {
+    wrap.innerHTML = `
+      <div class="icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h1>You're all set!</h1>
+      <p>Speaking Practice is unlocked — every topic, every level, no limits.</p>
+      <a href="conversation_select.html" class="btn">Start talking with Emma</a>
+    `;
+  }
+
+  function showStillProcessing() {
+    wrap.innerHTML = `
+      <h1>Almost there</h1>
+      <p>Your payment went through, but it's taking a little longer than usual to confirm on our side. This will resolve itself shortly — try refreshing in a moment.</p>
+      <button class="btn" onclick="location.reload()">Refresh</button>
+      <a href="conversation_select.html" class="btn secondary" style="margin-top:0.6rem;">Back to Topics</a>
+    `;
+  }
+
+  // The Paddle checkout redirect can land here slightly before the webhook
+  // has finished updating our DB, so poll /status briefly rather than
+  // trusting the redirect alone.
+  let attempts = 0;
+  const MAX_ATTEMPTS = 8; // ~16 seconds at 2s intervals
+
+  async function poll() {
+    attempts += 1;
+    try {
+      const res  = await fetch(`${PADDLE_API}/status`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (data.success && data.hasAccess) { showSuccess(); return; }
+    } catch (err) {
+      console.error('billing_success poll error:', err);
+    }
+    if (attempts >= MAX_ATTEMPTS) { showStillProcessing(); return; }
+    setTimeout(poll, 2000);
+  }
+
+  poll();
+</script>
+</body>
+</html>
