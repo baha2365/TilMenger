@@ -32,9 +32,9 @@ const TTS_SPEED = {
 // conversations short and finishable, and gives the "X / Y turns" tracker on
 // the frontend a real limit to count down against.
 const TURN_LIMITS = {
-  'Beginner A1-A2':     10,
-  'Intermediate B1-B2': 12,
-  'Advanced C1-C2':     15,
+  'Beginner A1-A2':     5,
+  'Intermediate B1-B2': 6,
+  'Advanced C1-C2':     8,
 };
 function turnLimitFor(level) {
   return TURN_LIMITS[level] ?? TURN_LIMITS['Intermediate B1-B2'];
