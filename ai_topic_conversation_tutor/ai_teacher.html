@@ -952,6 +952,7 @@ async function init() {
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (res.status === 401) { localStorage.clear(); location.href = 'index.html'; return; }
+    if (res.status === 402) { location.href = 'subscribe.html'; return; }
 
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
