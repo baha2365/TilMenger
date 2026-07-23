@@ -744,7 +744,7 @@ function canAccessTopic(slug, access) {
         // Score from the last FINISHED attempt — stays visible through a
         // redo-in-progress so the student has something to compare against.
         const score = scores[slug];
-        
+
         const locked_by_payment = status !== 'locked' && !canAccessTopic(slug, access);
 
         const node = document.createElement('div');
@@ -800,7 +800,13 @@ function canAccessTopic(slug, access) {
 
         if (status !== 'locked') {
           node.style.cursor = 'pointer';
-          node.addEventListener('click', () => navigateToChat(slug, name, icon, section.key));
+          node.addEventListener('click', () => {
+            if (locked_by_payment) {
+              window.location.href = 'subscribe.html';
+            } else {
+              navigateToChat(slug, name, icon, section.key);
+            }
+          });
         }
 
         if (inProgress) {
