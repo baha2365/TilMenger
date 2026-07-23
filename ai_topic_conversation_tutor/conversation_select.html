@@ -634,6 +634,17 @@
     });
   }
 
+  // Mirrors the server-side rule in subscriptionMiddleware.js: an active
+// subscriber can open anything; otherwise only the exact trial topic
+// (once claimed) — or, if nothing's been claimed yet, whichever topic
+// they're about to open (the server claims it on that first request).
+function canAccessTopic(slug, access) {
+  if (!access) return true; // access status hasn't loaded yet — don't block the UI
+  if (access.hasAccess) return true;
+  if (!access.trialTopicSlug) return true;
+  return access.trialTopicSlug === slug;
+}
+
   function showError(message) {
     document.getElementById('statusScreen').innerHTML = `
       <span style="font-size:2.5rem">⚠️</span>
