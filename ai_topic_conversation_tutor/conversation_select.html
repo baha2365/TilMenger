@@ -744,6 +744,8 @@ function canAccessTopic(slug, access) {
         // Score from the last FINISHED attempt — stays visible through a
         // redo-in-progress so the student has something to compare against.
         const score = scores[slug];
+        
+        const locked_by_payment = status !== 'locked' && !canAccessTopic(slug, access);
 
         const node = document.createElement('div');
         node.className = `part-node is-${status}`;
