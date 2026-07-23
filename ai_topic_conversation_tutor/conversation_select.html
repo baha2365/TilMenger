@@ -859,11 +859,20 @@ function canAccessTopic(slug, access) {
       // Progress now comes from the backend — same source of truth Emma
       // uses to decide when a topic conversation is finished. inProgress
       // covers topics that were opened but never finished.
-      const progRes  = await fetch(`${AITEACHER}/topics/progress`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const progData = await progRes.json();
+      const PADDLE_API = (typeof LINGUA !== 'undefined' && LINGUA.paddle)
+        ? LINGUA.paddle
+        : `${location.origin}/api/paddle`;
+
+      const [progRes, accessRes] = await Promise.all([
+        fetch(`${AITEACHER}/topics/progress`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${PADDLE_API}/status`,          { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      const progData   = await progRes.json();
+      const accessData = await accessRes.json();
       if (!progData.success) throw new Error(progData.message || 'Could not load progress.');
+      // accessData failing isn't fatal to the page — treat as "unknown", canAccessTopic()
+      // already defaults open in that case so the UI doesn't wrongly lock everything.
+      const access = accessData.success ? accessData : null;
 
       const completedSet  = new Set(progData.completed);
       const inProgressSet = new Set(progData.inProgress || []);
