@@ -1,6 +1,7 @@
 const express = require('express');
 const multer  = require('multer');
 const { authenticate } = require('./authMiddleware');
+const { requireSpeakingAccess, requireAnySpeakingAccess } = require('./subscriptionMiddleware');
 const {
   getSession,
   greetTopic,
@@ -24,23 +25,28 @@ const upload = multer({
 
 router.use(authenticate);
 
-// Topic-scoped conversation (replaces the old free-chat session/chat pair)
-router.get('/session',                             getSession);        // ?topic=<slug>&title=<name>
-router.post('/greet',                               greetTopic);        // { topic, title }
-router.post('/chat',                                chatWithTopic);     // { topic, title, text }
+// ── Topic-scoped conversation — gated ────────────────────────────────────────
+// requireSpeakingAccess lets an active subscriber through, otherwise enforces
+// the one-topic free trial (see subscriptionMiddleware.js). Returns 402
+// paymentRequired:true when neither applies — the frontend redirects to
+// subscribe.html on that response.
+router.get('/session', requireSpeakingAccess, getSession);        // ?topic=<slug>&title=<name>
+router.post('/greet',  requireSpeakingAccess, greetTopic);         // { topic, title }
+router.post('/chat',   requireSpeakingAccess, chatWithTopic);      // { topic, title, text }
 
-// Unchanged — level-aware, topic-agnostic
-router.post('/transcribe', upload.single('audio'), transcribeAudio);
-router.post('/speak',                               speakText);
+// ── Topic-agnostic — lighter check ───────────────────────────────────────────
+// These don't carry a topic slug, so they can't be checked against the exact
+// trial topic — see requireAnySpeakingAccess for what it does check instead.
+router.post('/transcribe', upload.single('audio'), requireAnySpeakingAccess, transcribeAudio);
+router.post('/speak',                              requireAnySpeakingAccess, speakText);
 
-// Drives the lock/current/completed chain on the topic-select page
-router.get('/topics/progress',                      getTopicsProgress);
-
-// Wipes a topic's stored conversation in place so the student can redo it
-router.post('/restart',                             restartTopic);
-
-// Full transcript + per-message corrections + score — only returns data once
-// the topic's current session is actually completed
-router.get('/results',                               getResults);
+// ── Progress / restart / results — NOT gated ─────────────────────────────────
+// Deliberate choice: a student whose subscription has lapsed can still see
+// what they already completed and their past scores (read/manage operations
+// on data they already own), they just can't start or continue new chat
+// turns above. Flip this if you'd rather lock these down too.
+router.get('/topics/progress', getTopicsProgress);
+router.post('/restart',        restartTopic);
+router.get('/results',         getResults);
 
 module.exports = router;
