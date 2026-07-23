@@ -30,6 +30,7 @@ const LINGUA = (() => {
     aiTeacher: `${base}/api/ai-teacher`,
     pronunciation: `${base}/api/pronunciation`,
     race: `${base}/api/race`,
+    paddle:    `${base}/api/paddle`,
   };
 })();
 
