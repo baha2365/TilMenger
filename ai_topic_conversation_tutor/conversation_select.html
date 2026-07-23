@@ -882,7 +882,7 @@ function canAccessTopic(slug, access) {
       const statusMap         = new Map(statuses.map((t) => [t.slug, t]));
 
       updateProgress(completedSet.size, flat.length);
-      renderSections(statusMap, inProgressSet, scores);
+      renderSections(statusMap, inProgressSet, scores, access);
 
       document.getElementById('statusScreen').style.display = 'none';
       document.getElementById('mainContent').style.display  = 'block';
