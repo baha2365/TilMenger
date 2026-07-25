@@ -5,569 +5,541 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TilMenger — Sign In</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cream:    #F5F0E8;
-      --ink:      #1A1612;
-      --rust:     #C4572A;
-      --sage:     #4A6741;
-      --gold:     #D4A853;
-      --muted:    #7A6E65;
-      --border:   #DDD5C8;
-      --card-bg:  #FDFAF5;
-      --input-bg: #F9F5EE;
-      --error:    #C0392B;
+      /* ── canvas ── */
+      --canvas-blue:  #E7F0FA;
+      --canvas-white: #F8FAFC;
+      --canvas-cyan:  #E9F7F6;
+      --canvas-violet:#EFEDFB;
+
+      /* ── ink ── */
+      --ink-1:#1D1D1F;
+      --ink-2:#6E6E76;
+      --ink-3:#9C9CA5;
+
+      /* ── glass ── */
+      --glass:        rgba(255,255,255,0.58);
+      --glass-strong: rgba(255,255,255,0.84);
+      --glass-border: rgba(255,255,255,0.70);
+      --hairline:     rgba(28,28,36,0.08);
+      --hairline-2:   rgba(28,28,36,0.13);
+
+      /* ── brand accent ── */
+      --accent:      #0A84FF;
+      --accent-2:    #5E5CE6;
+      --accent-glow: rgba(10,132,255,0.30);
+
+      --success:#2FB350; --success-bg:rgba(47,179,80,0.10); --success-bd:rgba(47,179,80,0.26);
+      --error:#FF3B30;   --error-bg:rgba(255,59,48,0.09);   --error-bd:rgba(255,59,48,0.24);
+      --amber:#FF9F0A;   --amber-bg:rgba(255,159,10,0.12);  --amber-bd:rgba(255,159,10,0.26);
+
+      /* ── shape / elevation ── */
+      --r-xl:28px; --r-lg:22px; --r-md:16px; --r-sm:11px;
+      --sh-1: 0 1px 1px rgba(28,28,36,0.03), 0 6px 18px rgba(28,28,36,0.05);
+      --sh-float: 0 22px 60px rgba(28,28,36,0.16);
+      --ease: cubic-bezier(.22,1,.36,1);
+      --spring: cubic-bezier(.34,1.56,.64,1);
     }
 
-    html, body {
-      height: 100%;
-      font-family: 'DM Sans', sans-serif;
-      background-color: var(--cream);
-      color: var(--ink);
+    html, body { height:100%; }
+    body {
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;
+      color: var(--ink-1);
+      line-height: 1.5; -webkit-font-smoothing:antialiased;
+      background: var(--canvas-white);
+      overflow-x:hidden;
+    }
+    h1,h2,h3,.display { font-family:'Inter Tight','Inter',-apple-system,'SF Pro Display',sans-serif; }
+
+    /* ═══ AMBIENT BACKGROUND ═══ */
+    .bg-blobs { position:fixed; inset:0; z-index:-1; overflow:hidden; background:
+        radial-gradient(ellipse 60% 50% at 18% 8%,  var(--canvas-blue) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 45% at 88% 18%, var(--canvas-violet) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 55% at 30% 92%, var(--canvas-cyan) 0%, transparent 62%),
+        var(--canvas-white);
+    }
+    .blob { position:absolute; border-radius:50%; filter:blur(70px); opacity:.55; }
+    .blob-1 { width:520px; height:420px; top:-160px; left:-120px; background:radial-gradient(circle,rgba(10,132,255,.30),transparent 70%); }
+    .blob-2 { width:460px; height:460px; top:-80px; right:-140px; background:radial-gradient(circle,rgba(191,90,242,.22),transparent 70%); animation: driftSlow 26s ease-in-out infinite; }
+    .blob-3 { width:560px; height:460px; bottom:-200px; left:20%; background:radial-gradient(circle,rgba(0,190,190,.20),transparent 70%); animation: driftSlow 32s ease-in-out infinite reverse; }
+    @keyframes driftSlow { 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-24px,26px); } }
+    @media (prefers-reduced-motion: reduce) { .blob-2,.blob-3 { animation:none; } }
+
+    /* ═══ SHELL ═══ */
+    .auth-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2.5rem 1.2rem; position:relative; z-index:1; }
+    .auth-shell {
+      width:100%; max-width:980px; min-height:640px;
+      display:grid; grid-template-columns:1fr 1fr;
+      border-radius: var(--r-xl); overflow:hidden;
+      border:1px solid var(--glass-border);
+      box-shadow: var(--sh-float);
+      background: var(--glass);
+      backdrop-filter: blur(28px) saturate(1.6); -webkit-backdrop-filter: blur(28px) saturate(1.6);
     }
 
-    .page {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* ═══ HERO PANEL ═══ */
+    .panel-hero {
+      position:relative; overflow:hidden;
+      background: linear-gradient(150deg, var(--accent) 0%, var(--accent-2) 100%);
+      padding:2.6rem 2.4rem; display:flex; flex-direction:column; justify-content:space-between; color:#fff;
     }
+    .panel-hero::before { content:''; position:absolute; top:-120px; left:-100px; width:340px; height:340px; border-radius:50%; background: radial-gradient(circle,rgba(255,255,255,.22),transparent 70%); pointer-events:none; }
+    .panel-hero::after  { content:''; position:absolute; bottom:-140px; right:-100px; width:320px; height:320px; border-radius:50%; background: radial-gradient(circle,rgba(255,255,255,.14),transparent 70%); pointer-events:none; }
 
-    /* ── Left panel ── */
-    .panel-left {
-      background: var(--ink);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 3rem;
+    .hero-brand { position:relative; z-index:1; display:flex; align-items:center; gap:.65rem; }
+    .hero-brand-mark {
+      width:40px; height:40px; border-radius:12px; flex-shrink:0;
+      background: rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.32);
+      display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+      backdrop-filter: blur(6px);
     }
-    .panel-left::before {
-      content: '';
-      position: absolute;
-      top: -120px; left: -120px;
-      width: 500px; height: 500px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(196,87,42,0.25) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .panel-left::after {
-      content: '';
-      position: absolute;
-      bottom: -80px; right: -80px;
-      width: 400px; height: 400px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(212,168,83,0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .brand { position: relative; z-index: 1; }
-    .brand-mark {
-      width: 48px; height: 48px;
-      background: var(--rust); border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem; margin-bottom: 1rem;
-    }
-    .brand-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem; color: var(--cream); letter-spacing: -0.02em;
-    }
-    .brand-tagline {
-      font-size: 0.78rem; color: var(--muted);
-      letter-spacing: 0.12em; text-transform: uppercase; margin-top: 0.3rem;
-    }
-    .hero-text { position: relative; z-index: 1; }
-    .hero-text h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2rem, 3.5vw, 3rem);
-      color: var(--cream); line-height: 1.15; margin-bottom: 1.2rem;
-    }
-    .hero-text h1 em { color: var(--gold); font-style: italic; }
-    .hero-text p { color: #9A9089; font-size: 0.95rem; line-height: 1.7; max-width: 340px; }
+    .hero-brand-name { font-family:'Inter Tight','Inter',sans-serif; font-size:1.15rem; font-weight:800; letter-spacing:-.02em; }
+    .hero-tagline { font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.68); margin-top:.32rem; font-weight:700; }
 
-    .levels-preview { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0.6rem; }
-    .level-chip {
-      display: inline-flex; align-items: center; gap: 0.6rem;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; padding: 0.6rem 1rem;
-      color: #C8BFB5; font-size: 0.82rem; width: fit-content;
-    }
-    .level-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
-    .dot-a { background: var(--sage); }
-    .dot-b { background: var(--gold); }
-    .dot-c { background: var(--rust); }
+    .hero-copy { position:relative; z-index:1; }
+    .hero-copy h1 { font-size:clamp(1.7rem,3.2vw,2.35rem); font-weight:800; letter-spacing:-.03em; line-height:1.16; margin-bottom:1rem; }
+    .hero-copy h1 em { font-style:normal; opacity:.82; }
+    .hero-copy p { font-size:.92rem; color:rgba(255,255,255,.8); line-height:1.7; max-width:320px; }
 
-    /* ── Right panel ── */
-    .panel-right { display: flex; align-items: center; justify-content: center; padding: 2rem; }
-    .form-card {
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 20px; padding: 2.5rem 2.8rem;
-      width: 100%; max-width: 460px;
-      box-shadow: 0 4px 40px rgba(0,0,0,0.07);
-    }
+    .levels-preview { position:relative; z-index:1; display:flex; flex-direction:column; gap:.55rem; }
+    .level-chip { display:inline-flex; align-items:center; gap:.6rem; background: rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:.6rem 1rem; color:rgba(255,255,255,.94); font-size:.79rem; font-weight:600; width:fit-content; backdrop-filter: blur(6px); }
+    .level-chip .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
-    /* ── Tabs ── */
-    .tabs {
-      display: flex;
-      background: var(--input-bg); border: 1px solid var(--border);
-      border-radius: 10px; padding: 4px; margin-bottom: 2rem;
-    }
-    .tab-btn {
-      flex: 1; padding: 0.55rem; border: none;
-      background: transparent; border-radius: 7px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500;
-      color: var(--muted); cursor: pointer; transition: all 0.2s;
-    }
-    .tab-btn.active { background: var(--ink); color: var(--cream); }
+    /* ═══ FORM PANEL ═══ */
+    .panel-form { background: var(--glass-strong); display:flex; align-items:center; justify-content:center; padding:2.6rem 2.4rem; }
+    .form-card { width:100%; max-width:400px; }
 
-    /* ── Form elements ── */
-    .form-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.3rem; }
-    .form-subtitle { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.8rem; line-height: 1.6; }
+    /* Segmented tabs */
+    .tabs { position:relative; display:flex; background: rgba(28,28,36,0.05); border-radius:999px; padding:4px; margin-bottom:1.8rem; }
+    .tabs-indicator { position:absolute; top:4px; left:4px; height:calc(100% - 8px); border-radius:999px; background:#fff; box-shadow: var(--sh-1); transition: transform .34s var(--spring), width .34s var(--spring); }
+    .tab-btn { position:relative; z-index:1; flex:1; padding:.62rem; border:none; background:transparent; border-radius:999px; font-family:inherit; font-size:.83rem; font-weight:700; color:var(--ink-3); cursor:pointer; transition: color .2s; }
+    .tab-btn.active { color: var(--ink-1); }
 
-    .field { margin-bottom: 1.1rem; }
-    label {
-      display: block; font-size: 0.78rem; font-weight: 500;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 0.4rem;
-    }
+    .form-title { font-size:1.35rem; font-weight:800; letter-spacing:-.02em; color:var(--ink-1); margin-bottom:.3rem; }
+    .form-subtitle { font-size:.82rem; color:var(--ink-3); margin-bottom:1.6rem; line-height:1.6; }
+
+    .field { margin-bottom:1.05rem; }
+    label { display:block; font-size:.68rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); margin-bottom:.4rem; }
+
+    .input-wrap { position:relative; }
+    .input-icon { position:absolute; left:.9rem; top:50%; transform:translateY(-50%); color:var(--ink-3); display:flex; pointer-events:none; transition: color .2s; }
+    .input-icon svg { width:16px; height:16px; }
+    .input-wrap:focus-within .input-icon { color: var(--accent); }
+
     input, select {
-      width: 100%; padding: 0.75rem 1rem;
-      background: var(--input-bg); border: 1.5px solid var(--border);
-      border-radius: 10px; font-family: 'DM Sans', sans-serif;
-      font-size: 0.92rem; color: var(--ink);
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none; appearance: none;
+      width:100%; padding:.72rem 1rem .72rem 2.6rem;
+      background: rgba(255,255,255,0.6); border:1px solid var(--hairline-2); border-radius: var(--r-sm);
+      font-family:inherit; font-size:.87rem; color:var(--ink-1); outline:none; appearance:none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
     }
-    input:focus, select:focus {
-      border-color: var(--rust); box-shadow: 0 0 0 3px rgba(196,87,42,0.12);
-    }
-    input.error, select.error {
-      border-color: var(--error); box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
-    }
-    .select-wrap { position: relative; }
-    .select-wrap::after {
-      content: '▾'; position: absolute; right: 1rem; top: 50%;
-      transform: translateY(-50%); color: var(--muted); pointer-events: none;
-    }
-    .pw-wrap { position: relative; }
-    .pw-wrap input { padding-right: 2.8rem; }
-    .pw-toggle {
-      position: absolute; right: 0.9rem; top: 50%;
-      transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1.1rem;
-    }
-    .pw-strength { margin-top: 0.4rem; display: flex; gap: 3px; height: 3px; }
-    .pw-strength span { flex: 1; border-radius: 2px; background: var(--border); transition: background 0.3s; }
-    .pw-strength.s1 span:nth-child(1)    { background: var(--error); }
-    .pw-strength.s2 span:nth-child(-n+2) { background: var(--gold); }
-    .pw-strength.s3 span:nth-child(-n+3) { background: var(--gold); }
-    .pw-strength.s4 span                 { background: var(--sage); }
+    input::placeholder { color: var(--ink-3); }
+    input:focus, select:focus { border-color: var(--accent); background:#fff; box-shadow: 0 0 0 4px var(--accent-glow); }
+    input.error, select.error { border-color: var(--error) !important; box-shadow: 0 0 0 4px var(--error-bg) !important; }
 
-    .field-error { display: none; font-size: 0.75rem; color: var(--error); margin-top: 0.35rem; }
-    .field-error.show { display: block; }
+    .select-wrap { position:relative; }
+    .select-wrap select { padding-right:2.4rem; }
+    .select-chevron { position:absolute; right:1rem; top:50%; transform:translateY(-50%); color:var(--ink-3); pointer-events:none; display:flex; }
+    .select-chevron svg { width:12px; height:12px; }
+
+    .pw-wrap input { padding-right:2.7rem; }
+    .pw-toggle { position:absolute; right:.65rem; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--ink-3); display:flex; padding:.32rem; border-radius:7px; transition: color .2s, background .2s; }
+    .pw-toggle:hover { color: var(--ink-1); background: rgba(28,28,36,.05); }
+    .pw-toggle svg { width:17px; height:17px; }
+
+    .pw-strength { margin-top:.5rem; display:flex; gap:3px; height:3px; }
+    .pw-strength span { flex:1; border-radius:2px; background: var(--hairline-2); transition: background .3s; }
+    .pw-strength.s1 span:nth-child(1)    { background: var(--error); }
+    .pw-strength.s2 span:nth-child(-n+2) { background: var(--amber); }
+    .pw-strength.s3 span:nth-child(-n+3) { background: var(--amber); }
+    .pw-strength.s4 span                 { background: var(--success); }
+
+    .field-error { display:none; font-size:.74rem; color:var(--error); margin-top:.35rem; font-weight:500; }
+    .field-error.show { display:block; }
 
     .btn-submit {
-      width: 100%; margin-top: 0.5rem; padding: 0.85rem;
-      background: var(--ink); color: var(--cream);
-      border: none; border-radius: 10px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
-      cursor: pointer; transition: background 0.2s, transform 0.1s;
+      width:100%; margin-top:.4rem; padding:.82rem; border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; border:none;
+      font-family:inherit; font-size:.9rem; font-weight:700; cursor:pointer;
+      box-shadow: 0 4px 16px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.25);
+      transition: transform .22s var(--ease), box-shadow .22s ease;
     }
-    .btn-submit:hover  { background: #2E2822; }
-    .btn-submit:active { transform: scale(0.99); }
-    .btn-submit.loading { pointer-events: none; opacity: 0.7; }
+    .btn-submit:hover  { transform:translateY(-2px); box-shadow: 0 10px 26px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.3); }
+    .btn-submit:active { transform:translateY(0) scale(.99); }
+    .btn-submit.loading { pointer-events:none; opacity:.75; }
 
-    /* ── Forgot password link ── */
-    .forgot-link { text-align: center; margin-top: 0.9rem; }
-    .forgot-btn {
-      background: none; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
-      color: var(--muted); padding: 0;
-      transition: color 0.2s;
-    }
-    .forgot-btn:hover { color: var(--rust); text-decoration: underline; }
+    .forgot-link { text-align:center; margin-top:.9rem; }
+    .forgot-btn { background:none; border:none; cursor:pointer; font-family:inherit; font-size:.8rem; color:var(--ink-3); padding:0; font-weight:600; transition: color .2s; }
+    .forgot-btn:hover { color: var(--accent); }
 
-    .alert {
-      display: none; padding: 0.75rem 1rem; border-radius: 8px;
-      font-size: 0.83rem; margin-bottom: 1.2rem; border: 1px solid;
-    }
-    .alert.show    { display: block; }
-    .alert.success { background: #EBF5EB; border-color: #A5D6A7; color: #2E7D32; }
-    .alert.danger  { background: #FDEDEC; border-color: #F1948A; color: var(--error); }
+    .alert { display:none; padding:.75rem 1rem; border-radius: var(--r-sm); font-size:.82rem; font-weight:600; margin-bottom:1.2rem; border:1px solid; }
+    .alert.show { display:block; }
+    .alert.success { background: var(--success-bg); border-color: var(--success-bd); color:#1F8A3B; }
+    .alert.danger  { background: var(--error-bg);   border-color: var(--error-bd);   color:#D8291E; }
 
-    .form-section { animation: fadeUp 0.35s ease both; }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    .form-section { animation: fadeUp .4s var(--ease) both; }
+    @keyframes fadeUp { from{ opacity:0; transform:translateY(12px);} to{ opacity:1; transform:translateY(0);} }
 
-    /* ── Back button ── */
-    .back-btn {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      background: none; border: none; cursor: pointer;
-      color: var(--muted); font-family: 'DM Sans', sans-serif;
-      font-size: 0.82rem; padding: 0; margin-bottom: 1.5rem;
-      transition: color 0.2s;
-    }
-    .back-btn:hover { color: var(--ink); }
+    .back-btn { display:inline-flex; align-items:center; gap:.4rem; background:none; border:none; cursor:pointer; color:var(--ink-3); font-family:inherit; font-size:.8rem; font-weight:600; padding:0; margin-bottom:1.4rem; transition: color .2s; }
+    .back-btn:hover { color: var(--ink-1); }
+    .back-btn svg { width:14px; height:14px; }
 
-    /* ── Verify / forgot icon ── */
-    .section-icon {
-      width: 62px; height: 62px; border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.7rem; margin-bottom: 1.1rem;
-    }
-    .section-icon.mail {
-      background: linear-gradient(135deg, rgba(196,87,42,0.12), rgba(212,168,83,0.08));
-      border: 1px solid rgba(196,87,42,0.22);
-    }
-    .section-icon.lock {
-      background: linear-gradient(135deg, rgba(74,103,65,0.12), rgba(212,168,83,0.08));
-      border: 1px solid rgba(74,103,65,0.22);
-    }
-    .section-icon.key {
-      background: linear-gradient(135deg, rgba(212,168,83,0.12), rgba(196,87,42,0.08));
-      border: 1px solid rgba(212,168,83,0.3);
-    }
+    .section-icon { width:52px; height:52px; border-radius:15px; display:flex; align-items:center; justify-content:center; margin-bottom:1.1rem; }
+    .section-icon svg { width:22px; height:22px; }
+    .section-icon.mail    { background: rgba(10,132,255,.1);  color:var(--accent);   border:1px solid rgba(10,132,255,.22); }
+    .section-icon.lock    { background: rgba(94,92,230,.1);   color:var(--accent-2); border:1px solid rgba(94,92,230,.22); }
+    .section-icon.key     { background: var(--amber-bg);      color:#B5720A;         border:1px solid var(--amber-bd); }
+    .section-icon.success { background: var(--success-bg);    color:#1F8A3B;         border:1px solid var(--success-bd); }
 
-    .email-hint {
-      font-weight: 500; color: var(--rust); word-break: break-all;
-    }
+    .email-hint { font-weight:700; color:var(--accent); word-break:break-all; }
 
-    /* ── 6-digit code boxes ── */
-    .code-inputs {
-      display: flex; gap: 0.5rem; justify-content: center;
-      margin: 1.8rem 0 0.5rem;
-    }
+    .code-inputs { display:flex; gap:.5rem; justify-content:center; margin:1.7rem 0 .5rem; }
     .code-box {
-      width: 50px !important;
-      height: 58px !important;
-      padding: 0 !important;
-      border-radius: 12px !important;
-      font-size: 1.5rem !important;
-      font-weight: 600;
-      text-align: center;
-      letter-spacing: 0;
-      caret-color: var(--rust);
+      width:46px !important; height:54px !important; padding:0 !important; border-radius:13px !important;
+      font-size:1.35rem !important; font-weight:800; text-align:center; letter-spacing:0;
+      caret-color: var(--accent); background: rgba(255,255,255,.6);
     }
-    .code-box.filled  { border-color: var(--gold) !important; }
-    .code-box.success {
-      border-color: var(--sage) !important;
-      background: rgba(74,103,65,0.07) !important;
-      color: var(--sage) !important;
-    }
+    .code-box.filled  { border-color: var(--accent-2) !important; background:#fff !important; }
+    .code-box.success { border-color: var(--success) !important; background: var(--success-bg) !important; color:#1F8A3B !important; }
+    .code-box.error   { border-color: var(--error) !important;   background: var(--error-bg) !important; }
 
-    /* ── Expiry timer ── */
-    .code-timer {
-      text-align: center; font-size: 0.8rem; color: var(--muted);
-      margin: 0.7rem 0 1.5rem;
-    }
-    .timer-val { font-weight: 600; color: var(--rust); font-variant-numeric: tabular-nums; }
-    .timer-val.urgent  { color: #C0392B; }
-    .timer-val.expired { color: var(--muted); font-weight: 400; }
+    .code-timer { text-align:center; font-size:.8rem; color:var(--ink-3); margin:.7rem 0 1.4rem; }
+    .timer-val { font-weight:700; color: var(--accent); font-variant-numeric:tabular-nums; }
+    .timer-val.urgent  { color: var(--error); }
+    .timer-val.expired { color: var(--ink-3); font-weight:500; }
 
-    /* ── Resend row ── */
-    .resend-row {
-      margin-top: 1.2rem; text-align: center;
-      font-size: 0.82rem; color: var(--muted);
-    }
-    .resend-btn {
-      background: none; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
-      font-weight: 500; padding: 0; color: var(--rust);
-      transition: color 0.2s;
-    }
-    .resend-btn:hover:not(:disabled) { color: #A03820; text-decoration: underline; }
-    .resend-btn:disabled { color: var(--muted); cursor: default; }
-    .resend-cd { color: var(--muted); font-weight: 400; }
+    .resend-row { margin-top:1.1rem; text-align:center; font-size:.81rem; color:var(--ink-3); }
+    .resend-btn { background:none; border:none; cursor:pointer; font-family:inherit; font-size:.81rem; font-weight:700; padding:0; color:var(--accent); transition: color .2s; }
+    .resend-btn:hover:not(:disabled) { color: var(--accent-2); }
+    .resend-btn:disabled { color: var(--ink-3); cursor:default; }
+    .resend-cd { color: var(--ink-3); font-weight:500; }
 
-    /* ── Password confirm match indicator ── */
-    .match-hint {
-      font-size: 0.75rem; margin-top: 0.35rem;
-      display: none;
-    }
-    .match-hint.match   { display: block; color: var(--sage); }
-    .match-hint.nomatch { display: block; color: var(--error); }
+    .match-hint { font-size:.74rem; margin-top:.35rem; display:none; font-weight:600; }
+    .match-hint.match   { display:block; color: var(--success); }
+    .match-hint.nomatch { display:block; color: var(--error); }
 
-    /* ── Shake on wrong code ── */
     @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      15%      { transform: translateX(-7px); }
-      35%      { transform: translateX(7px); }
-      55%      { transform: translateX(-4px); }
-      75%      { transform: translateX(4px); }
+      0%,100% { transform:translateX(0); }
+      15%     { transform:translateX(-7px); }
+      35%     { transform:translateX(7px); }
+      55%     { transform:translateX(-4px); }
+      75%     { transform:translateX(4px); }
     }
-    .shake { animation: shake 0.45s ease; }
+    .shake { animation: shake .45s ease; }
 
-    @media (max-width: 800px) {
-      .page { grid-template-columns: 1fr; }
-      .panel-left { display: none; }
-      .code-box { width: 44px !important; height: 52px !important; font-size: 1.3rem !important; }
+    .trust-note { display:flex; align-items:center; justify-content:center; gap:.4rem; margin-top:1.7rem; font-size:.72rem; color:var(--ink-3); font-weight:600; }
+    .trust-note svg { width:13px; height:13px; flex-shrink:0; color:var(--ink-3); }
+
+    ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:rgba(28,28,36,0.14);border-radius:3px;}
+
+    @media (max-width: 860px) {
+      .auth-shell { grid-template-columns:1fr; max-width:460px; min-height:0; }
+      .panel-hero { display:none; }
+      .panel-form { padding:2.3rem 1.6rem; }
+    }
+    @media (max-width: 480px) {
+      .code-box { width:38px !important; height:46px !important; font-size:1.1rem !important; }
+      .code-inputs { gap:.35rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
     }
   </style>
 </head>
 <body>
 
-<div class="page">
-  <!-- ── Left panel ── -->
-  <div class="panel-left">
-    <div class="brand">
-      <div class="brand-mark">🎓</div>
-      <div class="brand-name">TilMenger</div>
-      <div class="brand-tagline">AI-Powered English Teacher</div>
-    </div>
-    <div class="hero-text">
-      <h1>Master English<br>with <em>intelligent</em><br>guidance</h1>
-      <p>Personalized lessons, real-time feedback, and adaptive learning paths — all powered by AI.</p>
-    </div>
-    <div class="levels-preview">
-      <div class="level-chip"><span class="dot dot-a"></span>Beginner A1–A2 — Build your foundation</div>
-      <div class="level-chip"><span class="dot dot-b"></span>Intermediate B1–B2 — Gain fluency</div>
-      <div class="level-chip"><span class="dot dot-c"></span>Advanced C1–C2 — Achieve mastery</div>
-    </div>
-  </div>
+<div class="bg-blobs" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
 
-  <!-- ── Right panel ── -->
-  <div class="panel-right">
-    <div class="form-card">
-      <div class="tabs" id="tabsBar">
-        <button class="tab-btn active" onclick="switchTab('login')">Sign in</button>
-        <button class="tab-btn"        onclick="switchTab('register')">Create account</button>
-      </div>
+<div class="auth-wrap">
+  <div class="auth-shell">
 
-      <div class="alert" id="alert"></div>
-
-      <!-- ── LOGIN ── -->
-      <div id="loginSection" class="form-section">
-        <div class="form-title">Welcome back</div>
-        <div class="form-subtitle">Sign in to continue your learning journey.</div>
-        <div class="field">
-          <label for="loginEmail">Email address</label>
-          <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"/>
-          <div class="field-error" id="loginEmailErr"></div>
-        </div>
-        <div class="field">
-          <label for="loginPassword">Password</label>
-          <div class="pw-wrap">
-            <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"/>
-            <button class="pw-toggle" type="button" onclick="togglePw('loginPassword', this)">👁</button>
-          </div>
-          <div class="field-error" id="loginPasswordErr"></div>
-        </div>
-        <button class="btn-submit" id="loginBtn" onclick="handleLogin()">Sign in</button>
-        <div class="forgot-link">
-          <button type="button" class="forgot-btn" onclick="showForgot()">Forgot your password?</button>
+    <!-- ── Hero panel ── -->
+    <div class="panel-hero">
+      <div class="hero-brand">
+        <div class="hero-brand-mark">✦</div>
+        <div>
+          <div class="hero-brand-name">TilMenger</div>
+          <div class="hero-tagline">AI-Powered English Teacher</div>
         </div>
       </div>
 
-      <!-- ── REGISTER ── -->
-      <div id="registerSection" class="form-section" style="display:none;">
-        <div class="form-title">Create account</div>
-        <div class="form-subtitle">Start your personalized English learning today.</div>
-        <div class="field">
-          <label for="regName">Full name</label>
-          <input type="text" id="regName" placeholder="Jane Doe" autocomplete="name"/>
-          <div class="field-error" id="regNameErr"></div>
-        </div>
-        <div class="field">
-          <label for="regEmail">Email address</label>
-          <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email"/>
-          <div class="field-error" id="regEmailErr"></div>
-        </div>
-        <div class="field">
-          <label for="regPassword">Password</label>
-          <div class="pw-wrap">
-            <input type="password" id="regPassword" placeholder="••••••••"
-                   autocomplete="new-password" oninput="updateStrength(this.value, 'pwStrength')"/>
-            <button class="pw-toggle" type="button" onclick="togglePw('regPassword', this)">👁</button>
-          </div>
-          <div class="pw-strength" id="pwStrength">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <div class="field-error" id="regPasswordErr"></div>
-        </div>
-        <div class="field">
-          <label for="regLevel">English level</label>
-          <div class="select-wrap">
-            <select id="regLevel">
-              <option value="" disabled selected>Choose your level…</option>
-              <option value="Beginner A1-A2">Beginner A1-A2</option>
-              <option value="Intermediate B1-B2">Intermediate B1-B2</option>
-              <option value="Advanced C1-C2">Advanced C1-C2</option>
-            </select>
-          </div>
-          <div class="field-error" id="regLevelErr"></div>
-        </div>
-        <button class="btn-submit" id="registerBtn" onclick="handleRegister()">Create my account</button>
+      <div class="hero-copy">
+        <h1>Master English with <em>intelligent</em> guidance</h1>
+        <p>Personalized lessons, real-time feedback, and adaptive learning paths — all powered by AI.</p>
       </div>
 
-      <!-- ── VERIFY (registration) ── -->
-      <div id="verifySection" class="form-section" style="display:none;">
-        <button class="back-btn" onclick="goBack()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back to registration
-        </button>
+      <div class="levels-preview">
+        <div class="level-chip"><span class="dot" style="background:#5FE87E"></span>Beginner A1–A2 — Build your foundation</div>
+        <div class="level-chip"><span class="dot" style="background:#FFC24A"></span>Intermediate B1–B2 — Gain fluency</div>
+        <div class="level-chip"><span class="dot" style="background:#ffffff"></span>Advanced C1–C2 — Achieve mastery</div>
+      </div>
+    </div>
 
-        <div class="section-icon mail">📬</div>
-        <div class="form-title">Check your inbox</div>
-        <div class="form-subtitle">
-          We sent a 6-digit code to<br>
-          <span class="email-hint" id="verifyEmailDisplay"></span>
+    <!-- ── Form panel ── -->
+    <div class="panel-form">
+      <div class="form-card">
+
+        <div class="tabs" id="tabsBar">
+          <div class="tabs-indicator" id="tabsIndicator"></div>
+          <button class="tab-btn active" onclick="switchTab('login')">Sign in</button>
+          <button class="tab-btn"        onclick="switchTab('register')">Create account</button>
         </div>
 
-        <div class="code-inputs" id="codeInputsRow">
-          <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
-          <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
-          <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
-          <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
-          <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
-          <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
+        <div class="alert" id="alert"></div>
+
+        <!-- ── LOGIN ── -->
+        <div id="loginSection" class="form-section">
+          <div class="form-title">Welcome back</div>
+          <div class="form-subtitle">Sign in to continue your learning journey.</div>
+          <div class="field">
+            <label for="loginEmail">Email address</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span>
+              <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" autofocus/>
+            </div>
+            <div class="field-error" id="loginEmailErr"></div>
+          </div>
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <div class="input-wrap pw-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.3"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></span>
+              <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"/>
+              <button class="pw-toggle" type="button" onclick="togglePw('loginPassword', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="field-error" id="loginPasswordErr"></div>
+          </div>
+          <button class="btn-submit" id="loginBtn" onclick="handleLogin()">Sign in</button>
+          <div class="forgot-link">
+            <button type="button" class="forgot-btn" onclick="showForgot()">Forgot your password?</button>
+          </div>
         </div>
 
-        <div class="field-error" id="codeErr"></div>
-
-        <div class="code-timer">
-          Code expires in <span class="timer-val" id="timerDisplay">10:00</span>
+        <!-- ── REGISTER ── -->
+        <div id="registerSection" class="form-section" style="display:none;">
+          <div class="form-title">Create account</div>
+          <div class="form-subtitle">Start your personalized English learning today.</div>
+          <div class="field">
+            <label for="regName">Full name</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-4 3.5-6.2 7-6.2s6.2 2.2 7 6.2"/></svg></span>
+              <input type="text" id="regName" placeholder="Jane Doe" autocomplete="name"/>
+            </div>
+            <div class="field-error" id="regNameErr"></div>
+          </div>
+          <div class="field">
+            <label for="regEmail">Email address</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span>
+              <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+            <div class="field-error" id="regEmailErr"></div>
+          </div>
+          <div class="field">
+            <label for="regPassword">Password</label>
+            <div class="input-wrap pw-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.3"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></span>
+              <input type="password" id="regPassword" placeholder="••••••••"
+                     autocomplete="new-password" oninput="updateStrength(this.value, 'pwStrength')"/>
+              <button class="pw-toggle" type="button" onclick="togglePw('regPassword', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="pw-strength" id="pwStrength">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="field-error" id="regPasswordErr"></div>
+          </div>
+          <div class="field">
+            <label for="regLevel">English level</label>
+            <div class="select-wrap input-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20v-6M12 20V6M19 20v-9"/></svg></span>
+              <select id="regLevel">
+                <option value="" disabled selected>Choose your level…</option>
+                <option value="Beginner A1-A2">Beginner A1-A2</option>
+                <option value="Intermediate B1-B2">Intermediate B1-B2</option>
+                <option value="Advanced C1-C2">Advanced C1-C2</option>
+              </select>
+              <span class="select-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+            </div>
+            <div class="field-error" id="regLevelErr"></div>
+          </div>
+          <button class="btn-submit" id="registerBtn" onclick="handleRegister()">Create my account</button>
         </div>
 
-        <button class="btn-submit" id="verifyBtn" onclick="handleVerify()">
-          Verify &amp; Create Account
-        </button>
+        <!-- ── VERIFY (registration) ── -->
+        <div id="verifySection" class="form-section" style="display:none;">
+          <button class="back-btn" onclick="goBack()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back to registration
+          </button>
 
-        <div class="resend-row">
-          Didn't receive it?
-          <button id="resendBtn" class="resend-btn" onclick="handleResend()" disabled>
-            Resend code <span class="resend-cd" id="resendCd">(60s)</span>
+          <div class="section-icon mail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></div>
+          <div class="form-title">Check your inbox</div>
+          <div class="form-subtitle">
+            We sent a 6-digit code to<br>
+            <span class="email-hint" id="verifyEmailDisplay"></span>
+          </div>
+
+          <div class="code-inputs" id="codeInputsRow">
+            <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+            <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
+            <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
+            <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
+            <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
+            <input class="code-box reg-code-box" type="text" inputmode="numeric" maxlength="1" />
+          </div>
+
+          <div class="field-error" id="codeErr"></div>
+
+          <div class="code-timer">
+            Code expires in <span class="timer-val" id="timerDisplay">10:00</span>
+          </div>
+
+          <button class="btn-submit" id="verifyBtn" onclick="handleVerify()">
+            Verify &amp; Create Account
+          </button>
+
+          <div class="resend-row">
+            Didn't receive it?
+            <button id="resendBtn" class="resend-btn" onclick="handleResend()" disabled>
+              Resend code <span class="resend-cd" id="resendCd">(60s)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── FORGOT PASSWORD ── -->
+        <div id="forgotSection" class="form-section" style="display:none;">
+          <button class="back-btn" onclick="switchTab('login')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back to sign in
+          </button>
+
+          <div class="section-icon key"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.3"/><path d="M10.6 12.4 19 4M19 4v4M19 4h-4"/></svg></div>
+          <div class="form-title">Forgot your password?</div>
+          <div class="form-subtitle">
+            Enter your account email and we'll send you a 6-digit reset code.
+          </div>
+
+          <div class="field">
+            <label for="forgotEmail">Email address</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span>
+              <input type="email" id="forgotEmail" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+            <div class="field-error" id="forgotEmailErr"></div>
+          </div>
+
+          <button class="btn-submit" id="forgotBtn" onclick="handleForgot()">
+            Send Reset Code
           </button>
         </div>
-      </div>
 
-      <!-- ── FORGOT PASSWORD ── -->
-      <div id="forgotSection" class="form-section" style="display:none;">
-        <button class="back-btn" onclick="switchTab('login')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back to sign in
-        </button>
+        <!-- ── RESET VERIFY ── -->
+        <div id="resetVerifySection" class="form-section" style="display:none;">
+          <button class="back-btn" onclick="goBackToForgot()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Back
+          </button>
 
-        <div class="section-icon key">🔑</div>
-        <div class="form-title">Forgot your password?</div>
-        <div class="form-subtitle">
-          Enter your account email and we'll send you a 6-digit reset code.
+          <div class="section-icon lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.3"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></div>
+          <div class="form-title">Check your inbox</div>
+          <div class="form-subtitle">
+            We sent a reset code to<br>
+            <span class="email-hint" id="resetEmailDisplay"></span>
+          </div>
+
+          <div class="code-inputs" id="resetCodeInputsRow">
+            <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
+            <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
+            <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
+            <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
+            <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
+            <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
+          </div>
+
+          <div class="field-error" id="resetCodeErr"></div>
+
+          <div class="code-timer">
+            Code expires in <span class="timer-val" id="resetTimerDisplay">10:00</span>
+          </div>
+
+          <button class="btn-submit" id="resetVerifyBtn" onclick="handleResetVerify()">
+            Verify Code
+          </button>
+
+          <div class="resend-row">
+            Didn't receive it?
+            <button id="resetResendBtn" class="resend-btn" onclick="handleResendReset()" disabled>
+              Resend code <span class="resend-cd" id="resetResendCd">(60s)</span>
+            </button>
+          </div>
         </div>
 
-        <div class="field">
-          <label for="forgotEmail">Email address</label>
-          <input type="email" id="forgotEmail" placeholder="you@example.com" autocomplete="email"/>
-          <div class="field-error" id="forgotEmailErr"></div>
-        </div>
+        <!-- ── RESET PASSWORD ── -->
+        <div id="resetPasswordSection" class="form-section" style="display:none;">
+          <div class="section-icon success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div class="form-title">Create new password</div>
+          <div class="form-subtitle">
+            Choose a strong password for<br>
+            <span class="email-hint" id="resetPasswordEmailDisplay"></span>
+          </div>
 
-        <button class="btn-submit" id="forgotBtn" onclick="handleForgot()">
-          Send Reset Code
-        </button>
-      </div>
+          <div class="field">
+            <label for="newPassword">New password</label>
+            <div class="input-wrap pw-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.3"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></span>
+              <input type="password" id="newPassword" placeholder="••••••••"
+                     autocomplete="new-password"
+                     oninput="updateStrength(this.value, 'pwStrength2'); checkPasswordMatch()"/>
+              <button class="pw-toggle" type="button" onclick="togglePw('newPassword', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="pw-strength" id="pwStrength2">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="field-error" id="newPasswordErr"></div>
+          </div>
 
-      <!-- ── RESET VERIFY ── -->
-      <div id="resetVerifySection" class="form-section" style="display:none;">
-        <button class="back-btn" onclick="goBackToForgot()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.2"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back
-        </button>
+          <div class="field">
+            <label for="confirmPassword">Confirm new password</label>
+            <div class="input-wrap pw-wrap">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.3"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg></span>
+              <input type="password" id="confirmPassword" placeholder="••••••••"
+                     autocomplete="new-password" oninput="checkPasswordMatch()"/>
+              <button class="pw-toggle" type="button" onclick="togglePw('confirmPassword', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="match-hint" id="matchHint"></div>
+            <div class="field-error" id="confirmPasswordErr"></div>
+          </div>
 
-        <div class="section-icon lock">🔒</div>
-        <div class="form-title">Check your inbox</div>
-        <div class="form-subtitle">
-          We sent a reset code to<br>
-          <span class="email-hint" id="resetEmailDisplay"></span>
-        </div>
-
-        <div class="code-inputs" id="resetCodeInputsRow">
-          <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" />
-          <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
-          <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
-          <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
-          <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
-          <input class="code-box reset-code-box" type="text" inputmode="numeric" maxlength="1" />
-        </div>
-
-        <div class="field-error" id="resetCodeErr"></div>
-
-        <div class="code-timer">
-          Code expires in <span class="timer-val" id="resetTimerDisplay">10:00</span>
-        </div>
-
-        <button class="btn-submit" id="resetVerifyBtn" onclick="handleResetVerify()">
-          Verify Code
-        </button>
-
-        <div class="resend-row">
-          Didn't receive it?
-          <button id="resetResendBtn" class="resend-btn" onclick="handleResendReset()" disabled>
-            Resend code <span class="resend-cd" id="resetResendCd">(60s)</span>
+          <button class="btn-submit" id="resetPasswordBtn" onclick="handleResetPassword()">
+            Reset Password
           </button>
         </div>
+
+        <div class="trust-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>
+          Your data is encrypted and never shared.
+        </div>
+
       </div>
-
-      <!-- ── RESET PASSWORD ── -->
-      <div id="resetPasswordSection" class="form-section" style="display:none;">
-        <div class="section-icon lock">✅</div>
-        <div class="form-title">Create new password</div>
-        <div class="form-subtitle">
-          Choose a strong password for<br>
-          <span class="email-hint" id="resetPasswordEmailDisplay"></span>
-        </div>
-
-        <div class="field">
-          <label for="newPassword">New password</label>
-          <div class="pw-wrap">
-            <input type="password" id="newPassword" placeholder="••••••••"
-                   autocomplete="new-password"
-                   oninput="updateStrength(this.value, 'pwStrength2'); checkPasswordMatch()"/>
-            <button class="pw-toggle" type="button" onclick="togglePw('newPassword', this)">👁</button>
-          </div>
-          <div class="pw-strength" id="pwStrength2">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <div class="field-error" id="newPasswordErr"></div>
-        </div>
-
-        <div class="field">
-          <label for="confirmPassword">Confirm new password</label>
-          <div class="pw-wrap">
-            <input type="password" id="confirmPassword" placeholder="••••••••"
-                   autocomplete="new-password" oninput="checkPasswordMatch()"/>
-            <button class="pw-toggle" type="button" onclick="togglePw('confirmPassword', this)">👁</button>
-          </div>
-          <div class="match-hint" id="matchHint"></div>
-          <div class="field-error" id="confirmPasswordErr"></div>
-        </div>
-
-        <button class="btn-submit" id="resetPasswordBtn" onclick="handleResetPassword()">
-          Reset Password
-        </button>
-      </div>
-
     </div>
+
   </div>
 </div>
 
 <script src="/config.js"></script>
 <script>
   const API = LINGUA.auth;
+
+  const ICON_EYE     = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const ICON_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.24 4.24"/><path d="M9.9 5.14A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a13.2 13.2 0 0 1-3.4 4.02M6.2 6.2A13 13 0 0 0 1 12s4 7 11 7c1.5 0 2.9-.3 4.1-.83"/></svg>';
 
   if (localStorage.getItem('token')) {
     window.location.href = 'dashboard.html';
@@ -606,6 +578,20 @@
     });
   }
 
+  // ── Segmented tab indicator ──────────────────────────────────────────────────
+  function moveTabIndicator() {
+    const bar      = document.getElementById('tabsBar');
+    const indicator = document.getElementById('tabsIndicator');
+    const activeBtn = bar.querySelector('.tab-btn.active');
+    if (!activeBtn || bar.style.display === 'none') return;
+    const barRect = bar.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    indicator.style.width     = `${btnRect.width}px`;
+    indicator.style.transform = `translateX(${btnRect.left - barRect.left - 4}px)`;
+  }
+  window.addEventListener('load', moveTabIndicator);
+  window.addEventListener('resize', moveTabIndicator);
+
   // ── Tab switching ─────────────────────────────────────────────────────────────
   function switchTab(tab) {
     const isLogin = tab === 'login';
@@ -616,6 +602,7 @@
     );
     clearAlert();
     clearErrors();
+    requestAnimationFrame(moveTabIndicator);
   }
 
   // ── Alerts ───────────────────────────────────────────────────────────────────
@@ -653,7 +640,7 @@
     const input = document.getElementById(id);
     const show  = input.type === 'password';
     input.type  = show ? 'text' : 'password';
-    btn.textContent = show ? '🙈' : '👁';
+    btn.innerHTML = show ? ICON_EYE_OFF : ICON_EYE;
   }
 
   function updateStrength(val, targetId) {
