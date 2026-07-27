@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poly Creator — ENGLISHPOLY!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --red:#e03232; --yellow:#f5c518; --green:#2e9e4f; --blue:#2574c0;
+    --purple:#8b35b0; --brown:#8B5E3C; --orange:#e07820; --gold:#ffd700;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at center,#1a3a5c 0%,#0d1f33 100%);
+    min-height:100vh;font-family:'Nunito',sans-serif;color:#fff;padding-bottom:96px;
+  }
+
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 1.5rem;height:56px;background:rgba(0,0,0,0.35);
+    border-bottom:1px solid rgba(255,215,0,0.12);position:sticky;top:0;z-index:30;
+    backdrop-filter:blur(10px);
+  }
+  .nav-brand{font-family:'Fredoka One',cursive;color:var(--gold);font-size:1.25rem;letter-spacing:1px;}
+  .nav-back{font-size:0.75rem;color:rgba(255,255,255,0.55);text-decoration:none;
+    border:1px solid rgba(255,255,255,0.15);padding:.35rem .9rem;border-radius:6px;transition:all .18s;}
+  .nav-back:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:2rem 1.5rem;}
+  h1.page-title{font-family:'Fredoka One',cursive;font-size:clamp(1.5rem,4vw,2.1rem);color:var(--gold);margin-bottom:.3rem;}
+  .page-sub{color:rgba(255,255,255,.55);font-size:.88rem;margin-bottom:1.8rem;max-width:600px;line-height:1.5;}
+
+  .panel{
+    background:rgba(255,255,255,0.045);border:1.5px solid rgba(255,255,255,0.12);
+    border-radius:14px;padding:20px 22px;margin-bottom:20px;
+  }
+  .panel h2{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--gold);
+    letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1/-1;}
+  label{font-size:.75rem;font-weight:800;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.04em;}
+  input[type=text], input[type=number], input[type=url], textarea, select{
+    background:rgba(0,0,0,0.25);border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;
+    padding:.6rem .75rem;color:#fff;font-family:'Nunito',sans-serif;font-size:.88rem;
+    outline:none;transition:border-color .15s;width:100%;
+  }
+  input::placeholder, textarea::placeholder{color:rgba(255,255,255,.3);}
+  input:focus, textarea:focus, select:focus{border-color:var(--gold);}
+  textarea{resize:vertical;min-height:56px;line-height:1.4;}
+  select{cursor:pointer;}
+  .char-count{font-size:.68rem;color:rgba(255,255,255,.35);text-align:right;}
+
+  .cellcount-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .cellcount-row input[type=number]{width:90px;flex:none;}
+  .cellcount-hint{font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.5;}
+  .cellcount-hint b{color:var(--gold);}
+
+  /* ─── path editor ─── */
+  .path-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+  .tile{
+    background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.13);
+    border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:8px;
+    transition:border-color .15s;
+  }
+  .tile.corner{border-color:rgba(255,215,0,.45);background:rgba(255,215,0,.05);}
+  .tile.invalid{border-color:var(--red);box-shadow:0 0 0 2px rgba(224,50,50,.25);}
+  .tile-head{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .tile-pos{font-family:'Fredoka One',cursive;font-size:.85rem;color:#fff;}
+  .corner-tag{font-size:.6rem;font-weight:800;color:var(--gold);background:rgba(255,215,0,.15);
+    padding:.15rem .45rem;border-radius:10px;letter-spacing:.04em;}
+  .tile select{font-size:.8rem;padding:.4rem .55rem;}
+  .tile textarea{font-size:.8rem;min-height:52px;}
+  .tile input[type=url]{font-size:.78rem;}
+  .swatches{display:flex;gap:5px;flex-wrap:wrap;}
+  .swatch{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;}
+  .swatch.selected{border-color:#fff;transform:scale(1.15);}
+  .special-note{font-size:.78rem;color:rgba(255,255,255,.6);line-height:1.4;text-align:center;padding:6px 0;}
+  .finish-tile{
+    background:rgba(46,158,79,.12);border:1.5px solid rgba(46,158,79,.5);
+    border-radius:12px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;text-align:center;
+  }
+  .finish-tile .tile-pos{color:var(--green);}
+
+  /* ─── sticky action bar ─── */
+  .action-bar{
+    position:fixed;bottom:0;left:0;right:0;z-index:40;
+    background:rgba(13,31,51,.92);backdrop-filter:blur(10px);
+    border-top:1px solid rgba(255,215,0,.15);
+    padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  }
+  .action-bar .err-msg{font-size:.8rem;color:#ff9a9a;flex:1;min-width:200px;}
+  .action-bar .btns{display:flex;gap:10px;margin-left:auto;}
+  .btn-cancel{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.2);
+    border-radius:9px;padding:.7rem 1.4rem;font-family:'Fredoka One',cursive;font-size:.92rem;cursor:pointer;text-decoration:none;
+    display:inline-flex;align-items:center;}
+  .btn-cancel:hover{color:#fff;border-color:rgba(255,255,255,.4);}
+  .btn-save{background:var(--green);color:#fff;border:none;border-radius:9px;padding:.7rem 1.6rem;
+    font-family:'Fredoka One',cursive;font-size:.95rem;cursor:pointer;box-shadow:0 4px 0 #1a6b2f;
+    transition:transform .1s,box-shadow .1s;}
+  .btn-save:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 0 #1a6b2f;}
+  .btn-save:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 #1a6b2f;}
+  .btn-save:disabled{opacity:.5;cursor:not-allowed;}
+
+  .toast{
+    position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:#1a3a5c;color:white;padding:12px 24px;border-radius:30px;
+    font-weight:700;font-size:.9rem;z-index:200;transition:transform .4s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;max-width:90vw;text-align:center;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  .loading-row{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:4rem 0;color:rgba(255,255,255,.5);}
+  .spinner{width:38px;height:38px;border:3px solid rgba(255,215,0,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  @media(max-width:640px){ .field-row{grid-template-columns:1fr;} }
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">ENGLISHPOLY! 🎲</div>
+  <a class="nav-back" id="navBack" href="games_dashboard.html">← My Polys</a>
+</nav>
+
+<div id="loadingRow" class="loading-row" style="display:none;">
+  <div class="spinner"></div>
+  <div>Loading poly…</div>
+</div>
+
+<div class="wrap" id="mainWrap">
+  <h1 class="page-title" id="pageTitle">Create New Poly</h1>
+  <p class="page-sub">Design a custom Englishpoly board: set the length, then fill in each cell. Corner cells (marked gold) can be turned into bonus or "go back 4" squares — every other cell is a question or a picture challenge.</p>
+
+  <!-- BASIC INFO -->
+  <div class="panel">
+    <h2>📋 Board Info</h2>
+    <div class="field-row">
+      <div class="field full">
+        <label for="fTitle">Title</label>
+        <input type="text" id="fTitle" maxlength="200" placeholder="e.g. Unit 3 Vocabulary Poly">
+        <div class="char-count"><span id="titleCount">0</span>/200</div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field full">
+        <label for="fDesc">Description <span style="font-weight:600;text-transform:none;">(optional)</span></label>
+        <textarea id="fDesc" maxlength="2000" placeholder="What is this board for? Which unit or topic does it cover?"></textarea>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="fLevel">Level</label>
+        <select id="fLevel">
+          <option value="beginner">Beginner</option>
+          <option value="elementary">Elementary</option>
+          <option value="intermediate" selected>Intermediate</option>
+          <option value="upper_intermediate">Upper-Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fCellCount">Number of Cells (10–32)</label>
+        <div class="cellcount-row">
+          <input type="number" id="fCellCount" min="10" max="32" value="20">
+          <div class="cellcount-hint" id="cellCountHint"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATH EDITOR -->
+  <div class="panel">
+    <h2>🧩 Cells</h2>
+    <div class="path-grid" id="pathGrid"></div>
+  </div>
+</div>
+
+<div class="action-bar">
+  <div class="err-msg" id="errMsg"></div>
+  <div class="btns">
+    <a class="btn-cancel" id="cancelBtn" href="games_dashboard.html">Cancel</a>
+    <button class="btn-save" id="saveBtn">💾 Create Poly</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../../config.js"></script>
+<script>
+const API_BASE = LINGUA.base;
+const token    = localStorage.getItem('token');
+const roleId   = localStorage.getItem('role_id');
+if (!token || roleId !== '2') { location.href = '../../../index.html'; }
+
+const params  = new URLSearchParams(location.search);
+const editId  = params.get('id'); // presence => edit mode
+
+const MIN_CELL_COUNT = 10;
+const MAX_CELL_COUNT = 32;
+const COLORS = ['red','yellow','green','blue','purple','brown','orange'];
+const COLOR_HEX = { red:'#e03232', yellow:'#f5c518', green:'#2e9e4f', blue:'#2574c0', purple:'#8b35b0', brown:'#8B5E3C', orange:'#e07820' };
+
+// ═══ state ═══
+let cellCount = 20;
+let cells = {}; // position(int) -> { cell_type, question, image_url, color }
+
+// ─── MUST match computeCornerPositions() in englishpolyRoutes.js exactly ───
+function computeCornerPositions(count) {
+  const lastRealPosition = count - 1;
+  const raw = [Math.round(count*0.25), Math.round(count*0.5), Math.round(count*0.75)];
+  const used = new Set();
+  const corners = [];
+  for (let c of raw) {
+    c = Math.max(1, Math.min(lastRealPosition, c));
+    while (used.has(c) && c < lastRealPosition) c++;
+    while (used.has(c) && c > 1) c--;
+    used.add(c);
+    corners.push(c);
+  }
+  return [...new Set(corners)].sort((a,b) => a-b);
+}
+
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function defaultCell(position) {
+  return { cell_type: 'question', question: '', image_url: '', color: COLORS[(position - 1) % COLORS.length] };
+}
+
+// ─── Rebuild the `cells` map for a new cellCount, preserving overlap ───
+function resizeCells(newCount) {
+  const corners = new Set(computeCornerPositions(newCount));
+  const next = {};
+  let droppedContent = false;
+
+  for (let pos = 1; pos <= newCount - 1; pos++) {
+    let c = cells[pos] ? { ...cells[pos] } : defaultCell(pos);
+    const isCorner = corners.has(pos);
+    // A position that lost/gained corner status may hold a now-illegal type.
+    if (!isCorner && (c.cell_type === 'bonus' || c.cell_type === 'paf')) c.cell_type = 'question';
+    if (isCorner && c.cell_type === 'picture') c.cell_type = 'question';
+    next[pos] = c;
+  }
+  // Anything beyond the new range is dropped — warn if it had real content.
+  Object.keys(cells).forEach(k => {
+    const pos = Number(k);
+    if (pos > newCount - 1 && (cells[pos].question || cells[pos].image_url)) droppedContent = true;
+  });
+
+  cells = next;
+  cellCount = newCount;
+  if (droppedContent) showToast('⚠️ Reducing the cell count removed content from the trimmed cells.');
+}
+
+function updateCellCountHint() {
+  const corners = computeCornerPositions(cellCount).length;
+  document.getElementById('cellCountHint').innerHTML =
+    `<b>${cellCount - 1}</b> real cells (<b>${corners}</b> corner${corners===1?'':'s'}) + <b>1</b> automatic finish cell`;
+}
+
+// ═══ rendering ═══
+function renderAll() {
+  updateCellCountHint();
+  const corners = new Set(computeCornerPositions(cellCount));
+  const grid = document.getElementById('pathGrid');
+  let html = '';
+  for (let pos = 1; pos <= cellCount - 1; pos++) {
+    html += tileHTML(pos, corners.has(pos));
+  }
+  html += `
+    <div class="finish-tile">
+      <div class="tile-pos">🏁 #${cellCount}</div>
+      <div style="font-family:'Fredoka One',cursive;color:var(--green);font-size:1rem;">FINISH</div>
+      <div style="font-size:.72rem;color:rgba(255,255,255,.5);">Automatic — no content needed</div>
+    </div>`;
+  grid.innerHTML = html;
+
+  for (let pos = 1; pos <= cellCount - 1; pos++) wireTile(pos);
+}
+
+function tileHTML(position, isCorner) {
+  const c = cells[position] || defaultCell(position);
+  return `
+    <div class="tile ${isCorner ? 'corner' : ''}" data-position="${position}" id="tile-${position}">
+      <div class="tile-head">
+        <span class="tile-pos">#${position}</span>
+        ${isCorner ? '<span class="corner-tag">⭐ CORNER</span>' : ''}
+      </div>
+      <select class="type-select" data-position="${position}">
+        ${isCorner ? `
+          <option value="question" ${c.cell_type==='question'?'selected':''}>❓ Question</option>
+          <option value="bonus" ${c.cell_type==='bonus'?'selected':''}>⭐ Bonus (+2)</option>
+          <option value="paf" ${c.cell_type==='paf'?'selected':''}>💥 Go Back 4</option>
+        ` : `
+          <option value="question" ${c.cell_type==='question'?'selected':''}>❓ Question</option>
+          <option value="picture" ${c.cell_type==='picture'?'selected':''}>🖼️ Picture Challenge</option>
+        `}
+      </select>
+      <div class="tile-fields" id="fields-${position}"></div>
+    </div>`;
+}
+
+function fieldsHTML(position) {
+  const c = cells[position] || defaultCell(position);
+  if (c.cell_type === 'question') {
+    return `
+      <textarea class="q-input" data-position="${position}" placeholder="Type the question…">${esc(c.question)}</textarea>
+      <div class="swatches" data-position="${position}">
+        ${COLORS.map(col => `<span class="swatch ${c.color===col?'selected':''}" data-color="${col}" style="background:${COLOR_HEX[col]};" title="${col}"></span>`).join('')}
+      </div>`;
+  }
+  if (c.cell_type === 'picture') {
+    return `
+      <input type="url" class="img-input" data-position="${position}" placeholder="Image URL (https://…)" value="${esc(c.image_url)}">
+      <textarea class="q-input" data-position="${position}" placeholder="Question shown below the image…">${esc(c.question)}</textarea>`;
+  }
+  if (c.cell_type === 'bonus') {
+    return `<div class="special-note">⭐ Players get <b>+2 points</b> when they land here.</div>`;
+  }
+  if (c.cell_type === 'paf') {
+    return `<div class="special-note">💥 Players go <b>back 4 spaces</b> when they land here.</div>`;
+  }
+  return '';
+}
+
+function wireTile(position) {
+  const fieldsEl = document.getElementById(`fields-${position}`);
+  fieldsEl.innerHTML = fieldsHTML(position);
+
+  const tile = document.getElementById(`tile-${position}`);
+  const select = tile.querySelector('.type-select');
+  select.addEventListener('change', () => {
+    cells[position].cell_type = select.value;
+    if (select.value !== 'question') cells[position].color = cells[position].color || COLORS[(position-1)%COLORS.length];
+    fieldsEl.innerHTML = fieldsHTML(position);
+    wireFields(position);
+    tile.classList.remove('invalid');
+  });
+
+  wireFields(position);
+}
+
+function wireFields(position) {
+  const fieldsEl = document.getElementById(`fields-${position}`);
+  const q = fieldsEl.querySelector('.q-input');
+  if (q) q.addEventListener('input', () => { cells[position].question = q.value; });
+  const img = fieldsEl.querySelector('.img-input');
+  if (img) img.addEventListener('input', () => { cells[position].image_url = img.value; });
+  const swatches = fieldsEl.querySelectorAll('.swatch');
+  swatches.forEach(sw => {
+    sw.addEventListener('click', () => {
+      cells[position].color = sw.dataset.color;
+      swatches.forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+    });
+  });
+}
+
+// ═══ cell count input ═══
+const cellCountInput = document.getElementById('fCellCount');
+cellCountInput.addEventListener('change', () => {
+  let n = parseInt(cellCountInput.value, 10);
+  if (!Number.isInteger(n)) n = cellCount;
+  n = Math.max(MIN_CELL_COUNT, Math.min(MAX_CELL_COUNT, n));
+  cellCountInput.value = n;
+  resizeCells(n);
+  renderAll();
+});
+
+// ═══ title char counter ═══
+const titleInput = document.getElementById('fTitle');
+titleInput.addEventListener('input', () => {
+  document.getElementById('titleCount').textContent = titleInput.value.length;
+});
+
+// ═══ validation + save ═══
+function validateForm() {
+  const errors = [];
+  document.querySelectorAll('.tile.invalid').forEach(t => t.classList.remove('invalid'));
+
+  const title = titleInput.value.trim();
+  if (!title) errors.push('Title is required.');
+
+  let firstInvalidPos = null;
+  for (let pos = 1; pos <= cellCount - 1; pos++) {
+    const c = cells[pos];
+    let bad = false;
+    if (c.cell_type === 'question' && c.question.trim().length < 3) bad = true;
+    if (c.cell_type === 'picture' && (c.question.trim().length < 3 || !/^https?:\/\/.+/i.test(c.image_url.trim()))) bad = true;
+    if (bad) {
+      document.getElementById(`tile-${pos}`)?.classList.add('invalid');
+      if (firstInvalidPos === null) firstInvalidPos = pos;
+    }
+  }
+  if (firstInvalidPos !== null) {
+    errors.push(`Cell #${firstInvalidPos} needs a question${cells[firstInvalidPos].cell_type==='picture' ? ' and a valid image URL' : ''}.`);
+    document.getElementById(`tile-${firstInvalidPos}`)?.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  return errors;
+}
+
+function buildPayload() {
+  return {
+    title: titleInput.value.trim(),
+    description: document.getElementById('fDesc').value.trim(),
+    level: document.getElementById('fLevel').value,
+    cell_count: cellCount,
+    cells: Array.from({ length: cellCount - 1 }, (_, i) => {
+      const pos = i + 1;
+      const c = cells[pos];
+      return {
+        position: pos,
+        cell_type: c.cell_type,
+        question: c.cell_type === 'question' || c.cell_type === 'picture' ? c.question.trim() : '',
+        image_url: c.cell_type === 'picture' ? c.image_url.trim() : '',
+        color: c.cell_type === 'question' ? c.color : '',
+      };
+    }),
+  };
+}
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const errors = validateForm();
+  const errMsg = document.getElementById('errMsg');
+  if (errors.length) {
+    errMsg.textContent = '⚠️ ' + errors[0];
+    return;
+  }
+  errMsg.textContent = '';
+
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = editId ? '💾 Saving…' : '💾 Creating…';
+
+  try {
+    const payload = buildPayload();
+    const url = editId ? `${API_BASE}/api/englishpoly/games/${editId}` : `${API_BASE}/api/englishpoly/games`;
+    const res = await fetch(url, {
+      method: editId ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.success) {
+      errMsg.textContent = '⚠️ ' + (data.message || 'Could not save the poly.');
+      saveBtn.disabled = false;
+      saveBtn.textContent = editId ? '💾 Save Changes' : '💾 Create Poly';
+      return;
+    }
+    const savedId = data.game.id;
+    location.href = `englishpoly_review.html?id=${encodeURIComponent(savedId)}`;
+  } catch (err) {
+    console.error(err);
+    errMsg.textContent = '⚠️ Could not reach the server.';
+    saveBtn.disabled = false;
+    saveBtn.textContent = editId ? '💾 Save Changes' : '💾 Create Poly';
+  }
+});
+
+// ═══ init ═══
+async function init() {
+  if (editId) {
+    document.getElementById('pageTitle').textContent = 'Edit Poly';
+    document.getElementById('saveBtn').textContent = '💾 Save Changes';
+    document.getElementById('cancelBtn').href = `englishpoly_review.html?id=${encodeURIComponent(editId)}`;
+    document.getElementById('mainWrap').style.display = 'none';
+    document.getElementById('loadingRow').style.display = 'flex';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/englishpoly/games/${editId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!data.success) {
+        showToast('⚠️ ' + (data.message || 'Could not load this poly.'));
+        setTimeout(() => location.href = 'games_dashboard.html', 1600);
+        return;
+      }
+
+      titleInput.value = data.game.title;
+      document.getElementById('titleCount').textContent = titleInput.value.length;
+      document.getElementById('fDesc').value = data.game.description || '';
+      document.getElementById('fLevel').value = data.game.level;
+      cellCount = data.game.cell_count;
+      cellCountInput.value = cellCount;
+
+      cells = {};
+      data.cells.filter(c => c.cell_type !== 'finish').forEach(c => {
+        cells[c.position] = {
+          cell_type: c.cell_type,
+          question: c.question || '',
+          image_url: c.image_url || '',
+          color: c.color || COLORS[(c.position - 1) % COLORS.length],
+        };
+      });
+
+      document.getElementById('loadingRow').style.display = 'none';
+      document.getElementById('mainWrap').style.display = 'block';
+      renderAll();
+    } catch (err) {
+      console.error(err);
+      showToast('⚠️ Could not reach the server.');
+    }
+  } else {
+    resizeCells(cellCount);
+    renderAll();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
