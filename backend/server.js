@@ -19,6 +19,8 @@ const { router: raceRouter, registerRaceSocketHandlers } = require('./raceRoutes
 const topicRoutes = require('./topicRoutes');
 const paddleWebhookRoute = require('./paddleWebhookRoute');
 const paddleRoutes       = require('./paddleRoutes');
+const { router: englishpolyRouter } = require('./englishpolyRoutes');
+
 
 const app        = express();
 const httpServer = http.createServer(app);
@@ -74,6 +76,7 @@ app.use('/api/ai-teacher', aiTeacherRoutes);
 app.use('/api/pronunciation', pronunciationRoutes);
 app.use('/api/topics', topicRoutes);
 app.use('/api/paddle', paddleRoutes);
+app.use('/api/englishpoly', englishpolyRouter);
 
 // ─── Static files ─────────────────────────────────────────────────────────────
 app.use(
