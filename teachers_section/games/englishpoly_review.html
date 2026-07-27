@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poly Review — ENGLISHPOLY!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --red:#e03232; --yellow:#f5c518; --green:#2e9e4f; --blue:#2574c0;
+    --purple:#8b35b0; --brown:#8B5E3C; --orange:#e07820; --gold:#ffd700;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at center,#1a3a5c 0%,#0d1f33 100%);
+    min-height:100vh;font-family:'Nunito',sans-serif;color:#fff;
+  }
+
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 1.5rem;height:56px;background:rgba(0,0,0,0.35);
+    border-bottom:1px solid rgba(255,215,0,0.12);position:sticky;top:0;z-index:30;
+    backdrop-filter:blur(10px);
+  }
+  .nav-brand{font-family:'Fredoka One',cursive;color:var(--gold);font-size:1.25rem;letter-spacing:1px;}
+  .nav-back{font-size:0.75rem;color:rgba(255,255,255,0.55);text-decoration:none;
+    border:1px solid rgba(255,255,255,0.15);padding:.35rem .9rem;border-radius:6px;transition:all .18s;}
+  .nav-back:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+
+  .loading-row{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:5rem 0;color:rgba(255,255,255,.5);}
+  .spinner{width:38px;height:38px;border:3px solid rgba(255,215,0,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ─── header ─── */
+  .head-panel{
+    background:rgba(255,255,255,0.045);border:1.5px solid rgba(255,255,255,0.12);
+    border-radius:14px;padding:22px 24px;margin-bottom:20px;
+    display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;align-items:flex-start;
+  }
+  .head-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .head-title{font-family:'Fredoka One',cursive;font-size:clamp(1.4rem,3.6vw,1.9rem);color:#fff;}
+  .level-badge{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    padding:.28rem .65rem;border-radius:20px;white-space:nowrap;}
+  .head-desc{color:rgba(255,255,255,.6);font-size:.9rem;margin-top:.5rem;max-width:640px;line-height:1.55;}
+  .head-stats{display:flex;gap:18px;margin-top:.9rem;flex-wrap:wrap;}
+  .stat{display:flex;flex-direction:column;gap:2px;}
+  .stat b{font-family:'Fredoka One',cursive;color:var(--gold);font-size:1.05rem;}
+  .stat span{font-size:.68rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.04em;}
+
+  .head-actions{display:flex;gap:10px;flex-shrink:0;}
+  .btn{border:none;border-radius:9px;padding:.65rem 1.3rem;font-family:'Fredoka One',cursive;
+    font-size:.85rem;cursor:pointer;transition:transform .1s,box-shadow .1s;text-decoration:none;
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn-edit{background:var(--blue);color:#fff;box-shadow:0 4px 0 #14437a;}
+  .btn-delete{background:var(--red);color:#fff;box-shadow:0 4px 0 #8b0000;}
+
+  /* ─── board preview panel ─── */
+  .panel{
+    background:rgba(255,255,255,0.045);border:1.5px solid rgba(255,255,255,0.12);
+    border-radius:14px;padding:20px 22px;
+  }
+  .panel h2{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--gold);
+    letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px;}
+
+  .path-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+  .tile{
+    background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.13);
+    border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:7px;
+  }
+  .tile.corner{border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.06);}
+  .tile-head{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .tile-pos{font-family:'Fredoka One',cursive;font-size:.82rem;color:#fff;}
+  .corner-tag{font-size:.58rem;font-weight:800;color:var(--gold);background:rgba(255,215,0,.15);
+    padding:.15rem .45rem;border-radius:10px;letter-spacing:.04em;}
+  .type-tag{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
+    padding:.15rem .45rem;border-radius:8px;align-self:flex-start;}
+  .tile-q{font-size:.8rem;color:rgba(255,255,255,.85);line-height:1.4;}
+  .tile-img{width:100%;height:90px;object-fit:cover;border-radius:8px;}
+  .special-note{font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.4;text-align:center;padding:8px 0;}
+  .finish-tile{
+    background:rgba(46,158,79,.12);border:1.5px solid rgba(46,158,79,.5);border-radius:12px;
+    padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;
+  }
+  .finish-tile .tile-pos{color:var(--green);}
+
+  /* ─── delete confirm modal ─── */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;
+    align-items:center;justify-content:center;padding:16px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:#132a44;border:1.5px solid rgba(255,255,255,.15);border-radius:16px;
+    padding:26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.5);
+  }
+  .modal h3{font-family:'Fredoka One',cursive;font-size:1.2rem;color:#fff;margin-bottom:10px;}
+  .modal p{color:rgba(255,255,255,.65);font-size:.88rem;line-height:1.5;margin-bottom:20px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;}
+  .btn-ghost{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.2);
+    border-radius:9px;padding:.6rem 1.2rem;font-family:'Fredoka One',cursive;font-size:.85rem;cursor:pointer;}
+  .btn-ghost:hover{color:#fff;border-color:rgba(255,255,255,.4);}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:#1a3a5c;color:white;padding:12px 24px;border-radius:30px;font-weight:700;font-size:.9rem;
+    z-index:200;transition:transform .4s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">ENGLISHPOLY! 🎲</div>
+  <a class="nav-back" href="games_dashboard.html">← My Polys</a>
+</nav>
+
+<div class="wrap">
+  <div id="loadingRow" class="loading-row">
+    <div class="spinner"></div>
+    <div>Loading poly…</div>
+  </div>
+
+  <div id="content" style="display:none;">
+    <div class="head-panel">
+      <div>
+        <div class="head-title-row">
+          <div class="head-title" id="gTitle"></div>
+          <div class="level-badge" id="gLevel"></div>
+        </div>
+        <div class="head-desc" id="gDesc"></div>
+        <div class="head-stats">
+          <div class="stat"><b id="statTotal">0</b><span>Total Cells</span></div>
+          <div class="stat"><b id="statQuestion">0</b><span>Question</span></div>
+          <div class="stat"><b id="statPicture">0</b><span>Picture</span></div>
+          <div class="stat"><b id="statSpecial">0</b><span>Bonus / Go Back</span></div>
+          <div class="stat"><b id="statCreated">—</b><span>Created</span></div>
+        </div>
+      </div>
+      <div class="head-actions">
+        <a class="btn btn-edit" id="editBtn" href="#">✏️ Edit</a>
+        <button class="btn btn-delete" id="deleteBtn">🗑️ Delete</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>🧩 Board Preview</h2>
+      <div class="path-grid" id="pathGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>Delete this poly?</h3>
+    <p>This permanently removes <b id="deleteTitle"></b> and all of its cells. This can't be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="deleteCancelBtn">Cancel</button>
+      <button class="btn btn-delete" id="deleteConfirmBtn">🗑️ Delete Poly</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../../config.js"></script>
+<script>
+const API_BASE = LINGUA.base;
+const token    = localStorage.getItem('token');
+const roleId   = localStorage.getItem('role_id');
+if (!token || roleId !== '2') { location.href = '../../../index.html'; }
+
+const params = new URLSearchParams(location.search);
+const gameId = params.get('id');
+if (!gameId) location.href = 'games_dashboard.html';
+
+const LEVEL_META = {
+  beginner:            { label: 'Beginner',            color: 'var(--green)' },
+  elementary:          { label: 'Elementary',           color: 'var(--blue)' },
+  intermediate:        { label: 'Intermediate',         color: 'var(--yellow)' },
+  upper_intermediate:  { label: 'Upper-Intermediate',   color: 'var(--orange)' },
+  advanced:            { label: 'Advanced',             color: 'var(--red)' },
+};
+const COLOR_HEX = { red:'#e03232', yellow:'#f5c518', green:'#2e9e4f', blue:'#2574c0', purple:'#8b35b0', brown:'#8B5E3C', orange:'#e07820' };
+const TYPE_META = {
+  question: { label: 'Question', bg: 'rgba(37,116,192,.25)', color: '#7fb8ff' },
+  picture:  { label: 'Picture',  bg: 'rgba(139,53,176,.25)', color: '#d6a4ef' },
+  bonus:    { label: 'Bonus +2', bg: 'rgba(255,215,0,.2)',   color: 'var(--gold)' },
+  paf:      { label: 'Go Back 4',bg: 'rgba(224,50,50,.22)',  color: '#ff9a9a' },
+};
+
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function fmtDate(iso){
+  try { return new Date(iso).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' }); }
+  catch { return '—'; }
+}
+
+function tileHTML(cell) {
+  if (cell.cell_type === 'finish') {
+    return `
+      <div class="finish-tile">
+        <div class="tile-pos">🏁 #${cell.position}</div>
+        <div style="font-family:'Fredoka One',cursive;color:var(--green);font-size:.95rem;">FINISH</div>
+      </div>`;
+  }
+  const t = TYPE_META[cell.cell_type];
+  let body = '';
+  if (cell.cell_type === 'question') {
+    const dot = cell.color ? `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${COLOR_HEX[cell.color]||'#888'};margin-right:6px;"></span>` : '';
+    body = `<div class="tile-q">${dot}${esc(cell.question)}</div>`;
+  } else if (cell.cell_type === 'picture') {
+    body = `${cell.image_url ? `<img class="tile-img" src="${esc(cell.image_url)}" alt="" loading="lazy">` : ''}<div class="tile-q">${esc(cell.question)}</div>`;
+  } else if (cell.cell_type === 'bonus') {
+    body = `<div class="special-note">⭐ <b>+2 points</b> to whoever lands here.</div>`;
+  } else if (cell.cell_type === 'paf') {
+    body = `<div class="special-note">💥 Go <b>back 4 spaces</b> from here.</div>`;
+  }
+  return `
+    <div class="tile ${cell.is_corner ? 'corner' : ''}">
+      <div class="tile-head">
+        <span class="tile-pos">#${cell.position}</span>
+        ${cell.is_corner ? '<span class="corner-tag">⭐ CORNER</span>' : ''}
+      </div>
+      <span class="type-tag" style="background:${t.bg};color:${t.color};">${t.label}</span>
+      ${body}
+    </div>`;
+}
+
+async function loadGame() {
+  try {
+    const res = await fetch(`${API_BASE}/api/englishpoly/games/${gameId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    document.getElementById('loadingRow').style.display = 'none';
+
+    if (!data.success) {
+      showToast('⚠️ ' + (data.message || 'Could not load this poly.'));
+      setTimeout(() => location.href = 'games_dashboard.html', 1600);
+      return;
+    }
+
+    const game = data.game;
+    const cells = data.cells;
+    const lv = LEVEL_META[game.level] || LEVEL_META.beginner;
+
+    document.getElementById('gTitle').textContent = game.title;
+    document.getElementById('gLevel').textContent = lv.label;
+    document.getElementById('gLevel').style.background = `${lv.color}22`;
+    document.getElementById('gLevel').style.color = lv.color;
+    document.getElementById('gLevel').style.border = `1px solid ${lv.color}55`;
+    document.getElementById('gDesc').textContent = game.description || 'No description provided.';
+
+    const questionCount = cells.filter(c => c.cell_type === 'question').length;
+    const pictureCount  = cells.filter(c => c.cell_type === 'picture').length;
+    const specialCount  = cells.filter(c => c.cell_type === 'bonus' || c.cell_type === 'paf').length;
+
+    document.getElementById('statTotal').textContent    = game.cell_count;
+    document.getElementById('statQuestion').textContent = questionCount;
+    document.getElementById('statPicture').textContent  = pictureCount;
+    document.getElementById('statSpecial').textContent  = specialCount;
+    document.getElementById('statCreated').textContent  = fmtDate(game.created_at);
+
+    document.getElementById('editBtn').href = `englishpoly_creator.html?id=${encodeURIComponent(game.id)}`;
+    document.getElementById('deleteTitle').textContent = game.title;
+
+    document.getElementById('pathGrid').innerHTML = cells.map(tileHTML).join('');
+    document.getElementById('content').style.display = 'block';
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loadingRow').style.display = 'none';
+    showToast('⚠️ Could not reach the server.');
+  }
+}
+
+// ─── delete flow ───
+const deleteModal = document.getElementById('deleteModal');
+document.getElementById('deleteBtn').addEventListener('click', () => deleteModal.classList.add('show'));
+document.getElementById('deleteCancelBtn').addEventListener('click', () => deleteModal.classList.remove('show'));
+document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('deleteConfirmBtn');
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    const res = await fetch(`${API_BASE}/api/englishpoly/games/${gameId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (!data.success) {
+      showToast('⚠️ ' + (data.message || 'Could not delete this poly.'));
+      btn.disabled = false;
+      btn.textContent = '🗑️ Delete Poly';
+      return;
+    }
+    location.href = 'games_dashboard.html';
+  } catch (err) {
+    console.error(err);
+    showToast('⚠️ Could not reach the server.');
+    btn.disabled = false;
+    btn.textContent = '🗑️ Delete Poly';
+  }
+});
+
+loadGame();
+</script>
+</body>
+</html>
