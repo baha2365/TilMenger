@@ -1,13 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Games Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Polys — ENGLISHPOLY!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --red:#e03232; --yellow:#f5c518; --green:#2e9e4f; --blue:#2574c0;
+    --purple:#8b35b0; --brown:#8B5E3C; --orange:#e07820; --gold:#ffd700;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at center,#1a3a5c 0%,#0d1f33 100%);
+    min-height:100vh;font-family:'Nunito',sans-serif;color:#fff;
+  }
+
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 1.5rem;height:56px;background:rgba(0,0,0,0.35);
+    border-bottom:1px solid rgba(255,215,0,0.12);position:sticky;top:0;z-index:20;
+    backdrop-filter:blur(10px);
+  }
+  .nav-brand{font-family:'Fredoka One',cursive;color:var(--gold);font-size:1.25rem;letter-spacing:1px;}
+  .nav-back{font-size:0.75rem;color:rgba(255,255,255,0.55);text-decoration:none;
+    border:1px solid rgba(255,255,255,0.15);padding:.35rem .9rem;border-radius:6px;
+    transition:all .18s;background:none;cursor:pointer;font-family:'Nunito',sans-serif;}
+  .nav-back:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:2.4rem 1.5rem 4rem;}
+
+  .hero{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;
+    flex-wrap:wrap;margin-bottom:2rem;
+  }
+  .hero h1{font-family:'Fredoka One',cursive;font-size:clamp(1.6rem,4vw,2.3rem);color:var(--gold);letter-spacing:.5px;}
+  .hero p{color:rgba(255,255,255,.6);font-size:.92rem;margin-top:.35rem;max-width:520px;line-height:1.5;}
+  .btn-create{
+    background:var(--red);color:#fff;border:none;border-radius:10px;
+    padding:.85rem 1.6rem;font-family:'Fredoka One',cursive;font-size:1rem;
+    letter-spacing:.5px;cursor:pointer;box-shadow:0 4px 0 #8b0000;
+    transition:transform .1s,box-shadow .1s;white-space:nowrap;text-decoration:none;
+    display:inline-flex;align-items:center;gap:.5rem;
+  }
+  .btn-create:hover{transform:translateY(-2px);box-shadow:0 6px 0 #8b0000;}
+  .btn-create:active{transform:translateY(2px);box-shadow:0 2px 0 #8b0000;}
+
+  /* ─── shelf grid ─── */
+  .shelf{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+    gap:16px;
+  }
+
+  .box{
+    background:rgba(255,255,255,0.045);border:1.5px solid rgba(255,255,255,0.12);
+    border-radius:12px;overflow:hidden;cursor:pointer;
+    display:flex;transition:transform .15s,border-color .15s,background .15s;
+    text-align:left;
+  }
+  .box:hover{transform:translateY(-3px);border-color:rgba(255,215,0,.4);background:rgba(255,255,255,0.07);}
+  .box:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+  .spine{width:10px;flex-shrink:0;}
+  .box-body{flex:1;min-width:0;padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+  .box-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .box-title{font-family:'Fredoka One',cursive;font-size:1.05rem;color:#fff;line-height:1.25;
+    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+  .level-badge{
+    flex-shrink:0;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    padding:.25rem .55rem;border-radius:20px;white-space:nowrap;
+  }
+  .box-desc{color:rgba(255,255,255,.55);font-size:.8rem;line-height:1.5;
+    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.4em;}
+
+  /* mini path preview — a small strip of dots standing in for the board */
+  .mini-path{display:flex;align-items:center;gap:3px;flex-wrap:wrap;}
+  .mini-dot{width:7px;height:7px;border-radius:2px;background:rgba(255,255,255,.18);flex-shrink:0;}
+  .mini-dot.q{background:var(--blue);}
+  .mini-dot.p{background:var(--purple);}
+  .mini-dot.s{background:var(--gold);}
+  .mini-dot.f{background:var(--green);width:9px;height:9px;border-radius:50%;}
+
+  .box-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding-top:8px;border-top:1px solid rgba(255,255,255,.08);font-size:.7rem;color:rgba(255,255,255,.45);}
+
+  .empty{
+    text-align:center;padding:4.5rem 1.5rem;border:1.5px dashed rgba(255,255,255,.18);
+    border-radius:16px;color:rgba(255,255,255,.55);
+  }
+  .empty .empty-icon{font-size:2.6rem;margin-bottom:.6rem;}
+  .empty h3{font-family:'Fredoka One',cursive;color:#fff;font-size:1.2rem;margin-bottom:.4rem;}
+  .empty p{font-size:.85rem;max-width:360px;margin:0 auto 1.2rem;line-height:1.5;}
+
+  .loading-row{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:4rem 0;color:rgba(255,255,255,.5);}
+  .spinner{width:38px;height:38px;border:3px solid rgba(255,215,0,.2);border-top-color:var(--gold);
+    border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:#1a3a5c;color:white;padding:12px 24px;border-radius:30px;
+    font-weight:700;font-size:.9rem;z-index:200;transition:transform .4s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:none;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+</style>
 </head>
 <body>
-    <div id="monopoly_game">
-        <button>Create Monopoly Game.</button>
+
+<nav class="nav">
+  <div class="nav-brand">ENGLISHPOLY! 🎲</div>
+  <button class="nav-back" id="navBack">← Back</button>
+</nav>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>My Polys</h1>
+      <p>Design your own Englishpoly boards — pick a length, place your questions, and choose which corners give bonus points or send players back. Play them with a class later.</p>
     </div>
+    <a class="btn-create" href="englishpoly_creator.html">✏️ Create New Poly</a>
+  </div>
+
+  <div id="loadingRow" class="loading-row">
+    <div class="spinner"></div>
+    <div>Loading your polys…</div>
+  </div>
+
+  <div id="emptyState" class="empty" style="display:none;">
+    <div class="empty-icon">🎲</div>
+    <h3>No polys yet</h3>
+    <p>You haven't designed an Englishpoly board yet. Start with your first one — it only takes a few minutes.</p>
+    <a class="btn-create" href="englishpoly_creator.html">✏️ Create Your First Poly</a>
+  </div>
+
+  <div id="shelf" class="shelf" style="display:none;"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../../config.js"></script>
+<script>
+const API_BASE = LINGUA.base;
+const token    = localStorage.getItem('token');
+const roleId   = localStorage.getItem('role_id');
+
+if (!token || roleId !== '2') { location.href = '../../../index.html'; }
+
+document.getElementById('navBack').addEventListener('click', () => {
+  if (document.referrer) history.back(); else location.href = '../courses/class_details.html';
+});
+
+const LEVEL_META = {
+  beginner:            { label: 'Beginner',            color: 'var(--green)' },
+  elementary:          { label: 'Elementary',           color: 'var(--blue)' },
+  intermediate:        { label: 'Intermediate',         color: 'var(--yellow)' },
+  upper_intermediate:  { label: 'Upper-Intermediate',   color: 'var(--orange)' },
+  advanced:            { label: 'Advanced',             color: 'var(--red)' },
+};
+
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function fmtDate(iso){
+  try {
+    return new Date(iso).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+  } catch { return ''; }
+}
+
+function miniPath(game){
+  // Small at-a-glance strip: one dot per non-finish cell, coloured by type,
+  // then a bigger green dot for FINISH. Capped visually via flex-wrap.
+  const total = game.cell_count;
+  const q = game.question_cell_count || 0;
+  const p = game.picture_cell_count  || 0;
+  const s = game.special_cell_count  || 0;
+  const dots = [];
+  for (let i=0;i<q;i++) dots.push('<div class="mini-dot q"></div>');
+  for (let i=0;i<p;i++) dots.push('<div class="mini-dot p"></div>');
+  for (let i=0;i<s;i++) dots.push('<div class="mini-dot s"></div>');
+  dots.push('<div class="mini-dot f"></div>');
+  return `<div class="mini-path" title="${total} cells total">${dots.join('')}</div>`;
+}
+
+async function loadGames(){
+  try {
+    const res = await fetch(`${API_BASE}/api/englishpoly/games`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    document.getElementById('loadingRow').style.display = 'none';
+
+    if (!data.success) {
+      showToast('⚠️ ' + (data.message || 'Could not load your polys.'));
+      return;
+    }
+
+    const games = data.games || [];
+    if (!games.length) {
+      document.getElementById('emptyState').style.display = 'block';
+      return;
+    }
+
+    const shelf = document.getElementById('shelf');
+    shelf.style.display = 'grid';
+    shelf.innerHTML = games.map(g => {
+      const lv = LEVEL_META[g.level] || LEVEL_META.beginner;
+      const realCells = g.cell_count - 1;
+      return `
+        <div class="box" tabindex="0" role="button"
+             onclick="location.href='englishpoly_review.html?id=${encodeURIComponent(g.id)}'"
+             onkeydown="if(event.key==='Enter')this.click();">
+          <div class="spine" style="background:${lv.color};"></div>
+          <div class="box-body">
+            <div class="box-top">
+              <div class="box-title">${esc(g.title)}</div>
+              <div class="level-badge" style="background:${lv.color}22;color:${lv.color};border:1px solid ${lv.color}55;">${lv.label}</div>
+            </div>
+            <div class="box-desc">${esc(g.description) || 'No description yet.'}</div>
+            ${miniPath(g)}
+            <div class="box-meta">
+              <span>${realCells} cells + finish</span>
+              <span>${fmtDate(g.created_at)}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loadingRow').style.display = 'none';
+    showToast('⚠️ Could not reach the server.');
+  }
+}
+
+loadGames();
+</script>
 </body>
 </html>
