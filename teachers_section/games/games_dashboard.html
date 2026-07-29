@@ -85,13 +85,14 @@
   .box-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;
     padding-top:8px;border-top:1px solid rgba(255,255,255,.08);font-size:.7rem;color:rgba(255,255,255,.45);}
 
-  .empty{
-    text-align:center;padding:4.5rem 1.5rem;border:1.5px dashed rgba(255,255,255,.18);
-    border-radius:16px;color:rgba(255,255,255,.55);
-  }
-  .empty .empty-icon{font-size:2.6rem;margin-bottom:.6rem;}
-  .empty h3{font-family:'Fredoka One',cursive;color:#fff;font-size:1.2rem;margin-bottom:.4rem;}
-  .empty p{font-size:.85rem;max-width:360px;margin:0 auto 1.2rem;line-height:1.5;}
+  .sample-box{border-color:rgba(255,215,0,.3);}
+  .sample-box:hover{border-color:rgba(255,215,0,.7);}
+
+  .create-tile{border:1.5px dashed rgba(255,255,255,.25);background:transparent;text-decoration:none;}
+  .create-tile:hover{border-color:var(--gold);background:rgba(255,215,0,.06);}
+  .create-tile-body{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;text-align:center;width:100%;color:rgba(255,255,255,.8);}
+  .create-tile-icon{font-size:1.7rem;color:var(--gold);}
 
   .loading-row{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:4rem 0;color:rgba(255,255,255,.5);}
   .spinner{width:38px;height:38px;border:3px solid rgba(255,215,0,.2);border-top-color:var(--gold);
@@ -125,19 +126,40 @@
     <a class="btn-create" href="englishpoly_creator.html">✏️ Create New Poly</a>
   </div>
 
+  <div class="shelf" id="shelf">
+    <!-- Pinned sample board — not stored in the database, always here,
+         never editable or deletable. Gives new teachers a reference for
+         what a finished board looks like. -->
+    <div class="box sample-box" tabindex="0" role="button"
+         onclick="location.href='englishpoly_review.html?id=sample'"
+         onkeydown="if(event.key==='Enter')this.click();">
+      <div class="spine" style="background:var(--gold);"></div>
+      <div class="box-body">
+        <div class="box-top">
+          <div class="box-title">🏛️ Original Englishpoly</div>
+          <div class="level-badge" style="background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.4);">Built-in Sample</div>
+        </div>
+        <div class="box-desc">The classic default board every class starts with. Open it to see exactly how a finished board looks before designing your own.</div>
+        <div class="box-meta">
+          <span>31 cells + finish</span>
+          <span>Always available</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Always-visible shortcut into the creator -->
+    <a class="box create-tile" href="englishpoly_creator.html">
+      <div class="box-body create-tile-body">
+        <div class="create-tile-icon">➕</div>
+        <div class="box-title" style="font-size:.95rem;">Create New Poly</div>
+      </div>
+    </a>
+  </div>
+
   <div id="loadingRow" class="loading-row">
     <div class="spinner"></div>
     <div>Loading your polys…</div>
   </div>
-
-  <div id="emptyState" class="empty" style="display:none;">
-    <div class="empty-icon">🎲</div>
-    <h3>No polys yet</h3>
-    <p>You haven't designed an Englishpoly board yet. Start with your first one — it only takes a few minutes.</p>
-    <a class="btn-create" href="englishpoly_creator.html">✏️ Create Your First Poly</a>
-  </div>
-
-  <div id="shelf" class="shelf" style="display:none;"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -155,11 +177,9 @@ document.getElementById('navBack').addEventListener('click', () => {
 });
 
 const LEVEL_META = {
-  beginner:            { label: 'Beginner',            color: 'var(--green)' },
-  elementary:          { label: 'Elementary',           color: 'var(--blue)' },
-  intermediate:        { label: 'Intermediate',         color: 'var(--yellow)' },
-  upper_intermediate:  { label: 'Upper-Intermediate',   color: 'var(--orange)' },
-  advanced:            { label: 'Advanced',             color: 'var(--red)' },
+  beginner:     { label: 'Beginner',     color: 'var(--green)' },
+  intermediate: { label: 'Intermediate', color: 'var(--yellow)' },
+  advanced:     { label: 'Advanced',     color: 'var(--red)' },
 };
 
 function esc(s){
@@ -207,14 +227,10 @@ async function loadGames(){
     }
 
     const games = data.games || [];
-    if (!games.length) {
-      document.getElementById('emptyState').style.display = 'block';
-      return;
-    }
+    if (!games.length) return; // sample + create tiles already cover the empty state
 
     const shelf = document.getElementById('shelf');
-    shelf.style.display = 'grid';
-    shelf.innerHTML = games.map(g => {
+    const cardsHTML = games.map(g => {
       const lv = LEVEL_META[g.level] || LEVEL_META.beginner;
       const realCells = g.cell_count - 1;
       return `
@@ -236,6 +252,7 @@ async function loadGames(){
           </div>
         </div>`;
     }).join('');
+    shelf.insertAdjacentHTML('beforeend', cardsHTML);
   } catch (err) {
     console.error(err);
     document.getElementById('loadingRow').style.display = 'none';
