@@ -10,25 +10,27 @@
   :root {
     --red:#e03232; --yellow:#f5c518; --green:#2e9e4f; --blue:#2574c0;
     --purple:#8b35b0; --brown:#8B5E3C; --orange:#e07820; --gold:#ffd700;
+    --board-bg:#b8d4a0; --cell-border:#2a2a2a;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{
     background:radial-gradient(ellipse at center,#1a3a5c 0%,#0d1f33 100%);
     min-height:100vh;font-family:'Nunito',sans-serif;color:#fff;
+    display:flex;flex-direction:column;align-items:center;
   }
 
   .nav{
-    display:flex;align-items:center;justify-content:space-between;
+    width:100%;display:flex;align-items:center;justify-content:space-between;
     padding:0 1.5rem;height:56px;background:rgba(0,0,0,0.35);
     border-bottom:1px solid rgba(255,215,0,0.12);position:sticky;top:0;z-index:30;
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);flex-shrink:0;
   }
   .nav-brand{font-family:'Fredoka One',cursive;color:var(--gold);font-size:1.25rem;letter-spacing:1px;}
   .nav-back{font-size:0.75rem;color:rgba(255,255,255,0.55);text-decoration:none;
     border:1px solid rgba(255,255,255,0.15);padding:.35rem .9rem;border-radius:6px;transition:all .18s;}
   .nav-back:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
 
-  .wrap{max-width:1080px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+  .wrap{max-width:1100px;width:100%;margin:0 auto;padding:2rem 1.5rem 4rem;}
 
   .loading-row{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:5rem 0;color:rgba(255,255,255,.5);}
   .spinner{width:38px;height:38px;border:3px solid rgba(255,215,0,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;}
@@ -50,56 +52,107 @@
   .stat b{font-family:'Fredoka One',cursive;color:var(--gold);font-size:1.05rem;}
   .stat span{font-size:.68rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.04em;}
 
-  .head-actions{display:flex;gap:10px;flex-shrink:0;}
+  .head-actions{display:flex;gap:10px;flex-shrink:0;align-items:center;}
   .btn{border:none;border-radius:9px;padding:.65rem 1.3rem;font-family:'Fredoka One',cursive;
     font-size:.85rem;cursor:pointer;transition:transform .1s,box-shadow .1s;text-decoration:none;
     display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
   .btn:hover{transform:translateY(-2px);}
   .btn-edit{background:var(--blue);color:#fff;box-shadow:0 4px 0 #14437a;}
   .btn-delete{background:var(--red);color:#fff;box-shadow:0 4px 0 #8b0000;}
+  .sample-note{font-size:.8rem;color:rgba(255,255,255,.55);max-width:220px;line-height:1.5;
+    background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);border-radius:10px;padding:.6rem .8rem;}
 
-  /* ─── board preview panel ─── */
+  /* ─── board panel ─── */
   .panel{
     background:rgba(255,255,255,0.045);border:1.5px solid rgba(255,255,255,0.12);
-    border-radius:14px;padding:20px 22px;
+    border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;align-items:center;
   }
   .panel h2{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--gold);
-    letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px;}
+    letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px;align-self:flex-start;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .panel h2 .hint{font-family:'Nunito',sans-serif;font-weight:600;text-transform:none;
+    letter-spacing:0;color:rgba(255,255,255,.45);font-size:.75rem;}
 
-  .path-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
-  .tile{
-    background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.13);
-    border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:7px;
+  /* ─── board (mirrors game_room.html's live board) ─── */
+  .board{
+    background:var(--board-bg);border:4px solid #2a2a2a;border-radius:12px;
+    display:grid;gap:2px;padding:2px;box-shadow:0 12px 40px rgba(0,0,0,.6);
+    width:min(700px,94vw);height:min(700px,94vw);position:relative;
   }
-  .tile.corner{border-color:rgba(255,215,0,.5);background:rgba(255,215,0,.06);}
-  .tile-head{display:flex;align-items:center;justify-content:space-between;gap:6px;}
-  .tile-pos{font-family:'Fredoka One',cursive;font-size:.82rem;color:#fff;}
-  .corner-tag{font-size:.58rem;font-weight:800;color:var(--gold);background:rgba(255,215,0,.15);
-    padding:.15rem .45rem;border-radius:10px;letter-spacing:.04em;}
-  .type-tag{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;
-    padding:.15rem .45rem;border-radius:8px;align-self:flex-start;}
-  .tile-q{font-size:.8rem;color:rgba(255,255,255,.85);line-height:1.4;}
-  .tile-img{width:100%;height:90px;object-fit:cover;border-radius:8px;}
-  .special-note{font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.4;text-align:center;padding:8px 0;}
-  .finish-tile{
-    background:rgba(46,158,79,.12);border:1.5px solid rgba(46,158,79,.5);border-radius:12px;
-    padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;
+  .cell{
+    background:#d4e8b8;border:1.5px solid var(--cell-border);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;border-radius:3px;transition:transform .12s,filter .12s;
   }
-  .finish-tile .tile-pos{color:var(--green);}
+  .cell:hover{transform:scale(1.06);filter:brightness(1.08);z-index:5;}
+  .cell .cell-text{font-size:clamp(5px,1.1vw,11px);font-weight:700;text-align:center;padding:2px;line-height:1.2;color:#111;}
+  .cell .color-bar{width:100%;height:8px;flex-shrink:0;}
+  .cell.red    {background:#fde8e8;} .cell.red    .color-bar{background:var(--red);}
+  .cell.yellow {background:#fdf8dd;} .cell.yellow .color-bar{background:var(--yellow);}
+  .cell.green  {background:#e2f7e8;} .cell.green  .color-bar{background:var(--green);}
+  .cell.blue   {background:#ddeeff;} .cell.blue   .color-bar{background:var(--blue);}
+  .cell.purple {background:#f0e0ff;} .cell.purple .color-bar{background:var(--purple);}
+  .cell.brown  {background:#f5e8d8;} .cell.brown  .color-bar{background:var(--brown);}
+  .cell.orange {background:#ffeedd;} .cell.orange .color-bar{background:var(--orange);}
+  .cell.corner-start {background:#fff9e0;border:3px solid var(--red);}
+  .cell.corner-finish{background:#fff9e0;border:3px solid var(--green);}
+  .cell.corner-paf   {background:linear-gradient(135deg,#5b21b6,#9333ea);border:3px solid #ffd700;}
+  .cell.corner-bonus {background:linear-gradient(135deg,#065f46,#10b981);border:3px solid var(--gold);}
+  .cell.question-cell{background:#fff7e0;}
+  .cell-icon{font-size:clamp(10px,2.2vw,22px);line-height:1;}
+  .cell.corner-start .cell-text,.cell.corner-finish .cell-text,
+  .cell.corner-paf .cell-text,.cell.corner-bonus .cell-text{font-size:clamp(7px,1.5vw,15px);font-weight:800;}
 
-  /* ─── delete confirm modal ─── */
+  .center{
+    background:linear-gradient(135deg,#b8d4a0 0%,#9dcc80 100%);border-radius:8px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    padding:12px;position:relative;overflow:hidden;pointer-events:none;
+  }
+  .center-title{
+    font-family:'Fredoka One',cursive;font-size:clamp(1.1rem,2.8vw,2.2rem);color:white;
+    background:var(--red);padding:6px 24px;border-radius:8px;transform:skewX(-3deg);
+    letter-spacing:2px;text-shadow:2px 2px 0 #8b0000;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  .center-turn{
+    background:rgba(0,0,0,.25);border-radius:8px;padding:6px 16px;color:#fff;
+    font-size:clamp(.6rem,1.3vw,.95rem);font-weight:800;text-align:center;max-width:90%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* ─── peek modal (read-only "what would this show during play") ─── */
   .modal-overlay{
-    display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;
     align-items:center;justify-content:center;padding:16px;
   }
   .modal-overlay.show{display:flex;}
   .modal{
+    background:white;border-radius:20px;padding:28px;max-width:480px;width:100%;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);max-height:90vh;overflow-y:auto;
+    animation:modalPop .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes modalPop{from{transform:scale(.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .modal-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.72rem;font-weight:800;
+    text-transform:uppercase;letter-spacing:1px;}
+  .modal-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+  .btn-close{background:#666;color:white;border:none;border-radius:10px;padding:10px 24px;
+    font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;}
+  .event-icon{font-size:3rem;text-align:center;margin-bottom:8px;}
+  .event-title{font-family:'Fredoka One',cursive;font-size:1.5rem;text-align:center;margin-bottom:8px;color:#1a1a2e;}
+  .event-desc{font-size:.92rem;color:#555;text-align:center;line-height:1.5;margin-bottom:6px;}
+
+  /* ─── delete confirm modal ─── */
+  .confirm-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;
+    align-items:center;justify-content:center;padding:16px;
+  }
+  .confirm-overlay.show{display:flex;}
+  .confirm-modal{
     background:#132a44;border:1.5px solid rgba(255,255,255,.15);border-radius:16px;
     padding:26px;max-width:420px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.5);
   }
-  .modal h3{font-family:'Fredoka One',cursive;font-size:1.2rem;color:#fff;margin-bottom:10px;}
-  .modal p{color:rgba(255,255,255,.65);font-size:.88rem;line-height:1.5;margin-bottom:20px;}
-  .modal-actions{display:flex;justify-content:flex-end;gap:10px;}
+  .confirm-modal h3{font-family:'Fredoka One',cursive;font-size:1.2rem;color:#fff;margin-bottom:10px;}
+  .confirm-modal p{color:rgba(255,255,255,.65);font-size:.88rem;line-height:1.5;margin-bottom:20px;}
+  .confirm-actions{display:flex;justify-content:flex-end;gap:10px;}
   .btn-ghost{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.2);
     border-radius:9px;padding:.6rem 1.2rem;font-family:'Fredoka One',cursive;font-size:.85rem;cursor:pointer;}
   .btn-ghost:hover{color:#fff;border-color:rgba(255,255,255,.4);}
@@ -140,28 +193,41 @@
           <div class="stat"><b id="statQuestion">0</b><span>Question</span></div>
           <div class="stat"><b id="statPicture">0</b><span>Picture</span></div>
           <div class="stat"><b id="statSpecial">0</b><span>Bonus / Go Back</span></div>
-          <div class="stat"><b id="statCreated">—</b><span>Created</span></div>
+          <div class="stat"><b id="statCreated">—</b><span id="statCreatedLabel">Created</span></div>
         </div>
       </div>
-      <div class="head-actions">
+      <div class="head-actions" id="editDeleteActions">
         <a class="btn btn-edit" id="editBtn" href="#">✏️ Edit</a>
         <button class="btn btn-delete" id="deleteBtn">🗑️ Delete</button>
+      </div>
+      <div class="sample-note" id="sampleNote" style="display:none;">
+        📌 This is the built-in sample board — it can't be edited or deleted.
       </div>
     </div>
 
     <div class="panel">
-      <h2>🧩 Board Preview</h2>
-      <div class="path-grid" id="pathGrid"></div>
+      <h2>🎲 Board Preview <span class="hint">— click any cell to see exactly what it shows during play</span></h2>
+      <div class="board" id="board">
+        <div class="center" id="boardCenter">
+          <div class="center-title">ENGLISHPOLY!</div>
+          <div class="center-turn" id="centerGameTitle"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- PEEK MODAL -->
+<div class="modal-overlay" id="peekModal">
+  <div class="modal" id="peekContent"></div>
+</div>
+
 <!-- DELETE CONFIRM -->
-<div class="modal-overlay" id="deleteModal">
-  <div class="modal">
+<div class="confirm-overlay" id="deleteModal">
+  <div class="confirm-modal">
     <h3>Delete this poly?</h3>
     <p>This permanently removes <b id="deleteTitle"></b> and all of its cells. This can't be undone.</p>
-    <div class="modal-actions">
+    <div class="confirm-actions">
       <button class="btn-ghost" id="deleteCancelBtn">Cancel</button>
       <button class="btn btn-delete" id="deleteConfirmBtn">🗑️ Delete Poly</button>
     </div>
@@ -182,18 +248,19 @@ const gameId = params.get('id');
 if (!gameId) location.href = 'games_dashboard.html';
 
 const LEVEL_META = {
-  beginner:            { label: 'Beginner',            color: 'var(--green)' },
-  elementary:          { label: 'Elementary',           color: 'var(--blue)' },
-  intermediate:        { label: 'Intermediate',         color: 'var(--yellow)' },
-  upper_intermediate:  { label: 'Upper-Intermediate',   color: 'var(--orange)' },
-  advanced:            { label: 'Advanced',             color: 'var(--red)' },
+  beginner:     { label: 'Beginner',     color: 'var(--green)' },
+  intermediate: { label: 'Intermediate', color: 'var(--yellow)' },
+  advanced:     { label: 'Advanced',     color: 'var(--red)' },
 };
 const COLOR_HEX = { red:'#e03232', yellow:'#f5c518', green:'#2e9e4f', blue:'#2574c0', purple:'#8b35b0', brown:'#8B5E3C', orange:'#e07820' };
-const TYPE_META = {
-  question: { label: 'Question', bg: 'rgba(37,116,192,.25)', color: '#7fb8ff' },
-  picture:  { label: 'Picture',  bg: 'rgba(139,53,176,.25)', color: '#d6a4ef' },
-  bonus:    { label: 'Bonus +2', bg: 'rgba(255,215,0,.2)',   color: 'var(--gold)' },
-  paf:      { label: 'Go Back 4',bg: 'rgba(224,50,50,.22)',  color: '#ff9a9a' },
+const COLOR_META = {
+  red:   { bg:'#fde8e8', accent:'var(--red)' },
+  yellow:{ bg:'#fdf8dd', accent:'#c89000' },
+  green: { bg:'#e2f7e8', accent:'var(--green)' },
+  blue:  { bg:'#ddeeff', accent:'var(--blue)' },
+  purple:{ bg:'#f0e0ff', accent:'var(--purple)' },
+  brown: { bg:'#f5e8d8', accent:'var(--brown)' },
+  orange:{ bg:'#ffeedd', accent:'var(--orange)' },
 };
 
 function esc(s){
@@ -211,37 +278,225 @@ function fmtDate(iso){
   catch { return '—'; }
 }
 
-function tileHTML(cell) {
-  if (cell.cell_type === 'finish') {
-    return `
-      <div class="finish-tile">
-        <div class="tile-pos">🏁 #${cell.position}</div>
-        <div style="font-family:'Fredoka One',cursive;color:var(--green);font-size:.95rem;">FINISH</div>
-      </div>`;
-  }
-  const t = TYPE_META[cell.cell_type];
-  let body = '';
-  if (cell.cell_type === 'question') {
-    const dot = cell.color ? `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${COLOR_HEX[cell.color]||'#888'};margin-right:6px;"></span>` : '';
-    body = `<div class="tile-q">${dot}${esc(cell.question)}</div>`;
-  } else if (cell.cell_type === 'picture') {
-    body = `${cell.image_url ? `<img class="tile-img" src="${esc(cell.image_url)}" alt="" loading="lazy">` : ''}<div class="tile-q">${esc(cell.question)}</div>`;
-  } else if (cell.cell_type === 'bonus') {
-    body = `<div class="special-note">⭐ <b>+2 points</b> to whoever lands here.</div>`;
-  } else if (cell.cell_type === 'paf') {
-    body = `<div class="special-note">💥 Go <b>back 4 spaces</b> from here.</div>`;
-  }
-  return `
-    <div class="tile ${cell.is_corner ? 'corner' : ''}">
-      <div class="tile-head">
-        <span class="tile-pos">#${cell.position}</span>
-        ${cell.is_corner ? '<span class="corner-tag">⭐ CORNER</span>' : ''}
-      </div>
-      <span class="type-tag" style="background:${t.bg};color:${t.color};">${t.label}</span>
-      ${body}
-    </div>`;
+// ═══════════════════════════════════════════════════════════════════════
+//  BOARD LAYOUT — lays any number of cells out as a square perimeter loop,
+//  the same way game_room.html's fixed 33-cell board is built, just sized
+//  to fit `totalCells` (= cell_count + 1, i.e. including the implicit
+//  START at position 0). This is what makes the review board actually
+//  look like the live playing board instead of a plain list.
+// ═══════════════════════════════════════════════════════════════════════
+function computeBoardGrid(totalCells) {
+  const side = Math.max(4, Math.ceil((totalCells + 4) / 4));
+  const positions = [];
+  for (let c = 1; c <= side; c++) positions.push([c, side]);       // bottom row, left→right
+  for (let r = side - 1; r >= 2; r--) positions.push([side, r]);   // right column, bottom→top
+  for (let c = side; c >= 1; c--) positions.push([c, 1]);          // top row, right→left
+  for (let r = 2; r <= side - 1; r++) positions.push([1, r]);      // left column, top→bottom
+  return { side, positions: positions.slice(0, totalCells) };
 }
 
+function getCellClass(cell) {
+  if (cell.cell_type === 'start')   return 'corner-start';
+  if (cell.cell_type === 'finish')  return 'corner-finish';
+  if (cell.cell_type === 'paf')     return 'corner-paf';
+  if (cell.cell_type === 'bonus')   return 'corner-bonus';
+  if (cell.cell_type === 'picture') return 'question-cell';
+  return cell.color || 'blue';
+}
+function getCellHTML(cell) {
+  if (cell.cell_type === 'start')
+    return `<div class="cell-icon">🏁</div><div class="cell-text" style="font-family:'Fredoka One';color:var(--red);">START</div>`;
+  if (cell.cell_type === 'finish')
+    return `<div class="cell-icon">🎉</div><div class="cell-text" style="color:var(--green);">FINISH!</div>`;
+  if (cell.cell_type === 'paf')
+    return `<div style="font-family:'Fredoka One';font-size:clamp(9px,1.8vw,18px);color:#ffd700">PAF!</div><div class="cell-text" style="color:rgba(255,255,255,.8)">Go back 4</div>`;
+  if (cell.cell_type === 'bonus')
+    return `<div class="cell-icon">⭐</div><div class="cell-text" style="color:white">BONUS!<br>+2</div>`;
+  if (cell.cell_type === 'picture')
+    return `<div class="cell-icon" style="color:var(--red)">🖼️</div>`;
+  return `<div class="color-bar" style="background:var(--${cell.color || 'blue'})"></div><div class="cell-text">${esc(cell.question || '')}</div>`;
+}
+
+function renderBoard(game, cells) {
+  // cells = positions 1..cell_count (already includes the finish row).
+  // Prepend the implicit START — it's never stored, position 0 always.
+  const full = [{ position: 0, cell_type: 'start' }, ...cells];
+  const { side, positions } = computeBoardGrid(full.length);
+
+  const board = document.getElementById('board');
+  board.style.gridTemplateColumns = `90px repeat(${side - 2},1fr) 90px`;
+  board.style.gridTemplateRows    = `90px repeat(${side - 2},1fr) 90px`;
+  board.querySelectorAll('.cell').forEach(el => el.remove());
+
+  full.forEach((cell, idx) => {
+    const [col, row] = positions[idx];
+    const el = document.createElement('div');
+    el.className = 'cell ' + getCellClass(cell);
+    el.style.gridColumn = col;
+    el.style.gridRow = row;
+    el.innerHTML = getCellHTML(cell);
+    if (['question', 'picture', 'bonus', 'paf', 'finish'].includes(cell.cell_type)) {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => openPeek(cell));
+    }
+    board.appendChild(el);
+  });
+
+  const center = document.getElementById('boardCenter');
+  center.style.gridColumn = `2 / ${side}`;
+  center.style.gridRow    = `2 / ${side}`;
+  document.getElementById('centerGameTitle').textContent = game.title;
+}
+
+// ─── peek modal — a read-only look at what a cell shows during play ─────
+function openPeek(cell) {
+  let html = '';
+  if (cell.cell_type === 'question') {
+    const t = COLOR_META[cell.color] || COLOR_META.blue;
+    html = `
+      <div style="text-align:center;margin-bottom:14px;"><div class="modal-badge" style="background:${t.accent};color:white;">Question</div></div>
+      <div style="background:${t.bg};border-radius:16px;padding:24px 20px;text-align:center;border:2px solid ${t.accent}22;">
+        <h2 style="font-family:'Fredoka One',cursive;font-size:1.3rem;color:#1a1a2e;">${esc(cell.question)}</h2>
+      </div>`;
+  } else if (cell.cell_type === 'picture') {
+    html = `
+      <div style="text-align:center;margin-bottom:14px;"><div class="modal-badge" style="background:var(--purple);color:white;">Picture Question</div></div>
+      ${cell.image_url ? `<img src="${esc(cell.image_url)}" alt="" style="width:100%;border-radius:14px;margin-bottom:14px;max-height:280px;object-fit:cover;display:block;">` : ''}
+      <div style="background:#f0e0ff;border-radius:16px;padding:22px 20px;text-align:center;">
+        <h2 style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:#1a1a2e;">${esc(cell.question)}</h2>
+      </div>`;
+  } else if (cell.cell_type === 'bonus') {
+    html = `<div class="event-icon">⭐</div><div class="event-title">Bonus!</div><div class="event-desc">Landing here gives the player <b>+2 points</b>.</div>`;
+  } else if (cell.cell_type === 'paf') {
+    html = `<div class="event-icon">💥</div><div class="event-title">Go Back 4!</div><div class="event-desc">Landing here sends the player <b>back 4 spaces</b>.</div>`;
+  } else if (cell.cell_type === 'finish') {
+    html = `<div class="event-icon">🎉</div><div class="event-title">Finish Line</div><div class="event-desc">Once every player reaches here, the game ends and the podium is shown.</div>`;
+  }
+  html += `<div class="modal-actions"><button class="btn-close" onclick="closePeek()">Close</button></div>`;
+  document.getElementById('peekContent').innerHTML = html;
+  document.getElementById('peekModal').classList.add('show');
+}
+function closePeek() { document.getElementById('peekModal').classList.remove('show'); }
+document.getElementById('peekModal').addEventListener('click', (e) => {
+  if (e.target.id === 'peekModal') closePeek();
+});
+
+// ─── shared header rendering (real polys + the sample) ──────────────────
+function renderHeader(game, cells, isSample) {
+  document.getElementById('gTitle').textContent = game.title;
+
+  const lvBadge = document.getElementById('gLevel');
+  if (isSample) {
+    lvBadge.textContent = '🏛️ Built-in Sample';
+    lvBadge.style.background = 'rgba(255,215,0,.15)';
+    lvBadge.style.color = 'var(--gold)';
+    lvBadge.style.border = '1px solid rgba(255,215,0,.4)';
+  } else {
+    const lv = LEVEL_META[game.level] || LEVEL_META.beginner;
+    lvBadge.textContent = lv.label;
+    lvBadge.style.background = `${lv.color}22`;
+    lvBadge.style.color = lv.color;
+    lvBadge.style.border = `1px solid ${lv.color}55`;
+  }
+  document.getElementById('gDesc').textContent = game.description || 'No description provided.';
+
+  document.getElementById('statTotal').textContent    = game.cell_count;
+  document.getElementById('statQuestion').textContent = cells.filter(c => c.cell_type === 'question').length;
+  document.getElementById('statPicture').textContent  = cells.filter(c => c.cell_type === 'picture').length;
+  document.getElementById('statSpecial').textContent  = cells.filter(c => c.cell_type === 'bonus' || c.cell_type === 'paf').length;
+  document.getElementById('statCreatedLabel').textContent = isSample ? 'Availability' : 'Created';
+  document.getElementById('statCreated').textContent      = isSample ? 'Always' : fmtDate(game.created_at);
+
+  document.getElementById('editDeleteActions').style.display = isSample ? 'none' : 'flex';
+  document.getElementById('sampleNote').style.display        = isSample ? 'block' : 'none';
+  if (!isSample) {
+    document.getElementById('editBtn').href = `englishpoly_creator.html?id=${encodeURIComponent(game.id)}`;
+    document.getElementById('deleteTitle').textContent = game.title;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PERMANENT SAMPLE BOARD — mirrors the fixed default board that ships in
+//  game_room.html (BOARD_CELLS). It is NOT stored in the database; it's
+//  hardcoded here so it's always available, on every environment, and can
+//  never be edited or deleted. Reached via englishpoly_review.html?id=sample.
+// ═══════════════════════════════════════════════════════════════════════
+const SAMPLE_SPEC = [
+  { p:1,  t:'question', c:'red',    q:'What is your favourite fruit?' },
+  { p:2,  t:'question', c:'red',    q:'When is your birthday?' },
+  { p:3,  t:'question', c:'red',    q:'Do you have a pet?' },
+  { p:4,  t:'picture' },
+  { p:5,  t:'question', c:'brown',  q:'What is your favourite animal?' },
+  { p:6,  t:'question', c:'brown',  q:'Where do you live?' },
+  { p:7,  t:'question', c:'brown',  q:'Can you speak English?' },
+  { p:8,  t:'picture' },
+  { p:9,  t:'question', c:'blue',   q:'Do you have a sister?' },
+  { p:10, t:'paf' },
+  { p:11, t:'question', c:'blue',   q:'Do you like basketball?' },
+  { p:12, t:'picture' },
+  { p:13, t:'question', c:'green',  q:'Can you drive a car?' },
+  { p:14, t:'question', c:'green',  q:'What is your favourite subject?' },
+  { p:15, t:'picture' },
+  { p:16, t:'question', c:'green',  q:'What is your favourite day?' },
+  { p:17, t:'bonus' },
+  { p:18, t:'question', c:'green',  q:'What is your favourite drink?' },
+  { p:19, t:'picture' },
+  { p:20, t:'question', c:'yellow', q:'What is the weather like today?' },
+  { p:21, t:'question', c:'yellow', q:'Talk about your bedroom' },
+  { p:22, t:'question', c:'yellow', q:'What time do you go to bed?' },
+  { p:23, t:'picture' },
+  { p:24, t:'question', c:'red',    q:'Do you like pizza?' },
+  { p:25, t:'question', c:'red',    q:'Where is your school?' },
+  { p:26, t:'question', c:'red',    q:'What is your favourite subject?' },
+  { p:27, t:'bonus' },
+  { p:28, t:'question', c:'orange', q:'Can you cook?' },
+  { p:29, t:'question', c:'orange', q:'Name 4 months of the year!' },
+  { p:30, t:'question', c:'orange', q:'Sing a song for 20 seconds!' },
+  { p:31, t:'picture' },
+];
+const SAMPLE_PICS = [
+  { image:'https://gru-games.s3.eu-west-2.amazonaws.com/assets/img/no-level/no-level__extras__park-scene-2.jpg', question:'Describe this picture. Use at least 3 sentences.' },
+  { image:'https://media.baamboozle.com/uploads/images/1656203/349a4714-41f2-4f24-a960-cb1784e49cb3-thumbnail.jpeg', question:'What is happening in this picture?' },
+  { image:'https://picsum.photos/seed/englishpoly-kitchen/640/420', question:'Name 5 things you can see in this picture.' },
+  { image:'https://www.pinkvilla.com/images/2023-07/1688482828_pexels-diva-plavalaguna-6150432-1.jpg', question:'How do you think the people feel? Why?' },
+  { image:'https://picsum.photos/seed/englishpoly-city/640/420', question:'Imagine you are in this picture. What would you do next?' },
+  { image:'https://picsum.photos/seed/englishpoly-forest/640/420', question:'Make up a short story about this picture.' },
+  { image:'https://picsum.photos/seed/englishpoly-animals/640/420', question:'Describe the colours and shapes you see.' },
+];
+
+function buildSampleCells() {
+  let picIdx = 0;
+  const cells = SAMPLE_SPEC.map(s => {
+    if (s.t === 'picture') {
+      const pic = SAMPLE_PICS[picIdx % SAMPLE_PICS.length]; picIdx++;
+      return { position:s.p, cell_type:'picture', is_corner:false, question:pic.question, image_url:pic.image, color:null };
+    }
+    if (s.t === 'question') {
+      return { position:s.p, cell_type:'question', is_corner:false, question:s.q, image_url:null, color:s.c };
+    }
+    return { position:s.p, cell_type:s.t, is_corner:true, question:null, image_url:null, color:null }; // bonus / paf
+  });
+  cells.push({ position:32, cell_type:'finish', is_corner:false, question:null, image_url:null, color:null });
+  return cells;
+}
+
+function renderSampleMode() {
+  const game = {
+    id: 'sample',
+    title: 'Original Englishpoly 🏛️',
+    description: 'The classic default board every class starts with — click any cell to see exactly what it shows during play.',
+    level: null,
+    cell_count: 32,
+    created_at: null,
+  };
+  const cells = buildSampleCells();
+  document.getElementById('loadingRow').style.display = 'none';
+  renderHeader(game, cells, true);
+  renderBoard(game, cells);
+  document.getElementById('content').style.display = 'block';
+}
+
+// ─── real poly loading ────────────────────────────────────────────────
 async function loadGame() {
   try {
     const res = await fetch(`${API_BASE}/api/englishpoly/games/${gameId}`, {
@@ -256,31 +511,8 @@ async function loadGame() {
       return;
     }
 
-    const game = data.game;
-    const cells = data.cells;
-    const lv = LEVEL_META[game.level] || LEVEL_META.beginner;
-
-    document.getElementById('gTitle').textContent = game.title;
-    document.getElementById('gLevel').textContent = lv.label;
-    document.getElementById('gLevel').style.background = `${lv.color}22`;
-    document.getElementById('gLevel').style.color = lv.color;
-    document.getElementById('gLevel').style.border = `1px solid ${lv.color}55`;
-    document.getElementById('gDesc').textContent = game.description || 'No description provided.';
-
-    const questionCount = cells.filter(c => c.cell_type === 'question').length;
-    const pictureCount  = cells.filter(c => c.cell_type === 'picture').length;
-    const specialCount  = cells.filter(c => c.cell_type === 'bonus' || c.cell_type === 'paf').length;
-
-    document.getElementById('statTotal').textContent    = game.cell_count;
-    document.getElementById('statQuestion').textContent = questionCount;
-    document.getElementById('statPicture').textContent  = pictureCount;
-    document.getElementById('statSpecial').textContent  = specialCount;
-    document.getElementById('statCreated').textContent  = fmtDate(game.created_at);
-
-    document.getElementById('editBtn').href = `englishpoly_creator.html?id=${encodeURIComponent(game.id)}`;
-    document.getElementById('deleteTitle').textContent = game.title;
-
-    document.getElementById('pathGrid').innerHTML = cells.map(tileHTML).join('');
+    renderHeader(data.game, data.cells, false);
+    renderBoard(data.game, data.cells);
     document.getElementById('content').style.display = 'block';
   } catch (err) {
     console.error(err);
@@ -289,7 +521,7 @@ async function loadGame() {
   }
 }
 
-// ─── delete flow ───
+// ─── delete flow (real polys only — buttons are hidden for the sample) ──
 const deleteModal = document.getElementById('deleteModal');
 document.getElementById('deleteBtn').addEventListener('click', () => deleteModal.classList.add('show'));
 document.getElementById('deleteCancelBtn').addEventListener('click', () => deleteModal.classList.remove('show'));
@@ -318,7 +550,12 @@ document.getElementById('deleteConfirmBtn').addEventListener('click', async () =
   }
 });
 
-loadGame();
+// ═══ init ═══
+if (gameId === 'sample') {
+  renderSampleMode();
+} else {
+  loadGame();
+}
 </script>
 </body>
 </html>
