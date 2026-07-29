@@ -55,7 +55,7 @@ const { authenticate } = require('./authMiddleware');
 const router = express.Router();
 
 // ─── Constants ──────────────────────────────────────────────────────────────
-const LEVELS          = ['beginner', 'elementary', 'intermediate', 'upper_intermediate', 'advanced'];
+const LEVELS          = ['beginner', 'intermediate', 'advanced'];
 const CELL_TYPES       = ['question', 'picture', 'bonus', 'paf'];
 const CORNER_ONLY_TYPES = new Set(['bonus', 'paf']);
 const MIN_CELL_COUNT   = 10;
