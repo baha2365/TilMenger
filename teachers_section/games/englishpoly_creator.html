@@ -159,9 +159,7 @@
         <label for="fLevel">Level</label>
         <select id="fLevel">
           <option value="beginner">Beginner</option>
-          <option value="elementary">Elementary</option>
           <option value="intermediate" selected>Intermediate</option>
-          <option value="upper_intermediate">Upper-Intermediate</option>
           <option value="advanced">Advanced</option>
         </select>
       </div>
@@ -474,6 +472,11 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
 
 // ═══ init ═══
 async function init() {
+  if (editId === 'sample') {
+    showToast('⚠️ The built-in sample board can\'t be edited.');
+    setTimeout(() => location.href = 'englishpoly_review.html?id=sample', 1200);
+    return;
+  }
   if (editId) {
     document.getElementById('pageTitle').textContent = 'Edit Poly';
     document.getElementById('saveBtn').textContent = '💾 Save Changes';
