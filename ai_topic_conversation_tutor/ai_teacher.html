@@ -240,6 +240,7 @@
       position: absolute;
       inset: 0;
       border-radius: 50%;
+      overflow: hidden;
       opacity: 0;
       filter: blur(9px);
       transform: scale(1);
@@ -257,15 +258,73 @@
     }
 
     .orb-emma {
+      --emma-deep: 47,38,120; /* deepest indigo corner, darker than --emma-c */
       background-image:
-        radial-gradient(circle at 30% 24%, rgba(255,255,255,0.55), rgba(255,255,255,0) 42%),
-        radial-gradient(circle at 70% 32%, rgba(var(--emma-a), 0.65), transparent 58%),
-        radial-gradient(circle at 38% 78%, rgba(var(--emma-b), 0.55), transparent 62%),
-        linear-gradient(155deg, rgb(var(--emma-a)) 0%, rgb(var(--emma-b)) 55%, rgb(var(--emma-c)) 100%);
+        radial-gradient(circle at 27% 21%, rgba(255,255,255,0.95), rgba(255,255,255,0) 24%),
+        radial-gradient(circle at 39% 32%, rgba(232,222,255,0.65), transparent 44%),
+        radial-gradient(circle at 68% 46%, rgba(var(--emma-b), 0.55), transparent 56%),
+        radial-gradient(circle at 62% 82%, rgba(var(--emma-deep), 0.75), transparent 62%),
+        linear-gradient(148deg, rgb(214,203,255) 0%, rgb(var(--emma-a)) 32%, rgb(var(--emma-b)) 60%, rgb(var(--emma-c)) 82%, rgb(var(--emma-deep)) 100%);
       box-shadow:
-        0 0 46px 4px rgba(var(--emma-a), 0.30),
-        inset -12px -16px 30px rgba(20,14,48,0.38),
-        inset 9px 11px 22px rgba(255,255,255,0.20);
+        0 0 50px 5px rgba(var(--emma-a), 0.32),
+        inset -14px -18px 32px rgba(16,10,46,0.45),
+        inset 10px 12px 24px rgba(255,255,255,0.24),
+        inset 0 0 18px rgba(255,255,255,0.08);
+    }
+
+    /* Flowing aurora ribbons + drifting sparkles inside the Emma sphere */
+    .orb-emma-fx {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      mix-blend-mode: screen;
+      opacity: calc(0.62 + var(--amp, 0) * 0.3);
+      transition: opacity var(--dur-med) var(--ease);
+    }
+    .wave-drift {
+      transform-box: fill-box;
+      transform-origin: 50% 50%;
+      animation: waveDrift1 10s ease-in-out infinite;
+    }
+    .wave-drift-2 { animation-name: waveDrift2; animation-duration: 13s; animation-delay: -4s; }
+    @keyframes waveDrift1 {
+      0%, 100% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+      50%      { transform: translate(-3%, 2.5%) rotate(5deg) scale(1.04); }
+    }
+    @keyframes waveDrift2 {
+      0%, 100% { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+      50%      { transform: translate(3%, -2%) rotate(-6deg) scale(1.03); }
+    }
+    .orb-stage[data-phase="thinking"] .wave-drift-1 { animation-duration: 5.5s; }
+    .orb-stage[data-phase="thinking"] .wave-drift-2 { animation-duration: 7s; }
+    .orb-stage[data-phase="speaking"] .wave-drift-1 { animation-duration: 4.5s; }
+    .orb-stage[data-phase="speaking"] .wave-drift-2 { animation-duration: 5.8s; }
+
+    .spark {
+      fill: #fff;
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: sparkleTwinkle 4s ease-in-out infinite;
+    }
+    @keyframes sparkleTwinkle {
+      0%, 100% { opacity: 0;    transform: scale(0.4); }
+      50%      { opacity: 0.95; transform: scale(1); }
+    }
+    .glint {
+      fill: #fff;
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      filter: drop-shadow(0 0 1.6px rgba(255,255,255,0.9));
+      animation: glintTwinkle 5.2s ease-in-out infinite;
+    }
+    @keyframes glintTwinkle {
+      0%, 45%, 100% { opacity: 0;   transform: scale(0.3) rotate(0deg); }
+      65%           { opacity: 1;  transform: scale(1.15) rotate(20deg); }
+      85%           { opacity: 0.4; transform: scale(0.7) rotate(30deg); }
     }
     .orb-user {
       background-image:
@@ -752,7 +811,60 @@
   <section class="orb-stage" id="stage" data-orb="emma" data-phase="idle">
     <div class="orb-wrap">
       <div class="orb-halo" aria-hidden="true"></div>
-      <div class="orb orb-emma" id="orbEmma" aria-hidden="true"></div>
+      <div class="orb orb-emma" id="orbEmma" aria-hidden="true">
+        <svg class="orb-emma-fx" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="waveGradA" x1="0%" y1="10%" x2="100%" y2="90%">
+              <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.6"/>
+              <stop offset="55%" stop-color="#cfd2ff" stop-opacity="0.16"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="waveGradB" x1="100%" y1="0%" x2="10%" y2="100%">
+              <stop offset="0%"  stop-color="#e7e1ff" stop-opacity="0.42"/>
+              <stop offset="60%" stop-color="#b9b3ff" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#b9b3ff" stop-opacity="0"/>
+            </linearGradient>
+            <filter id="waveBlur" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="2.2"/>
+            </filter>
+            <path id="starGlint" d="M0,-3.2 L0.85,-0.85 L3.2,0 L0.85,0.85 L0,3.2 L-0.85,0.85 L-3.2,0 L-0.85,-0.85 Z"/>
+          </defs>
+
+          <!-- Flowing aurora-like ribbons -->
+          <g class="wave-drift wave-drift-1">
+            <path d="M -10,58 C 12,40 26,72 48,52 C 68,34 84,64 110,44 L 110,116 L -10,116 Z"
+                  fill="url(#waveGradA)" filter="url(#waveBlur)"/>
+          </g>
+          <g class="wave-drift wave-drift-2">
+            <path d="M -10,38 C 18,58 34,18 54,42 C 76,68 90,28 110,48 L 110,-16 L -10,-16 Z"
+                  fill="url(#waveGradB)" filter="url(#waveBlur)"/>
+          </g>
+
+          <!-- Fine speckled sparkle dust -->
+          <g class="orb-sparkles">
+            <circle class="spark" cx="24" cy="33" r="0.7" style="animation-delay:.1s"/>
+            <circle class="spark" cx="31" cy="53" r="0.5" style="animation-delay:1.4s"/>
+            <circle class="spark" cx="39" cy="63" r="0.85" style="animation-delay:.6s"/>
+            <circle class="spark" cx="46" cy="49" r="0.45" style="animation-delay:2.1s"/>
+            <circle class="spark" cx="53" cy="68" r="0.6" style="animation-delay:.9s"/>
+            <circle class="spark" cx="59" cy="44" r="0.5" style="animation-delay:2.6s"/>
+            <circle class="spark" cx="64" cy="73" r="0.8" style="animation-delay:1.7s"/>
+            <circle class="spark" cx="71" cy="57" r="0.4" style="animation-delay:.3s"/>
+            <circle class="spark" cx="76" cy="39" r="0.6" style="animation-delay:2.9s"/>
+            <circle class="spark" cx="19" cy="60" r="0.5" style="animation-delay:1.1s"/>
+            <circle class="spark" cx="83" cy="66" r="0.7" style="animation-delay:1.9s"/>
+            <circle class="spark" cx="56" cy="29" r="0.4" style="animation-delay:3.2s"/>
+            <circle class="spark" cx="67" cy="81" r="0.5" style="animation-delay:.5s"/>
+            <circle class="spark" cx="36" cy="79" r="0.4" style="animation-delay:2.3s"/>
+          </g>
+
+          <!-- Bright 4-point star glints -->
+          <g class="orb-glints">
+            <use href="#starGlint" class="glint" transform="translate(24,24) scale(0.9)" style="animation-delay:.2s"/>
+            <use href="#starGlint" class="glint" transform="translate(79,76) scale(0.75)" style="animation-delay:2.4s"/>
+          </g>
+        </svg>
+      </div>
       <div class="orb orb-user" id="orbUser" aria-hidden="true">
         <svg class="user-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
           <circle cx="32" cy="23" r="10.5" fill="currentColor"/>
